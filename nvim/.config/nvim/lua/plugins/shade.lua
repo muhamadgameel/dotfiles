@@ -1,0 +1,2 @@
+-- Setup
+require("shade").setup({})

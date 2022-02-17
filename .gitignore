@@ -1,0 +1,7 @@
+# macOS
+.DS_Store
+
+Session.vim
+
+# nvim
+packer_compiled.lua
