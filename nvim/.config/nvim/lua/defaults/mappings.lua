@@ -40,9 +40,14 @@ inoremap("<C-c>", "<esc>mmviwb<esc>vU`ma", "Defaults", "capitalize_word_i", "Cap
 nnoremap("<leader>cc", "mmviwb<esc>vU`m", "Defaults", "capitalize_word_n", "Capitalize a Word")
 
 -- highlight last inserted/yanked text
-nnoremap("gV", "`[v`]", "Defaults", "highlight_last_yanked_text", "Highlight Last Yanked/Inserted")
+nnoremap(
+  "gV", "`[v`]", "Defaults", "highlight_last_yanked_text", "Highlight Last Yanked/Inserted"
+)
 
-vnoremap("<LeftRelease>", "\"+ygv", "Defaults", "copy_mouse_select", "Copy Selection With Mouse Left Release")
+vnoremap(
+  "<LeftRelease>", "\"+ygv", "Defaults", "copy_mouse_select",
+  "Copy Selection With Mouse Left Release"
+)
 
 -- act like D and C
 nnoremap("Y", "y$", "Defaults", "copy_to_end_of_line", "Copy till End of The Line")
@@ -52,14 +57,26 @@ nnoremap("H", "^", "Defaults", "start_of_line", "Start of Line")
 nnoremap("L", "$", "Defaults", "end_of_line", "End of Line")
 
 -- toggle spell checking
-nnoremap("<F2>", ":setlocal spell! spell?<cr>", "Defaults", "toggle_spell_checker", "Toggle Spell Checker")
+nnoremap(
+  "<F2>", ":setlocal spell! spell?<cr>", "Defaults", "toggle_spell_checker",
+  "Toggle Spell Checker"
+)
 
 -- paste inline from clipboard and respect formatting
-inoremap("<c-p>", "<esc>:set paste<cr>\"+p:set nopaste<cr>a", "Defaults", "paste_clipboard", "Paste From ClipBoard")
+inoremap(
+  "<c-p>", "<esc>:set paste<cr>\"+p:set nopaste<cr>a", "Defaults", "paste_clipboard",
+  "Paste From ClipBoard"
+)
 
 -- move up/down completion menu with Ctrl+{j,k}
-inoremap("<C-j>", "pumvisible() ? '<C-n>' : '<C-j>'", "Defaults", "move_down_in_compl_menu", "Move Down in Completion Menu")
-inoremap("<C-k>", "pumvisible() ? '<C-p>' : '<C-k>'", "Defaults", "move_up_in_compl_menu", "Move Up in completion Menu")
+inoremap(
+  "<C-j>", "pumvisible() ? '<C-n>' : '<C-j>'", "Defaults", "move_down_in_compl_menu",
+  "Move Down in Completion Menu"
+)
+inoremap(
+  "<C-k>", "pumvisible() ? '<C-p>' : '<C-k>'", "Defaults", "move_up_in_compl_menu",
+  "Move Up in completion Menu"
+)
 
 -- exit window
 nnoremap("<leader>q", "<cmd>q<cr>", "Window", "exit_window", "Exit Window")
@@ -74,4 +91,6 @@ nnoremap("<leader>]", ":bnext<cr>", "Buffer", "default_buffer_cycle_next", "Next
 nnoremap("<leader>[", ":bprev<cr>", "Buffer", "default_buffer_cycle_prev", "Previous Buffer")
 
 -- swap between the last two buffers
-nnoremap("<leader>sw", "<C-^>", "Buffer", "default_buffer_swap_last_two", "Swap The Last Two Buffers")
+nnoremap(
+  "<leader>sw", "<C-^>", "Buffer", "default_buffer_swap_last_two", "Swap The Last Two Buffers"
+)
