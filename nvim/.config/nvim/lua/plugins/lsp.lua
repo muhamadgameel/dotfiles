@@ -108,6 +108,22 @@ local servers = {
   "rust_analyzer",
 }
 
+-- instal language servers
+require("nvim-lsp-installer").setup(
+  {
+    ensure_installed = servers,
+    automatic_installation = true,
+    ui = {
+      icons = {
+        server_installed = "✓",
+        server_pending = "➜",
+        server_uninstalled = "✗",
+      },
+    },
+  }
+)
+
+-- configure servers
 local nvim_lsp = require("lspconfig")
 for _, server in pairs(servers) do
   local opts = {
@@ -128,9 +144,17 @@ for _, server in pairs(servers) do
   capabilities.textDocument.completion.completionItem.snippetSupport = true
 
   opts.capabilities = capabilities
+
   nvim_lsp[server].setup(opts)
-  -- server:setup(opts)
 end
+
+-- custom sumneko_lua configs
+nvim_lsp.sumneko_lua.setup {
+  on_init = function(client)
+    client.config.settings = {Lua = {diagnostics = {globals = {"vim"}}}}
+    return true
+  end,
+}
 
 -- set custom diagnostic icons
 local signs = {Error = "✘ ", Warning = " ", Hint = " ", Information = " "}

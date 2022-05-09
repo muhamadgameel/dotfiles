@@ -77,6 +77,7 @@ return require("packer").startup(
 
       -- LSP (Language Server)
       use {
+        {"williamboman/nvim-lsp-installer"},
         {
           "neovim/nvim-lspconfig",
           config = function()
