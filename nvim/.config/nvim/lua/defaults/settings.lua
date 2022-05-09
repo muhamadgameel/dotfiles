@@ -44,9 +44,9 @@ o.gdefault = true -- use 'g' flag by default with :s/foo/bar/.
 -- Tabs, indent
 -----------------------------------------------------------
 o.expandtab = true -- insert spaces instead of tabs
-o.shiftwidth = 4 -- amount of (tab/spaces) when indenting
-o.tabstop = 4 -- width of tab character (1 tab == 4 spaces)
-o.softtabstop = 4 -- amount of space to replace tab
+o.shiftwidth = 2 -- amount of (tab/spaces) when indenting
+o.tabstop = 2 -- width of tab character (1 tab == 2 spaces)
+o.softtabstop = 2 -- amount of space to replace tab
 o.smartindent = true -- autoindent new lines
 o.shiftround = true -- round indent to multiple of shiftwidth applies to > and <
 
