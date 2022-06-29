@@ -56,6 +56,7 @@ return require("packer").startup(
         },
         {"nvim-telescope/telescope-fzf-native.nvim", run = "make"},
         {"gbrlsnchs/telescope-lsp-handlers.nvim"},
+        {"nvim-telescope/telescope-ui-select.nvim"},
       }
 
       -- Treesitter (Syntax Parser)

@@ -64,11 +64,11 @@ nnoremap(
 
 -- lsp
 nnoremap(
-  "<leader>cd", "<cmd>lua require('telescope.builtin').lsp_workspace_diagnostics()<cr>",
-  "Telescope", "telescope_diagnostics", "Diagnostic List"
+  "<leader>cd", "<cmd>Telescope diagnostics<cr>", "Telescope", "telescope_diagnostics",
+  "Diagnostic List"
 )
 nnoremap(
-  "<leader>ca", "<cmd>lua require('telescope.builtin').lsp_code_actions()<cr>", "Telescope",
+  "<leader>ca", "<cmd>lua vim.lsp.buf.code_action()<cr>", "Telescope",
   "telescope_code_actions", "Code Actions"
 )
 
