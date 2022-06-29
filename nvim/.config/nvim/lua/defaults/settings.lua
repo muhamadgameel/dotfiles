@@ -33,6 +33,7 @@ o.scrolloff = 5 -- line offset to hit to scroll vertically
 o.sidescrolloff = 10 -- column offset to hit to scroll horizontally
 o.sidescroll = 1 -- the number of columns when scrolling horizontally
 o.inccommand = "split" -- Incremental live preview for :substitute
+o.laststatus = 3; -- set global status bar, instead of one per window
 -----------------------------------------------------------
 -- Search
 -----------------------------------------------------------
