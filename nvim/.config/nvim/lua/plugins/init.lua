@@ -231,14 +231,6 @@ return require("packer").startup(
         end,
       }
 
-      -- Better Way of Motion
-      use {
-        "ggandor/lightspeed.nvim",
-        config = function()
-          require "plugins.lightspeed-nvim"
-        end,
-      }
-
       -- Formatter
       use {
         "mhartington/formatter.nvim",
