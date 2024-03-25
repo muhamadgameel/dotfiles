@@ -51,7 +51,7 @@ export LC_ALL=en_US.UTF-8
 HISTSIZE=100000
 SAVEHIST=100000
 HISTCONTROL=ignoredups
-HISTFILE=$ZSH_CACHE_DIR/.zsh_history
+HISTFILE=$ZSH_CACHE_DIR/zsh_history
 
 setopt bang_hist                 # Treat the '!' character specially during expansion
 setopt extended_history          # Write the history file in the ":start:elapsed;command" format
