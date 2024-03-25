@@ -1,4 +1,5 @@
 # Android SDK
+# TODO enable if find android files
 if [[ -z $ANDROID_HOME ]]; then
   case `uname` in
     Darwin)
@@ -15,14 +16,10 @@ if [[ -z $ANDROID_HOME ]]; then
   export PATH=$PATH:$ANDROID_HOME/platform-tools
 fi
 
-# NVM
-case `uname` in
-  Darwin)
-    export NVM_DIR=$HOME/.nvm
-    local nvm_init=$(brew --prefix nvm)/nvm.sh
-    [[ -s $nvm_init ]] && source $nvm_init
-  ;;
-esac
+# FNM (Node package manager)
+if (( $+commands[fnm] )); then
+  eval "$(fnm env --use-on-cd)"
+fi
 
 # Apps
 export PAGER=less
