@@ -21,6 +21,9 @@ if (( $+commands[fnm] )); then
   eval "$(fnm env --use-on-cd)"
 fi
 
+# GPG (tell git about gpg)
+export GPG_TTY=$(tty)
+
 # Apps
 export PAGER=less
 export EDITOR=nvim
