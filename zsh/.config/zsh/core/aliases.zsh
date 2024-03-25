@@ -19,6 +19,10 @@ if (( $+commands[kitty] )); then
   alias diff="kitty +kitten diff"  # diff between files
 fi
 
+if (( $+commands[bat] )); then
+  alias cat="bat"
+fi
+
 # Resources Management
 alias df='df -h'
 alias du='du -h'
