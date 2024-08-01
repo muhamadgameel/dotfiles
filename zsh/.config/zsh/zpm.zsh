@@ -1,139 +1,107 @@
 # Inspired by Zap: https://github.com/zap-zsh/zap
+emulate -L zsh
+setopt extended_glob nomatch nullglob
 
-: "${XDG_DATA_HOME:=$HOME/.local/share}"
-ZPM_DIR="$XDG_DATA_HOME/zpm"
-ZPM_PLUGIN_DIR="$ZPM_DIR/plugins"
-ZPM_INSTALLED_PLUGINS=""
+# Use parameter expansion with default for XDG_DATA_HOME
+: ${XDG_DATA_HOME:=$HOME/.local/share}
+: ${ZPM_DIR:=$XDG_DATA_HOME/zpm}
+: ${ZPM_PLUGIN_DIR:=$ZPM_DIR/plugins}
+
+typeset -gA ZPM_INSTALLED_PLUGINS
 
 Plug() {
-  _try_source() {
-    plugin_dir="$1"
-    plugin_name="$2"
-    for ext in plugin. ''; do
-      for shell in zsh sh; do
-        for theme in -theme ''; do
-          initfile="$plugin_dir/$plugin_name.$ext$shell$theme"
-          if [ -f "$initfile" ]; then
-            source "$initfile"
-            return 0
-          fi
-        done
-      done
-    done
-    return 1
-  }
+  local plugin="$1"
+  local plugin_name=${plugin:t}
+  local plugin_dir="$ZPM_PLUGIN_DIR/$plugin_name"
 
-  plugin="$1"
-  plugin_name=$(basename "$plugin")
-  plugin_dir="$ZPM_PLUGIN_DIR/$plugin_name"
-
-  if [ ! -d "$plugin_dir" ]; then
-    printf "🔌 Zpm is installing %s...\n" "$plugin_name"
-    if git clone --depth 1 "https://github.com/${plugin}.git" "$plugin_dir" >/dev/null 2>&1; then
-      printf "\033[1A\033[K⚡ Zpm installed %s\n" "$plugin_name"
+  if [[ ! -d "$plugin_dir" ]]; then
+    print -P "%F{yellow}🔌 Zpm is installing $plugin_name...%f"
+    if git clone --depth 1 "https://github.com/${plugin}.git" "$plugin_dir" &>/dev/null; then
+      print -P "\e[1A\e[K%F{green}⚡ Zpm installed $plugin_name%f"
     else
-      printf "\033[1A\033[K❌ Failed to clone %s\n" "$plugin_name"
-      return 12
+      print -P "\e[1A\e[K%F{red}❌ Failed to clone $plugin_name%f"
+      return 1
     fi
   fi
 
-  if _try_source "$plugin_dir" "$plugin_name"; then
-    case ":$ZPM_INSTALLED_PLUGINS:" in
-      *":$plugin_name:"*) ;;
-      *)
-        if [ -z "$ZPM_INSTALLED_PLUGINS" ]; then
-          ZPM_INSTALLED_PLUGINS="$plugin_name"
-        else
-          ZPM_INSTALLED_PLUGINS="$ZPM_INSTALLED_PLUGINS:$plugin_name"
-        fi
-        ;;
-    esac
-    return 0
+  local initfile=(${plugin_dir}/${plugin_name}.(plugin.|)(zsh|sh)(-theme|)(N))
+  if (( $#initfile )); then
+    source $initfile[1]
+    ZPM_INSTALLED_PLUGINS[$plugin_name]=$plugin_dir
   else
-    printf "❌ %s not activated\n" "$plugin_name"
+    print -P "%F{red}❌ $plugin_name not activated%f"
     return 1
   fi
 }
 
-_pull() {
-  printf "🔌 updating %s...\n" "$(basename "$1")"
-  if git -C "$1" pull >/dev/null 2>&1; then
-    printf "\033[1A\033[K⚡ %s updated!\n" "$(basename "$1")"
-    return 0
+_zpm_pull() {
+  local dir="$1"
+  local name=${dir:t}
+  print -P "%F{yellow}🔌 Updating $name...%f"
+  if git -C "$dir" pull &>/dev/null; then
+    print -P "\e[1A\e[K%F{green}⚡ $name updated!%f"
   else
-    printf "\033[1A\033[K❌ Failed to pull\n"
-    return 14
+    print -P "\e[1A\e[K%F{red}❌ Failed to update $name%f"
+    return 1
   fi
 }
 
 _zpm_clean() {
-  printf "⚡ Zpm - Clean\n\n"
-  unused_found=0
-  for plugin in "$ZPM_PLUGIN_DIR"/*; do
-    plugin_name=$(basename "$plugin")
-    if ! echo ":$ZPM_INSTALLED_PLUGINS:" | grep -q ":$plugin_name:"; then
+  print -P "%F{blue}⚡ Zpm - Clean%f\n"
+  local unused_found=0
+  for plugin in $ZPM_PLUGIN_DIR/*(/); do
+    local plugin_name=${plugin:t}
+    if (( ! ${+ZPM_INSTALLED_PLUGINS[$plugin_name]} )); then
       unused_found=1
-      printf "❔ Remove: %s? (y/N)\n" "$plugin_name"
-      read -r answer
-      case "$answer" in
-        [Yy]*)
-          rm -rf "$plugin"
-          printf "\033[1A\033[K✅ Removed %s\n" "$plugin_name"
-          ;;
-        *)
-          printf "\033[1A\033[K❕ skipped %s\n" "$plugin_name"
-          ;;
-      esac
+      print -P "%F{yellow}❔ Remove: $plugin_name? (y/N)%f"
+      read -q "answer?"; echo
+      if [[ $answer == [Yy] ]]; then
+        rm -rf "$plugin"
+        print -P "%F{green}✅ Removed $plugin_name%f"
+      else
+        print -P "%F{cyan}❕ Skipped $plugin_name%f"
+      fi
     fi
   done
-  if [ "$unused_found" -eq 0 ]; then
-    printf "✅ Nothing to remove\n"
-  fi
+  (( unused_found )) || print -P "%F{green}✅ Nothing to remove%f"
 }
 
 _zpm_update() {
-  printf "\nUpdating All Plugins\n\n"
-  echo "$ZPM_INSTALLED_PLUGINS" | tr ':' '\n' | while read -r plug; do
-    if [ -n "$plug" ]; then
-      _pull "$ZPM_PLUGIN_DIR/$plug"
-    fi
+  print -P "\n%F{blue}Updating All Plugins%f\n"
+  for plugin plugin_dir in ${(kv)ZPM_INSTALLED_PLUGINS}; do
+    _zpm_pull "$plugin_dir"
   done
 }
 
 _zpm_list() {
-  printf "⚡ Zpm - List\n\n"
-  i=1
-  echo "$ZPM_INSTALLED_PLUGINS" | tr ':' '\n' | while read -r plugin; do
-    if [ -n "$plugin" ]; then
-      printf "%d %s 🔌\n" "$i" "$plugin"
-      i=$((i + 1))
-    fi
+  print -P "%F{blue}⚡ Zpm - List%f\n"
+  integer i=1
+  for plugin plugin_dir in ${(kv)ZPM_INSTALLED_PLUGINS}; do
+    print -P "%F{yellow}$i%f %F{green}$plugin%f 🔌 ($plugin_dir)"
+    ((i++))
   done
 }
 
 _zpm_help() {
-  cat <<EOF
-⚡ Zpm - Help
-
-Usage: zpm <command> [options]
+  print -P "%F{blue}⚡ Zpm - Help%f
+Usage: zpm <command>
 
 COMMANDS:
-    clean          Remove unused plugins
-    help           Show this help message
-    list           List plugins
-    update         Update plugins
-EOF
+    %F{green}clean%f          Remove unused plugins
+    %F{green}help%f           Show this help message
+    %F{green}list%f           List installed plugins
+    %F{green}update%f         Update all plugins"
 }
 
 zpm() {
-  case "$1" in
+  # Initialize plugin directory
+  [[ -d $ZPM_PLUGIN_DIR ]] || mkdir -p $ZPM_PLUGIN_DIR
+
+  local cmd="${1:-help}"
+  case "$cmd" in
     clean) _zpm_clean ;;
-    help) _zpm_help ;;
     list) _zpm_list ;;
     update) _zpm_update ;;
-    *)
-      _zpm_help
-      return 1
-      ;;
+    help|*) _zpm_help ;;
   esac
 }
