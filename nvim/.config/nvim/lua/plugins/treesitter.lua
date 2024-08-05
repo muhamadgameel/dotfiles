@@ -6,6 +6,7 @@ local M = {
     { "windwp/nvim-ts-autotag" },
     { "nvim-treesitter/nvim-treesitter-textobjects" },
     { "RRethy/nvim-treesitter-endwise" },
+    { "axelvc/template-string.nvim" },
   },
 }
 
@@ -116,6 +117,16 @@ function M.config()
           ["<leader>A"] = "@parameter.inner",
         },
       },
+    },
+  }
+
+  require("template-string").setup {
+    filetypes = { "html", "typescript", "javascript", "typescriptreact", "javascriptreact", "vue", "svelte", "python" },
+    jsx_brackets = true,
+    remove_template_string = true,
+    restore_quotes = {
+      normal = [[']],
+      jsx = [["]],
     },
   }
 end
