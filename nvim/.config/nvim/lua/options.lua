@@ -110,7 +110,7 @@ set_options {
 -- Folding
 ----------------------------------------------------------------------------------
 set_options {
-  foldlevelstart = 99, -- Initially unfold every thing
+  foldenable = false,
   foldmethod = "indent",
 }
 

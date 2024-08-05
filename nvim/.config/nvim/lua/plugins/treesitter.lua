@@ -13,8 +13,9 @@ local M = {
 function M.config()
   local configs = require "nvim-treesitter.configs"
 
-  vim.wo.foldmethod = "expr"
-  vim.wo.foldexpr = "v:lua.vim.treesitter.foldexpr()"
+  vim.opt.foldmethod = "expr"
+  vim.opt.foldexpr = "v:lua.vim.treesitter.foldexpr()"
+  vim.opt.foldenable = false
 
   configs.setup {
     ensure_installed = {
