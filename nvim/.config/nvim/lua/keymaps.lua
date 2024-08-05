@@ -10,6 +10,10 @@ vim.g.maplocalleader = " "
 keymap("n", ";", ":", { noremap = true, silent = false })
 keymap("n", ":", ";", opts)
 
+-- Better movement
+keymap("n", "j", [[v:count?'j':'gj']], { noremap = true, expr = true })
+keymap("n", "k", [[v:count?'k':'gk']], { noremap = true, expr = true })
+
 -- Better window navigation
 keymap("n", "<C-h>", "<C-w>h", { remap = true })
 keymap("n", "<C-j>", "<C-w>j", { remap = true })
@@ -70,7 +74,7 @@ keymap("n", "+", "<C-a>", opts)
 keymap("n", "-", "<C-x>", opts)
 
 -- Select all
-keymap("n", "<C-a>", "gg<S-v>G", opts)
+keymap("n", "<C-a>", "ggVG", opts)
 
 -- Save file
 keymap("n", "<leader>w", "<cmd>w<cr>", opts)

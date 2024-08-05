@@ -1,7 +1,8 @@
 local M = {
   "williamboman/mason.nvim",
   dependencies = {
-    { "WhoIsSethDaniel/mason-tool-installer.nvim" },
+    "williamboman/mason-lspconfig.nvim",
+    "WhoIsSethDaniel/mason-tool-installer.nvim",
   },
 }
 
@@ -16,6 +17,8 @@ function M.config()
       },
     },
   }
+
+  require("mason-lspconfig").setup {}
 
   require("mason-tool-installer").setup {
     ensure_installed = {
@@ -34,7 +37,6 @@ function M.config()
 
       -- Formatters
       "prettierd",
-      "prettier",
       "stylua", -- lua
       "shfmt", -- shell script
     },

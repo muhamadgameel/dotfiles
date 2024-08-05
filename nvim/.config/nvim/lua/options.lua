@@ -28,11 +28,11 @@ set_options {
   formatoptions = "jcroqlnt", -- Improve auto-formatting options
 
   -- Editing Experience
-  mouse = "a", -- Enable mouse support in all modes
   showmatch = true, -- Briefly jump to the matching bracket when inserted
   timeoutlen = 500, -- Time to wait for a mapped sequence to complete
   updatetime = 200, -- Delay before writing swap file to disk (also affects CursorHold)
 }
+opt.mouse:append "a" -- Enable mouse support in all modes
 opt.iskeyword:append "-" -- Consider '-' as part of a word
 opt.whichwrap:append "<,>,[,],h,l" -- Allow more keys to move across lines
 
@@ -50,7 +50,6 @@ set_options {
   showcmd = false, -- Don't show (partial) command in the last line of the screen
   laststatus = 3, -- Always display the status line and make it global
   showtabline = 0, -- Never show the tab line
-  winbar = " ", -- Set the winbar to an empty string
 
   -- Scrolling and Viewport
   scrolloff = 10, -- Minimum number of screen lines to keep above and below the cursor
@@ -92,13 +91,13 @@ set_options {
 -- File handling
 ----------------------------------------------------------------------------------
 set_options {
-  clipboard = "unnamedplus", -- Use system clipboard
   confirm = true, -- Prompt to save changes before exiting modified buffer
   writebackup = false, -- Don't create a backup before overwriting a file
   swapfile = false, -- Don't use swapfiles
   undofile = true, -- Persist undo history to a file
   undolevels = 10000, -- Maximum number of changes that can be undone
 }
+opt.clipboard:append "unnamedplus" -- Use system clipboard
 
 ----------------------------------------------------------------------------------
 -- Diff Mode

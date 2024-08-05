@@ -17,6 +17,7 @@ function M.config()
 
   configs.setup {
     ensure_installed = {
+      "tsx",
       "html",
       "css",
       "jsdoc",
@@ -42,12 +43,13 @@ function M.config()
       "gitcommit",
       "gitignore",
       "markdown",
+      "markdown_inline",
       "ruby",
       "sql",
       "regex",
     },
     sync_install = false,
-    auto_install = false,
+    auto_install = true,
     highlight = {
       enable = true,
       disable = {},
