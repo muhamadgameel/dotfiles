@@ -21,6 +21,7 @@ return {
       dependencies = { 'rafamadriz/friendly-snippets' },
     },
     { 'windwp/nvim-autopairs', event = 'InsertEnter' },
+    { 'folke/lazydev.nvim', ft = 'lua' },
   },
   config = function()
     local cmp = require 'cmp'
@@ -83,6 +84,7 @@ return {
         end, { 'i', 's' }),
       },
       sources = {
+        { name = 'lazydev', group_index = 0 },
         { name = 'nvim_lsp' },
         { name = 'luasnip' },
         { name = 'nvim_lua' },
@@ -108,6 +110,7 @@ return {
         format = function(entry, vim_item)
           vim_item.kind = string.format('%s %s', icons.kind[vim_item.kind], vim_item.kind)
           vim_item.menu = ({
+            lazydev = '',
             buffer = '',
             nvim_lsp = '',
             luasnip = '',
