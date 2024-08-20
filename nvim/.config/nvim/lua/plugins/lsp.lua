@@ -8,7 +8,6 @@ local on_attach = function(_, bufnr)
   keymap('n', 'gi', vim.lsp.buf.implementation, opts)
   keymap('n', 'gR', vim.lsp.buf.rename, opts)
   keymap('n', 'gs', vim.lsp.buf.signature_help, opts)
-  keymap('n', 'ga', vim.lsp.buf.code_action, opts)
   keymap('n', 'gl', vim.diagnostic.open_float, opts)
   keymap('n', ']d', vim.diagnostic.goto_next, opts)
   keymap('n', '[d', vim.diagnostic.goto_prev, opts)
@@ -27,6 +26,10 @@ local common_capabilities = function()
 end
 
 return {
+  -------
+  -- LSP
+  -------
+  {
   'neovim/nvim-lspconfig',
   event = { 'BufReadPre', 'BufNewFile' },
   dependencies = {
@@ -149,4 +152,19 @@ return {
       lspconfig[server].setup(opts)
     end
   end,
+  },
+
+  ------------------------
+  -- Code Actions Preview
+  ------------------------
+  {
+    'aznhe21/actions-preview.nvim',
+    event = { 'BufReadPost', 'BufNewFile' },
+    dependencies = {
+      'MunifTanjim/nui.nvim',
+    },
+    config = function()
+      vim.keymap.set({ 'v', 'n' }, 'ga', require('actions-preview').code_actions, { silent = true })
+    end,
+  },
 }
