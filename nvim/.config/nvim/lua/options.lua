@@ -67,7 +67,7 @@ opt.title = true -- Set the window's title to the current file
 opt.titlestring = "%{substitute(getcwd(), $HOME, '~', '')}" -- Show current directory in the title
 
 -- Command Line and Popups
-opt.cmdheight = 1 -- Number of screen lines to use for the command-line
+opt.cmdheight = 0 -- Number of screen lines to use for the command-line
 opt.pumheight = 10 -- Maximum number of items to show in the popup menu
 opt.pumblend = 10 -- Pseudo-transparency for popup menu (0-100)
 opt.winblend = 10 -- Pseudo-transparency for floating windows (0-100)
