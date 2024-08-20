@@ -36,6 +36,7 @@ return {
     local keymap = vim.keymap.set
     local opts = { noremap = true, silent = true }
 
+    -- Built-in
     keymap('n', '<leader>oo', builtin.find_files, opts)
     keymap('n', '<leader>os', builtin.live_grep, opts)
     keymap('n', '<leader>oG', builtin.grep_string, opts)
@@ -47,9 +48,16 @@ return {
     keymap('n', '<leader>oh', builtin.help_tags, opts)
     keymap('n', '<leader>om', builtin.man_pages, opts)
 
+    -- Git
     keymap('n', '<leader>ogs', '<cmd>Telescope git_status<cr>', opts)
     keymap('n', '<leader>ogb', '<cmd>Telescope git_branches<cr>', opts)
     keymap('n', '<leader>ogc', '<cmd>Telescope git_commits<cr>', opts)
+
+    -- Todo Comments
+    local todo_comments_require_ok = pcall(require, 'todo-comments')
+    if todo_comments_require_ok then
+      keymap('n', '<leader>ot', '<cmd>TodoTelescope<cr>', opts)
+    end
 
     local telescope = require 'telescope'
     local icons = require 'icons'
