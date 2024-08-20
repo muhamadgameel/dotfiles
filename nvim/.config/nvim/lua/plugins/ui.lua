@@ -40,77 +40,9 @@ return {
     end,
   },
 
-  -------------
-  -- Neoscroll
-  -------------
-  {
-    'karb94/neoscroll.nvim',
-    event = 'BufRead',
-    config = function()
-      require('neoscroll').setup {
-        mappings = { '<C-u>', '<C-d>', '<C-b>', '<C-f>', '<C-y>', '<C-e>', 'zt', 'zz', 'zb' },
-        hide_cursor = true,
-        stop_eof = true,
-        easing_function = 'sine',
-        respect_scrolloff = false,
-        performance_mode = false,
-      }
-    end,
-  },
-
-  ---------------------------------------------------------------------
-  -- Illuminate (Highlighting other uses of the word under the cursor)
-  ---------------------------------------------------------------------
-  {
-    'RRethy/vim-illuminate',
-    event = 'VeryLazy',
-    config = function()
-      require('illuminate').configure {
-        filetypes_denylist = {
-          'mason',
-          'harpoon',
-          'DressingInput',
-          'NeogitCommitMessage',
-          'qf',
-          'dirbuf',
-          'dirvish',
-          'oil',
-          'minifiles',
-          'fugitive',
-          'alpha',
-          'NvimTree',
-          'lazy',
-          'NeogitStatus',
-          'Trouble',
-          'netrw',
-          'lir',
-          'DiffviewFiles',
-          'Outline',
-          'Jaq',
-          'spectre_panel',
-          'toggleterm',
-          'DressingSelect',
-          'TelescopePrompt',
-        },
-      }
-    end,
-  },
-
-  ------------------------------------
-  -- Indent Blankline (Indent guides)
-  ------------------------------------
-  {
-    'lukas-reineke/indent-blankline.nvim',
-    main = 'ibl',
-    event = 'BufRead',
-    config = function()
-      require('ibl').setup { scope = { enabled = false } }
-    end,
-  },
-
-  ------------------------------------
+  ---------
   -- Noice
-  ------------------------------------
+  ---------
   {
     'folke/noice.nvim',
     event = 'VeryLazy',
