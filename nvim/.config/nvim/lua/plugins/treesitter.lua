@@ -48,6 +48,7 @@ return {
             'ruby',
             'sql',
             'regex',
+            'latex',
           },
           sync_install = false,
           auto_install = true,
@@ -185,10 +186,30 @@ return {
 
       treesj.setup { use_default_keymaps = false }
 
-      vim.keymap.set('n', '<leader>m', treesj.toggle)
-      vim.keymap.set('n', '<leader>M', function()
+      vim.keymap.set('n', '<leader>j', treesj.toggle)
+      vim.keymap.set('n', '<leader>J', function()
         treesj.toggle { split = { recursive = true } }
       end)
     end,
+  },
+
+  -------------------
+  -- Render Markdown
+  -------------------
+  {
+    'MeanderingProgrammer/markdown.nvim',
+    event = { 'BufReadPost', 'BufNewFile' },
+    opts = {},
+    dependencies = { 'nvim-treesitter/nvim-treesitter', 'nvim-tree/nvim-web-devicons' },
+    keys = {
+      {
+        '<leader>m',
+        mode = 'n',
+        function()
+          require('render-markdown').toggle()
+        end,
+        desc = 'Toggle markdown renderer',
+      },
+    },
   },
 }
