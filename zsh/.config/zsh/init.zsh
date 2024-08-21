@@ -13,3 +13,6 @@ sources=(
 for src in ${sources[@]}; do
   source ${0:a:h}/core/$src.zsh
 done
+
+# load Zpm package manager
+source ${0:a:h}/zpm.zsh
