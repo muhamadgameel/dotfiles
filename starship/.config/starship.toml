@@ -1,0 +1,41 @@
+# Inserts a blank line between shell prompts
+add_newline = true
+
+format = """
+$username\
+$hostname\
+$localip\
+$directory\
+$git_branch\
+$git_commit\
+$git_state\
+$git_metrics\
+$git_status\
+$package\
+$nodejs\
+$python\
+$rust\
+$custom\
+$sudo\
+$cmd_duration\
+$line_break\
+$jobs\
+$status\
+$os\
+$character"""
+
+[line_break]
+disabled = true
+
+[localip]
+ssh_only = true
+format = '@[$localipv4](bold red) '
+disabled = false
+
+[directory]
+truncate_to_repo = true
+truncation_symbol = '…/'
+truncation_length = 2
+
+[sudo]
+disabled = false
