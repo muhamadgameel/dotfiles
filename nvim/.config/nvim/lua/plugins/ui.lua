@@ -131,4 +131,34 @@ return {
       }
     end,
   },
+
+  ---------------
+  -- Buffer line
+  ---------------
+  {
+    'akinsho/bufferline.nvim',
+    dependencies = 'nvim-tree/nvim-web-devicons',
+    lazy = false,
+    config = function()
+      local icons = require 'icons'
+      require('bufferline').setup {
+        options = {
+          separator_style = 'slant',
+          indicator = {
+            style = 'underline',
+          },
+          hover = {
+            enabled = true,
+            delay = 200,
+            reveal = { 'close' },
+          },
+          diagnostics = 'nvim_lsp',
+          diagnostics_indicator = function(count, level, _, _)
+            local icon = level:match 'error' and icons.diagnostics.Error .. ' ' or icons.diagnostics.Warning .. ' '
+            return ' ' .. icon .. count
+          end,
+        },
+      }
+    end,
+  },
 }
