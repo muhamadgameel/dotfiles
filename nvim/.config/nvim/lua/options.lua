@@ -133,7 +133,7 @@ opt.foldcolumn = '1' -- Show a small column on the side to indicate folds
 opt.hidden = true -- Allow switching buffers without saving
 opt.history = 1000 -- Increase command-line history
 opt.redrawtime = 1500 -- Time in milliseconds for redrawing the display
-opt.lazyredraw = true -- Don't redraw while executing macros
+opt.lazyredraw = false -- Disable lazy redraw while doing operations like macros
 opt.synmaxcol = 200 -- Only highlight the first 200 columns
 opt.ttyfast = true -- Indicate a fast terminal connection
 

@@ -20,6 +20,7 @@ return {
         sh = { 'shfmt' },
         bash = { 'shfmt' },
         zsh = { 'shfmt' },
+        ['_'] = { 'trim_whitespace', 'trim_newlines' },
       },
       format_on_save = {
         timeout_ms = 500,
