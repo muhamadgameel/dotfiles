@@ -1,4 +1,5 @@
 require 'options'
 require 'keymaps'
+require 'filetypes'
 require 'autocmd'
 require 'lazy-setup'
