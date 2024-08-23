@@ -21,7 +21,7 @@ end
 
 return {
   'nvim-telescope/telescope.nvim',
-  event = { 'BufRead', 'BufNewFile' },
+  event = 'VeryLazy',
   dependencies = {
     { 'BurntSushi/ripgrep' },
     { 'nvim-lua/plenary.nvim' },

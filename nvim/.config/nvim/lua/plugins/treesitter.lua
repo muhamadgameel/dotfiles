@@ -7,7 +7,6 @@ return {
     build = ':TSUpdate',
     event = { 'BufReadPost', 'BufNewFile' },
     dependencies = {
-      { 'windwp/nvim-ts-autotag' },
       { 'RRethy/nvim-treesitter-endwise' },
       { 'nvim-treesitter/nvim-treesitter-textobjects' },
       config = function()
@@ -122,57 +121,17 @@ return {
         }
       end,
     },
+  },
 
-    ------------
-    -- Comments
-    ------------
-    {
-      'numToStr/Comment.nvim',
-      event = { 'BufReadPost', 'BufNewFile' },
-      dependencies = {
-        { 'JoosepAlviste/nvim-ts-context-commentstring' },
-      },
-      config = function()
-        require('ts_context_commentstring').setup {
-          enable = true,
-          enable_autocmd = false,
-        }
-
-        vim.g.skip_ts_context_commentstring_module = true
-
-        require('Comment').setup {
-          pre_hook = require('ts_context_commentstring.integrations.comment_nvim').create_pre_hook(),
-        }
-      end,
-    },
-
-    -----------------------------------
-    -- JS/TS template string converter
-    -----------------------------------
-    {
-      'axelvc/template-string.nvim',
-      event = { 'BufReadPost', 'BufNewFile' },
-      config = function()
-        require('template-string').setup {
-          filetypes = {
-            'html',
-            'typescript',
-            'javascript',
-            'typescriptreact',
-            'javascriptreact',
-            'vue',
-            'svelte',
-            'python',
-          },
-          jsx_brackets = true,
-          remove_template_string = true,
-          restore_quotes = {
-            normal = [[']],
-            jsx = [["]],
-          },
-        }
-      end,
-    },
+  -----------
+  -- Autotag
+  -----------
+  {
+    'windwp/nvim-ts-autotag',
+    event = { 'BufReadPre', 'BufNewFile' },
+    config = function()
+      require('nvim-ts-autotag').setup {}
+    end,
   },
 
   ---------------------------------------------
@@ -191,25 +150,5 @@ return {
         treesj.toggle { split = { recursive = true } }
       end)
     end,
-  },
-
-  -------------------
-  -- Render Markdown
-  -------------------
-  {
-    'MeanderingProgrammer/markdown.nvim',
-    event = { 'BufReadPost', 'BufNewFile' },
-    opts = {},
-    dependencies = { 'nvim-treesitter/nvim-treesitter', 'nvim-tree/nvim-web-devicons' },
-    keys = {
-      {
-        '<leader>m',
-        mode = 'n',
-        function()
-          require('render-markdown').toggle()
-        end,
-        desc = 'Toggle markdown renderer',
-      },
-    },
   },
 }
