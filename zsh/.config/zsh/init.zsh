@@ -29,3 +29,9 @@ bindkey -M emacs "${key_info[Down]}" history-substring-search-down
 
 # Auto Suggestions
 ZSH_AUTOSUGGEST_STRATEGY=(history)
+
+# Load starship Prompt
+if (( $+commands[starship] )) then
+  eval "$(starship init zsh)"
+fi
+
