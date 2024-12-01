@@ -27,7 +27,7 @@ return {
           { 'up', 'down' },
           { 'top', 'right', 'bottom', 'left' },
         },
-        additions = {}
+        additions = {},
       }
     end,
   },

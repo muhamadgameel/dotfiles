@@ -64,8 +64,8 @@ return {
           pattern = [[\b(KEYWORDS):?]],
         },
       }
-      vim.keymap.set('n', ']t', todo_comments.jump_next, { desc = "Jump to next todo comment" })
-      vim.keymap.set('n', '[t', todo_comments.jump_prev, { desc = "Jump to previous todo comment" })
+      vim.keymap.set('n', ']t', todo_comments.jump_next, { desc = 'Jump to next todo comment' })
+      vim.keymap.set('n', '[t', todo_comments.jump_prev, { desc = 'Jump to previous todo comment' })
     end,
   },
 
