@@ -8,6 +8,7 @@ return {
   'hrsh7th/nvim-cmp',
   event = 'InsertEnter',
   dependencies = {
+    { 'hrsh7th/cmp-nvim-lsp', event = 'InsertEnter' },
     { 'hrsh7th/cmp-emoji', event = 'InsertEnter' },
     { 'hrsh7th/cmp-buffer', event = 'InsertEnter' },
     { 'hrsh7th/cmp-path', event = 'InsertEnter' },
@@ -84,6 +85,7 @@ return {
       },
       sources = {
         { name = 'lazydev', group_index = 0 },
+        { name = 'nvim_lsp' },
         { name = 'luasnip' },
         { name = 'nvim_lua' },
         { name = 'path' },
