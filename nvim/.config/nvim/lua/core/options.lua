@@ -54,7 +54,7 @@ opt.listchars = { -- Define which invisible characters to show
   extends = '❯',
   precedes = '❮',
 }
-vim.g.netrw_liststyle = "3" -- Show Netrw in tree-like view
+vim.g.netrw_liststyle = '3' -- Show Netrw in tree-like view
 
 -- Scrolling and Viewport
 opt.scrolloff = 10 -- Minimum number of screen lines to keep above and below the cursor
