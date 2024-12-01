@@ -36,4 +36,25 @@ return {
       },
     },
   },
+
+  -----------------------
+  -- Sessions Management
+  -----------------------
+  {
+    'rmagatti/auto-session',
+    config = function()
+      local auto_session = require 'auto-session'
+      auto_session.setup {
+        auto_restore = true,
+        suppressed_dirs = { '~/', '~/Downloads', '~/Documents', '/' },
+      }
+
+      local keymap = vim.keymap.set
+
+      keymap('n', '<leader>ss', '<cmd>SessionSave<cr>', { desc = 'Save session' })
+      keymap('n', '<leader>sr', '<cmd>SessionRestore<cr>', { desc = 'Restore session' })
+      keymap('n', '<leader>sf', '<cmd>SessionSearch<cr>', { desc = 'Search session' })
+      keymap('n', '<leader>sd', '<cmd>SessionDelete<cr>', { desc = 'Delete session' })
+    end,
+  },
 }
