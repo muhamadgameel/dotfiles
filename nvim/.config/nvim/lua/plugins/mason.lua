@@ -21,6 +21,14 @@ return {
 
     require('mason-tool-installer').setup {
       ensure_installed = {
+        -- LSP
+        'lua-language-server',
+        'css-lsp',
+        'html-lsp',
+        'json-lsp',
+        'eslint-lsp',
+        'bash-language-server',
+
         -- Linters
         'shellcheck',
         'eslint_d',
