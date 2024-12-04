@@ -83,7 +83,7 @@ return {
           end
         end, { 'i', 's' }),
       },
-      sources = {
+      sources = cmp.config.sources {
         { name = 'lazydev', group_index = 0 },
         { name = 'nvim_lsp' },
         { name = 'luasnip' },
