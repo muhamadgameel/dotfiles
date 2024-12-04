@@ -1,25 +1,48 @@
 local on_attach = function(_, bufnr)
   local opts = { buffer = bufnr, silent = true }
   local keymap = vim.keymap.set
+  local telescope_builtin = require 'telescope.builtin'
 
+  opts.desc = 'Go to declaration'
   keymap('n', 'gD', vim.lsp.buf.declaration, opts)
+
+  opts.desc = 'Show LSP definitions'
   keymap('n', 'gd', vim.lsp.buf.definition, opts)
-  keymap('n', 'K', vim.lsp.buf.hover, opts)
+
+  opts.desc = 'Show LSP implementations'
   keymap('n', 'gi', vim.lsp.buf.implementation, opts)
-  keymap('n', 'gR', vim.lsp.buf.rename, opts)
-  keymap('n', 'gs', vim.lsp.buf.signature_help, opts)
+
+  opts.desc = 'Show LSP type definitions'
+  keymap('n', 'gt', telescope_builtin.lsp_type_definitions, opts)
+
+  opts.desc = 'Smart code rename'
+  keymap('n', 'gr', vim.lsp.buf.rename, opts)
+
+  opts.desc = 'Show line diagnostics'
   keymap('n', 'gl', vim.diagnostic.open_float, opts)
+
+  opts.desc = 'Show signature'
+  keymap('n', 'gs', vim.lsp.buf.signature_help, opts)
+
+  opts.desc = 'Go to next diagnostic'
   keymap('n', ']d', vim.diagnostic.goto_next, opts)
+
+  opts.desc = 'Go to previous diagnostic'
   keymap('n', '[d', vim.diagnostic.goto_prev, opts)
 
-  -- LSP References
-  local telescope_builtin = require 'telescope.builtin'
-  keymap('n', 'gr', telescope_builtin.lsp_references, opts)
+  opts.desc = 'Show documentation for what is under cursor'
+  keymap('n', 'K', vim.lsp.buf.hover, opts)
 
-  -- Toggle inlay hints
+  opts.desc = 'Show workspace diagnostics'
+  keymap('n', 'ge', telescope_builtin.diagnostics, opts)
+
+  opts.desc = 'Show LSP references'
+  keymap('n', 'gR', telescope_builtin.lsp_references, opts)
+
+  opts.desc = 'Toggle inlay hints'
   keymap('n', 'gh', function()
     vim.lsp.inlay_hint.enable(not vim.lsp.inlay_hint.is_enabled { bufnr }, { bufnr })
-  end, { desc = 'Toggle Inlay Hints', buffer = bufnr, silent = true })
+  end, opts)
 end
 
 local common_capabilities = function()
@@ -49,13 +72,12 @@ return {
               local opts = { buffer = bufnr, silent = true }
               local keymap = vim.keymap.set
 
-              -- TODO: should be combined with the default LSP attach function
               keymap('n', 'go', '<cmd>TSToolsOrganizeImports<cr>', opts)
               keymap('n', 'gI', '<cmd>TSToolsAddMissingImports<cr>', opts)
               keymap('n', 'gf', '<cmd>TSToolsFixAll<cr>', opts)
               keymap('n', '<leader>gd', '<cmd>TSToolsGoToSourceDefinition<cr>', opts)
-              keymap('n', '<leader>gR', '<cmd>TSToolsRenameFile<cr>', opts)
-              keymap('n', '<leader>gr', '<cmd>TSToolsFileReferences<cr>', opts)
+              keymap('n', '<leader>gr', '<cmd>TSToolsRenameFile<cr>', opts)
+              keymap('n', '<leader>gR', '<cmd>TSToolsFileReferences<cr>', opts)
             end,
 
             settings = {
@@ -154,6 +176,22 @@ return {
 
         lspconfig[server].setup(opts)
       end
+    end,
+  },
+
+  ------------------------
+  -- Code Actions Preview
+  ------------------------
+  {
+    'aznhe21/actions-preview.nvim',
+    event = { 'BufReadPost', 'BufNewFile' },
+    config = function()
+      vim.keymap.set(
+        { 'v', 'n' },
+        'ga',
+        require('actions-preview').code_actions,
+        { silent = true, desc = 'Show code actions' }
+      )
     end,
   },
 }
