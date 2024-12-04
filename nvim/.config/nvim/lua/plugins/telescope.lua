@@ -31,36 +31,38 @@ return {
   config = function()
     local builtin = require 'telescope.builtin'
 
-    local keymap = vim.keymap.set
-    local opts = { noremap = true, silent = true }
+    local function map(mode, l, r, desc)
+      vim.keymap.set(mode, l, r, { noremap = true, silent = true, desc = desc })
+    end
 
     -- Built-in
-    keymap('n', '<leader>oo', builtin.find_files, opts)
-    keymap('n', '<leader>os', builtin.live_grep, opts)
-    keymap('n', '<leader>oG', builtin.grep_string, opts)
-    keymap('n', '<leader>ob', builtin.buffers, opts)
-    keymap('n', '<leader>oc', builtin.commands, opts)
-    keymap('n', '<leader>oC', builtin.colorscheme, opts)
-    keymap('n', '<leader>of', builtin.filetypes, opts)
-    keymap('n', '<leader>ok', builtin.keymaps, opts)
-    keymap('n', '<leader>oh', builtin.help_tags, opts)
-    keymap('n', '<leader>om', builtin.man_pages, opts)
+    map('n', '<leader>oo', builtin.find_files, 'Files (Telescope)')
+    map('n', '<leader>os', builtin.live_grep, 'Search (Telescope)')
+    map('n', '<leader>oG', builtin.grep_string, 'Grep Search (Telescope)')
+    map('n', '<leader>ob', builtin.buffers, 'Buffers (Telescope)')
+    map('n', '<leader>oc', builtin.commands, 'Commands (Telescope)')
+    map('n', '<leader>oC', builtin.colorscheme, 'Color Schemes (Telescope)')
+    map('n', '<leader>of', builtin.filetypes, 'File Types (Telescope)')
+    map('n', '<leader>ok', builtin.keymaps, 'Keymaps (Telescope)')
+    map('n', '<leader>oh', builtin.help_tags, 'Help Tags (Telescope)')
+    map('n', '<leader>om', builtin.man_pages, 'Man Pages (Telescope)')
 
     -- Git
-    keymap('n', '<leader>ogs', '<cmd>Telescope git_status<cr>', opts)
-    keymap('n', '<leader>ogb', '<cmd>Telescope git_branches<cr>', opts)
-    keymap('n', '<leader>ogc', '<cmd>Telescope git_commits<cr>', opts)
+    map('n', '<leader>ogs', '<cmd>Telescope git_status<cr>', 'Git Status (Telescope)')
+    map('n', '<leader>ogb', '<cmd>Telescope git_branches<cr>', 'Git Branches (Telescope)')
+    map('n', '<leader>ogc', '<cmd>Telescope git_commits<cr>', 'Git Commits (Telescope)')
 
     -- Todo Comments
-    local todo_comments_require_ok = pcall(require, 'todo-comments')
-    if todo_comments_require_ok then
-      keymap('n', '<leader>ot', '<cmd>TodoTelescope<cr>', opts)
-    end
+    map('n', '<leader>ot', '<cmd>TodoTelescope<cr>', 'TODO comments (Telescope)')
+
+    -- Trouble
+    map('n', '<leader>ox', '<cmd>Trouble<cr>', 'Trouble (Telescope)')
 
     local telescope = require 'telescope'
     local icons = require 'core.icons'
     local actions = require 'telescope.actions'
     local action_layout = require 'telescope.actions.layout'
+    local trouble = require 'trouble.sources.telescope'
 
     telescope.setup {
       defaults = {
@@ -85,6 +87,7 @@ return {
 
         mappings = {
           i = {
+            ['<c-t>'] = trouble.open,
             ['<C-j>'] = actions.move_selection_next,
             ['<C-k>'] = actions.move_selection_previous,
             ['<C-x>'] = actions.select_horizontal,
@@ -96,6 +99,7 @@ return {
             ['j'] = actions.move_selection_next,
             ['k'] = actions.move_selection_previous,
             ['q'] = actions.close,
+            ['<c-t>'] = trouble.open,
             ['<C-p>'] = action_layout.toggle_preview,
             ['<esc>'] = actions.close,
           },
