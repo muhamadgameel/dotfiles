@@ -39,6 +39,15 @@ return {
     end,
   },
 
+  ------------
+  -- Dressing
+  ------------
+  {
+    'stevearc/dressing.nvim',
+    event = 'VeryLazy',
+    opts = {},
+  },
+
   -----------
   -- Lualine
   -----------
@@ -46,8 +55,20 @@ return {
     'nvim-lualine/lualine.nvim',
     config = function()
       local icons = require 'core.icons'
+      local lualine = require 'lualine'
+      local lazy_status = require 'lazy.status'
 
-      require('lualine').setup {
+      local trouble = require 'trouble'
+      local symbols = trouble.statusline {
+        mode = 'lsp_document_symbols',
+        groups = {},
+        title = false,
+        filter = { range = true },
+        format = '{kind_icon}{symbol.name:Normal}',
+        hl_group = 'lualine_c_normal',
+      }
+
+      lualine.setup {
         options = {
           theme = 'tokyonight',
           component_separators = { left = icons.ui.DividerRight, right = icons.ui.DividerLeft },
@@ -57,8 +78,22 @@ return {
         sections = {
           lualine_a = { 'mode' },
           lualine_b = { 'branch', 'diff' },
-          lualine_c = { 'diagnostics' },
-          lualine_x = {},
+          lualine_c = {
+            { 'diagnostics' },
+            {
+              symbols.get,
+              cond = symbols.has,
+            },
+          },
+
+          lualine_x = {
+            {
+              lazy_status.updates,
+              cond = lazy_status.has_updates,
+              color = { fg = '#ff9e64' },
+            },
+            { 'fileformat' },
+          },
           lualine_y = { 'filetype' },
           lualine_z = { 'progress' },
         },
