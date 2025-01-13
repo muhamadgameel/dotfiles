@@ -1,0 +1,12 @@
+[user]
+  email = mgameel@pm.me
+  name = Muhamad Gameel
+  signingkey = 62BA848F76AF27B5
+[pull]
+  rebase = true
+[gpg]
+  program = gpg
+[commit]
+  gpgsign = true
+[init]
+  defaultBranch = main
