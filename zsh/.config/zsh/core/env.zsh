@@ -23,6 +23,17 @@ if [[ -z $ANDROID_HOME ]]; then
   export PATH=$PATH:$ANDROID_HOME/build-tools/35.0.0/
 fi
 
+# Append to PATH
+case $(uname) in
+  Darwin)
+    eval "$(/opt/homebrew/bin/brew shellenv)"
+    . "$HOME/.cargo/env"
+    ;;
+  Linux)
+    export PATH=$HOME/.local/bin:$HOME/.cargo/bin:$PATH
+    ;;
+esac
+
 # FNM (Node versions manager)
 case $(uname) in
   Darwin)
@@ -36,12 +47,5 @@ case $(uname) in
       export PATH=$HOME/.local/share/fnm:$PATH
       eval "$(fnm env --use-on-cd)"
     fi
-    ;;
-esac
-
-# Append to PATH
-case $(uname) in
-  Linux)
-    export PATH=$HOME/.local/bin:$HOME/.cargo/bin:$PATH
     ;;
 esac
