@@ -4,6 +4,9 @@ export EDITOR=nvim
 export VISUAL=nvim
 export TERMINAL=kitty
 
+# Fix GPG in terminal
+export GPG_TTY=$(tty)
+
 # Android SDK
 if [[ -z $ANDROID_HOME ]]; then
   case $(uname) in
