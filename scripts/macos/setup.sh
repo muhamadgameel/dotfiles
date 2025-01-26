@@ -40,11 +40,7 @@ install_homebrew() {
     print_message "$GREEN" "✅ Homebrew installed successfully"
     
     # Add Homebrew to PATH for the current session
-    if [[ $(uname -m) == "arm64" ]]; then
-      eval "$(/opt/homebrew/bin/brew shellenv)"
-    else
-      eval "$(/usr/local/bin/brew shellenv)"
-    fi
+    eval "$(/opt/homebrew/bin/brew shellenv)"
   else
     print_message "$RED" "❌ Failed to install Homebrew"
     exit 1
@@ -112,16 +108,27 @@ else
   exit 1
 fi
 
-# TODO Apply Mac settings
+# TODO Apply MacOS settings
+# print_message "$YELLOW" "🔧 Applying macOS settings..."
+# if ./scripts/macos/apply_settings.sh; then
+#   print_message "$YELLOW" "🔄 Restarting Dock..."
+#   killall Dock &> /dev/null || true
+#   print_message "$GREEN" "✅ MacOS settings applied successfully"
+# else
+#   print_message "$RED" "❌ Failed to apply macOS settings"
+#   exit 1
+# fi
+
 # TODO Import GPG keys
 
 # Create summary
 echo
-print_message "$CYAN" "======================================="
+print_message "$CYAN" "========================================================================"
 print_message "$BLUE" "📊 Setup Summary:"
 print_message "$GREEN" "✅ Packages installed"
 print_message "$GREEN" "✅ Dotfiles configured"
+# print_message "$GREEN" "✅ MacOS settings applied"
 print_message "$BLUE" "📝 Log file: $LOG_FILE"
-print_message "$CYAN" "======================================="
+print_message "$CYAN" "========================================================================"
 print_message "$BLUE" "🎉 System setup completed successfully!"
-print_message "$CYAN" "======================================="
+print_message "$CYAN" "========================================================================"
