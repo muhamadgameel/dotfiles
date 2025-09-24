@@ -20,6 +20,7 @@ return {
     config = function()
       local treesitter = require 'nvim-treesitter.configs'
 
+      vim.opt.foldenable = true
       vim.opt.foldmethod = 'expr'
       vim.opt.foldexpr = 'v:lua.vim.treesitter.foldexpr()'
 
@@ -58,7 +59,7 @@ return {
           'graphql',
           'dockerfile',
         },
-        sync_install = true,
+        sync_install = false,
         auto_install = false,
         highlight = {
           enable = true,

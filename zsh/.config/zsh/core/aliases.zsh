@@ -1,5 +1,8 @@
+# Cache OS detection
+local _os=$(uname)
+
 # Listing Files
-case $(uname) in
+case $_os in
   Darwin)
     alias ls="ls -hG"
     ;;
@@ -42,6 +45,11 @@ alias grep="grep --color=auto -i"
 alias egrep="egrep --color=auto"
 alias fgrep="fgrep --color=auto"
 
+# Viewers
+if (( $+commands[bat] )); then
+  alias cat="bat"
+fi
+
 # Process management
 alias psa="ps aux"
 alias psg="ps aux | grep"
@@ -52,8 +60,9 @@ alias g="git"
 alias py="python3"
 
 # Network
-alias myip="curl http://ipecho.net/plain; echo"
-case $(uname) in
+alias myip="curl https://ipecho.net/plain; echo"
+
+case $_os in
   Darwin)
     alias ports="netstat -vanp tcp && netstat -vanp udp"
     alias psport="lsof -iTCP -sTCP:LISTEN -P -n"
@@ -65,14 +74,14 @@ case $(uname) in
 esac
 
 # System
-case $(uname) in
+case $_os in
   Darwin)
     alias sys-update="softwareupdate -i -a"
     ;;
   Linux)
     if [ -f /etc/os-release ]; then
-      . /etc/os-release
-      case $ID in
+      OS_ID=$(. /etc/os-release && echo $ID)
+      case $OS_ID in
         debian | ubuntu | elementary | pop)
           alias sys-update="sudo apt update && sudo apt upgrade"
           ;;

@@ -1,7 +1,7 @@
 autoload -U zmv
 
 # ===== Basics
-setopt no_beep              # donot beep on error
+setopt no_beep              # do not beep on error
 setopt interactive_comments # Enable comments in interactive shell.
 unsetopt clobber            # Do not overwrite existing files with > and >>.  Use >! and >>! to bypass.
 
@@ -35,12 +35,12 @@ export LESS_TERMCAP_se=$'\E[0m'        # Ends standout-mode.
 export LESS_TERMCAP_so=$'\E[00;47;30m' # Begins standout-mode.
 export LESS_TERMCAP_ue=$'\E[0m'        # Ends underline.
 export LESS_TERMCAP_us=$'\E[01;32m'    # Begins underline.
-export LESS_TERMCAP_mr=$(tput rev)
-export LESS_TERMCAP_mh=$(tput dim)
-export LESS_TERMCAP_ZN=$(tput ssubm)
-export LESS_TERMCAP_ZV=$(tput rsubm)
-export LESS_TERMCAP_ZO=$(tput ssupm)
-export LESS_TERMCAP_ZW=$(tput rsupm)
+export LESS_TERMCAP_mr=$(tput rev 2>/dev/null) || export LESS_TERMCAP_mr=''
+export LESS_TERMCAP_mh=$(tput dim 2>/dev/null) || export LESS_TERMCAP_mh=''
+export LESS_TERMCAP_ZN=$(tput ssubm 2>/dev/null) || export LESS_TERMCAP_ZN=''
+export LESS_TERMCAP_ZV=$(tput rsubm 2>/dev/null) || export LESS_TERMCAP_ZV=''
+export LESS_TERMCAP_ZO=$(tput ssupm 2>/dev/null) || export LESS_TERMCAP_ZO=''
+export LESS_TERMCAP_ZW=$(tput rsupm 2>/dev/null) || export LESS_TERMCAP_ZW=''
 export LESS="--raw-control-chars"
 
 # ===== Locale
@@ -50,7 +50,6 @@ export LC_ALL=en_US.UTF-8
 # ===== History
 HISTSIZE=100000
 SAVEHIST=100000
-HISTCONTROL=ignoredups
 HISTFILE=$ZSH_CACHE_DIR/zsh_history
 
 setopt bang_hist              # Treat the '!' character specially during expansion
