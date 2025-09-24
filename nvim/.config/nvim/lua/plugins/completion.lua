@@ -116,7 +116,6 @@ return {
             luasnip = '',
             nvim_lua = '',
             path = '',
-            latex_symbols = '',
             emoji = '',
           })[entry.source.name]
 

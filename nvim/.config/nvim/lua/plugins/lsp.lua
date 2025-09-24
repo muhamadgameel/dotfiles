@@ -119,7 +119,7 @@ return {
       -- Set rounded border for floating info windows
       vim.lsp.handlers['textDocument/hover'] = vim.lsp.with(vim.lsp.handlers.hover, { border = 'rounded' })
       vim.lsp.handlers['textDocument/signatureHelp'] =
-        vim.lsp.with(vim.lsp.handlers.signature_help, { border = 'rounded' })
+          vim.lsp.with(vim.lsp.handlers.signature_help, { border = 'rounded' })
       require('lspconfig.ui.windows').default_options.border = 'rounded'
 
       -- Diagnostic ui
@@ -128,9 +128,9 @@ return {
           active = true,
           values = {
             { name = 'DiagnosticSignError', text = icons.diagnostics.Error },
-            { name = 'DiagnosticSignWarn', text = icons.diagnostics.Warning },
-            { name = 'DiagnosticSignHint', text = icons.diagnostics.Hint },
-            { name = 'DiagnosticSignInfo', text = icons.diagnostics.Information },
+            { name = 'DiagnosticSignWarn',  text = icons.diagnostics.Warning },
+            { name = 'DiagnosticSignHint',  text = icons.diagnostics.Hint },
+            { name = 'DiagnosticSignInfo',  text = icons.diagnostics.Information },
           },
         },
         virtual_text = true,

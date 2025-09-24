@@ -7,9 +7,12 @@ export TERMINAL=kitty
 # Fix GPG in terminal
 export GPG_TTY=$(tty)
 
+# Cache OS detection
+local _os=$(uname)
+
 # Android SDK
 if [[ -z $ANDROID_HOME ]]; then
-  case $(uname) in
+  case $_os in
     Darwin)
       export ANDROID_HOME=$HOME/Library/Android/sdk
       ;;
@@ -22,12 +25,15 @@ if [[ -z $ANDROID_HOME ]]; then
   export PATH=$PATH:$ANDROID_HOME/emulator
   export PATH=$PATH:$ANDROID_HOME/platform-tools
   
-  # TODO this should be more dynamic
-  export PATH=$PATH:$ANDROID_HOME/build-tools/35.0.0/
+  # Use latest build-tools version if available
+  if [[ -d "$ANDROID_HOME/build-tools" ]]; then
+    local latest_build_tools=$(ls "$ANDROID_HOME/build-tools" | sort -V | tail -n1)
+    [[ -n "$latest_build_tools" ]] && export PATH=$PATH:$ANDROID_HOME/build-tools/$latest_build_tools
+  fi
 fi
 
 # Append to PATH
-case $(uname) in
+case $_os in
   Darwin)
     eval "$(/opt/homebrew/bin/brew shellenv)"
     . "$HOME/.cargo/env"
@@ -38,7 +44,7 @@ case $(uname) in
 esac
 
 # FNM (Node versions manager)
-case $(uname) in
+case $_os in
   Darwin)
     if (( $+commands[fnm] )) then
       eval "$(fnm env --use-on-cd)"

@@ -1,25 +1,32 @@
+brew 'bash'       # Updated Bash shell
+brew 'zsh'        # Updated Z shell
+brew 'nushell'    # Modern shell
 brew 'git'        # Distributed revision control system
 brew 'fnm'        # Node version manager
-brew 'yarn'       # Javasript/Node package manager
+brew 'yarn'       # JavaScript/Node package manager
+brew 'cocoapods'  # Objective-C & Swift application dependency manager
 brew 'cmake'      # Build Tool
 brew 'fd'         # Fast find command
+brew 'bat'        # Modern cat replacement
 brew 'ripgrep'    # Fast search tool
+brew 'shellcheck' # Shell script linting tool
+brew 'shfmt'      # Shell script formatter
 brew 'starship'   # Starship shell prompt
 brew 'stow'       # Config files symlink manager
-brew 'neovim'     # Vim text editor
-brew 'cocoapods'  # Objective-C & Swift application dependency manager
 brew 'gnupg'      # PGP Privacy
+brew 'neovim'     # Vim text editor
 brew 'mas'        # App Store command line interface
 
 cask 'font-jetbrains-mono-nerd-font'  # Nerd Font
 cask 'zulu@17'                        # Java JDK
 cask 'arc'                            # Web Browser
 cask 'visual-studio-code'             # Code Editor
-cask 'sublime-text'                   # Text editor
+cask 'zed'                            # Zed text editor
 cask 'kitty'                          # Terminal Emulator
+cask 'wezterm'                        # Wezterm terminal emulator
 cask 'slack'                          # Team communication and collaboration
-cask 'android-studio'                 # Tools for building Android applications
 cask 'reactotron'                     # Inspecting React JS and React Native projects
+cask 'android-studio'                 # Tools for building Android applications
 cask 'webex'                          # Video communication and virtual meeting platform
 
 mas 'Xcode', id: 497799835

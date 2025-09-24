@@ -24,7 +24,7 @@ opt.iskeyword:append '-' -- Consider '-' as part of a word
 -- Editing Experience
 opt.showmatch = true -- Briefly jump to the matching bracket when inserted
 opt.timeoutlen = 400 -- Time to wait for a mapped sequence to complete
-opt.updatetime = 100 -- Delay before writing swap file to disk (also affects CursorHold)
+opt.updatetime = 150 -- Delay before writing swap file to disk (also affects CursorHold)
 opt.mouse = 'a' -- Enable mouse support in all modes
 opt.clipboard = 'unnamedplus' -- Use system clipboard
 opt.whichwrap:append '<,>,[,],h,l' -- Allow more keys to move across lines

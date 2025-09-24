@@ -25,7 +25,7 @@ keymap('n', 'g#', 'g#zz')
 keymap('n', '<C-h>', '<C-w>h', { desc = 'Move to Left Window' })
 keymap('n', '<C-j>', '<C-w>j', { desc = 'Move to Down Window' })
 keymap('n', '<C-k>', '<C-w>k', { desc = 'Move to Up Window' })
-keymap('n', '<C-l>', '<C-w>l', { desc = 'Move to Right Window' }) -- FIXME: does not work because of key overlapping with the terminal
+keymap('n', '<C-;>', '<C-w>l', { desc = 'Move to Right Window' })
 
 -- Resize with arrows
 keymap('n', '<C-Up>', '<cmd>resize +2<cr>', { desc = 'Resize Window Up' })

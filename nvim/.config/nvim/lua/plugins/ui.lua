@@ -12,7 +12,7 @@ return {
         lualine_bold = true,
         on_colors = function(colors)
           colors.hint = colors.orange
-          colors.error = '#ff0000'
+          colors.error = colors.red1 or colors.error
         end,
       }
 
@@ -90,7 +90,7 @@ return {
             {
               lazy_status.updates,
               cond = lazy_status.has_updates,
-              color = { fg = '#ff9e64' },
+              color = { fg = 'orange' },
             },
             { 'fileformat' },
           },

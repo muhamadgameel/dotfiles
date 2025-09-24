@@ -11,6 +11,7 @@ vim.filetype.add {
   },
   pattern = {
     ['.*/.zsh/.*'] = 'zsh',
-    ['.*zsh.*'] = 'zsh',
+    ['.*%.zshrc.*'] = 'zsh',
+    ['.*%.zsh'] = 'zsh',
   },
 }
