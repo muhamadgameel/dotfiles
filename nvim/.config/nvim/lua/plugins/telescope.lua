@@ -1,90 +1,57 @@
--- highlight path part with some dimmed color (like comment)
-vim.api.nvim_create_autocmd('FileType', {
-  pattern = 'TelescopeResults',
-  callback = function(ctx)
-    vim.api.nvim_buf_call(ctx.buf, function()
-      vim.fn.matchadd('TelescopeParent', '\t\t.*$')
-      vim.api.nvim_set_hl(0, 'TelescopeParent', { link = 'Comment' })
-    end)
-  end,
-})
-
--- show filename first, then path
-local function filenameFirst(_, path)
-  local tail = vim.fs.basename(path)
-  local parent = vim.fs.dirname(path)
-  if parent == '.' then
-    return tail
-  end
-  return string.format('%s\t\t%s', tail, parent)
-end
+local keymap = vim.keymap.set
 
 return {
   'nvim-telescope/telescope.nvim',
-  event = 'VeryLazy',
+  event = 'VimEnter',
   dependencies = {
-    { 'nvim-telescope/telescope-fzf-native.nvim', build = 'make', },
+    { 'nvim-lua/plenary.nvim' },
+    { 'nvim-telescope/telescope-fzf-native.nvim', build = 'make' },
+    { 'nvim-tree/nvim-web-devicons' },
   },
   config = function()
+    -- General
     local builtin = require 'telescope.builtin'
-
-    local function map(mode, l, r, desc)
-      vim.keymap.set(mode, l, r, { noremap = true, silent = true, desc = desc })
-    end
-
-    -- Built-in
-    map('n', '<leader>oo', builtin.find_files, 'Files (Telescope)')
-    map('n', '<leader>os', builtin.live_grep, 'Search (Telescope)')
-    map('n', '<leader>oG', builtin.grep_string, 'Grep Search (Telescope)')
-    map('n', '<leader>ob', builtin.buffers, 'Buffers (Telescope)')
-    map('n', '<leader>oc', builtin.commands, 'Commands (Telescope)')
-    map('n', '<leader>oC', builtin.colorscheme, 'Color Schemes (Telescope)')
-    map('n', '<leader>of', builtin.filetypes, 'File Types (Telescope)')
-    map('n', '<leader>ok', builtin.keymaps, 'Keymaps (Telescope)')
-    map('n', '<leader>oh', builtin.help_tags, 'Help Tags (Telescope)')
-    map('n', '<leader>om', builtin.man_pages, 'Man Pages (Telescope)')
-
+    keymap('n', '<leader>oo', builtin.find_files, { desc = 'Find Files' })
+    keymap('n', '<leader>os', builtin.live_grep, { desc = 'Live Search' })
+    keymap('n', '<leader>oS', builtin.spell_suggest, { desc = 'Spell Suggest' })
+    keymap('n', '<leader>ob', builtin.buffers, { desc = 'Buffers' })
+    keymap('n', '<leader>oh', builtin.help_tags, { desc = 'Help Tags' })
+    keymap('n', '<leader>oc', builtin.commands, { desc = 'Commands' })
+    keymap('n', '<leader>oC', builtin.colorscheme, { desc = 'Color Schemes' })
+    keymap('n', '<leader>ot', builtin.filetypes, { desc = 'File Types' })
+    keymap('n', '<leader>ok', builtin.keymaps, { desc = 'Keymaps' })
+    keymap('n', '<leader>oq', builtin.quickfix, { desc = 'QuickFix List' })
+    keymap('n', '<leader>oa', builtin.autocommands, { desc = 'Auto Commands' })
+    keymap('n', '<leader>or', builtin.registers, { desc = 'Registers' })
+    keymap('n', '<leader>od', builtin.diagnostics, { desc = 'Diagnostics' })
     -- Git
-    map('n', '<leader>ogs', '<cmd>Telescope git_status<cr>', 'Git Status (Telescope)')
-    map('n', '<leader>ogb', '<cmd>Telescope git_branches<cr>', 'Git Branches (Telescope)')
-    map('n', '<leader>ogc', '<cmd>Telescope git_commits<cr>', 'Git Commits (Telescope)')
-
-    -- Todo Comments
-    map('n', '<leader>ot', '<cmd>TodoTelescope<cr>', 'TODO comments (Telescope)')
-
-    -- Trouble
-    map('n', '<leader>ox', '<cmd>Trouble<cr>', 'Trouble (Telescope)')
+    keymap('n', '<leader>ogs', builtin.git_status, { desc = 'Git Status' })
+    keymap('n', '<leader>ogb', builtin.git_branches, { desc = 'Git Branches' })
+    keymap('n', '<leader>ogc', builtin.git_commits, { desc = 'Git Commits' })
+    keymap('n', '<leader>ogt', builtin.git_stash, { desc = 'Git Stash' })
 
     local telescope = require 'telescope'
-    local icons = require 'core.icons'
+    local telescopeConfig = require 'telescope.config'
     local actions = require 'telescope.actions'
     local action_layout = require 'telescope.actions.layout'
-    local trouble = require 'trouble.sources.telescope'
+
+    -- Grep, support search in hidden files, and trim white space for results
+    local vimgrep_arguments = { unpack(telescopeConfig.values.vimgrep_arguments) }
+    table.insert(vimgrep_arguments, '--hidden')
+    table.insert(vimgrep_arguments, '--trim')
+    table.insert(vimgrep_arguments, '--glob')
+    table.insert(vimgrep_arguments, '!**/.git/*')
 
     telescope.setup {
       defaults = {
-        prompt_prefix = icons.ui.Telescope .. ' ',
-        selection_caret = icons.ui.Forward .. ' ',
-        path_display = { 'smart' },
-        entry_prefix = '   ',
+        prompt_prefix = '🔍' .. ' ',
+        selection_caret = '' .. ' ', -- TODO: choose another icon
+        path_display = { 'filename_first' },
         initial_mode = 'insert',
-        selection_strategy = 'reset',
-        color_devicons = true,
-        vimgrep_arguments = {
-          'rg',
-          '--color=never',
-          '--no-heading',
-          '--with-filename',
-          '--line-number',
-          '--column',
-          '--smart-case',
-          '--hidden',
-          '--glob=!.git/',
-        },
-
+        dynamic_preview_title = true,
+        vimgrep_arguments = vimgrep_arguments,
         mappings = {
           i = {
-            ['<c-t>'] = trouble.open,
             ['<C-j>'] = actions.move_selection_next,
             ['<C-k>'] = actions.move_selection_previous,
             ['<C-x>'] = actions.select_horizontal,
@@ -96,7 +63,6 @@ return {
             ['j'] = actions.move_selection_next,
             ['k'] = actions.move_selection_previous,
             ['q'] = actions.close,
-            ['<c-t>'] = trouble.open,
             ['<C-p>'] = action_layout.toggle_preview,
             ['<esc>'] = actions.close,
           },
@@ -105,43 +71,35 @@ return {
       pickers = {
         find_files = {
           find_command = { 'fd', '--type', 'file', '--hidden', '--follow', '--exclude', '.git' },
-          path_display = filenameFirst,
-          theme = 'dropdown',
-          previewer = false,
-        },
-        live_grep = {
-          previewer = true,
-        },
-        grep_string = {
-          previewer = true,
         },
         buffers = {
           theme = 'dropdown',
           previewer = false,
-          initial_mode = 'normal',
           sort_lastused = true,
           mappings = {
-            i = { ['<C-x>'] = actions.delete_buffer },
+            i = { ['<C-x>'] = actions.delete_buffer + actions.move_to_top },
             n = { ['dd'] = actions.delete_buffer },
           },
         },
         colorscheme = {
           theme = 'dropdown',
+          previewer = false,
           enable_preview = true,
         },
         commands = {
           theme = 'ivy',
         },
+        autocommands = {
+          theme = 'ivy',
+        },
+        keymaps = {
+          theme = 'ivy',
+        },
         filetypes = {
           theme = 'dropdown',
         },
-      },
-      extensions = {
-        fzf = {
-          fuzzy = true,
-          override_generic_sorter = true,
-          override_file_sorter = true,
-          case_mode = 'smart_case',
+        registers = {
+          theme = 'dropdown',
         },
       },
     }

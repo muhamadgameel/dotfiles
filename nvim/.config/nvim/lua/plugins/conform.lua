@@ -1,6 +1,6 @@
 return {
   'stevearc/conform.nvim',
-  event = { 'BufReadPre', 'BufNewFile' },
+  event = 'BufWritePre',
   config = function()
     local conform = require 'conform'
 
@@ -20,24 +20,24 @@ return {
         sh = { 'shfmt' },
         bash = { 'shfmt' },
         zsh = { 'shfmt' },
+        rust = { 'rustfmt' },
         ['_'] = { 'trim_whitespace', 'trim_newlines' },
       },
       format_on_save = {
-        timeout_ms = 800,
-        lsp_fallback = true,
+        timeout_ms = 500,
+        lsp_format = 'fallback',
       },
     }
 
     conform.formatters.shfmt = {
-      prepend_args = { '-i', '2', '-ci' },
+      append_args = { '-i', '2' },
     }
 
     vim.keymap.set({ 'n', 'v' }, '<leader>F', function()
       conform.format {
-        lsp_fallback = true,
-        async = false,
-        timeout_ms = 500,
+        async = true,
+        lsp_format = 'fallback',
       }
-    end, { desc = 'Format file or range (in visual mode)' })
+    end, { desc = 'Format buffer' })
   end,
 }
