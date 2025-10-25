@@ -14,16 +14,13 @@ if not (vim.uv or vim.loop).fs_stat(lazypath) then
   end
 end
 
+-- Set lazy nvim runtime path, where to find it
 vim.opt.rtp:prepend(lazypath)
 
-require('lazy').setup('plugins', {
-  defaults = {
-    lazy = false,
-  },
-  install = {
-    colorscheme = { 'tokyonight' },
-  },
-  ui = { border = 'rounded' },
+require('lazy').setup {
+  spec = { { import = 'plugins' } },
+  defaults = { lazy = false },
+  install = { colorscheme = { 'kanagawa' } },
   checker = {
     enabled = true,
     notify = false,
@@ -35,6 +32,8 @@ require('lazy').setup('plugins', {
   performance = {
     rtp = {
       disabled_plugins = {
+        'netrw',
+        'netrwPlugin',
         'gzip',
         'tarPlugin',
         'zipPlugin',
@@ -43,4 +42,21 @@ require('lazy').setup('plugins', {
       },
     },
   },
-})
+  ui = {
+    icons = {
+      cmd = '⌘',
+      config = '🛠',
+      event = '📅',
+      ft = '📂',
+      init = '⚙',
+      keys = '',
+      plugin = '🔌',
+      runtime = '💻',
+      require = '🌙',
+      source = '📄',
+      start = '🚀',
+      task = '📌',
+      lazy = '💤 ',
+    },
+  },
+}

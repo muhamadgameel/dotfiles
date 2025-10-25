@@ -1,30 +1,20 @@
--- https://luals.github.io/wiki/settings/
+-- Docs: https://luals.github.io/wiki/settings/
 return {
   settings = {
     Lua = {
-      runtime = {
-        version = 'LuaJIT',
-        special = {
-          spec = 'require',
-        },
-      },
       diagnostics = {
-        globals = { 'vim', 'spec' },
+        globals = { 'vim' },
       },
       workspace = {
-        checkThirdParty = false,
-        library = {
-          [vim.fn.expand '$VIMRUNTIME/lua'] = true,
-          [vim.fn.stdpath 'config' .. '/lua'] = true,
-        },
-      },
-      telemetry = {
-        enable = false,
+        library = vim.api.nvim_get_runtime_file('', true),
       },
       completion = {
         callSnippet = 'Replace',
       },
       format = {
+        enable = false,
+      },
+      telemetry = {
         enable = false,
       },
       hint = {
