@@ -7,7 +7,7 @@ return {
 
     lualine.setup {
       options = {
-        theme = 'kanagawa',
+        theme = 'tokyonight',
         refresh = {
           statusline = 200,
           tabline = 500,
@@ -15,7 +15,7 @@ return {
         },
       },
       sections = {
-        lualine_a = { { 'mode', icon = ' ' } },
+        lualine_a = { { 'mode', icon = '' } },
         lualine_b = {
           { 'branch', icon = { '' } },
           {
@@ -24,7 +24,7 @@ return {
             symbols = { added = ' ', modified = ' ', removed = ' ' },
           },
         },
-        lualine_c = { 'diagnostics' },
+        lualine_c = { { 'diagnostics' } },
 
         lualine_x = {
           {
@@ -34,8 +34,8 @@ return {
           },
           { 'fileformat' },
         },
-        lualine_y = { 'filetype' },
-        lualine_z = { 'progress' },
+        lualine_y = { { 'filetype' } },
+        lualine_z = { { 'progress' } },
       },
       extensions = {
         'oil',

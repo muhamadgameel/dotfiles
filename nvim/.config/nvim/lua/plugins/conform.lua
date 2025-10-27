@@ -17,6 +17,7 @@ return {
         markdown = { 'prettierd' },
         yaml = { 'prettierd' },
         graphql = { 'prettierd' },
+        toml = { 'taplo' },
         sh = { 'shfmt' },
         bash = { 'shfmt' },
         zsh = { 'shfmt' },

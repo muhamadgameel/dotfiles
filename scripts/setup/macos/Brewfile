@@ -22,8 +22,7 @@ cask 'zulu@17'                        # Java JDK
 cask 'arc'                            # Web Browser
 cask 'visual-studio-code'             # Code Editor
 cask 'zed'                            # Zed text editor
-cask 'kitty'                          # Terminal Emulator
-cask 'wezterm'                        # Wezterm terminal emulator
+cask 'alacritty'                      # Terminal Emulator
 cask 'slack'                          # Team communication and collaboration
 cask 'reactotron'                     # Inspecting React JS and React Native projects
 cask 'android-studio'                 # Tools for building Android applications

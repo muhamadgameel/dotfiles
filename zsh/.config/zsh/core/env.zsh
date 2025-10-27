@@ -2,7 +2,7 @@
 export PAGER=less
 export EDITOR=nvim
 export VISUAL=nvim
-export TERMINAL=kitty
+export TERMINAL=alacritty
 
 # Fix GPG in terminal
 export GPG_TTY=$(tty)

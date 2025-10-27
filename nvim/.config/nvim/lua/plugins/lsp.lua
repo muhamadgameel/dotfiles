@@ -18,7 +18,7 @@ return {
       'williamboman/mason-lspconfig.nvim',
       opts = {
         automatic_enable = true,
-        ensure_installed = { 'lua_ls', 'jsonls', 'ts_ls', 'bashls', 'vale_ls' },
+        ensure_installed = { 'lua_ls', 'jsonls', 'ts_ls', 'html', 'cssls', 'bashls', 'taplo', 'vale_ls' },
       },
     },
     {
