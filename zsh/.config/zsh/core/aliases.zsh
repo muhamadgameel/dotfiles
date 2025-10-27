@@ -29,13 +29,6 @@ alias rm="rm -i"        # Interactive removal
 alias cp="cp -i"        # Interactive copy
 alias mv="mv -i"        # Interactive move
 
-# kitty terminal add-ons commands
-if (( $+commands[kitty] )); then
-  alias icat="kitty +kitten icat" # show image in terminal
-  alias diff="kitty +kitten diff" # diff between files
-  alias ssh="kitty +kitten ssh"   # Better SSH support in kitty
-fi
-
 # Resources Management
 alias df='df -h'
 alias du='du -h'

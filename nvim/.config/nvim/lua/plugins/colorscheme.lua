@@ -8,6 +8,7 @@ return {
         dim_inactive = true,
         lualine_bold = true,
       }
+      vim.cmd.colorscheme 'tokyonight'
     end,
   },
   {
@@ -29,9 +30,8 @@ return {
             PmenuThumb = { bg = theme.ui.bg_p2 },
           }
         end,
+        background = { dark = 'wave', light = 'lotus' },
       }
-
-      vim.cmd.colorscheme 'kanagawa'
     end,
   },
 }

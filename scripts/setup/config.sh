@@ -14,7 +14,7 @@ readonly LOG_FILE="$LOG_DIR/setup_$(date +%Y%m%d_%H%M%S).log"
 readonly MAX_LOG_FILES=10
 
 # Configuration arrays
-readonly DOTFILES_CONFIGS=("zsh" "nvim" "starship" "kitty" "gitconfig")
+readonly DOTFILES_CONFIGS=("zsh" "nvim" "starship" "alacritty" "gitconfig")
 
 # Color codes
 readonly GREEN='\033[0;32m'
