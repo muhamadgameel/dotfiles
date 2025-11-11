@@ -1,0 +1,133 @@
+/* Colors */
+@define-color bg    #1a1b26;
+@define-color fg    #c0caf5;
+@define-color blk     #15161e;
+@define-color red     #f7768e;
+@define-color grn     #9ece6a;
+@define-color ylw     #e0af68;
+@define-color blu     #7aa2f7;
+@define-color mag     #bb9af7;
+@define-color cyn     #7dcfff;
+@define-color brblk   #414868;
+@define-color wht     #a9b1d6;
+
+* {
+  border: none;
+  outline: none;
+  border-radius: 0;
+  font-family: "JetBrainsMono Nerd Font Propo", monospace;
+  font-size: 18px;
+  font-weight: bold;
+  min-height: 0;
+}
+
+/* Bar */
+window#waybar {
+  background-color: @bg;
+  border-bottom: 3px solid rgba(100, 114, 125, 0.5);
+  color: @fg;
+}
+
+/* Tooltip */
+tooltip {
+  background: @blk;
+  border: 1px solid rgba(100, 114, 125, 0.5);
+}
+
+tooltip label {
+  color: @wht;
+}
+
+/* Workspaces */
+#workspaces {
+  margin: 0 4px 0 0;
+}
+
+#workspaces button {
+  transition-property: background-color;
+  transition: 0.2s ease-in-out;
+  background: transparent;
+  color: @fg;
+  min-width: 24px;
+  border-bottom: 3px solid transparent;
+  padding: 4px 8px;
+}
+
+#workspaces button.active {
+  color: @ylw;
+  border-bottom: 3px solid @ylw;
+}
+
+#workspaces button.empty {
+  color: @brblk;
+}
+
+#workspaces button.urgent {
+  color: @red;
+}
+
+#workspaces button:hover {
+  box-shadow: inherit;
+  border-bottom: 3px solid @blu;
+  color: @blu;
+}
+
+/* Window Title */
+#window {
+  color: @cyn;
+  margin: 0 4px;
+}
+
+/* Modules */
+#network,
+#wireplumber,
+#cpu,
+#memory,
+#disk,
+#temperature,
+#backlight,
+#battery,
+#clock,
+#tray {
+  padding: 0 6px;
+  margin: 0 6px;
+  color: @wht;
+}
+
+/* WirePlumber */
+#wireplumber.muted {
+  color: @brblk;
+}
+
+/* Network */
+#network.ethernet,
+#network.wifi {
+  color: @grn;
+}
+
+#network.disconnected,
+#network.disabled {
+  color: @red;
+}
+
+#network.linked {
+  color: @ylw;
+}
+
+/* Termperature */
+#temperature.critical {
+  color: @red;
+}
+
+/* Battery */
+#battery.charging {
+  color: @grn;
+}
+
+#battery.warning {
+  color: @ylw;
+}
+
+#battery.critical {
+  color: @red;
+}
