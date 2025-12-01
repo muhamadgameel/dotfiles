@@ -108,6 +108,8 @@ return {
         'svelte',
         'graphql',
         'dockerfile',
+        'qmldir',
+        'qmljs',
       },
     }
   end,
