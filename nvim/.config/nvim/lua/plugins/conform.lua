@@ -22,6 +22,7 @@ return {
         bash = { 'shfmt' },
         zsh = { 'shfmt' },
         rust = { 'rustfmt' },
+        qml = { '/usr/lib/qt6/bin/qmlformat' }, -- Externally downloaded
         ['_'] = { 'trim_whitespace', 'trim_newlines' },
       },
       format_on_save = {
