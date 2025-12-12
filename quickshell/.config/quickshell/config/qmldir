@@ -1,0 +1,5 @@
+module config
+
+singleton Config 1.0 Config.qml
+singleton Icons 1.0 Icons.qml
+singleton Theme 1.0 Theme.qml

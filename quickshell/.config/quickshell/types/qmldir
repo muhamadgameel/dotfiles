@@ -1,0 +1,3 @@
+module types
+
+singleton Enums 1.0 Enums.qml
