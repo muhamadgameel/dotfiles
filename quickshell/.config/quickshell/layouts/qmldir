@@ -1,0 +1,7 @@
+module layouts
+
+Collapsible 1.0 Collapsible.qml
+FormRow 1.0 FormRow.qml
+IconLabel 1.0 IconLabel.qml
+NotificationCard 1.0 NotificationCard.qml
+ProgressRow 1.0 ProgressRow.qml

@@ -1,0 +1,10 @@
+module modules.bar.widgets
+
+Clock 1.0 Clock.qml
+Volume 1.0 Volume.qml
+Microphone 1.0 Microphone.qml
+Brightness 1.0 Brightness.qml
+Launcher 1.0 Launcher.qml
+Settings 1.0 Settings.qml
+Workspaces 1.0 Workspaces.qml
+Notification 1.0 Notification.qml

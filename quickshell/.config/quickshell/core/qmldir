@@ -1,0 +1,9 @@
+module core
+
+singleton Style 1.0 Style.qml
+singleton Logger 1.0 Logger.qml
+singleton Screen 1.0 Screen.qml
+singleton Utils 1.0 Utils.qml
+PopAnimator 1.0 PopAnimator.qml
+SlideAnimator 1.0 SlideAnimator.qml
+PositionedPanelWindow 1.0 PositionedPanelWindow.qml
