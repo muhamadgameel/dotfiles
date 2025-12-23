@@ -3,38 +3,28 @@ import QtQuick
 import "../config" as Config
 import "../core" as Core
 
-/*
-* Badge - A small indicator for counts or status
+/**
+* Badge - A pill-shaped label for status or tags
 */
 Rectangle {
   id: root
 
-  property int count: 0
-  property color badgeColor: Config.Theme.error
-  property color textColor: Config.Theme.bg
-  property color borderColor: Config.Theme.bg
+  property string text: ""
+  property color textColor: Config.Theme.accent
+  property color backgroundColor: Config.Theme.alpha(textColor, 0.2)
+  property real fontSize: Core.Style.fontS
 
-  width: count > 0 ? Math.max(14, badgeText.implicitWidth + 6) : 8
-  height: count > 0 ? 14 : 8
-  radius: height / 2
-  color: badgeColor
-  visible: count > 0
-  border.color: borderColor
-  border.width: Core.Style.borderThin
+  implicitWidth: badgeText.width + Core.Style.spaceM
+  implicitHeight: badgeText.height + Core.Style.spaceXS
+  radius: implicitHeight / 2
+  color: backgroundColor
+  visible: text !== ""
 
-  Text {
+  Label {
     id: badgeText
     anchors.centerIn: parent
-    text: root.count > 99 ? "99+" : root.count.toString()
-    font.pixelSize: Core.Style.fontS
-    font.weight: Font.Bold
+    text: root.text
+    size: root.fontSize
     color: root.textColor
-    visible: root.count > 0
-  }
-
-  Behavior on width {
-    NumberAnimation {
-      duration: Core.Style.animFast
-    }
   }
 }

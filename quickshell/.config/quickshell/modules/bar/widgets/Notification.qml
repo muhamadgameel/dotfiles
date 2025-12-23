@@ -13,7 +13,7 @@ Item {
   implicitWidth: notificationButton.implicitWidth
   implicitHeight: notificationButton.implicitHeight
 
-  // Badge for unread count (bind directly to service property)
+  // Indicator for unread count (bind directly to service property)
   property int unreadCount: Services.Notification.unreadCount
 
   signal clickedMainEvent
@@ -33,8 +33,8 @@ Item {
     }
   }
 
-  // Unread badge
-  Components.Badge {
+  // Unread indicator
+  Components.Indicator {
     anchors.right: parent.right
     anchors.top: parent.top
     anchors.rightMargin: 1

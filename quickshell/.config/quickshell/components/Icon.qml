@@ -18,6 +18,10 @@ import "../core" as Core
 *
 *   // With background padding
 *   Icon { name: "bell"; padding: 8; backgroundColor: Theme.surface; radius: Style.radiusM }
+*
+*   // With spinning animation (for loading states)
+*   Icon { name: "refresh"; spinning: true }
+*   Icon { name: "loading"; spinning: isLoading; spinDuration: 800 }
 */
 Item {
   id: root
@@ -31,6 +35,10 @@ Item {
   property alias backgroundColor: background.color
   property real padding: 0
   property alias radius: background.radius
+
+  // Spinning animation
+  property bool spinning: false
+  property int spinDuration: 1000
 
   // Determine if we should show an image or text icon
   readonly property bool isImage: {
@@ -94,5 +102,13 @@ Item {
     font.pixelSize: root.size
     color: Config.Theme.text
     anchors.centerIn: parent
+
+    RotationAnimation on rotation {
+      running: root.spinning
+      from: 0
+      to: 360
+      duration: root.spinDuration
+      loops: Animation.Infinite
+    }
   }
 }

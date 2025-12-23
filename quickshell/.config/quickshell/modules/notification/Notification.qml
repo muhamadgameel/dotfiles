@@ -26,7 +26,7 @@ Variants {
 
       screen: modelData
       namespace: "quickshell-notifications"
-      location: Config.Config.notificationPosition
+      location: "top_right"
 
       margin: Core.Style.spaceL
       topExtra: Core.Style.barHeight

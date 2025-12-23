@@ -38,6 +38,8 @@ Variants {
     Bar {
       anchors.fill: parent
       onNotificationClicked: notificationCenter.toggle()
+      onNetworkClicked: networkPanel.toggle()
+      onSettingsClicked: settingsPanel.toggle()
     }
 
     // Notification Center
@@ -49,6 +51,12 @@ Variants {
     // Settings Panel
     Panels.SettingsPanel {
       id: settingsPanel
+      parentWindow: barWindow
+    }
+
+    // Network Panel
+    Panels.NetworkPanel {
+      id: networkPanel
       parentWindow: barWindow
     }
   }

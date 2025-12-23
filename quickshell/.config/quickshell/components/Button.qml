@@ -42,6 +42,7 @@ Rectangle {
   property real iconSize: Core.Style.fontL
   property color iconColor: Config.Theme.text
   property color iconHoverColor: iconColor
+  property bool iconSpinning: false
 
   property string text: ""
   property real textSize: Core.Style.fontM
@@ -103,6 +104,7 @@ Rectangle {
       visible: root.icon !== ""
       name: root.icon
       size: root.iconSize
+      spinning: root.iconSpinning
       color: {
         if (root.useActiveColorOnHover && root.hovered)
           return Config.Theme.bg;

@@ -83,14 +83,22 @@ Singleton {
       "file-text": "󰈙",
 
       // === Connectivity ===
-      "wifi": "󰖩",
-      "wifi-off": "󰖪",
-      "wifi-weak": "󰖫",
-      "wifi-medium": "󰖬",
-      "wifi-strong": "󰖩",
+      // WiFi signal strength icons
+      "wifi": "󰤨",
+      "wifi-strong": "󰤨",
+      "wifi-medium": "󰤥",
+      "wifi-weak": "󰤟",
+      "wifi-off": "󰤭",
+      "wifi-lock": "󰤪",
+      "wifi-alert": "󰤬",
+      "wifi-outline": "󰤯",
+
+      // Bluetooth
       "bluetooth": "󰂯",
       "bluetooth-off": "󰂲",
       "bluetooth-connected": "󰂱",
+
+      // Network
       "network": "󰛳",
       "network-off": "󰲛",
 
