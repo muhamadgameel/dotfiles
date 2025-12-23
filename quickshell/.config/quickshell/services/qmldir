@@ -1,8 +1,8 @@
 module services
 
 singleton OSD 1.0 OSD.qml
-singleton Panel 1.0 Panel.qml
 singleton Time 1.0 Time.qml
 singleton Tooltip 1.0 Tooltip.qml
 singleton Audio 1.0 Audio.qml
 singleton Notification 1.0 Notification.qml
+singleton Network 1.0 Network.qml

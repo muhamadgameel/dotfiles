@@ -161,7 +161,6 @@ Rectangle {
           color: Config.Theme.text
           wrapMode: Text.WrapAtWordBoundaryOrAnywhere
           maximumLineCount: root.compact ? 1 : 2
-          elide: Text.ElideRight
           visible: text.length > 0
           Layout.fillWidth: true
         }
@@ -173,7 +172,6 @@ Rectangle {
           color: Config.Theme.textDim
           wrapMode: Text.WrapAtWordBoundaryOrAnywhere
           maximumLineCount: root.compact ? 2 : 4
-          elide: Text.ElideRight
           visible: text.length > 0
           Layout.fillWidth: true
         }

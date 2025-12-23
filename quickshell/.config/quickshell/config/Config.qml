@@ -18,6 +18,7 @@ Singleton {
   readonly property bool barShowBrightness: true
   readonly property bool barShowLauncher: true
   readonly property bool barShowNotification: true
+  readonly property bool barShowNetwork: true
 
   // === OSD Configuration ===
   readonly property string osdPosition: "top_right"
@@ -25,7 +26,6 @@ Singleton {
   readonly property bool osdEnabled: true
 
   // === Panel Configuration ===
-  readonly property bool panelBackdropEnabled: true
   readonly property real panelBackdropOpacity: 0.3
 
   // === Tooltip Configuration ===

@@ -8,3 +8,4 @@ Launcher 1.0 Launcher.qml
 Settings 1.0 Settings.qml
 Workspaces 1.0 Workspaces.qml
 Notification 1.0 Notification.qml
+Network 1.0 Network.qml

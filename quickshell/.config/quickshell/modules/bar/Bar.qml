@@ -12,6 +12,7 @@ Rectangle {
   // Signals for external communication
   signal settingsClicked
   signal notificationClicked
+  signal networkClicked
 
   color: Config.Theme.alpha(Config.Theme.bg, 0.95)
 
@@ -47,6 +48,11 @@ Rectangle {
     // === RIGHT SECTION ===
     RowLayout {
       spacing: Core.Style.spaceXS
+
+      Widgets.Network {
+        visible: Config.Config.barShowNetwork
+        onPanelRequested: root.networkClicked()
+      }
 
       Widgets.Volume {
         visible: Config.Config.barShowVolume
