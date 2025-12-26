@@ -102,4 +102,17 @@ Singleton {
   function clamp(value, min, max) {
     return Math.max(min, Math.min(max, value));
   }
+
+  // === Time Formatting ===
+
+  function formatDuration(seconds, shortAnnotation) {
+    if (seconds <= 0)
+      return "";
+    const hours = Math.floor(seconds / 3600);
+    const minutes = Math.floor((seconds % 3600) / 60);
+    if (shortAnnotation) {
+      return hours > 0 ? hours + "h " + minutes + "m" : minutes + "m";
+    }
+    return hours > 0 ? hours + "h " + minutes + "m" : minutes + " min";
+  }
 }

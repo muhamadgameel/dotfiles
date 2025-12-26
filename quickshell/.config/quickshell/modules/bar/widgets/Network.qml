@@ -58,27 +58,11 @@ Components.Button {
   }
 
   // Visual indicator for connecting state
-  Rectangle {
+  Components.PulsingDot {
     anchors.bottom: parent.bottom
     anchors.horizontalCenter: parent.horizontalCenter
     anchors.bottomMargin: 2
-    width: 4
-    height: 4
-    radius: 2
+    active: Services.Network.connecting || Services.Network.scanning
     color: Config.Theme.accent
-    visible: Services.Network.connecting || Services.Network.scanning
-
-    SequentialAnimation on opacity {
-      running: Services.Network.connecting || Services.Network.scanning
-      loops: Animation.Infinite
-      NumberAnimation {
-        to: 0.3
-        duration: 400
-      }
-      NumberAnimation {
-        to: 1.0
-        duration: 400
-      }
-    }
   }
 }
