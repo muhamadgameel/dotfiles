@@ -16,6 +16,7 @@ Singleton {
   readonly property bool barShowVolume: true
   readonly property bool barShowMicrophone: true
   readonly property bool barShowBrightness: true
+  readonly property bool barShowBattery: true
   readonly property bool barShowLauncher: true
   readonly property bool barShowNotification: true
   readonly property bool barShowNetwork: true

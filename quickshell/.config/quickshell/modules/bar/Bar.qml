@@ -62,14 +62,18 @@ Rectangle {
         visible: Config.Config.barShowMicrophone
       }
 
+      Widgets.Battery {
+        visible: Config.Config.barShowBattery
+      }
+
       Widgets.Notification {
         visible: Config.Config.barShowNotification
         onClickedMainEvent: root.notificationClicked()
       }
 
-      Widgets.Brightness {
-        visible: Config.Config.barShowBrightness
-      }
+      // Widgets.Brightness {
+      //   visible: Config.Config.barShowBrightness
+      // }
 
       Components.Divider {
         vertical: true
