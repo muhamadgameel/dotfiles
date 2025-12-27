@@ -18,8 +18,8 @@ Components.Button {
   id: root
 
   // === Configuration ===
-  readonly property real lowThreshold: 20
-  readonly property real criticalThreshold: 10
+  readonly property real lowThreshold: 30
+  readonly property real criticalThreshold: 15
 
   // === UPower State ===
   readonly property var battery: UPower.displayDevice

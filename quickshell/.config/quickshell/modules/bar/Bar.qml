@@ -13,6 +13,7 @@ Rectangle {
   signal settingsClicked
   signal notificationClicked
   signal networkClicked
+  signal systemStatsClicked
 
   color: Config.Theme.alpha(Config.Theme.bg, 0.95)
 
@@ -60,6 +61,11 @@ Rectangle {
 
       Widgets.Microphone {
         visible: Config.Config.barShowMicrophone
+      }
+
+      Widgets.SystemStats {
+        visible: Config.Config.barShowSystemStats
+        onPanelRequested: root.systemStatsClicked()
       }
 
       Widgets.Battery {
