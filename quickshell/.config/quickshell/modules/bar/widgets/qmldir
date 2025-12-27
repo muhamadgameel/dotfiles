@@ -10,3 +10,4 @@ Settings 1.0 Settings.qml
 Workspaces 1.0 Workspaces.qml
 Notification 1.0 Notification.qml
 Network 1.0 Network.qml
+SystemStats 1.0 SystemStats.qml

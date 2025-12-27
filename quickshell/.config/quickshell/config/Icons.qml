@@ -180,6 +180,22 @@ Singleton {
       "layers": "󰌨",
       "split": "󰕮",
 
+      // === System Monitoring ===
+      "cpu": "",
+      "cpu-temp": "󱃃",
+      "gpu": "󰢮",
+      "gpu-temp": "󰢮",
+      "memory": "",
+      "ram": "󰘚",
+      "disk": "󰋊",
+      "thermometer": "󰔏",
+      "thermometer-high": "󰔐",
+      "thermometer-low": "󱃃",
+      "chip": "󰍛",
+      "dashboard": "󰕮",
+      "gauge": "󰓅",
+      "fire": "󰈸",
+
       // === Misc ===
       "loading": "󰑓",
       "spinner": "󰑓",

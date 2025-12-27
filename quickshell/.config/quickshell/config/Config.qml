@@ -20,6 +20,7 @@ Singleton {
   readonly property bool barShowLauncher: true
   readonly property bool barShowNotification: true
   readonly property bool barShowNetwork: true
+  readonly property bool barShowSystemStats: true
 
   // === OSD Configuration ===
   readonly property string osdPosition: "top_right"

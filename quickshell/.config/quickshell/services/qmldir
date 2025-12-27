@@ -6,3 +6,4 @@ singleton Tooltip 1.0 Tooltip.qml
 singleton Audio 1.0 Audio.qml
 singleton Notification 1.0 Notification.qml
 singleton Network 1.0 Network.qml
+singleton SystemStats 1.0 SystemStats.qml
