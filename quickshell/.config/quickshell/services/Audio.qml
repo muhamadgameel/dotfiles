@@ -55,11 +55,12 @@ QtObject {
   // Private: Show volume OSD with computed data
   function _showVolumeOSD() {
     Services.OSD.show("progressRow", {
-      icon: _getVolumeIcon(volume, muted),
+      iconName: _getVolumeIcon(volume, muted),
       value: volume,
       maxValue: 1.5,
       iconColor: muted ? Config.Theme.error : Config.Theme.text,
-      progressColor: muted ? Config.Theme.error : (volume > 1.0 ? Config.Theme.warning : Config.Theme.accent)
+      progressColor: muted ? Config.Theme.error : (volume > 1.0 ? Config.Theme.warning : Config.Theme.accent),
+      valueText: Math.round(volume / 1 * 100) + "%"
     });
   }
 
@@ -76,13 +77,15 @@ QtObject {
 
   // Private: Get volume icon based on level and mute state
   function _getVolumeIcon(value, isMuted) {
-    if (isMuted || value < 0.01)
-      return "🔇";
+    if (isMuted)
+      return "volume-mute";
+    if (value == 0)
+      return "volume-off";
     if (value < 0.33)
-      return "🔈";
+      return "volume-low";
     if (value <= 0.66)
-      return "🔉";
-    return "🔊";
+      return "volume-medium";
+    return "volume-high";
   }
 
   // Private: Get microphone icon based on mute state

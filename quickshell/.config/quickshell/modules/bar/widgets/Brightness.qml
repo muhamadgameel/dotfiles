@@ -2,38 +2,70 @@ import QtQuick
 
 import "../../../components" as Components
 import "../../../config" as Config
+import "../../../core" as Core
 import "../../../services" as Services
 
+/**
+* Brightness - Bar widget for display backlight control
+*
+* Features:
+* - Dynamic icon based on brightness level
+* - Scroll to adjust brightness
+* - Click to toggle between min/max
+* - Middle-click to set to 50%
+* - Tooltip showing percentage and device info
+*/
 Components.Button {
   id: root
 
-  // TODO: Connect to actual brightness service
-  property real brightness: 0.8
+  // Hide when no backlight device is available (desktops without backlight)
+  visible: Services.Brightness.ready
 
-  icon: _getBrightnessIcon(brightness)
+  icon: Services.Brightness.getIcon()
+  iconSize: Core.Style.fontL
 
-  tooltipText: Math.round(brightness * 100) + "%"
+  text: Services.Brightness.ready ? Math.round(Services.Brightness.brightness * 100) + "%" : "--"
 
-  function _getBrightnessIcon(value) {
-    if (value < 0.33)
-      return "brightness-low";
-    if (value <= 0.66)
-      return "brightness-medium";
-    return "brightness-high";
+  tooltipText: {
+    if (!Services.Brightness.ready)
+      return "Brightness control unavailable";
+
+    let lines = [];
+    lines.push("Brightness: " + Math.round(Services.Brightness.brightness * 100) + "%");
+
+    if (Services.Brightness.device) {
+      lines.push(Config.Icons.get("monitor") + "  " + Services.Brightness.device);
+    }
+
+    lines.push("");
+    lines.push("Scroll: Adjust brightness");
+    lines.push("Click: Toggle min/max");
+    lines.push("Middle-click: Set to 50%");
+
+    return lines.join("\n");
   }
 
-  onClicked: {
-    // Demo: cycle through brightness levels
-    brightness = (brightness + 0.1) % 1.1;
-    if (brightness > 1.0)
-      brightness = 0.1;
+  // Scroll to adjust brightness
+  onWheel: function (wheel) {
+    if (wheel.angleDelta.y > 0) {
+      Services.Brightness.increase();
+    } else {
+      Services.Brightness.decrease();
+    }
+  }
 
-    Services.OSD.show("progressRow", {
-      icon: _getBrightnessIcon(brightness),
-      value: brightness,
-      maxValue: 1.0,
-      iconColor: Config.Theme.text,
-      progressColor: Config.Theme.accent
-    });
+  // Click handlers
+  onClicked: function (button) {
+    if (button === Qt.LeftButton) {
+      // Toggle between low (10%) and high (100%)
+      if (Services.Brightness.brightness > 0.5) {
+        Services.Brightness.set(0.1);
+      } else {
+        Services.Brightness.set(1.0);
+      }
+    } else if (button === Qt.MiddleButton) {
+      // Set to 50%
+      Services.Brightness.set(0.5);
+    }
   }
 }
