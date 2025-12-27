@@ -26,10 +26,12 @@ Item {
     id: progressRowComponent
     Layouts.ProgressRow {
       icon: Services.OSD.data.icon ?? ""
+      iconName: Services.OSD.data.iconName ?? ""
       iconColor: Services.OSD.data.iconColor ?? Config.Theme.text
       value: Services.OSD.data.value ?? 0
       maxValue: Services.OSD.data.maxValue ?? 1
       progressColor: Services.OSD.data.progressColor ?? Config.Theme.accent
+      valueText: Services.OSD.data.valueText ?? ""
     }
   }
 

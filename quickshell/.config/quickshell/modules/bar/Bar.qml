@@ -63,6 +63,10 @@ Rectangle {
         visible: Config.Config.barShowMicrophone
       }
 
+      Widgets.Brightness {
+        visible: Config.Config.barShowBrightness
+      }
+
       Widgets.SystemStats {
         visible: Config.Config.barShowSystemStats
         onPanelRequested: root.systemStatsClicked()
@@ -76,10 +80,6 @@ Rectangle {
         visible: Config.Config.barShowNotification
         onClickedMainEvent: root.notificationClicked()
       }
-
-      // Widgets.Brightness {
-      //   visible: Config.Config.barShowBrightness
-      // }
 
       Components.Divider {
         vertical: true
