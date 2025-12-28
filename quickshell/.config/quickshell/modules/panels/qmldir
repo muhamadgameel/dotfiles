@@ -1,6 +1,5 @@
 module modules.panels
 
-SettingsPanel 1.0 SettingsPanel.qml
 NotificationCenter 1.0 NotificationCenter.qml
 NetworkPanel 1.0 NetworkPanel.qml
 SystemStatsPanel 1.0 SystemStatsPanel.qml
