@@ -53,17 +53,31 @@ Item {
   // === Internal ===
   readonly property bool hasIcon: icon !== "" || iconName !== ""
 
-  implicitWidth: row.implicitWidth
-  implicitHeight: row.implicitHeight
+  // Size based on content, not parent
+  implicitWidth: hasIcon ? row.implicitWidth : label.implicitWidth
+  implicitHeight: hasIcon ? row.implicitHeight : label.implicitHeight
 
+  // Simple text (no icon) - render directly for correct sizing
+  Text {
+    id: label
+    visible: !root.hasIcon
+    anchors.fill: parent
+    font.pixelSize: root.size
+    font.weight: root.weight
+    color: Config.Theme.text
+    elide: Text.ElideRight
+    verticalAlignment: Text.AlignVCenter
+  }
+
+  // With icon - use RowLayout
   RowLayout {
     id: row
+    visible: root.hasIcon
     anchors.fill: parent
-    spacing: root.hasIcon ? root.spacing : 0
+    spacing: root.spacing
     layoutDirection: root.iconPosition === "right" ? Qt.RightToLeft : Qt.LeftToRight
 
     Icon {
-      visible: root.hasIcon
       icon: root.icon
       name: root.iconName
       size: root.iconSize
@@ -71,12 +85,14 @@ Item {
     }
 
     Text {
-      id: label
       Layout.fillWidth: true
+      text: label.text
       font.pixelSize: root.size
       font.weight: root.weight
-      color: Config.Theme.text
-      elide: Text.ElideRight
+      color: label.color
+      elide: label.elide
+      wrapMode: label.wrapMode
+      maximumLineCount: label.maximumLineCount
       verticalAlignment: Text.AlignVCenter
     }
   }
