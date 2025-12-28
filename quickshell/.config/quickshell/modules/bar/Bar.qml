@@ -10,7 +10,6 @@ Rectangle {
   id: root
 
   // Signals for external communication
-  signal settingsClicked
   signal notificationClicked
   signal networkClicked
   signal systemStatsClicked
@@ -79,15 +78,6 @@ Rectangle {
       Widgets.Notification {
         visible: Config.Config.barShowNotification
         onClickedMainEvent: root.notificationClicked()
-      }
-
-      Components.Divider {
-        vertical: true
-        Layout.preferredHeight: 16
-      }
-
-      Widgets.Settings {
-        onClicked: root.settingsClicked()
       }
     }
   }

@@ -101,6 +101,9 @@ Singleton {
       // Network
       "network": "󰛳",
       "network-off": "󰲛",
+      "ethernet": "󰈀",
+      "ethernet-off": "󰈂",
+      "usb": "󰕓",
 
       // === Audio ===
       "volume": "󰕾",
