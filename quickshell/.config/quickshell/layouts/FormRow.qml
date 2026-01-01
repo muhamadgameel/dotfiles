@@ -5,10 +5,23 @@ import "../components" as Components
 import "../config" as Config
 import "../core" as Core
 
-/*
+/**
 * FormRow - Row with label and optional control (toggle/value)
+*
+* Usage:
+*   FormRow {
+*       label: "Enable notifications"
+*       hasToggle: true
+*       toggleChecked: settings.notifications
+*       onToggled: settings.notifications = checked
+*   }
+*
+*   FormRow {
+*       label: "Version"
+*       valueText: "1.0.0"
+*   }
 */
-Rectangle {
+Components.Card {
   id: root
 
   property string label: "Label"
@@ -20,20 +33,18 @@ Rectangle {
 
   Layout.fillWidth: true
   implicitHeight: 40
-  radius: Core.Style.radiusS
-  color: rowMouse.containsMouse ? Config.Theme.surface : Config.Theme.transparent
 
   RowLayout {
     anchors.fill: parent
     anchors.leftMargin: Core.Style.spaceM
     anchors.rightMargin: Core.Style.spaceM
 
-    Components.Label {
+    Components.Text {
       text: root.label
       Layout.fillWidth: true
     }
 
-    Components.Label {
+    Components.Text {
       visible: root.valueText !== ""
       text: root.valueText
       color: Config.Theme.textDim
@@ -47,12 +58,5 @@ Rectangle {
         root.toggled(checked);
       }
     }
-  }
-
-  MouseArea {
-    id: rowMouse
-    anchors.fill: parent
-    hoverEnabled: true
-    acceptedButtons: Qt.NoButton
   }
 }

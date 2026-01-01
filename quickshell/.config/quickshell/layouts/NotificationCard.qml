@@ -24,7 +24,7 @@ import "../services" as Services
 *       onActionClicked: handleAction(actionId)
 *   }
 */
-Rectangle {
+Components.Card {
   id: root
 
   // === Properties ===
@@ -49,47 +49,32 @@ Rectangle {
   // === Signals ===
   signal closeClicked
   signal actionClicked(string actionId)
-  signal hoverChanged(bool hovered)
-  signal clicked(var mouse)
+  signal hoverChanged(bool isHovered)
 
-  // === State ===
-  readonly property bool hovered: contentMouseArea.containsMouse || closeButton.hovered || trashButton.hovered
-
+  // Forward hover changes
   onHoveredChanged: hoverChanged(hovered)
 
-  // === Appearance ===
+  // === Card Configuration ===
   radius: Core.Style.radiusL
-  border.color: root.compact ? Config.Theme.alpha(Config.Theme.overlay, 0.5) : Config.Theme.overlay
-  border.width: Core.Style.borderThin
-  color: hovered ? Config.Theme.surfaceHover : root.compact ? Config.Theme.surface : Config.Theme.bg
+  borderColor: root.compact ? Config.Theme.alpha(Config.Theme.overlay, 0.5) : Config.Theme.overlay
+  borderWidth: Core.Style.borderThin
+  backgroundColor: root.compact ? Config.Theme.surface : Config.Theme.bg
+  hoverColor: Config.Theme.surfaceHover
 
   implicitHeight: contentColumn.implicitHeight + Core.Style.spaceM * 2
 
-  Behavior on color {
-    ColorAnimation {
-      duration: Core.Style.animFast
-    }
-  }
+  interactive: true
 
   // === Progress Bar ===
   Components.ProgressBar {
     visible: root.showProgress
     value: root.progressValue
-    backgroundColor: Config.Theme.transparent
+    trackColor: Config.Theme.transparent
     progressColor: Config.Theme.urgencyColor(root.urgency)
-    implicitHeight: 2
-    implicitWidth: parent.width - (2 * parent.radius)
-    x: parent.radius
+    height: 2
+    width: root.width - (2 * root.radius)
+    anchors.horizontalCenter: parent.horizontalCenter
     reversed: true
-  }
-
-  // === Content Mouse Area ===
-  MouseArea {
-    id: contentMouseArea
-    anchors.fill: parent
-    hoverEnabled: true
-    acceptedButtons: Qt.LeftButton | Qt.RightButton | Qt.MiddleButton
-    onClicked: mouse => root.clicked(mouse.button)
   }
 
   // === Content ===
@@ -108,9 +93,9 @@ Rectangle {
       // App icon
       Components.Icon {
         Layout.alignment: Qt.AlignTop
-        name: root.image || "bell"
-        size: root.compact ? 24 : 32
-        padding: 8
+        icon: root.image || "bell"
+        size: root.compact ? 32 : 40
+        padding: root.compact ? 4 : 8
         radius: Core.Style.radiusM
         backgroundColor: root.compact ? Config.Theme.bgAlt : Config.Theme.surface
         color: Config.Theme.text
@@ -126,37 +111,32 @@ Rectangle {
           spacing: Core.Style.spaceXS
 
           // Urgency dot
-          Components.Icon {
-            name: "dot"
-            size: Core.Style.fontXXS
+          Components.StatusDot {
             Layout.alignment: Qt.AlignVCenter
             visible: root.showUrgencyDot
+            size: 6
             color: Config.Theme.urgencyColor(root.urgency)
           }
 
-          Components.Label {
+          Components.Text {
             text: root.appName
-            font.pixelSize: root.compact ? Core.Style.fontXS : Core.Style.fontS
+            size: root.compact ? Core.Style.fontXS : Core.Style.fontS
             font.weight: Font.Bold
             color: Config.Theme.accent
           }
 
-          Components.Label {
+          Components.Text {
             text: root.timestamp ? (" · " + Services.Time.formatRelativeTime(root.timestamp)) : ""
-            font.pixelSize: Core.Style.fontXS
+            size: Core.Style.fontXS
             color: Config.Theme.textMuted
             visible: text.length > 0
-          }
-
-          Item {
-            Layout.fillWidth: true
           }
         }
 
         // Summary
-        Components.Label {
+        Components.Text {
           text: root.summary
-          font.pixelSize: root.compact ? Core.Style.fontM : Core.Style.fontL
+          size: root.compact ? Core.Style.fontM : Core.Style.fontL
           font.weight: Font.Medium
           color: Config.Theme.text
           wrapMode: Text.WrapAtWordBoundaryOrAnywhere
@@ -166,9 +146,9 @@ Rectangle {
         }
 
         // Body
-        Components.Label {
+        Components.Text {
           text: root.body
-          font.pixelSize: root.compact ? Core.Style.fontS : Core.Style.fontM
+          size: root.compact ? Core.Style.fontS : Core.Style.fontM
           color: Config.Theme.textDim
           wrapMode: Text.WrapAtWordBoundaryOrAnywhere
           maximumLineCount: root.compact ? 2 : 4
@@ -189,6 +169,7 @@ Rectangle {
             delegate: Components.Button {
               property var actionData: modelData
               text: actionData.text
+              variant: "secondary"
               implicitHeight: 26
               onClicked: root.actionClicked(actionData.identifier || "")
             }
@@ -201,15 +182,8 @@ Rectangle {
         id: trashButton
         Layout.alignment: Qt.AlignCenter
         visible: root.showCloseButton && root.compact
-
         icon: "trash"
-        iconColor: Config.Theme.textMuted
-        iconSize: Core.Style.fontL
-
-        showBackground: true
-        backgroundColor: Config.Theme.transparent
-        useActiveColorOnHover: true
-
+        variant: "danger"
         onClicked: root.closeClicked()
       }
     }
@@ -223,14 +197,8 @@ Rectangle {
     anchors.right: parent.right
     anchors.rightMargin: Core.Style.spaceM
     visible: root.showCloseButton && !root.compact
-
     icon: "close"
-    iconSize: Core.Style.fontL
-
-    showBackground: true
-    backgroundColor: Config.Theme.surface
-    useActiveColorOnHover: true
-
+    variant: "danger"
     onClicked: root.closeClicked()
   }
 }

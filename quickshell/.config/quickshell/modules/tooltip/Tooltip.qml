@@ -63,23 +63,9 @@ PopupWindow {
 
   // === Content ===
 
-  Rectangle {
+  Components.Tooltip {
     id: content
-    width: label.implicitWidth + Core.Style.spaceM * 2
-    height: label.implicitHeight + Core.Style.spaceS * 2
-
-    color: Config.Theme.surface
-    border.color: Config.Theme.surfaceHover
-    border.width: 1
-    radius: Core.Style.radiusS
-
+    text: root.text
     transformOrigin: Item.Center
-
-    Components.Label {
-      id: label
-      anchors.centerIn: parent
-      text: root.text
-      size: Core.Style.fontS
-    }
   }
 }

@@ -5,20 +5,23 @@ import "../config" as Config
 import "../core" as Core
 
 /**
-* Label - Text component with optional icon
+* Text - Text display component with optional icon
+*
+* A styled text component that follows the design system.
+* Supports optional icon prefix/suffix.
 *
 * Usage:
 *   // Simple text
-*   Label { text: "Hello" }
+*   Text { text: "Hello" }
 *
 *   // With icon (section header style)
-*   Label { icon: "cpu"; text: "CPU"; size: Style.fontXL; weight: Font.Bold }
+*   Text { icon: "cpu"; text: "CPU"; size: Style.fontXL; weight: Font.Bold }
 *
 *   // Icon on right
-*   Label { text: "Settings"; icon: "chevron-right"; iconPosition: "right" }
+*   Text { text: "Settings"; icon: "chevron-right"; iconPosition: "right" }
 *
 *   // Multi-line with wrap
-*   Label { text: "Long text..."; wrapMode: Text.Wrap; maximumLineCount: 2 }
+*   Text { text: "Long text..."; wrapMode: Text.Wrap; maximumLineCount: 2 }
 */
 Item {
   id: root
@@ -37,12 +40,9 @@ Item {
   property alias lineHeight: label.lineHeight
   property alias lineHeightMode: label.lineHeightMode
   property alias truncated: label.truncated
-  property alias contentWidth: label.contentWidth
-  property alias contentHeight: label.contentHeight
 
   // === Icon Properties ===
   property string icon: ""
-  property string iconName: ""
   property color iconColor: label.color
   property real iconSize: size
   property string iconPosition: "left"  // "left" or "right"
@@ -51,7 +51,11 @@ Item {
   property real spacing: Core.Style.spaceS
 
   // === Internal ===
-  readonly property bool hasIcon: icon !== "" || iconName !== ""
+  readonly property bool hasIcon: icon !== ""
+  readonly property bool shouldWrap: label.wrapMode !== Text.NoWrap
+
+  // Auto fill width in layouts when wrapping is enabled
+  Layout.fillWidth: shouldWrap
 
   // Size based on content, not parent
   implicitWidth: hasIcon ? row.implicitWidth : label.implicitWidth
@@ -61,7 +65,7 @@ Item {
   Text {
     id: label
     visible: !root.hasIcon
-    anchors.fill: parent
+    width: parent.width
     font.pixelSize: root.size
     font.weight: root.weight
     color: Config.Theme.text
@@ -79,7 +83,6 @@ Item {
 
     Icon {
       icon: root.icon
-      name: root.iconName
       size: root.iconSize
       color: root.iconColor
     }

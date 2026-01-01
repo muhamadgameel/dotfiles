@@ -124,7 +124,7 @@ Singleton {
 
   function _showOSD() {
     Services.OSD.show("progressRow", {
-      iconName: getIcon(brightness),
+      icon: getIcon(brightness),
       value: brightness,
       maxValue: 1.0,
       iconColor: Config.Theme.text,

@@ -1,6 +1,5 @@
 import QtQuick
 import Quickshell
-import Quickshell.Wayland
 
 import "../../config" as Config
 import "../../core" as Core

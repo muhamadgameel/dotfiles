@@ -110,37 +110,18 @@ Components.Button {
   // === Visual Indicators ===
 
   // Charging indicator
-  Components.PulsingDot {
+  Components.StatusDot {
     anchors.bottom: parent.bottom
     anchors.horizontalCenter: parent.horizontalCenter
     anchors.bottomMargin: 2
-    active: root.isCharging
+    visible: root.isCharging
+    pulse: true
     color: Config.Theme.success
   }
 
-  // Critical battery warning pulse
-  Rectangle {
-    anchors.fill: parent
-    radius: parent.radius
-    color: Config.Theme.error
-    opacity: 0
-    visible: root.isCritical
-
-    SequentialAnimation on opacity {
-      running: root.isCritical
-      loops: Animation.Infinite
-
-      NumberAnimation {
-        to: 0.2
-        duration: Core.Style.animSlow * 2
-        easing.type: Easing.InOutQuad
-      }
-
-      NumberAnimation {
-        to: 0
-        duration: Core.Style.animSlow * 2
-        easing.type: Easing.InOutQuad
-      }
-    }
+  // Critical battery warning overlay
+  Components.WarningOverlay {
+    active: root.isCritical
+    severity: "critical"
   }
 }

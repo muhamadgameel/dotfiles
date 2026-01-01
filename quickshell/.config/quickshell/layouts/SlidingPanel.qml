@@ -6,7 +6,6 @@ import Quickshell.Wayland
 import "../components" as Components
 import "../config" as Config
 import "../core" as Core
-import "../services" as Services
 
 /**
 * SlidingPanel - Base component for sliding panels with common infrastructure
@@ -14,9 +13,30 @@ import "../services" as Services
 * Provides:
 * - PanelWindow setup with WlrLayershell configuration
 * - Slide animation (margins.right behavior)
-* - Content rectangle with border, radius, background
+* - Optional header with icon, title, subtitle, close button
+* - Optional scrollable content area
+* - Content padding and spacing configuration
 * - Escape key handling and focus management
 * - open(), close(), toggle() API
+*
+* Usage:
+*   // Simple panel with header and scrollable content
+*   SlidingPanel {
+*       headerIcon: "settings"
+*       headerTitle: "Settings"
+*       headerSubtitle: "Configure your preferences"
+*
+*       FormRow { label: "Option 1"; hasToggle: true }
+*       FormRow { label: "Option 2"; valueText: "Value" }
+*   }
+*
+*   // Non-scrollable panel (manages its own scrolling)
+*   SlidingPanel {
+*       headerTitle: "Network"
+*       scrollable: false
+*
+*       // Custom content with internal Flickable
+*   }
 */
 Item {
   id: root
@@ -24,16 +44,26 @@ Item {
   // === Required Properties ===
   property var parentWindow: null
 
-  // === Configuration ===
+  // === Panel Configuration ===
   property string namespace: "quickshell-panel"
   property bool hasBackdrop: false
   property real backdropOpacity: Config.Config.panelBackdropOpacity
+
+  // === Header Properties (optional - shown when headerTitle is set) ===
+  property string headerIcon: ""
+  property string headerTitle: ""
+  property string headerSubtitle: ""
+  property color headerIconColor: Config.Theme.text
+
+  // === Content Configuration ===
+  property bool scrollable: true
+  property int contentSpacing: Core.Style.spaceL
 
   // === State ===
   property bool isOpen: false
 
   // === Content ===
-  default property alias content: contentColumn.data
+  default property alias content: contentLoader.contentTarget
 
   // === Signals ===
   signal opened
@@ -42,6 +72,7 @@ Item {
   // === Computed Properties ===
   readonly property int panelWidth: Core.Style.panelWidth
   readonly property int topOffset: Core.Style.barHeight + Core.Style.spaceM
+  readonly property bool hasHeader: headerTitle !== ""
 
   // === Public API ===
   function toggle() {
@@ -162,10 +193,81 @@ Item {
       }
 
       ColumnLayout {
-        id: contentColumn
+        id: mainLayout
         anchors.fill: parent
-        anchors.margins: Core.Style.panelPadding
-        spacing: Core.Style.spaceL
+        spacing: 0
+
+        // === Optional Header ===
+        PanelHeader {
+          Layout.fillWidth: true
+          visible: root.hasHeader
+          icon: root.headerIcon
+          iconColor: root.headerIconColor
+          title: root.headerTitle
+          subtitle: root.headerSubtitle
+          onCloseClicked: root.close()
+        }
+
+        Components.Divider {
+          visible: root.hasHeader
+        }
+
+        // === Content Area ===
+        ContentLoader {
+          id: contentLoader
+          Layout.fillWidth: true
+          Layout.fillHeight: true
+          scrollable: root.scrollable
+          contentSpacing: root.contentSpacing
+        }
+      }
+    }
+  }
+
+  // === Content Loader Component ===
+  component ContentLoader: Item {
+    id: loader
+
+    property bool scrollable: true
+    property int contentSpacing: Core.Style.spaceL
+
+    // This property allows content to be added via default property alias
+    property alias contentTarget: scrollableContent.data
+
+    // Scrollable content (default)
+    Components.ScrollArea {
+      id: scrollArea
+      anchors.fill: parent
+      visible: loader.scrollable
+      contentHeight: scrollableContent.height
+
+      ColumnLayout {
+        id: scrollableContent
+        width: parent.width
+        spacing: loader.contentSpacing
+      }
+    }
+
+    // Non-scrollable content with padding
+    Item {
+      anchors.fill: parent
+      anchors.margins: Core.Style.panelPadding
+      visible: !loader.scrollable
+
+      ColumnLayout {
+        id: directContent
+        anchors.fill: parent
+        spacing: loader.contentSpacing
+
+        // Reparent items when switching modes
+        Component.onCompleted: {
+          if (!loader.scrollable) {
+            // Move items from scrollableContent to directContent
+            while (scrollableContent.children.length > 0) {
+              scrollableContent.children[0].parent = directContent;
+            }
+          }
+        }
       }
     }
   }

@@ -5,50 +5,62 @@ import "../components" as Components
 import "../config" as Config
 import "../core" as Core
 
-/*
+/**
 * Collapsible - Expandable/collapsible section with title
+*
+* Usage:
+*   Collapsible {
+*       title: "Advanced Settings"
+*       expanded: false
+*
+*       FormRow { label: "Option 1" }
+*       FormRow { label: "Option 2" }
+*   }
 */
 ColumnLayout {
   id: root
 
   property string title: "Section"
   property bool expanded: true
+  property string icon: ""
 
   default property alias content: contentColumn.data
 
   spacing: Core.Style.spaceS
 
   // Header
-  Rectangle {
+  Components.Card {
     Layout.fillWidth: true
-    height: 36
-    radius: Core.Style.radiusS
-    color: headerMouse.containsMouse ? Config.Theme.surface : Config.Theme.transparent
+    implicitHeight: 36
+    interactive: true
+
+    onClicked: root.expanded = !root.expanded
 
     RowLayout {
       anchors.fill: parent
       anchors.leftMargin: Core.Style.spaceS
       anchors.rightMargin: Core.Style.spaceS
 
-      Components.Label {
+      spacing: Core.Style.spaceS
+
+      Components.Icon {
+        visible: root.icon !== ""
+        icon: root.icon
+        size: Core.Style.fontL
+        color: Config.Theme.text
+      }
+
+      Components.Text {
         text: root.title
-        font.weight: Core.Style.weightBold
+        weight: Core.Style.weightBold
         Layout.fillWidth: true
       }
 
-      Components.Label {
-        text: root.expanded ? "▼" : "▶"
-        color: Config.Theme.textDim
+      Components.Icon {
+        icon: root.expanded ? "chevron-down" : "chevron-right"
         size: Core.Style.fontS
+        color: Config.Theme.textDim
       }
-    }
-
-    MouseArea {
-      id: headerMouse
-      anchors.fill: parent
-      hoverEnabled: true
-      cursorShape: Qt.PointingHandCursor
-      onClicked: root.expanded = !root.expanded
     }
   }
 

@@ -58,11 +58,12 @@ Components.Button {
   }
 
   // Visual indicator for connecting state
-  Components.PulsingDot {
+  Components.StatusDot {
     anchors.bottom: parent.bottom
     anchors.horizontalCenter: parent.horizontalCenter
     anchors.bottomMargin: 2
-    active: Services.Network.connecting || Services.Network.scanning
+    visible: Services.Network.connecting || Services.Network.scanning
+    pulse: true
     color: Config.Theme.accent
   }
 }

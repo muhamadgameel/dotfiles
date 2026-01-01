@@ -2,9 +2,8 @@ module layouts
 
 Collapsible 1.0 Collapsible.qml
 EmptyState 1.0 EmptyState.qml
-ErrorBanner 1.0 ErrorBanner.qml
+StatusBanner 1.0 StatusBanner.qml
 FormRow 1.0 FormRow.qml
-IconLabel 1.0 IconLabel.qml
 NotificationCard 1.0 NotificationCard.qml
 PanelHeader 1.0 PanelHeader.qml
 ProgressRow 1.0 ProgressRow.qml

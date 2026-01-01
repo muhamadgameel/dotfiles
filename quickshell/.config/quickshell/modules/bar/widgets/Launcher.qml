@@ -23,7 +23,6 @@ Components.Button {
   }
 
   onClicked: {
-    Core.Logger.d("Launcher", "Opening fuzzel app launcher");
     fuzzelProcess.running = true;
   }
 }

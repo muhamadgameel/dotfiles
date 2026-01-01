@@ -1,5 +1,4 @@
 import QtQuick
-import QtQuick.Layouts
 
 import "../../../components" as Components
 import "../../../config" as Config
@@ -83,15 +82,15 @@ Components.Button {
     // Network
     lines.push("");
     lines.push("󰛳 Network:");
-    lines.push("   ↓ " + stats.formatSpeed(stats.netDownSpeed));
-    lines.push("   ↑ " + stats.formatSpeed(stats.netUpSpeed));
+    lines.push("↓ " + stats.formatSpeed(stats.netDownSpeed));
+    lines.push("↑ " + stats.formatSpeed(stats.netUpSpeed));
 
     // Disk
     lines.push("");
     const diskIcon = stats.diskPercent > 85 ? "󰋊" : "󰋊";
     const diskUsed = stats.formatBytes(stats.diskUsed, 1);
     const diskTotal = stats.formatBytes(stats.diskTotal, 1);
-    lines.push(diskIcon + " Disk (/): " + diskUsed + " / " + diskTotal + " (" + stats.diskPercent + "%)");
+    lines.push(diskIcon + "  Disk (/): " + diskUsed + " / " + diskTotal + " (" + stats.diskPercent + "%)");
 
     // Footer hint
     lines.push("");
@@ -109,38 +108,9 @@ Components.Button {
 
   // === Visual Indicators ===
 
-  // Pulsing dot for critical state
-  Components.PulsingDot {
-    anchors.bottom: parent.bottom
-    anchors.horizontalCenter: parent.horizontalCenter
-    anchors.bottomMargin: 2
-    active: Services.SystemStats.healthStatus === "critical"
-    color: Config.Theme.error
-  }
-
-  // Warning flash overlay
-  Rectangle {
-    anchors.fill: parent
-    radius: parent.radius
-    color: Services.SystemStats.healthStatus === "critical" ? Config.Theme.error : Config.Theme.warning
-    opacity: 0
-    visible: Services.SystemStats.healthStatus !== "healthy"
-
-    SequentialAnimation on opacity {
-      running: Services.SystemStats.healthStatus === "critical"
-      loops: Animation.Infinite
-
-      NumberAnimation {
-        to: 0.15
-        duration: Core.Style.animSlow * 2
-        easing.type: Easing.InOutQuad
-      }
-
-      NumberAnimation {
-        to: 0
-        duration: Core.Style.animSlow * 2
-        easing.type: Easing.InOutQuad
-      }
-    }
+  // Warning/critical flash overlay
+  Components.WarningOverlay {
+    active: Services.SystemStats.healthStatus !== "healthy"
+    severity: Services.SystemStats.healthStatus
   }
 }

@@ -22,7 +22,7 @@ Singleton {
   property string lastError: ""
 
   // WiFi
-  property bool wifiEnabled: true
+  property bool wifiEnabled: false
   property bool wifiConnected: false
   property string wifiSSID: ""
   property int wifiSignal: 0
@@ -128,9 +128,9 @@ Singleton {
   // === Initialization ===
   Component.onCompleted: {
     Core.Logger.i("Network", "Service started");
+    _wifiStateProcess.running = true;
     _connectionStatusProcess.running = true;
     _connectivityCheckProcess.running = true;
-    scan();
     _monitorProcess.running = true;
   }
 
@@ -248,6 +248,21 @@ Singleton {
     onExited: {
       Core.Logger.w("Network", "Monitor exited, restarting...");
       Qt.callLater(() => _monitorProcess.running = true);
+    }
+  }
+
+  // WiFi radio state check
+  Process {
+    id: _wifiStateProcess
+    command: ["nmcli", "radio", "wifi"]
+
+    stdout: StdioCollector {
+      onStreamFinished: {
+        root.wifiEnabled = text.trim() === "enabled";
+        if (root.wifiEnabled) {
+          root.scan();
+        }
+      }
     }
   }
 

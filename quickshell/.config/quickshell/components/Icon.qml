@@ -6,61 +6,67 @@ import "../core" as Core
 /**
 * Icon - Renders a Nerd Font icon by name, direct glyph, or image file
 *
+* The `icon` property accepts:
+* - Icon names from the Icons registry (e.g., "bell", "settings")
+* - Direct Nerd Font glyphs (e.g., "󰂚")
+* - File paths are detected and rendered as images
+*
 * Usage:
 *   // By name (recommended)
-*   Icon { name: "bell" }
+*   Icon { icon: "bell" }
 *
 *   // Direct glyph (for custom/unlisted icons)
 *   Icon { icon: "󰂚" }
 *
 *   // Image file path
-*   Icon { source: "/path/to/icon.png" }
+*   Icon { icon: "/path/to/icon.png" }
 *
 *   // With background padding
-*   Icon { name: "bell"; padding: 8; backgroundColor: Theme.surface; radius: Style.radiusM }
+*   Icon { icon: "bell"; padding: 8; backgroundColor: Theme.surface; radius: Style.radiusM }
 *
 *   // With spinning animation (for loading states)
-*   Icon { name: "refresh"; spinning: true }
-*   Icon { name: "loading"; spinning: isLoading; spinDuration: 800 }
+*   Icon { icon: "refresh"; spinning: true }
 */
 Item {
   id: root
 
-  // Icon can be set directly (for Nerd Font glyphs) or by name
+  // === Icon Property (primary) ===
+  // Accepts: icon name, direct glyph, or file path
   property string icon: ""
-  property string name: ""
-  property string source: ""  // For image files (path or URL)
+
+  // === Styling ===
   property real size: Core.Style.fontL
   property alias color: iconText.color
   property alias backgroundColor: background.color
   property real padding: 0
   property alias radius: background.radius
 
-  // Spinning animation
+  // === Animation ===
   property bool spinning: false
   property int spinDuration: 1000
 
-  // Determine if we should show an image or text icon
-  readonly property bool isImage: {
-    if (root.source !== "")
-      return true;
-    // Check if name looks like a file path
-    if (root.name.startsWith("/") || root.name.startsWith("file://") || root.name.startsWith("image://"))
-      return true;
-    return false;
+  // === Internal: Determine icon type ===
+  readonly property bool _isFilePath: {
+    const val = root.icon;
+    return val.startsWith("/") || val.startsWith("file://") || val.startsWith("image://");
   }
 
-  readonly property string imagePath: {
-    if (root.source !== "")
-      return root.source;
-    if (root.name.startsWith("/") || root.name.startsWith("file://") || root.name.startsWith("image://"))
-      return root.name;
-    return "";
+  readonly property string _source: {
+    // if it's a file path or a direct glyph (non-ASCII, likely a Nerd Font character) return the icon
+    const firstChar = root.icon.charCodeAt(0);
+    if (root._isFilePath || firstChar > 127) {
+      return root.icon;
+    }
+
+    // Try to look up in Icons registry
+    return Config.Icons.get(root.icon);
   }
 
-  implicitWidth: root.isImage ? (root.size + padding * 2) : (iconText.implicitWidth + padding * 2)
-  implicitHeight: root.isImage ? (root.size + padding * 2) : (iconText.implicitHeight + padding * 2)
+  // === Dimensions ===
+  implicitWidth: root._isFilePath ? (root.size + padding * 2) : (iconText.implicitWidth + padding * 2)
+  implicitHeight: root._isFilePath ? (root.size + padding * 2) : (iconText.implicitHeight + padding * 2)
 
+  // === Background ===
   Rectangle {
     id: background
     anchors.fill: parent
@@ -68,11 +74,11 @@ Item {
     radius: 0
   }
 
-  // Image display for file-based icons
+  // === Image Display ===
   Image {
     id: iconImage
-    visible: root.isImage
-    source: root.imagePath
+    visible: root._isFilePath && root._source !== ""
+    source: root._source
     width: root.size
     height: root.size
     sourceSize.width: root.size * 2
@@ -83,21 +89,11 @@ Item {
     asynchronous: true
   }
 
-  // Text display for Nerd Font icons
+  // === Text Display (Nerd Font icons) ===
   Text {
     id: iconText
-    visible: !root.isImage
-
-    text: {
-      // First try direct icon property
-      if (root.icon !== "")
-        return root.icon;
-      // Then try name mapping from Icons registry
-      if (root.name !== "")
-        return Config.Icons.get(root.name);
-      return "";
-    }
-
+    visible: !root._isFilePath && root._source !== ""
+    text: root._source
     font.family: Config.Icons.fontFamily
     font.pixelSize: root.size
     color: Config.Theme.text

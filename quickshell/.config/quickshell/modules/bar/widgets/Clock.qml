@@ -6,6 +6,9 @@ import "../../../config" as Config
 import "../../../core" as Core
 import "../../../services" as Services
 
+/**
+* Clock - Bar widget showing time and date
+*/
 Item {
   id: root
 
@@ -18,10 +21,10 @@ Item {
     spacing: Core.Style.spaceS
 
     // Time
-    Components.Label {
+    Components.Text {
       text: Services.Time.timeLong
       size: Core.Style.fontL
-      font.weight: Core.Style.weightBold
+      weight: Core.Style.weightBold
     }
 
     // Separator
@@ -31,11 +34,11 @@ Item {
     }
 
     // Date
-    Components.Label {
+    Components.Text {
       text: Services.Time.dateShort
       size: Core.Style.fontM
       color: Config.Theme.textDim
-      font.weight: Core.Style.weightNormal
+      weight: Core.Style.weightNormal
     }
   }
 

@@ -40,6 +40,7 @@ Variants {
       onNotificationClicked: notificationCenter.toggle()
       onNetworkClicked: networkPanel.toggle()
       onSystemStatsClicked: systemStatsPanel.toggle()
+      onTestPanelClicked: testPanel.toggle()
     }
 
     // Notification Center
@@ -57,6 +58,12 @@ Variants {
     // System Stats Panel
     Panels.SystemStatsPanel {
       id: systemStatsPanel
+      parentWindow: barWindow
+    }
+
+    // Test Panel
+    Panels.TestPanel {
+      id: testPanel
       parentWindow: barWindow
     }
   }
