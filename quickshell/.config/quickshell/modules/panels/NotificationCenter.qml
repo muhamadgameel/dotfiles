@@ -1,5 +1,4 @@
 import QtQuick
-import QtQuick.Controls
 import QtQuick.Layouts
 import Quickshell
 
@@ -9,6 +8,9 @@ import "../../core" as Core
 import "../../layouts" as Layouts
 import "../../services" as Services
 
+/**
+* NotificationCenter - Panel showing notification history
+*/
 Loader {
   id: root
   active: true
@@ -53,14 +55,14 @@ Loader {
             spacing: Core.Style.spaceS
 
             Components.Icon {
-              name: "bell"
+              icon: "bell"
               size: Core.Style.fontXXL
               color: Config.Theme.accent
             }
 
-            Components.Label {
+            Components.Text {
               text: "Notifications"
-              font.pixelSize: Core.Style.fontL
+              size: Core.Style.fontL
               font.weight: Font.Bold
               color: Config.Theme.text
               Layout.fillWidth: true
@@ -68,85 +70,51 @@ Loader {
 
             // DND toggle
             Components.Button {
-              padding: Core.Style.spaceXXS
               icon: Services.Notification.doNotDisturb ? "bell-off" : "bell"
-              iconSize: Core.Style.fontXL
-              backgroundColor: Config.Theme.surface
               iconColor: Services.Notification.doNotDisturb ? Config.Theme.warning : Config.Theme.text
               onClicked: Services.Notification.doNotDisturb = !Services.Notification.doNotDisturb
             }
 
             // Clear button
             Components.Button {
-              padding: Core.Style.spaceXXS
               icon: "trash"
-              iconSize: Core.Style.fontXL
-              backgroundColor: Config.Theme.surface
-              iconColor: Config.Theme.text
+              tooltipText: "Clear all"
               onClicked: Services.Notification.clearHistory()
             }
 
             // Close button
             Components.Button {
-              padding: Core.Style.spaceXXS
               icon: "close"
-              iconSize: Core.Style.fontXL
-              backgroundColor: Config.Theme.surface
-              iconColor: Config.Theme.text
-              useActiveColorOnHover: true
+              variant: "danger"
+              tooltipText: "Close"
               onClicked: centerWindow.visible = false
             }
           }
 
           // Empty state
-          ColumnLayout {
+          Layouts.EmptyState {
             Layout.fillWidth: true
             Layout.fillHeight: true
-            Layout.alignment: Qt.AlignHCenter
             visible: Services.Notification.historyList.count === 0
-            spacing: Core.Style.spaceL
-
-            Item {
-              Layout.fillHeight: true
-            }
-
-            Components.Icon {
-              name: "bell-off"
-              size: 64
-              color: Config.Theme.textMuted
-              Layout.alignment: Qt.AlignHCenter
-            }
-
-            Components.Label {
-              text: "No notifications"
-              font.pixelSize: Core.Style.fontL
-              color: Config.Theme.textMuted
-              Layout.alignment: Qt.AlignHCenter
-            }
-
-            Components.Label {
-              text: "Your notifications will appear here"
-              font.pixelSize: Core.Style.fontS
-              color: Config.Theme.textMuted
-              Layout.alignment: Qt.AlignHCenter
-            }
-
-            Item {
-              Layout.fillHeight: true
-            }
+            icon: "bell-off"
+            iconSize: 64
+            message: "No notifications"
+            hint: "Your notifications will appear here"
           }
 
           // Notification list
-          ScrollView {
+          Components.ScrollArea {
             id: historyScrollView
             Layout.fillWidth: true
             Layout.fillHeight: true
-            ScrollBar.horizontal.policy: ScrollBar.AlwaysOff
-            ScrollBar.vertical.policy: ScrollBar.AsNeeded
-            clip: true
             visible: Services.Notification.historyList.count > 0
+            contentHeight: historyColumn.height
+            boundsBehavior: Flickable.DragOverBounds
+            rightMargin: 0
+            leftMargin: 0
 
             Column {
+              id: historyColumn
               width: historyScrollView.width
               spacing: Core.Style.spaceS
 

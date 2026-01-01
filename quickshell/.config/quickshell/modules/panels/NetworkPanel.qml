@@ -1,7 +1,5 @@
 import QtQuick
 import QtQuick.Layouts
-import Quickshell
-import Quickshell.Wayland
 
 import "../../components" as Components
 import "../../config" as Config
@@ -16,114 +14,125 @@ Layouts.SlidingPanel {
   id: root
 
   namespace: "quickshell-network-panel"
+  scrollable: false
+
+  // Header configuration
+  headerIcon: Services.Network.connectionIcon
+  headerIconColor: Services.Network.isConnected ? Config.Theme.accent : Config.Theme.textMuted
+  headerTitle: "Network"
+  headerSubtitle: Services.Network.connectionStatusText
 
   onOpened: Services.Network.scan()
 
-  // Header
-  Layouts.PanelHeader {
-    Layout.fillWidth: true
-    icon: Services.Network.connectionIcon
-    iconColor: Services.Network.isConnected ? Config.Theme.accent : Config.Theme.textMuted
-    title: "Network"
-    subtitle: Services.Network.connectionStatusText
-    onCloseClicked: root.close()
-  }
-
-  Components.Divider {}
-
-  // WiFi Toggle
-  Layouts.FormRow {
-    label: "Wi-Fi"
-    hasToggle: true
-    toggleChecked: Services.Network.wifiEnabled
-    onToggled: checked => Services.Network.setWifiEnabled(checked)
-  }
-
-  // Error Message
-  Layouts.ErrorBanner {
-    Layout.fillWidth: true
-    visible: Services.Network.lastError !== ""
-    message: Services.Network.lastError
-  }
-
-  // Connection Info (collapsible)
-  ConnectionInfoSection {
-    Layout.fillWidth: true
-    visible: Services.Network.isConnected
-  }
-
-  // WiFi Content (networks list or disabled state)
+  // Panel content wrapper with padding
   Item {
     Layout.fillWidth: true
     Layout.fillHeight: true
 
-    // Networks List (when WiFi enabled)
     ColumnLayout {
       anchors.fill: parent
-      spacing: Core.Style.spaceS
-      visible: Services.Network.wifiEnabled
+      spacing: Core.Style.spaceM
 
-      // Header with scan button
-      RowLayout {
+      // WiFi Toggle
+      Layouts.FormRow {
         Layout.fillWidth: true
-        spacing: Core.Style.spaceS
-
-        Components.Label {
-          text: "Available Networks"
-          font.weight: Core.Style.weightBold
-          Layout.fillWidth: true
-        }
-
-        Components.Label {
-          text: Services.Network.scanning ? "Scanning..." : `${Object.keys(Services.Network.networks).length} networks`
-          color: Config.Theme.textDim
-          size: Core.Style.fontS
-        }
-
-        ScanButton {}
+        label: "Wi-Fi"
+        hasToggle: true
+        toggleChecked: Services.Network.wifiEnabled
+        onToggled: checked => Services.Network.setWifiEnabled(checked)
       }
 
-      // Network List
-      Flickable {
+      // Error Message
+      Layouts.StatusBanner {
+        Layout.fillWidth: true
+        visible: Services.Network.lastError !== ""
+        message: Services.Network.lastError
+      }
+
+      // Connection Info (collapsible)
+      ConnectionInfoSection {
+        Layout.fillWidth: true
+        visible: Services.Network.isConnected
+      }
+
+      // WiFi Content (networks list or disabled state)
+      Item {
         Layout.fillWidth: true
         Layout.fillHeight: true
-        contentHeight: networkList.height
-        clip: true
-        boundsBehavior: Flickable.StopAtBounds
 
+        // Networks List (when WiFi enabled)
         ColumnLayout {
-          id: networkList
-          width: parent.width
-          spacing: Core.Style.spaceXS
+          anchors.fill: parent
+          spacing: Core.Style.spaceS
+          visible: Services.Network.wifiEnabled
 
-          Repeater {
-            model: Services.Network.sortedNetworks
-            delegate: NetworkItem {
+          // Header with scan button
+          RowLayout {
+            Layout.fillWidth: true
+            spacing: Core.Style.spaceS
+
+            Components.Text {
+              text: "Available Networks"
+              weight: Core.Style.weightBold
               Layout.fillWidth: true
-              network: modelData
-              onConnectRequested: ssid => Services.Network.connect(ssid)
+            }
+
+            Components.Text {
+              text: Services.Network.scanning ? "Scanning..." : `${Object.keys(Services.Network.networks).length} networks`
+              color: Config.Theme.textDim
+              size: Core.Style.fontS
+            }
+
+            ScanButton {}
+          }
+
+          // Network List
+          Flickable {
+            Layout.fillWidth: true
+            Layout.fillHeight: true
+            contentHeight: networkList.height
+            clip: true
+            boundsBehavior: Flickable.StopAtBounds
+
+            ColumnLayout {
+              id: networkList
+              width: parent.width
+              spacing: Core.Style.spaceXS
+
+              Repeater {
+                model: Services.Network.sortedNetworks
+                delegate: NetworkItem {
+                  Layout.fillWidth: true
+                  network: modelData
+                  onConnectRequested: ssid => Services.Network.connect(ssid)
+                }
+              }
+
+              Components.Spacer {
+                size: 32
+              }
+
+              // Empty state
+              Layouts.EmptyState {
+                Layout.fillWidth: true
+                visible: Object.keys(Services.Network.networks).length === 0 && !Services.Network.scanning
+                icon: "wifi-off"
+                message: "No networks found"
+              }
             }
           }
+        }
 
-          // Empty state
-          Layouts.EmptyState {
-            Layout.fillWidth: true
-            visible: Object.keys(Services.Network.networks).length === 0 && !Services.Network.scanning
-            icon: "wifi-off"
-            message: "No networks found"
-          }
+        // WiFi Disabled State
+        Layouts.EmptyState {
+          anchors.centerIn: parent
+          visible: !Services.Network.wifiEnabled
+          icon: "wifi-off"
+          iconSize: Core.Style.fontXXL * 2
+          message: "Wi-Fi is disabled"
+          hint: "Enable Wi-Fi to see available networks"
         }
       }
-    }
-
-    // WiFi Disabled State
-    Layouts.EmptyState {
-      anchors.centerIn: parent
-      visible: !Services.Network.wifiEnabled
-      icon: "wifi-off"
-      iconSize: Core.Style.fontXXL * 2
-      message: "Wi-Fi is disabled"
-      hint: "Enable Wi-Fi to see available networks"
     }
   }
 
@@ -134,7 +143,8 @@ Layouts.SlidingPanel {
   // --- Connection Info Section ---
   component ConnectionInfoSection: Layouts.Collapsible {
     id: connInfoRoot
-    title: "📊 Connection Info"
+    title: "Connection Info"
+    icon: "chart"
     expanded: false
 
     readonly property var infoRows: [
@@ -206,7 +216,7 @@ Layouts.SlidingPanel {
   }
 
   // --- Network Item ---
-  component NetworkItem: Rectangle {
+  component NetworkItem: Components.Card {
     id: netItem
 
     property var network: ({})
@@ -225,9 +235,14 @@ Layouts.SlidingPanel {
     readonly property bool isForgetting: Services.Network.forgettingNetwork === ssid
     readonly property bool isBusy: isConnecting || isDisconnecting || isForgetting
 
-    height: Core.Style.widgetSize + Core.Style.spaceL + Core.Style.spaceS
-    radius: Core.Style.radiusS
-    color: hoverArea.containsMouse ? Config.Theme.surface : Config.Theme.transparent
+    implicitHeight: Core.Style.widgetSize + Core.Style.spaceL + Core.Style.spaceS
+    interactive: true
+
+    onClicked: {
+      if (!connected && !isBusy) {
+        connectRequested(ssid);
+      }
+    }
 
     RowLayout {
       anchors.fill: parent
@@ -237,7 +252,7 @@ Layouts.SlidingPanel {
 
       // Signal icon
       Components.Icon {
-        name: Services.Network.getSignalIcon(netItem.signalStrength)
+        icon: Services.Network.getSignalIcon(netItem.signalStrength)
         size: Core.Style.fontL
         color: netItem.connected ? Config.Theme.accent : Config.Theme.text
       }
@@ -250,10 +265,10 @@ Layouts.SlidingPanel {
         RowLayout {
           spacing: Core.Style.spaceXS
 
-          Components.Label {
+          Components.Text {
             text: netItem.ssid
             color: netItem.connected ? Config.Theme.accent : Config.Theme.text
-            font.weight: netItem.connected ? Core.Style.weightBold : Core.Style.weightNormal
+            weight: netItem.connected ? Core.Style.weightBold : Core.Style.weightNormal
             Layout.fillWidth: true
           }
 
@@ -267,19 +282,20 @@ Layouts.SlidingPanel {
         RowLayout {
           spacing: Core.Style.spaceXS
 
-          Components.Label {
+          Components.Text {
             text: netItem.signalStrength + "%"
             size: Core.Style.fontS
             color: Config.Theme.textDim
           }
 
-          Components.Label {
+          Components.Icon {
             visible: netItem.secured
-            text: "🔒"
+            icon: "lock"
             size: Core.Style.fontS
+            color: Config.Theme.textDim
           }
 
-          Components.Label {
+          Components.Text {
             visible: netItem.security && netItem.security !== "--"
             text: netItem.security
             size: Core.Style.fontXS
@@ -288,31 +304,24 @@ Layouts.SlidingPanel {
         }
       }
 
-      RowLayout {
-        spacing: Core.Style.spaceXS
-        visible: netItem.isBusy
-
-        // Loading spinner
-        Components.Icon {
-          name: "loading"
-          size: Core.Style.fontM
-          color: Config.Theme.accent
-          spinning: netItem.isBusy
-        }
+      // Loading spinner
+      Components.Spinner {
+        running: netItem.isBusy
+        size: Core.Style.fontM
+        color: Config.Theme.accent
       }
 
       // Action buttons
       RowLayout {
         spacing: Core.Style.spaceXS
-        visible: hoverArea.containsMouse || netItem.connected
+        visible: (netItem.hovered || netItem.connected) && !netItem.isBusy
 
         // Connect/Disconnect button
         Components.Button {
-          visible: !netItem.isBusy
           icon: netItem.connected ? "close" : "chevron-right"
           iconSize: Core.Style.fontM
           tooltipText: netItem.connected ? "Disconnect" : "Connect"
-          useActiveColorOnHover: netItem.connected
+          variant: netItem.connected ? "danger" : "default"
           onClicked: {
             if (netItem.connected) {
               Services.Network.disconnect(netItem.ssid);
@@ -324,26 +333,11 @@ Layouts.SlidingPanel {
 
         // Forget button
         Components.Button {
-          visible: netItem.connected && !netItem.isBusy
+          visible: netItem.connected
           icon: "trash"
-          iconSize: Core.Style.fontM
+          variant: "danger"
           tooltipText: "Forget network"
-          useActiveColorOnHover: true
           onClicked: Services.Network.forget(netItem.ssid)
-        }
-      }
-    }
-
-    MouseArea {
-      id: hoverArea
-      anchors.fill: parent
-      hoverEnabled: true
-      acceptedButtons: Qt.LeftButton
-      z: -1
-
-      onClicked: {
-        if (!netItem.connected && !netItem.isBusy) {
-          netItem.connectRequested(netItem.ssid);
         }
       }
     }

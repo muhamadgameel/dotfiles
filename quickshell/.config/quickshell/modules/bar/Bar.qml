@@ -13,6 +13,7 @@ Rectangle {
   signal notificationClicked
   signal networkClicked
   signal systemStatsClicked
+  signal testPanelClicked
 
   color: Config.Theme.alpha(Config.Theme.bg, 0.95)
 
@@ -77,7 +78,15 @@ Rectangle {
 
       Widgets.Notification {
         visible: Config.Config.barShowNotification
-        onClickedMainEvent: root.notificationClicked()
+        onPanelRequested: root.notificationClicked()
+      }
+
+      Components.Divider {
+        vertical: true
+      }
+
+      Widgets.Test {
+        onPanelRequested: root.testPanelClicked()
       }
     }
   }

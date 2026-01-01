@@ -29,6 +29,7 @@ Singleton {
   readonly property real fontL: 14 * uiScale
   readonly property real fontXL: 18 * uiScale
   readonly property real fontXXL: 24 * uiScale
+  readonly property real fontXXXL: 32 * uiScale
 
   // === Font Weights ===
   readonly property int weightNormal: Font.Normal
@@ -42,6 +43,7 @@ Singleton {
   readonly property int spaceM: Math.round(12 * uiScale)
   readonly property int spaceL: Math.round(16 * uiScale)
   readonly property int spaceXL: Math.round(24 * uiScale)
+  readonly property int spaceXXL: Math.round(32 * uiScale)
 
   // === Border Radii ===
   readonly property int radiusS: Math.round(6 * uiScale)

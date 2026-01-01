@@ -10,15 +10,6 @@ import Quickshell
 Singleton {
   id: root
 
-  // Bar/Panel positions
-  enum Position {
-    Top,
-    Bottom,
-    Left,
-    Right
-  }
-
-  // Tooltip directions
   enum Urgency {
     Low = 0,
     Normal = 1,

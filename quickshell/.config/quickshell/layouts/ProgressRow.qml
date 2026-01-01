@@ -10,7 +10,7 @@ import "../core" as Core
 *
 * Supports multiple layouts:
 *
-* 1. Basic (original): Icon + Progress + Percentage
+* 1. Basic: Icon + Progress + Percentage
 *    ProgressRow { icon: "cpu"; value: 0.75 }
 *
 * 2. Labeled: Label + Info + Progress
@@ -27,7 +27,6 @@ ColumnLayout {
 
   // === Icon Properties ===
   property string icon: ""
-  property string iconName: ""
   property color iconColor: Config.Theme.text
   property int iconSize: Core.Style.fontXL
 
@@ -46,7 +45,7 @@ ColumnLayout {
   property string valueText: ""    // Custom value text (overrides percentage)
 
   // === Internal ===
-  readonly property bool hasIcon: icon !== "" || iconName !== ""
+  readonly property bool hasIcon: icon !== ""
   readonly property bool hasLabel: label !== ""
   readonly property bool hasLabelInfo: labelInfo !== ""
   readonly property bool hasValueText: valueText !== ""
@@ -61,8 +60,7 @@ ColumnLayout {
 
     // Icon
     Components.Icon {
-      icon: root.icon !== "" ? root.icon : ""
-      name: root.iconName !== "" ? root.iconName : ""
+      icon: root.icon
       size: root.iconSize
       color: root.iconColor
       visible: root.hasIcon
@@ -78,22 +76,21 @@ ColumnLayout {
     ColumnLayout {
       Layout.fillWidth: true
       spacing: Core.Style.spaceXS
-      visible: root.hasLabel
+      visible: root.hasLabel || root.hasLabelInfo
 
       // Label row with info
       RowLayout {
         Layout.fillWidth: true
 
-        Components.Label {
+        Components.Text {
+          visible: root.hasLabel
           text: root.label
           size: Core.Style.fontS
         }
 
-        Item {
-          Layout.fillWidth: true
-        }
+        Components.Spacer {}
 
-        Components.Label {
+        Components.Text {
           visible: root.hasLabelInfo
           text: root.labelInfo
           size: Core.Style.fontS
@@ -115,14 +112,14 @@ ColumnLayout {
     Components.ProgressBar {
       Layout.fillWidth: true
       Layout.preferredHeight: root.progressHeight
-      visible: !root.hasLabel
+      visible: !root.hasLabel && !root.hasLabelInfo
       value: root.value
       maxValue: root.maxValue
       progressColor: root.progressColor
     }
 
     // Value/Percentage display
-    Components.Label {
+    Components.Text {
       visible: root.showPercentage || root.hasValueText
       text: root.hasValueText ? root.valueText : Math.round(root.value / root.maxValue * 100) + "%"
       size: root.hasValueText ? Core.Style.fontL : Core.Style.fontM

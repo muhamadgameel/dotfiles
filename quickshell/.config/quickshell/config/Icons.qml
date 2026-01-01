@@ -217,7 +217,8 @@ Singleton {
       "bookmark": "󰃀",
       "tag": "󰓹",
       "filter": "󰈶",
-      "sort": "󰒺"
+      "sort": "󰒺",
+      "chart": "󱕎"
     })
 
   /**

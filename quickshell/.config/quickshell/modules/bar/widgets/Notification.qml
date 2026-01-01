@@ -4,7 +4,7 @@ import "../../../components" as Components
 import "../../../config" as Config
 import "../../../services" as Services
 
-/*
+/**
 * Notification Bar Widget - Shows notification bell and opens notification center
 */
 Item {
@@ -16,7 +16,7 @@ Item {
   // Indicator for unread count (bind directly to service property)
   property int unreadCount: Services.Notification.unreadCount
 
-  signal clickedMainEvent
+  signal panelRequested
 
   Components.Button {
     id: notificationButton
@@ -28,18 +28,19 @@ Item {
       if (button === Qt.RightButton) {
         Services.Notification.doNotDisturb = !Services.Notification.doNotDisturb;
       } else if (button === Qt.LeftButton) {
-        root.clickedMainEvent();
+        root.panelRequested();
       }
     }
   }
 
-  // Unread indicator
-  Components.Indicator {
+  // Unread indicator using Badge with count variant
+  Components.Badge {
     anchors.right: parent.right
     anchors.top: parent.top
     anchors.rightMargin: 1
     anchors.topMargin: 1
+    variant: "count"
     count: root.unreadCount
-    badgeColor: Services.Notification.doNotDisturb ? Config.Theme.warning : Config.Theme.error
+    backgroundColor: Services.Notification.doNotDisturb ? Config.Theme.warning : Config.Theme.error
   }
 }

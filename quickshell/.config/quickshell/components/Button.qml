@@ -7,6 +7,13 @@ import "../services" as Services
 /**
 * Button - Versatile button component with icon and/or text
 *
+* Supports multiple variants for different use cases:
+* - "default": Transparent background, hover highlight
+* - "primary": Accent colored background
+* - "secondary": Surface colored background
+* - "danger": Error colored, for destructive actions
+* - "ghost": No background, subtle hover
+*
 * Usage:
 *   // Icon-only button
 *   Button {
@@ -14,55 +21,57 @@ import "../services" as Services
 *       onClicked: openSettings()
 *   }
 *
-*   // Text button
+*   // Primary button
 *   Button {
+*       variant: "primary"
 *       text: "Submit"
 *       onClicked: submit()
 *   }
 *
-*   // Icon + text
+*   // Danger button
 *   Button {
-*       icon: "save"
-*       text: "Save"
-*       onClicked: save()
+*       variant: "danger"
+*       icon: "trash"
+*       text: "Delete"
+*       onClicked: delete()
 *   }
 *
-*   // Destructive action (close/delete style)
+*   // Ghost button
 *   Button {
+*       variant: "ghost"
 *       icon: "close"
-*       useActiveColorOnHover: true
 *       onClicked: close()
 *   }
 */
 Rectangle {
   id: root
 
+  // === Variant ===
+  property string variant: "default"  // "default", "primary", "secondary", "danger", "ghost"
+
   // === Content Properties ===
   property string icon: ""
   property real iconSize: Core.Style.fontL
-  property color iconColor: Config.Theme.text
-  property color iconHoverColor: iconColor
   property bool iconSpinning: false
 
   property string text: ""
   property real textSize: Core.Style.fontM
-  property color textColor: Config.Theme.text
-  property color textHoverColor: textColor
 
-  property real padding: 0
+  // property real padding: Core.Style.spaceS
+  property real padding: Core.Style.spaceS
 
-  // === Background Properties ===
-  property bool showBackground: true
+  // === Color Properties (for easy customization) ===
+  property color iconColor: Config.Theme.transparent
+  property color textColor: Config.Theme.transparent
   property color backgroundColor: Config.Theme.transparent
-  property color hoverColor: Config.Theme.surfaceHover
-  property color activeColor: Config.Theme.error
-
-  // === Behavior Properties ===
-  property bool useActiveColorOnHover: false  // For destructive actions (close, delete)
+  property color hoverColor: Config.Theme.transparent
 
   // === Tooltip Properties ===
   property string tooltipText: ""
   property string tooltipDirection: "auto"
+
+  // === Behavior Properties ===
+  property bool enabled: true
 
   // === Signals ===
   signal clicked(var mouse)
@@ -73,20 +82,84 @@ Rectangle {
   // === State (readonly) ===
   readonly property bool hovered: mouseArea.containsMouse
   readonly property bool pressed: mouseArea.pressed
+
+  // === Computed Colors Based on Variant ===
+  readonly property color _backgroundColor: {
+    if (backgroundColor !== Config.Theme.transparent)
+      return backgroundColor;
+    switch (variant) {
+    case "primary":
+      return Config.Theme.accent;
+    case "secondary":
+      return Config.Theme.surface;
+    case "danger":
+      return Config.Theme.transparent;
+    case "ghost":
+      return Config.Theme.transparent;
+    default:
+      return Config.Theme.transparent;
+    }
+  }
+
+  readonly property color _hoverColor: {
+    if (hoverColor !== Config.Theme.transparent)
+      return hoverColor;
+    switch (variant) {
+    case "primary":
+      return Config.Theme.lighten(Config.Theme.accent, 0.1);
+    case "secondary":
+      return Config.Theme.surfaceHover;
+    case "danger":
+      return Config.Theme.error;
+    case "ghost":
+      return Config.Theme.alpha(Config.Theme.text, 0.1);
+    default:
+      return Config.Theme.surfaceHover;
+    }
+  }
+
+  readonly property color _iconColor: {
+    if (iconColor !== Config.Theme.transparent)
+      return iconColor;
+    switch (variant) {
+    case "primary":
+      return Config.Theme.bg;
+    case "danger":
+      return hovered ? Config.Theme.bg : Config.Theme.text;
+    default:
+      return Config.Theme.text;
+    }
+  }
+
+  readonly property color _textColor: {
+    if (textColor !== Config.Theme.transparent)
+      return textColor;
+    switch (variant) {
+    case "primary":
+      return Config.Theme.bg;
+    case "danger":
+      return hovered ? Config.Theme.bg : Config.Theme.text;
+    default:
+      return Config.Theme.text;
+    }
+  }
+
+  // === Internal ===
+  readonly property bool hasText: text !== ""
+  readonly property bool hasIcon: icon !== ""
   readonly property real spaceBetweenIconAndText: Core.Style.spaceS
 
   // === Appearance ===
-  implicitWidth: (root.icon !== "" ? Core.Style.widgetSize : 0) + (root.text !== "" ? textLabel.implicitWidth + spaceBetweenIconAndText : 0) + padding * 2
-  implicitHeight: Core.Style.widgetSize + padding * 2
+  implicitWidth: (hasIcon ? root.iconSize : 0) + (hasText ? textLabel.implicitWidth : 0) + (hasIcon && hasText ? spaceBetweenIconAndText : 0) + padding * 2
+  implicitHeight: root.iconSize + padding * 2
   radius: Core.Style.radiusS
 
-  color: {
-    if (!showBackground)
-      return Config.Theme.transparent;
-    if (useActiveColorOnHover && hovered)
-      return activeColor;
-    return hovered ? hoverColor : backgroundColor;
-  }
+  opacity: enabled ? 1.0 : 0.5
+
+  // Use hoverColor's RGB with 0 alpha when transparent to prevent black flash during animation
+  readonly property color _effectiveBackground: _backgroundColor == Config.Theme.transparent ? Qt.rgba(_hoverColor.r, _hoverColor.g, _hoverColor.b, 0) : _backgroundColor
+
+  color: hovered ? _hoverColor : _effectiveBackground
 
   Behavior on color {
     ColorAnimation {
@@ -97,19 +170,15 @@ Rectangle {
   // === Content ===
   Row {
     anchors.centerIn: parent
-    spacing: root.text !== "" ? root.spaceBetweenIconAndText : 0
+    spacing: hasIcon && hasText ? spaceBetweenIconAndText : 0
 
     Icon {
       anchors.verticalCenter: parent.verticalCenter
       visible: root.icon !== ""
-      name: root.icon
+      icon: root.icon
       size: root.iconSize
       spinning: root.iconSpinning
-      color: {
-        if (root.useActiveColorOnHover && root.hovered)
-          return Config.Theme.bg;
-        return root.hovered ? root.iconHoverColor : root.iconColor;
-      }
+      color: root._iconColor
 
       Behavior on color {
         ColorAnimation {
@@ -118,17 +187,14 @@ Rectangle {
       }
     }
 
-    Label {
+    Text {
       id: textLabel
       anchors.verticalCenter: parent.verticalCenter
       visible: root.text !== ""
       text: root.text
-      size: root.textSize
-      color: {
-        if (root.useActiveColorOnHover && root.hovered)
-          return Config.Theme.bg;
-        return root.hovered ? root.textHoverColor : root.textColor;
-      }
+      font.pixelSize: root.textSize
+      font.weight: Core.Style.weightMedium
+      color: root._textColor
 
       Behavior on color {
         ColorAnimation {
@@ -142,8 +208,9 @@ Rectangle {
   MouseArea {
     id: mouseArea
     anchors.fill: parent
+    enabled: root.enabled
     hoverEnabled: true
-    cursorShape: Qt.PointingHandCursor
+    cursorShape: root.enabled ? Qt.PointingHandCursor : Qt.ArrowCursor
     acceptedButtons: Qt.LeftButton | Qt.RightButton | Qt.MiddleButton
 
     onClicked: mouse => root.clicked(mouse.button)
