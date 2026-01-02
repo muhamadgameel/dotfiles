@@ -1,5 +1,4 @@
 import QtQuick
-import Quickshell.Io
 
 import "../../../components" as Components
 import "../../../config" as Config
@@ -9,11 +8,7 @@ import "../../../services" as Services
 Components.Button {
   id: root
 
-  Process {
-    id: pavucontrolProcess
-    running: false
-    command: ["pavucontrol"]
-  }
+  signal panelRequested
 
   icon: {
     // Headphone icons
@@ -55,7 +50,7 @@ Components.Button {
   // Click handlers
   onClicked: function (button) {
     if (button === Qt.LeftButton) {
-      pavucontrolProcess.running = true;
+      root.panelRequested();
     } else if (button === Qt.MiddleButton) {
       Services.Audio.toggleMute();
     }

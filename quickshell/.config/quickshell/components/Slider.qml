@@ -44,8 +44,9 @@ Item {
   property color trackColor: Config.Theme.surface
   property color progressColor: Config.Theme.accent
   property color handleColor: Config.Theme.text
-  property color handleHoverColor: Config.Theme.accent
-  property int trackHeight: 6
+  property color handleHoverColor: Config.Theme.text
+  property color handleDragColor: Config.Theme.accent
+  property int trackHeight: 8
   property int handleSize: 16
   property bool showHandle: true
 
@@ -79,6 +80,18 @@ Item {
     color: root.trackColor
   }
 
+  // Normal range marker (100%)
+  Rectangle {
+    visible: root.maxValue > 1.0
+    anchors.verticalCenter: track.verticalCenter
+    x: track.width * (1.0 / root.maxValue) - 1
+    width: 2
+    height: track.height + 4
+    radius: 1
+    color: Config.Theme.textMuted
+    opacity: 0.5
+  }
+
   // === Progress Fill ===
   Rectangle {
     id: progress
@@ -107,8 +120,7 @@ Item {
     width: root.handleSize
     height: root.handleSize
     radius: width / 2
-    color: root.hovered || root.dragging ? root.handleHoverColor : root.handleColor
-
+    color: root.dragging ? root.handleDragColor : (root.hovered ? root.handleHoverColor : root.handleColor)
     scale: root.dragging ? 1.1 : (root.hovered ? 1.05 : 1.0)
 
     Behavior on color {

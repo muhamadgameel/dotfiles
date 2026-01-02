@@ -55,7 +55,7 @@ QtObject {
   // Private: Show volume OSD with computed data
   function _showVolumeOSD() {
     Services.OSD.show("progressRow", {
-      icon: _getVolumeIcon(volume, muted),
+      icon: getVolumeIcon(),
       value: volume,
       maxValue: 1.5,
       iconColor: muted ? Config.Theme.error : Config.Theme.text,
@@ -67,7 +67,7 @@ QtObject {
   // Private: Show microphone OSD with computed data
   function _showMicOSD() {
     Services.OSD.show("progressRow", {
-      icon: _getMicIcon(micVolume, micMuted),
+      icon: getMicIcon(),
       value: micVolume,
       maxValue: 1.0,
       iconColor: micMuted ? Config.Theme.error : Config.Theme.text,
@@ -76,21 +76,21 @@ QtObject {
   }
 
   // Private: Get volume icon based on level and mute state
-  function _getVolumeIcon(value, isMuted) {
-    if (isMuted)
+  function getVolumeIcon() {
+    if (muted)
       return "volume-mute";
-    if (value == 0)
+    if (volume == 0)
       return "volume-off";
-    if (value < 0.33)
+    if (volume < 0.33)
       return "volume-low";
-    if (value <= 0.66)
+    if (volume <= 0.66)
       return "volume-medium";
     return "volume-high";
   }
 
   // Private: Get microphone icon based on mute state
-  function _getMicIcon(value, isMuted) {
-    if (isMuted || value < 0.01)
+  function getMicIcon() {
+    if (micMuted || micVolume < 0.01)
       return "microphone-off";
     return "microphone";
   }
@@ -112,9 +112,36 @@ QtObject {
     return isBluetooth || hasHeadphoneKeyword;
   }
 
-  // Track nodes to ensure proper binding
+  // Reactive device lists (properties instead of functions for reactivity)
+  readonly property var sinkDevices: {
+    const nodes = Pipewire.nodes.values;
+    return nodes.filter(node => node.isSink && node.audio && !node.isStream);
+  }
+
+  readonly property var sourceDevices: {
+    const nodes = Pipewire.nodes.values;
+    return nodes.filter(node => node.isSource && node.audio && !node.isStream);
+  }
+
+  // Reactive stream lists
+  readonly property var sinkStreams: {
+    const nodes = Pipewire.nodes.values;
+    return nodes.filter(node => node.isSink && node.audio && node.isStream);
+  }
+
+  readonly property var sourceStreams: {
+    const nodes = Pipewire.nodes.values;
+    return nodes.filter(node => node.isSource && node.audio && node.isStream);
+  }
+
+  // Track all audio nodes to ensure proper binding
   property var _tracker: PwObjectTracker {
-    objects: [root.sink, root.source]
+    objects: {
+      const base = [root.sink, root.source];
+      const devices = [...root.sinkDevices, ...root.sourceDevices];
+      const streams = [...root.sinkStreams, ...root.sourceStreams];
+      return base.concat(devices, streams);
+    }
   }
 
   // Volume control functions
@@ -150,31 +177,6 @@ QtObject {
 
   function setDefaultSource(node) {
     Pipewire.preferredDefaultAudioSource = node;
-  }
-
-  // Device lists
-  function getSinkDevices() {
-    return Pipewire.nodes.values.filter(node => {
-      return node.isSink && node.audio && !node.isStream;
-    });
-  }
-
-  function getSourceDevices() {
-    return Pipewire.nodes.values.filter(node => {
-      return node.isSource && node.audio && !node.isStream;
-    });
-  }
-
-  function getSinkStreams() {
-    return Pipewire.nodes.values.filter(node => {
-      return node.isSink && node.audio && node.isStream;
-    });
-  }
-
-  function getSourceStreams() {
-    return Pipewire.nodes.values.filter(node => {
-      return node.isSource && node.audio && node.isStream;
-    });
   }
 
   // Helper to get friendly device name

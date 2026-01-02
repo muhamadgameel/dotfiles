@@ -37,10 +37,17 @@ Variants {
     // Bar Component
     Bar {
       anchors.fill: parent
+      onAudioClicked: audioPanel.toggle()
       onNotificationClicked: notificationCenter.toggle()
       onNetworkClicked: networkPanel.toggle()
       onSystemStatsClicked: systemStatsPanel.toggle()
       onTestPanelClicked: testPanel.toggle()
+    }
+
+    // Audio Panel
+    Panels.AudioPanel {
+      id: audioPanel
+      parentWindow: barWindow
     }
 
     // Notification Center
