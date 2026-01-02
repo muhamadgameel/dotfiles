@@ -10,6 +10,7 @@ Rectangle {
   id: root
 
   // Signals for external communication
+  signal audioClicked
   signal notificationClicked
   signal networkClicked
   signal systemStatsClicked
@@ -57,10 +58,12 @@ Rectangle {
 
       Widgets.Volume {
         visible: Config.Config.barShowVolume
+        onPanelRequested: root.audioClicked()
       }
 
       Widgets.Microphone {
         visible: Config.Config.barShowMicrophone
+        onPanelRequested: root.audioClicked()
       }
 
       Widgets.Brightness {

@@ -634,6 +634,17 @@ Layouts.SlidingPanel {
 
   Layouts.EmptyState {
     Layout.fillWidth: true
+    message: "Long empty message to test wrapping and alignment with a hint below it"
+    hint: "Long hint to test wrapping and alignment with the message above it, Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."
+  }
+
+  Components.Divider {
+    implicitWidth: 200
+    anchors.horizontalCenter: parent.horizontalCenter
+  }
+
+  Layouts.EmptyState {
+    Layout.fillWidth: true
     message: "Nothing here yet"
     hint: "Items will appear when available"
   }

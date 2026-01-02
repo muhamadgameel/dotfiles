@@ -1,5 +1,4 @@
 import QtQuick
-import Quickshell.Io
 
 import "../../../components" as Components
 import "../../../config" as Config
@@ -9,11 +8,7 @@ import "../../../services" as Services
 Components.Button {
   id: root
 
-  Process {
-    id: pavucontrolProcess
-    running: false
-    command: ["pavucontrol"]
-  }
+  signal panelRequested
 
   icon: {
     if (!Services.Audio.sourceReady)
@@ -31,6 +26,7 @@ Components.Button {
   iconSize: Core.Style.fontL
 
   text: Services.Audio.sourceReady ? Services.Audio.micMuted ? "" : Math.round(Services.Audio.micVolume * 100) + "%" : "--"
+
   textColor: Services.Audio.micMuted ? Config.Theme.textMuted : Config.Theme.text
 
   tooltipText: Services.Audio.deviceName(Services.Audio.source)
@@ -44,7 +40,7 @@ Components.Button {
   // Click handlers
   onClicked: function (button) {
     if (button === Qt.LeftButton) {
-      pavucontrolProcess.running = true;
+      root.panelRequested();
     } else if (button === Qt.MiddleButton) {
       Services.Audio.toggleMicMute();
     }
