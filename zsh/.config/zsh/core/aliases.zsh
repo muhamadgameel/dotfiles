@@ -11,12 +11,21 @@ case $_os in
     ;;
 esac
 alias l="ls"
-alias la="ls -A" # -A shows almost all (excludes . and ..)
+alias la="ls -A"
 alias ll="ls -l"
 alias lla="ls -lA"
-alias lr="ls -R"    # Recursive ls
-alias lt="ls -lt"   # Sort by newest first
-alias lS="ls -1FSs" # Sort by size
+
+if (( $+commands[eza] )); then
+  alias ls="eza --color=always --icons=always --smart-group"
+  alias ll="ls --long"
+  alias la="ls --all"
+  alias lla="ls --long --all"
+fi
+
+if (( $+commands[zoxide] )); then
+  eval "$(zoxide init zsh)"
+  alias cd="z"
+fi
 
 # Directory navigation
 alias ..="cd .."
@@ -25,9 +34,6 @@ alias ....="cd ../../.."
 
 # File and directory operations
 alias mkdir="mkdir -pv" # -p creates parent dirs, -v for verbose
-alias rm="rm -i"        # Interactive removal
-alias cp="cp -i"        # Interactive copy
-alias mv="mv -i"        # Interactive move
 
 # Resources Management
 alias df='df -h'
