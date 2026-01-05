@@ -24,7 +24,7 @@ if [[ -z $ANDROID_HOME ]]; then
 
   export PATH=$PATH:$ANDROID_HOME/emulator
   export PATH=$PATH:$ANDROID_HOME/platform-tools
-  
+
   # Use latest build-tools version if available
   if [[ -d "$ANDROID_HOME/build-tools" ]]; then
     local latest_build_tools=$(ls "$ANDROID_HOME/build-tools" | sort -V | tail -n1)

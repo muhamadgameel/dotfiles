@@ -12,6 +12,7 @@ return {
         javascriptreact = { 'prettierd' },
         typescriptreact = { 'prettierd' },
         json = { 'prettierd' },
+        jsonc = { 'prettierd' },
         html = { 'prettierd' },
         css = { 'prettierd' },
         markdown = { 'prettierd' },
@@ -20,7 +21,6 @@ return {
         toml = { 'taplo' },
         sh = { 'shfmt' },
         bash = { 'shfmt' },
-        zsh = { 'shfmt' },
         rust = { 'rustfmt' },
         qml = { '/usr/lib/qt6/bin/qmlformat' }, -- Externally downloaded
         ['_'] = { 'trim_whitespace', 'trim_newlines' },
