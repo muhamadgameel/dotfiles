@@ -17,9 +17,6 @@ keymap('n', 'k', [[v:count ? 'k' : 'gk']], { expr = true, silent = true })
 -- clear highlights
 keymap('n', '<Esc>', '<cmd>noh<cr>', opts)
 
--- Prevent delete chars from copying to clipboard
-keymap('n', 'x', '"_x', opts)
-
 -- Find and center
 keymap('n', 'n', 'nzzzv', opts)
 keymap('n', 'N', 'Nzzzv', opts)

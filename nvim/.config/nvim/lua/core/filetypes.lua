@@ -15,3 +15,7 @@ vim.filetype.add {
     ['.*%.zsh'] = 'zsh',
   },
 }
+
+vim.filetype.add {
+  pattern = { ['.*/hypr/.*%.conf'] = 'hyprlang' },
+}
