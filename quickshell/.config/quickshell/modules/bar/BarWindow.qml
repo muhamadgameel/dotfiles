@@ -40,6 +40,7 @@ Variants {
       onAudioClicked: audioPanel.toggle()
       onNotificationClicked: notificationCenter.toggle()
       onNetworkClicked: networkPanel.toggle()
+      onBluetoothClicked: bluetoothPanel.toggle()
       onSystemStatsClicked: systemStatsPanel.toggle()
       onTestPanelClicked: testPanel.toggle()
     }
@@ -59,6 +60,12 @@ Variants {
     // Network Panel
     Panels.NetworkPanel {
       id: networkPanel
+      parentWindow: barWindow
+    }
+
+    // Bluetooth Panel
+    Panels.BluetoothPanel {
+      id: bluetoothPanel
       parentWindow: barWindow
     }
 

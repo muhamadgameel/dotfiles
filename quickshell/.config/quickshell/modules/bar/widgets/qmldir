@@ -9,5 +9,6 @@ Launcher 1.0 Launcher.qml
 Workspaces 1.0 Workspaces.qml
 Notification 1.0 Notification.qml
 Network 1.0 Network.qml
+Bluetooth 1.0 Bluetooth.qml
 SystemStats 1.0 SystemStats.qml
 Test 1.0 Test.qml

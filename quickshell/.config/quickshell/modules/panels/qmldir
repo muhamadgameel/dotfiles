@@ -3,5 +3,6 @@ module modules.panels
 AudioPanel 1.0 AudioPanel.qml
 NotificationCenter 1.0 NotificationCenter.qml
 NetworkPanel 1.0 NetworkPanel.qml
+BluetoothPanel 1.0 BluetoothPanel.qml
 SystemStatsPanel 1.0 SystemStatsPanel.qml
 TestPanel 1.0 TestPanel.qml

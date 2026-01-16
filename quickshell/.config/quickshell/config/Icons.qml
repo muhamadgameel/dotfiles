@@ -97,6 +97,13 @@ Singleton {
       "bluetooth": "󰂯",
       "bluetooth-off": "󰂲",
       "bluetooth-connected": "󰂱",
+      "bluetooth-searching": "󰂰",
+      "bluetooth-audio": "󰂰",
+
+      // === Input Devices ===
+      "mouse": "󰍽",
+      "keyboard": "󰌌",
+      "gamepad": "󰊖",
 
       // Network
       "network": "󰛳",

@@ -5,6 +5,7 @@ import "../../../config" as Config
 import "../../../core" as Core
 import "../../../services" as Services
 
+// FIXME: there is a problem with ther input very visible when connecting AirPods
 Components.Button {
   id: root
 
