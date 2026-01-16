@@ -25,6 +25,7 @@ Item {
   property string message: ""
   property string hint: ""
 
+  width: parent.width
   implicitHeight: content.implicitHeight + Core.Style.spaceXL
 
   ColumnLayout {

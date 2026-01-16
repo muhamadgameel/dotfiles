@@ -314,21 +314,15 @@ Layouts.SlidingPanel {
       // Action buttons
       RowLayout {
         spacing: Core.Style.spaceXS
-        visible: (netItem.hovered || netItem.connected) && !netItem.isBusy
+        visible: netItem.connected && !netItem.isBusy
 
-        // Connect/Disconnect button
+        // Disconnect button
         Components.Button {
-          icon: netItem.connected ? "close" : "chevron-right"
+          icon: "close"
           iconSize: Core.Style.fontM
-          tooltipText: netItem.connected ? "Disconnect" : "Connect"
-          variant: netItem.connected ? "danger" : "default"
-          onClicked: {
-            if (netItem.connected) {
-              Services.Network.disconnect(netItem.ssid);
-            } else {
-              netItem.connectRequested(netItem.ssid);
-            }
-          }
+          variant: "danger"
+          tooltipText: "Disconnect"
+          onClicked: Services.Network.disconnect(netItem.ssid)
         }
 
         // Forget button
@@ -339,6 +333,14 @@ Layouts.SlidingPanel {
           tooltipText: "Forget network"
           onClicked: Services.Network.forget(netItem.ssid)
         }
+      }
+
+      // Arrow indicator (shows on hover for available devices)
+      Components.Icon {
+        visible: netItem.hovered && !netItem.connected && !netItem.isBusy
+        icon: "chevron-right"
+        size: Core.Style.fontM
+        color: Config.Theme.textDim
       }
     }
   }

@@ -13,6 +13,7 @@ Rectangle {
   signal audioClicked
   signal notificationClicked
   signal networkClicked
+  signal bluetoothClicked
   signal systemStatsClicked
   signal testPanelClicked
 
@@ -54,6 +55,11 @@ Rectangle {
       Widgets.Network {
         visible: Config.Config.barShowNetwork
         onPanelRequested: root.networkClicked()
+      }
+
+      Widgets.Bluetooth {
+        visible: Config.Config.barShowBluetooth
+        onPanelRequested: root.bluetoothClicked()
       }
 
       Widgets.Volume {
