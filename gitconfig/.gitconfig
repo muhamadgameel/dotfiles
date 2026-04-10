@@ -2,11 +2,93 @@
   email = mgameel@pm.me
   name = Muhamad Gameel
   signingkey = 62BA848F76AF27B5
-[pull]
-  rebase = true
-[gpg]
-  program = gpg
-[commit]
-  gpgsign = true
+
+[core]
+  editor = nvim
+  whitespace = trailing-space,space-before-tab
+  autocrlf = input
+  fsmonitor = true
+  untrackedCache = true
+
 [init]
   defaultBranch = main
+
+[push]
+  default = current
+  autoSetupRemote = true
+  followTags = true
+
+[pull]
+  rebase = true
+
+[fetch]
+  prune = true
+  pruneTags = true
+  all = true
+
+[rebase]
+  autoSquash = true
+  autoStash = true
+  updateRefs = true
+
+[merge]
+  conflictstyle = zdiff3
+
+[diff]
+  algorithm = histogram
+  colorMoved = default
+  mnemonicPrefix = true
+  renames = true
+
+[rerere]
+  enabled = true
+
+[column]
+  ui = auto
+
+[branch]
+  sort = -committerdate
+
+[tag]
+  sort = version:refname
+  gpgSign = true
+
+[gpg]
+  program = gpg
+
+[commit]
+  gpgsign = true
+  verbose = true
+
+[help]
+  autocorrect = prompt
+
+[transfer]
+  fsckobjects = true
+
+[receive]
+  fsckObjects = true
+
+[alias]
+  st = status -sb
+  sw = switch
+  sc = switch -c
+  br = branch -vv
+  ci = commit
+  ca = commit --amend
+  can = commit --amend --no-edit
+  unstage = restore --staged
+  discard = restore
+  undo = reset --soft HEAD~1
+  d = diff
+  ds = diff --staged
+  dw = diff --word-diff
+  last = log -1 HEAD --stat
+  lg = log --oneline --graph --all --decorate
+  cleanup = !git branch --merged | grep -v '\\*\\|main\\|master' | xargs -n 1 git branch -d
+  gone = !git branch -vv | grep ': gone]' | awk '{print $1}'
+  prune-gone = !git gone | xargs git branch -D
+  wip = !git add -A && git commit -m 'WIP'
+  stash-all = stash push --include-untracked
+  contributors = shortlog -sne --all
+  aliases = config --get-regexp ^alias
