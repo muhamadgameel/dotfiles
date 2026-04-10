@@ -1,6 +1,3 @@
-# Cache OS detection
-local _os=$(uname)
-
 # Listing Files
 case $_os in
   Darwin)
@@ -34,6 +31,8 @@ alias ....="cd ../../.."
 
 # File and directory operations
 alias mkdir="mkdir -pv" # -p creates parent dirs, -v for verbose
+alias cp="cp -iv"       # Confirm before overwriting
+alias mv="mv -iv"       # Confirm before overwriting
 
 # Resources Management
 alias df='df -h'
@@ -41,8 +40,6 @@ alias du='du -h'
 
 # Grep
 alias grep="grep --color=auto -i"
-alias egrep="egrep --color=auto"
-alias fgrep="fgrep --color=auto"
 
 # Viewers
 if (( $+commands[bat] )); then
@@ -51,7 +48,7 @@ fi
 
 # Process management
 alias psa="ps aux"
-alias psg="ps aux | grep"
+alias psg="pgrep -af"
 
 # Apps
 alias v="nvim"
@@ -87,15 +84,15 @@ case $_os in
         arch | manjaro)
           alias sys-update="sudo pacman -Syu"
           ;;
-        *)
-          echo "Unsupported Linux distribution for update alias"
-          ;;
-      esac
-    else
-      echo "Unable to determine Linux distribution for update alias"
+        esac
     fi
     ;;
 esac
+
+# Help (man pages for builtins)
+autoload -Uz run-help
+(( ${+aliases[run-help]} )) && unalias run-help
+alias help="run-help"
 
 # Misc
 alias h="history"

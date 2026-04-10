@@ -98,6 +98,10 @@ zle -N _zle-noop
 
 # Use an anonymous function for key binding
 () {
+  # Reset keymaps to default first
+  bindkey -d
+
+  # Disable unbound keys that insert tilde
   local -a unbound_keys=(
     "${key_info[F1]}"
     "${key_info[F2]}"
@@ -120,9 +124,6 @@ zle -N _zle-noop
   for keymap in $unbound_keys; do
     bindkey -M emacs "${keymap}" _zle-noop
   done
-
-  # Set default mode
-  bindkey -d
 
   # Ctrl+Left and Ctrl+Right bindings to forward/backward word
   for key in ${(s: :)key_info[Control+Left]}; do
@@ -183,7 +184,7 @@ zle -N _zle-noop
   bindkey -M emacs "${key_info[Control]}K" cd-up
 
   # cd -
-  bindkey -M emacs "${key_info[Control]}J" cd-back
+  bindkey -M emacs "${key_info[Control]}U" cd-back
 
   # Set Emacs mode
   bindkey -e

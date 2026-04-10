@@ -4,8 +4,8 @@ export ZSH_INIT=$ZSH_CONF_DIR/init.zsh
 export STARSHIP_CONFIG=~/.config/starship.toml
 export STARSHIP_CACHE=~/.cache/starship
 
-# Create the cache folder
-mkdir -p $ZSH_CACHE_DIR
-mkdir -p $STARSHIP_CACHE
+# Create cache folders (only if missing)
+[[ -d $ZSH_CACHE_DIR ]] || mkdir -p $ZSH_CACHE_DIR
+[[ -d $STARSHIP_CACHE ]] || mkdir -p $STARSHIP_CACHE
 
 source $ZSH_INIT
