@@ -7,9 +7,6 @@ export TERMINAL=alacritty
 # Fix GPG in terminal
 export GPG_TTY=$(tty)
 
-# Cache OS detection
-local _os=$(uname)
-
 # Android SDK
 if [[ -z $ANDROID_HOME ]]; then
   case $_os in

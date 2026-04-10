@@ -27,8 +27,13 @@ Plug "zsh-users/zsh-history-substring-search"
 bindkey -M emacs "${key_info[Up]}" history-substring-search-up
 bindkey -M emacs "${key_info[Down]}" history-substring-search-down
 
-# Auto Suggestions
-ZSH_AUTOSUGGEST_STRATEGY=(history)
+# Auto Suggestions (fall back to completion engine when history has no match)
+ZSH_AUTOSUGGEST_STRATEGY=(history completion)
+
+# fzf integration (Ctrl+R history, Ctrl+T file finder, Alt+C cd)
+if (( $+commands[fzf] )) then
+  eval "$(fzf --zsh)"
+fi
 
 # Load starship Prompt
 if (( $+commands[starship] )) then

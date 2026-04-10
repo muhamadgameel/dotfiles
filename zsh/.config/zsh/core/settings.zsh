@@ -1,12 +1,18 @@
 autoload -U zmv
 
+# Cache OS detection globally (used by aliases.zsh, env.zsh)
+typeset -g _os=$(uname)
+
 # ===== Basics
 setopt no_beep              # do not beep on error
 setopt interactive_comments # Enable comments in interactive shell.
 unsetopt clobber            # Do not overwrite existing files with > and >>.  Use >! and >>! to bypass.
 
 # ===== Changing Directories
-setopt auto_cd # Auto changes to a directory without typing cd.
+setopt auto_cd           # Auto changes to a directory without typing cd.
+setopt auto_pushd        # cd automatically pushes old dir onto dir stack
+setopt pushd_ignore_dups # No duplicate entries in dir stack
+setopt pushd_silent      # Don't print dir stack after pushd/popd
 
 # ===== Expansion and Globbing
 setopt extended_glob # Use extended globbing syntax.
@@ -54,15 +60,13 @@ HISTFILE=$ZSH_CACHE_DIR/zsh_history
 
 setopt bang_hist              # Treat the '!' character specially during expansion
 setopt extended_history       # Write the history file in the ":start:elapsed;command" format
-setopt inc_append_history     # Write to the history file immediately, not when the shell exits
-setopt share_history          # Share history between all sessions
+setopt share_history          # Share history between all sessions (implies inc_append_history_time)
 setopt hist_expire_dups_first # Delete duplicates first when HISTFILE size exceeds HISTSIZE.
 setopt hist_ignore_dups       # Do not record an entry that was just recorded
 setopt hist_ignore_all_dups   # Delete old recorded entry if new entry is a duplicate
 setopt hist_ignore_space      # Ignore commands that start with space
 setopt hist_save_no_dups      # Do not write duplicate entries in the history file
 setopt hist_verify            # Show command with history expansion to user before running it
-setopt hist_beep              # Beep when accessing nonexistent history
 setopt hist_find_no_dups      # When searching history do not display results already cycled through twice
 setopt hist_reduce_blanks     # Remove extra blanks from each command line being added to history
 
