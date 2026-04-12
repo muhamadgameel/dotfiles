@@ -12,15 +12,12 @@ return {
       json = { 'jsonlint' },
       bash = { 'shellcheck' },
       sh = { 'shellcheck' },
-      zsh = { 'shellcheck' },
     }
 
-    -- Configure shellcheck
     lint.linters.shellcheck.args = {
-      '--shell=zsh', -- Use zsh as the default shell
-      '--format=gcc', -- Use gcc format for output
-      '--external-sources', -- Allow 'source' outside of FILES
-      '--enable=all', -- Enable all checks
+      '--format=gcc',
+      '--external-sources',
+      '--enable=all',
     }
 
     local lint_augroup = vim.api.nvim_create_augroup('lint', { clear = true })
