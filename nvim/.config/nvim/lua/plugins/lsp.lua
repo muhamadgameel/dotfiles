@@ -26,7 +26,6 @@ return {
       dependencies = { 'nvim-lua/plenary.nvim' },
       event = 'LspAttach',
       opts = {
-        --- The backend to use, currently only "vim", "delta", "difftastic", "diffsofancy" are supported
         backend = 'vim',
         picker = 'telescope',
       },
@@ -35,7 +34,6 @@ return {
     { 'b0o/schemastore.nvim' },
   },
   config = function()
-    -- LSP
     vim.api.nvim_create_autocmd('LspAttach', {
       group = vim.api.nvim_create_augroup('LspAttachGroup', {}),
       callback = function(ev)
@@ -58,7 +56,6 @@ return {
 
         local client = vim.lsp.get_client_by_id(ev.data.client_id)
 
-        -- Support Inlay Hints
         if client and client:supports_method(vim.lsp.protocol.Methods.textDocument_inlayHint, ev.buf) then
           map('<leader>th', function()
             vim.lsp.inlay_hint.enable(not vim.lsp.inlay_hint.is_enabled { bufnr = ev.buf })
@@ -67,10 +64,13 @@ return {
       end,
     })
 
-    -- Diagnostic
     vim.diagnostic.config {
       severity_sort = true,
       underline = { severity = vim.diagnostic.severity.ERROR },
+      float = {
+        border = 'rounded',
+        source = true,
+      },
       signs = {
         text = {
           [vim.diagnostic.severity.ERROR] = '󰅚 ',
@@ -82,15 +82,6 @@ return {
       virtual_text = {
         source = 'if_many',
         spacing = 4,
-        format = function(diagnostic)
-          local diagnostic_message = {
-            [vim.diagnostic.severity.ERROR] = diagnostic.message,
-            [vim.diagnostic.severity.WARN] = diagnostic.message,
-            [vim.diagnostic.severity.INFO] = diagnostic.message,
-            [vim.diagnostic.severity.HINT] = diagnostic.message,
-          }
-          return diagnostic_message[diagnostic.severity]
-        end,
       },
     }
   end,

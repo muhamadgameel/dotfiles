@@ -1,10 +1,9 @@
 return {
   'rmagatti/auto-session',
-  opts = {
-    allowed_dirs = { '~/Projects' },
-  },
   config = function()
-    require('auto-session').setup {}
+    require('auto-session').setup {
+      allowed_dirs = { '~/Projects' },
+    }
 
     local keymap = vim.keymap.set
     keymap('n', '<leader>ss', '<cmd>AutoSession save<cr>', { desc = 'Save Session' })

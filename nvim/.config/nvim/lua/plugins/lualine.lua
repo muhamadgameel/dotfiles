@@ -7,7 +7,7 @@ return {
 
     lualine.setup {
       options = {
-        theme = 'tokyonight',
+        theme = 'auto',
         refresh = {
           statusline = 200,
           tabline = 500,
@@ -40,13 +40,11 @@ return {
       extensions = {
         'oil',
         'toggleterm',
-        'symbols-outline',
         'quickfix',
         'trouble',
         'man',
         'mason',
         'lazy',
-        'fugitive',
       },
     }
   end,

@@ -38,7 +38,6 @@ opt.signcolumn = 'yes' -- Always show sign column
 opt.showmode = false -- Mode shown in statusline instead
 opt.showcmd = false
 opt.laststatus = 3 -- Global statusline
-opt.showtabline = 0 -- Never show tabline
 opt.fillchars = {
   foldopen = '-',
   foldclose = '+',
@@ -140,7 +139,7 @@ opt.spelllang = { 'en_us' }
 opt.spelloptions = 'camel' -- Spell check camelCase words separately
 
 ----------------------------------------------------------------------------------
--- Folding
+-- Folding (treesitter sets foldmethod=expr and foldexpr)
 ----------------------------------------------------------------------------------
 opt.foldmethod = 'indent'
 opt.foldlevel = 99
@@ -178,8 +177,3 @@ opt.tabclose = 'left'
 ----------------------------------------------------------------------------------
 opt.shortmess:append 'c' -- Don't show completion messages
 opt.report = 0 -- Always report changed lines
-
-----------------------------------------------------------------------------------
--- External Integrations
-----------------------------------------------------------------------------------
-vim.g.netrw_liststyle = 3 -- Tree view

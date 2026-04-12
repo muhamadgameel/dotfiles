@@ -18,7 +18,7 @@ return {
     keymap('n', '<leader>oh', builtin.help_tags, { desc = 'Help Tags' })
     keymap('n', '<leader>oc', builtin.commands, { desc = 'Commands' })
     keymap('n', '<leader>oC', builtin.colorscheme, { desc = 'Color Schemes' })
-    keymap('n', '<leader>ot', builtin.filetypes, { desc = 'File Types' })
+    keymap('n', '<leader>of', builtin.filetypes, { desc = 'File Types' })
     keymap('n', '<leader>ok', builtin.keymaps, { desc = 'Keymaps' })
     keymap('n', '<leader>oq', builtin.quickfix, { desc = 'QuickFix List' })
     keymap('n', '<leader>oa', builtin.autocommands, { desc = 'Auto Commands' })

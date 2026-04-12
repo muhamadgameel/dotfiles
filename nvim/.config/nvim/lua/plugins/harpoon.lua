@@ -23,5 +23,11 @@ return {
     keymap('n', '<leader>p', function()
       harpoon:list():prev()
     end, { desc = 'Harpoon prev file' })
+
+    for i = 1, 5 do
+      keymap('n', '<leader>' .. i, function()
+        harpoon:list():select(i)
+      end, { desc = 'Harpoon file ' .. i })
+    end
   end,
 }
