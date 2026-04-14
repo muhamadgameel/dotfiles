@@ -14,6 +14,7 @@ return {
       { '<leader>r', group = 'rename/replace' },
       { '<leader>s', group = 'split/session' },
       { '<leader>t', group = 'toggle' },
+      { '<leader>u', group = 'utils' },
       { '<leader>x', group = 'trouble' },
       { 'gr', group = 'LSP goto/actions' },
     },

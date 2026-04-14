@@ -2,12 +2,6 @@
 return {
   settings = {
     Lua = {
-      diagnostics = {
-        globals = { 'vim' },
-      },
-      workspace = {
-        library = vim.api.nvim_get_runtime_file('', true),
-      },
       completion = {
         callSnippet = 'Replace',
       },
@@ -19,11 +13,11 @@ return {
       },
       hint = {
         enable = true,
-        arrayIndex = 'Auto', -- "Enable" | "Auto" | "Disable"
+        arrayIndex = 'Auto',
         await = true,
-        paramName = 'All', -- "All" | "Literal" | "Disable"
+        paramName = 'All',
         paramType = true,
-        semicolon = 'SameLine', -- "All" | "SameLine" | "Disable"
+        semicolon = 'SameLine',
         setType = true,
       },
     },
