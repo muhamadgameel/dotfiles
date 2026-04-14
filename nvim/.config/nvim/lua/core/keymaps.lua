@@ -113,6 +113,11 @@ end, { desc = 'Copy file path to clipboard' })
 keymap(
   'n',
   '<leader>rw',
-  [[:%s/\<<C-r><C-w>\>/<C-r><C-w>/gI<Left><Left><Left>]],
+  [[:%s/\<<C-r><C-w>\>/<C-r><C-w>/I<Left><Left>]],
   { desc = 'Replace word under cursor' }
 )
+
+----------------------------------------------------------------------------------
+-- Built-in tools (Neovim 0.12)
+----------------------------------------------------------------------------------
+keymap('n', '<leader>uu', '<cmd>packadd nvim.undotree | Undotree<cr>', { desc = 'Undotree' })

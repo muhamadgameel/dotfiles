@@ -37,7 +37,6 @@ require('lazy').setup {
         'gzip',
         'tarPlugin',
         'zipPlugin',
-        'tohtml',
         'tutor',
       },
     },

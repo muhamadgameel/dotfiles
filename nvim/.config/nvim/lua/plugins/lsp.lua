@@ -53,6 +53,7 @@ return {
         map('grD', vim.lsp.buf.declaration, 'Goto Declaration')
         map('gO', telescope.lsp_document_symbols, 'Open Document Symbols')
         map('gW', telescope.lsp_dynamic_workspace_symbols, 'Open Workspace Symbols')
+        map('grx', vim.lsp.codelens.run, 'Run Codelens')
 
         local client = vim.lsp.get_client_by_id(ev.data.client_id)
 
@@ -60,6 +61,16 @@ return {
           map('<leader>th', function()
             vim.lsp.inlay_hint.enable(not vim.lsp.inlay_hint.is_enabled { bufnr = ev.buf })
           end, 'Toggle Inlay Hints')
+        end
+
+        if client and client:supports_method(vim.lsp.protocol.Methods.textDocument_codeLens, ev.buf) then
+          vim.lsp.codelens.refresh { bufnr = ev.buf }
+          vim.api.nvim_create_autocmd({ 'BufEnter', 'InsertLeave' }, {
+            buffer = ev.buf,
+            callback = function()
+              vim.lsp.codelens.refresh { bufnr = ev.buf }
+            end,
+          })
         end
       end,
     })

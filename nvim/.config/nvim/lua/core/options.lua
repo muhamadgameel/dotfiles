@@ -49,6 +49,8 @@ opt.fillchars = {
 }
 opt.pumheight = 10 -- Max items in completion popup
 opt.pumblend = 10 -- Popup transparency
+opt.pumborder = 'rounded' -- Completion popup border
+opt.pummaxwidth = 40 -- Completion popup max width
 opt.winblend = 10 -- Floating window transparency
 opt.cmdheight = 0 -- Hide command line when not used
 
@@ -58,7 +60,7 @@ opt.cmdheight = 0 -- Hide command line when not used
 opt.scrolloff = 10 -- Keep 10 lines above/below cursor
 opt.sidescrolloff = 10 -- Keep 10 columns left/right of cursor
 opt.smoothscroll = true -- Smooth <C-d>/<C-u> scrolling
-opt.jumpoptions = 'stack' -- Jumplist behaves like browser history
+opt.jumpoptions = { 'stack', 'view' } -- Jumplist behaves like browser history, restores view on jump
 opt.whichwrap:append '<,>,[,],h,l'
 opt.virtualedit = 'block' -- Allow cursor past EOL in visual block
 
@@ -85,7 +87,7 @@ opt.grepformat = '%f:%l:%c:%m'
 ----------------------------------------------------------------------------------
 -- Completion
 ----------------------------------------------------------------------------------
-opt.completeopt = { 'menu', 'menuone', 'noselect', 'preview' }
+opt.completeopt = { 'menu', 'menuone', 'noselect', 'popup' }
 opt.infercase = true -- Infer case in keyword completion
 opt.wildmode = 'longest:full,full'
 opt.wildoptions = 'pum' -- Command completion as popup
@@ -157,7 +159,8 @@ opt.diffopt = {
   'algorithm:patience', -- Use the patience diff algorithm
   'linematch:60', -- Align lines by similar text (up to 60% different)
   'indent-heuristic', -- Use the indent heuristic for the patience algorithm
-  'vertical', -- Makes diffs open vertically by default (common preference).
+  'inline:char', -- Highlight inline changes at character level (new in 0.12)
+  'vertical', -- Makes diffs open vertically by default
 }
 
 ----------------------------------------------------------------------------------
