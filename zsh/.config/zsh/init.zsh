@@ -1,6 +1,10 @@
 # Load custom completions
 fpath+=${0:a:h}/completions
 
+# Load custom functions
+fpath+=${0:a:h}/functions
+autoload -Uz -- "${0:a:h}"/functions/[^_]*(:t)
+
 # Load configs
 sources=(
   "settings"
