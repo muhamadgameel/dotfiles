@@ -1,5 +1,7 @@
 return {
   'karb94/neoscroll.nvim',
   event = 'BufRead',
-  opts = {},
+  opts = {
+    easing_function = "sine",
+  },
 }

@@ -64,11 +64,12 @@ return {
         end
 
         if client and client:supports_method(vim.lsp.protocol.Methods.textDocument_codeLens, ev.buf) then
-          vim.lsp.codelens.refresh { bufnr = ev.buf }
+          vim.lsp.codelens.enable(true, { bufnr = ev.buf })
+
           vim.api.nvim_create_autocmd({ 'BufEnter', 'InsertLeave' }, {
             buffer = ev.buf,
             callback = function()
-              vim.lsp.codelens.refresh { bufnr = ev.buf }
+              vim.lsp.codelens.enable(true, { bufnr = ev.buf })
             end,
           })
         end
