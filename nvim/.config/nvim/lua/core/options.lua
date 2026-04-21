@@ -141,9 +141,10 @@ opt.spelllang = { 'en_us' }
 opt.spelloptions = 'camel' -- Spell check camelCase words separately
 
 ----------------------------------------------------------------------------------
--- Folding (treesitter sets foldmethod=expr and foldexpr)
+-- Folding
 ----------------------------------------------------------------------------------
-opt.foldmethod = 'indent'
+opt.foldmethod = 'expr'
+opt.foldexpr = 'v:lua.vim.treesitter.foldexpr()'
 opt.foldlevel = 99
 opt.foldlevelstart = 99 -- Always open files unfolded
 opt.foldcolumn = '1'

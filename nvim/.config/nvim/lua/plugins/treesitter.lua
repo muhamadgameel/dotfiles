@@ -1,106 +1,67 @@
+-- these are included with neovim:
+-- (c, lua, vim, vimdoc, query, markdown, markdown_inline)
+local languages = {
+  'jsdoc',
+  'json',
+  'json5',
+  'javascript',
+  'typescript',
+  'tsx',
+  'html',
+  'css',
+  'bash',
+  'python',
+  'cpp',
+  'rust',
+  'zig',
+  'go',
+  'toml',
+  'yaml',
+  'git_config',
+  'gitcommit',
+  'gitignore',
+  'ruby',
+  'regex',
+  'sql',
+  'svelte',
+  'graphql',
+  'dockerfile',
+  'qmldir',
+  'qmljs',
+}
+
 return {
   'nvim-treesitter/nvim-treesitter',
+  branch = 'main',
+  lazy = false,
   build = ':TSUpdate',
-  event = { 'BufReadPre', 'BufNewFile' },
-  dependencies = {
-    { 'nvim-treesitter/nvim-treesitter-textobjects' },
-  },
   config = function()
-    local treesitter = require 'nvim-treesitter.configs'
+    require('nvim-treesitter').install(languages)
 
-    vim.opt.foldmethod = 'expr'
-    vim.opt.foldexpr = 'v:lua.vim.treesitter.foldexpr()'
+    vim.api.nvim_create_autocmd('FileType', {
+      group = vim.api.nvim_create_augroup('treesitter.setup', {}),
+      callback = function(args)
+        local buf = args.buf
+        local filetype = args.match
 
-    treesitter.setup {
-      auto_install = true,
-      sync_install = false,
-      highlight = {
-        enable = true,
-        additional_vim_regex_highlighting = false,
-      },
-      indent = { enable = true },
-      textobjects = {
-        select = {
-          enable = true,
-          lookahead = true,
-          keymaps = {
-            ['af'] = '@function.outer',
-            ['if'] = '@function.inner',
-            ['ac'] = '@class.outer',
-            ['ic'] = '@class.inner',
-            ['al'] = '@loop.outer',
-            ['il'] = '@loop.inner',
-            ['aa'] = '@parameter.outer',
-            ['ia'] = '@parameter.inner',
-          },
-        },
-        move = {
-          enable = true,
-          set_jumps = true,
-          goto_next_start = {
-            [']m'] = '@function.outer',
-            [']]'] = '@class.outer',
-          },
-          goto_next_end = {
-            [']M'] = '@function.outer',
-            [']['] = '@class.outer',
-          },
-          goto_previous_start = {
-            ['[m'] = '@function.outer',
-            ['[['] = '@class.outer',
-          },
-          goto_previous_end = {
-            ['[M'] = '@function.outer',
-            ['[]'] = '@class.outer',
-          },
-        },
-        swap = {
-          enable = true,
-          swap_next = {
-            ['<leader>pa'] = '@parameter.inner',
-          },
-          swap_previous = {
-            ['<leader>pA'] = '@parameter.inner',
-          },
-        },
-      },
+        -- you need some mechanism to avoid running on buffers that do not
+        -- correspond to a language (like oil.nvim buffers), this implementation
+        -- checks if a parser exists for the current language
+        local language = vim.treesitter.language.get_lang(filetype) or filetype
+        if not vim.treesitter.language.add(language) then
+          return
+        end
 
-      ensure_installed = {
-        'jsdoc',
-        'json',
-        'json5',
-        'jsonc',
-        'javascript',
-        'typescript',
-        'tsx',
-        'html',
-        'css',
-        'lua',
-        'vim',
-        'vimdoc',
-        'query',
-        'bash',
-        'python',
-        'c',
-        'cpp',
-        'rust',
-        'go',
-        'toml',
-        'yaml',
-        'git_config',
-        'gitcommit',
-        'gitignore',
-        'markdown',
-        'markdown_inline',
-        'ruby',
-        'regex',
-        'sql',
-        'svelte',
-        'graphql',
-        'dockerfile',
-        'qmldir',
-        'qmljs',
-      },
-    }
+        -- fold
+        vim.wo.foldmethod = 'expr'
+        vim.wo.foldexpr = 'v:lua.vim.treesitter.foldexpr()'
+
+        -- highlight
+        vim.treesitter.start(buf, language)
+
+        -- indentation
+        vim.bo[buf].indentexpr = "v:lua.require'nvim-treesitter'.indentexpr()"
+      end,
+    })
   end,
 }
