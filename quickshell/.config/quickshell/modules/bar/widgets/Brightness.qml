@@ -56,14 +56,14 @@ Components.Button {
 
   // Click handlers
   onClicked: function (button) {
-    if (button === Qt.LeftButton) {
+    if (button === Qt.RightButton) {
       // Toggle between low (10%) and high (100%)
       if (Services.Brightness.brightness > 0.5) {
         Services.Brightness.set(0.1);
       } else {
         Services.Brightness.set(1.0);
       }
-    } else if (button === Qt.MiddleButton) {
+    } else if (button === Qt.LeftButton) {
       // Set to 50%
       Services.Brightness.set(0.5);
     }
