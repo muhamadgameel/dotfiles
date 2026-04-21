@@ -110,12 +110,7 @@ keymap('n', '<leader>fp', function()
 end, { desc = 'Copy file path to clipboard' })
 
 -- Replace word under cursor
-keymap(
-  'n',
-  '<leader>rw',
-  [[:%s/\<<C-r><C-w>\>/<C-r><C-w>/I<Left><Left>]],
-  { desc = 'Replace word under cursor' }
-)
+keymap('n', '<leader>rw', [[:%s/\<<C-r><C-w>\>/<C-r><C-w>/I<Left><Left>]], { desc = 'Replace word under cursor' })
 
 ----------------------------------------------------------------------------------
 -- Built-in tools (Neovim 0.12)
