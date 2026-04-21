@@ -10,7 +10,6 @@ return {
       { '<leader>h', group = 'git hunk' },
       { '<leader>o', group = 'open/search' },
       { '<leader>og', group = 'git' },
-      { '<leader>p', group = 'swap param' },
       { '<leader>r', group = 'rename/replace' },
       { '<leader>s', group = 'split/session' },
       { '<leader>t', group = 'toggle' },
