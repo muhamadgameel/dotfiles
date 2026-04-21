@@ -51,7 +51,7 @@ Components.Button {
   onClicked: function (button) {
     if (button === Qt.LeftButton) {
       root.panelRequested();
-    } else if (button === Qt.MiddleButton) {
+    } else if (button === Qt.RightButton) {
       Services.Audio.toggleMute();
     }
   }
