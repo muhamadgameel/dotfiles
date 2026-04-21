@@ -46,6 +46,11 @@ if (( $+commands[bat] )); then
   alias cat="bat"
 fi
 
+# System Monitoring
+if (( $+commands[btop] )); then
+  alias top="btop"
+fi
+
 # Process management
 alias psa="ps aux"
 alias psg="pgrep -af"
