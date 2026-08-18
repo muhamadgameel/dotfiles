@@ -1,0 +1,34 @@
+# ╔═══════════════════════════════════════════════════════════════════╗
+# ║                  UWSM ENVIRONMENT (all sessions)                  ║
+# ╚═══════════════════════════════════════════════════════════════════╝
+# Sourced by uwsm before the compositor starts, so these land in the systemd
+# and D-Bus activation environments. That is the difference that matters:
+# variables set with hl.env() in hyprland.lua only reach processes Hyprland
+# spawns itself, so portal- and D-Bus-activated apps never see them.
+#
+# Cursor variables are the exception -- uwsm re-exports those from the
+# compositor (see $UWSM_FINALIZE_VARNAMES) -- and stay in
+# .config/hypr/settings/env.lua next to the rest of the Hyprland config.
+#
+# Format is `export KEY=VAL`. Apply with a fresh session (uwsm stop, log in).
+
+# ── Toolkit backends ────────────────────────────────────────────────
+# Both take a fallback list. Without one, an app whose Wayland plugin is
+# missing fails to start instead of falling back to X11.
+export GDK_BACKEND=wayland,x11,*
+export QT_QPA_PLATFORM='wayland;xcb'
+export SDL_VIDEODRIVER=wayland
+export CLUTTER_BACKEND=wayland
+
+# Electron/Chromium: pick Wayland when the session is Wayland.
+export ELECTRON_OZONE_PLATFORM_HINT=auto
+
+# Hyprland draws the decorations, so Qt should not.
+export QT_WAYLAND_DISABLE_WINDOWDECORATION=1
+
+# Deliberately NOT set: QT_AUTO_SCREEN_SCALE_FACTOR.
+# It is an X11-era knob; under Wayland Qt takes the scale from the compositor,
+# and on a fractional-scale panel (this one is 1.333x) setting it risks
+# double-scaling XWayland Qt apps.
+
+# uwsm sets the XDG_* session variables itself -- do not duplicate them here.
