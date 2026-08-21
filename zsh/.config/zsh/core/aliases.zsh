@@ -20,8 +20,8 @@ if (( $+commands[eza] )); then
 fi
 
 if (( $+commands[zoxide] )); then
-  eval "$(zoxide init zsh)"
-  alias cd="z"
+  # --cmd cd makes zoxide define a real `cd` function rather than aliasing it.
+  eval "$(zoxide init zsh --cmd cd)"
 fi
 
 # Directory navigation
@@ -39,12 +39,7 @@ alias df='df -h'
 alias du='du -h'
 
 # Grep
-alias grep="grep --color=auto -i"
-
-# Viewers
-if (( $+commands[bat] )); then
-  alias cat="bat"
-fi
+alias grep="grep --color=auto"
 
 # System Monitoring
 if (( $+commands[btop] )); then
@@ -80,16 +75,24 @@ case $_os in
     alias sys-update="softwareupdate -i -a"
     ;;
   Linux)
-    if [ -f /etc/os-release ]; then
-      OS_ID=$(. /etc/os-release && echo $ID)
-      case $OS_ID in
+    # Read ID= straight out of /etc/os-release. The previous
+    # `$(. /etc/os-release && echo $ID)` spawned a subshell on every startup and
+    # leaked $OS_ID into the global namespace.
+    if [[ -r /etc/os-release ]]; then
+      typeset -a _osrelease_id
+      _osrelease_id=(${(M)${(f)"$(</etc/os-release)"}:#ID=*})
+      case ${${_osrelease_id[1]#ID=}//\"/} in
         debian | ubuntu | elementary | pop)
           alias sys-update="sudo apt update && sudo apt upgrade"
           ;;
-        arch | manjaro)
+        arch | manjaro | endeavouros | cachyos)
           alias sys-update="sudo pacman -Syu"
           ;;
-        esac
+        fedora | rhel | centos)
+          alias sys-update="sudo dnf upgrade --refresh"
+          ;;
+      esac
+      unset _osrelease_id
     fi
     ;;
 esac

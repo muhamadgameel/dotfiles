@@ -1,7 +1,18 @@
-export ZCOMPDUMP="$ZSH_CACHE_DIR/compdump"
+ZCOMPDUMP="$ZSH_CACHE_DIR/compdump"
 
-# load and initialize the completion system
-autoload -Uz compinit && compinit -C -i -d ${ZCOMPDUMP}
+# Load and initialise the completion system.
+#
+# `compinit -C` skips the scan for new completion functions, which is what makes
+# startup fast -- but on its own it means completions installed after the dump
+# was written stay invisible forever. Do the full scan once a day and take the
+# fast path the rest of the time: the glob matches only when the dump is missing
+# or older than 24h.
+autoload -Uz compinit
+if [[ -n ${ZCOMPDUMP}(#qN.mh-24) ]]; then
+  compinit -C -i -d ${ZCOMPDUMP}
+else
+  compinit -i -d ${ZCOMPDUMP}
+fi
 
 {
   # compile compdump file in the background
@@ -21,10 +32,10 @@ setopt auto_list           # Automatically list choices on ambiguous completion.
 setopt auto_param_slash    # If completed parameter is a directory, add a trailing slash.
 unsetopt menu_complete     # Do not autoselect the first completion entry.
 unsetopt flow_control      # Disable start/stop characters in shell editor.
-unsetopt case_glob         # Set case insensitive
 
 # group matches and describe.
-zstyle ':completion:*:*:*:*:*' menu select
+# fzf-tab renders the menu itself and requires the builtin one to be disabled.
+zstyle ':completion:*' menu no
 zstyle ':completion:*:matches' group 'yes'
 zstyle ':completion:*:options' description 'yes'
 zstyle ':completion:*:options' auto-description '%d'
@@ -54,10 +65,16 @@ zstyle ':completion:*:functions' ignored-patterns '(_*|pre(cmd|exec))'
 zstyle ':completion:*:*:-subscript-:*' tag-order indexes parameters
 
 # Directories
-export LS_COLORS='di=34:ln=35:so=32:pi=33:ex=31:bd=36;01:cd=33;01:su=31;40;07:sg=36;40;07:tw=32;40;07:ow=33;40;07:'
+# Prefer the system's dircolors database over a hand-maintained LS_COLORS: it
+# covers far more file types and stays in sync with the coreutils version.
+if (( $+commands[dircolors] )); then
+  eval "$(dircolors -b)"
+else
+  export LS_COLORS='di=34:ln=35:so=32:pi=33:ex=31:bd=36;01:cd=33;01:su=31;40;07:sg=36;40;07:tw=32;40;07:ow=33;40;07:'
+fi
 zstyle ':completion:*:default' list-colors ${(s.:.)LS_COLORS}
+zstyle ':completion:*' list-colors ${(s.:.)LS_COLORS}
 zstyle ':completion:*:*:cd:*' tag-order local-directories directory-stack path-directories
-zstyle ':completion:*:*:cd:*:directory-stack' menu yes select
 zstyle ':completion:*:-tilde-:*' group-order 'named-directories' 'path-directories' 'expand'
 zstyle ':completion:*' squeeze-slashes true
 
@@ -65,7 +82,6 @@ zstyle ':completion:*' squeeze-slashes true
 zstyle ':completion:*:history-words' stop yes
 zstyle ':completion:*:history-words' remove-all-dups yes
 zstyle ':completion:*:history-words' list false
-zstyle ':completion:*:history-words' menu yes
 
 # Environmental Variables
 zstyle ':completion::*:(-command-|export):*' fake-parameters ${${${_comps[(I)-value-*]#*,}%%,*}:#-*-}
@@ -96,7 +112,6 @@ zstyle ':completion:*:rm:*' file-patterns '*:all-files'
 # Kill
 zstyle ':completion:*:*:*:*:processes' command 'ps -u $LOGNAME -o pid,user,command -w'
 zstyle ':completion:*:*:kill:*:processes' list-colors '=(#b) #([0-9]#) ([0-9a-z-]#)*=01;36=0=01'
-zstyle ':completion:*:*:kill:*' menu yes select
 zstyle ':completion:*:*:kill:*' force-list always
 zstyle ':completion:*:*:kill:*' insert-ids single
 
@@ -125,3 +140,25 @@ zstyle ':completion::complete:*' cache-path "$ZSH_CACHE_DIR"
 
 # Automatically find new executables in $PATH
 zstyle ':completion:*' rehash true
+
+# ===== fzf-tab
+# Only consulted when the plugin is loaded (init.zsh sources it after compinit).
+zstyle ':fzf-tab:*' use-fzf-default-opts yes
+zstyle ':fzf-tab:*' switch-group '<' '>'
+zstyle ':fzf-tab:complete:*' fzf-min-height 15
+
+# Preview directory contents when completing a path
+if (( $+commands[eza] )); then
+  zstyle ':fzf-tab:complete:cd:*' fzf-preview 'eza --tree --level=2 --color=always --icons=always $realpath'
+  zstyle ':fzf-tab:complete:z:*'  fzf-preview 'eza --tree --level=2 --color=always --icons=always $realpath'
+  zstyle ':fzf-tab:complete:__zoxide_z:*' fzf-preview 'eza --tree --level=2 --color=always --icons=always $realpath'
+fi
+
+# Preview the environment for export/unset, and processes for kill
+zstyle ':fzf-tab:complete:(export|unset):*' fzf-preview 'echo ${(P)word}'
+zstyle ':fzf-tab:complete:(kill|ps):argument-rest' fzf-preview \
+  'ps --pid=$word -o cmd --no-headers -w -w'
+zstyle ':fzf-tab:complete:(kill|ps):argument-rest' fzf-flags --preview-window=down:3:wrap
+
+# Preview systemd units
+zstyle ':fzf-tab:complete:systemctl-*:*' fzf-preview 'SYSTEMD_COLORS=1 systemctl status $word'
