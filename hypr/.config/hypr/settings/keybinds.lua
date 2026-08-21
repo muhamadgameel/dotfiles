@@ -22,7 +22,7 @@ hl.bind(mod .. " + D", hl.dsp.exec_cmd("pkill " .. apps.menu .. " || " .. apps.m
 
 hl.bind(
 	mod .. " + V",
-	hl.dsp.exec_cmd("cliphist list | " .. apps.menu .. " -d | cliphist decode | wl-copy"),
+	hl.dsp.exec_cmd("cliphist list | " .. apps.menu .. " -d --placeholder='Clipboard history…' | cliphist decode | wl-copy"),
 	{ description = "Clipboard history" }
 )
 
