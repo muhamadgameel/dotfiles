@@ -1,3 +1,29 @@
+# TokyoNight Night — https://github.com/folke/tokyonight.nvim
+#   blue:    #7aa2f7    purple:  #bb9af7
+#   cyan:    #7dcfff    green:   #9ece6a
+#   yellow:  #e0af68    red:     #f7768e
+#   orange:  #ff9e64    fg:      #c0caf5    comment: #565f89
+
+# ── UI chrome ────────────────────────────────────────────────────────
+# Without these, Alacritty falls back to its built-in base16 defaults
+# (#ac4242 / #f4bf75), which clash badly with this palette.
+
+[colors]
+cursor         = { text = "#1a1b26", cursor = "#c0caf5" }
+vi_mode_cursor = { text = "#1a1b26", cursor = "#bb9af7" } # purple: vi mode is obvious at a glance
+selection      = { text = "CellForeground", background = "#283457" }
+footer_bar     = { foreground = "#c0caf5", background = "#16161e" }
+
+[colors.search]
+matches       = { foreground = "#1a1b26", background = "#a9b1d6" }
+focused_match = { foreground = "#1a1b26", background = "#ff9e64" }
+
+[colors.hints]
+start = { foreground = "#1a1b26", background = "#e0af68" }
+end   = { foreground = "#1a1b26", background = "#a9b1d6" }
+
+# ── Terminal palette ─────────────────────────────────────────────────
+
 [colors.primary]
 background = '#1a1b26'
 foreground = '#c0caf5'
