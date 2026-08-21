@@ -1,46 +1,104 @@
+# ╔═══════════════════════════════════════════════════════════════════╗
+# ║                            ALACRITTY                              ║
+# ╚═══════════════════════════════════════════════════════════════════╝
+#
+# Only non-default values live here, so this file reads as "what I changed"
+# rather than "what Alacritty does". Notably absent, on purpose:
+#   window.opacity  — Hyprland owns it (hypr/settings/rules.lua, class Alacritty)
+#   terminal.osc52  — the "OnlyCopy" default already lets Neovim copy out over
+#                     SSH; "CopyPaste" would let any remote process *read* the
+#                     local clipboard.
+#   env.TERM        — the `alacritty` terminfo is installed and does truecolor.
+
 [general]
 import = ["themes/tokyonight-night.toml"]
-live_config_reload = true
+
+# ── Window ───────────────────────────────────────────────────────────
 
 [window]
 padding = { x = 8, y = 8 }
 dynamic_padding = true
-option_as_alt = "Both"
 decorations = "None"
-decorations_theme_variant = "Dark"
+decorations_theme_variant = "Dark" # GTK/CSD variant; no-op while decorations = "None"
+option_as_alt = "Both"             # macOS only: Option → Alt, for zsh word-motions
+
+# ── Scrolling ────────────────────────────────────────────────────────
 
 [scrolling]
 history = 50000
 multiplier = 5
 
+# ── Font ─────────────────────────────────────────────────────────────
+
 [font]
 size = 12
-offset = { x = 0, y = 4 }
-builtin_box_drawing = true
+offset = { x = 0, y = 4 }       # +4px line spacing
+glyph_offset = { x = 0, y = 2 } # glyphs anchor to the cell bottom; re-center them in the taller cell
 
 [font.normal]
 family = "JetBrainsMono Nerd Font"
 style = "Regular"
 
-[selection]
-save_to_clipboard = true
+# ── Cursor ───────────────────────────────────────────────────────────
 
 [cursor]
 style = { shape = "Beam", blinking = "On" }
 vi_mode_style = { shape = "Block", blinking = "Off" }
 blink_interval = 500
-blink_timeout = 0
-unfocused_hollow = true
+blink_timeout = 0 # never stop blinking
 thickness = 0.2
+
+# ── Bell ─────────────────────────────────────────────────────────────
+# Off upstream (duration = 0). A brief flash is useful for "build finished".
+
+[bell]
+animation = "EaseOutExpo"
+duration = 80
+color = "#7aa2f7" # tokyonight blue, matching hypr/settings/theme.lua
+
+# ── Input ────────────────────────────────────────────────────────────
+
+[selection]
+save_to_clipboard = true
 
 [mouse]
 hide_when_typing = true
 
+[keyboard]
+# Filling in gaps where Alacritty ships a macOS default but no Linux one.
+bindings = [
+  # New window: no Linux default at all (macOS gets Cmd+N).
+  { key = "N", mods = "Control|Shift", action = "CreateNewWindow" },
+
+  # Clear scrollback: macOS gets Cmd+K, Linux gets nothing. Both entries fire,
+  # in definition order — form-feed clears the screen, then history goes.
+  { key = "K", mods = "Control|Shift", mode = "~Vi|~Search", chars = "\u000C" },
+  { key = "K", mods = "Control|Shift", mode = "~Vi|~Search", action = "ClearHistory" },
+]
+
+# ── Hints ────────────────────────────────────────────────────────────
+# Defining hints.enabled REPLACES the upstream default array, so the
+# open-in-browser hint has to be restated here to keep it alongside the
+# copy hint. Its regex is copied verbatim from upstream — the `\\u`
+# sequences are escaped backslashes that reach the regex engine as literal
+# `\u0000`, so retyping them by hand will silently break matching.
+
+# Ctrl+Shift+O, or click — open in the default handler.
 [[hints.enabled]]
-command = "xdg-open"
+regex = "(ipfs:|ipns:|magnet:|mailto:|gemini://|gopher://|https://|http://|news:|file:|git://|ssh:|ftp://)[^\\u0000-\\u001F\\u007F-\\u009F<>\"\\s{-}\\^⟨⟩`\\\\]+"
 hyperlinks = true
 post_processing = true
 persist = false
 mouse.enabled = true
 binding = { key = "O", mods = "Control|Shift" }
+command = "xdg-open" # macOS: "open"
+
+# Ctrl+Shift+U — copy to the clipboard instead of opening. No `mouse` key, so
+# only the hint above underlines on hover.
+[[hints.enabled]]
 regex = "(ipfs:|ipns:|magnet:|mailto:|gemini://|gopher://|https://|http://|news:|file:|git://|ssh:|ftp://)[^\\u0000-\\u001F\\u007F-\\u009F<>\"\\s{-}\\^⟨⟩`\\\\]+"
+hyperlinks = true
+post_processing = true
+persist = false
+binding = { key = "U", mods = "Control|Shift" }
+action = "Copy"
