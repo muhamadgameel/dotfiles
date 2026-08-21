@@ -47,7 +47,10 @@ export LESS="--raw-control-chars --use-color --quit-if-one-screen --no-init"
 export LANG=en_US.UTF-8
 
 # ===== History
-HISTSIZE=100000
+# HISTSIZE is deliberately larger than SAVEHIST: hist_expire_dups_first only has
+# room to drop duplicates ahead of unique entries when the in-memory list is
+# bigger than what gets written to disk.
+HISTSIZE=120000
 SAVEHIST=100000
 HISTFILE=$ZSH_CACHE_DIR/zsh_history
 
@@ -63,5 +66,3 @@ setopt hist_verify            # Show command with history expansion to user befo
 setopt hist_find_no_dups      # When searching history do not display results already cycled through twice
 setopt hist_reduce_blanks     # Remove extra blanks from each command line being added to history
 
-# Lists the 10 most used commands
-alias history-stat="history 0 | awk '{print \$2}' | sort | uniq -c | sort -n -r | head"

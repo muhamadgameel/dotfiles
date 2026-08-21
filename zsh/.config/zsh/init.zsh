@@ -1,3 +1,5 @@
+# ZSH_CONF_DIR is already set by .zshrc; derive it from this file's own path so
+# init.zsh also works when sourced directly.
 typeset -g ZSH_CONF_DIR=${0:a:h}
 
 # Load custom completions
@@ -5,7 +7,8 @@ fpath+=$ZSH_CONF_DIR/completions
 
 # Load custom functions
 fpath+=$ZSH_CONF_DIR/functions
-autoload -Uz -- "$ZSH_CONF_DIR"/functions/[^_]*(:t)
+# (N) so an empty functions/ directory is not a startup error.
+autoload -Uz -- "$ZSH_CONF_DIR"/functions/[^_]*(N:t)
 
 # Load configs.
 #
@@ -14,6 +17,7 @@ autoload -Uz -- "$ZSH_CONF_DIR"/functions/[^_]*(:t)
 # so that plugins contributing to $fpath are registered before compinit runs.
 sources=(
   "settings"
+  "cache"
   "input"
   "aliases"
   "env"
@@ -53,10 +57,8 @@ ZSH_AUTOSUGGEST_STRATEGY=(history completion)
 # startup and per-prompt saving. Safe as long as no widget is defined later.
 ZSH_AUTOSUGGEST_MANUAL_REBIND=1
 
-# Load starship Prompt
-if (( $+commands[starship] )); then
-  eval "$(starship init zsh)"
-fi
+# Load starship Prompt (cached; see core/cache.zsh)
+cached-eval starship starship init zsh
 
 # Startup profiling: ZSH_PROFILE=1 zsh -i -c exit
 (( ${+ZSH_PROFILE} )) && zprof
