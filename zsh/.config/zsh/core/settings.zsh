@@ -1,7 +1,12 @@
-autoload -U zmv
+autoload -Uz zmv
 
-# Cache OS detection globally (used by aliases.zsh, env.zsh)
-typeset -g _os=$(uname)
+# Cache OS detection globally (used by aliases.zsh, env.zsh).
+# $OSTYPE is a zsh builtin parameter, so this costs no fork.
+case $OSTYPE in
+  linux*)  typeset -g _os=Linux ;;
+  darwin*) typeset -g _os=Darwin ;;
+  *)       typeset -g _os=${(C)OSTYPE%%[0-9.]*} ;;
+esac
 
 # ===== Basics
 setopt no_beep              # do not beep on error
@@ -33,25 +38,13 @@ unsetopt hup          # Do not kill jobs on shell exit
 setopt prompt_subst      # Enable parameter expansion, command substitution, and arithmetic expansion in the prompt
 setopt transient_rprompt # only show the rprompt on the current prompt
 
-# ===== Termcap (add colors to less)
-export LESS_TERMCAP_mb=$'\E[01;31m'    # Begins blinking.
-export LESS_TERMCAP_md=$'\E[01;31m'    # Begins bold.
-export LESS_TERMCAP_me=$'\E[0m'        # Ends mode.
-export LESS_TERMCAP_se=$'\E[0m'        # Ends standout-mode.
-export LESS_TERMCAP_so=$'\E[00;47;30m' # Begins standout-mode.
-export LESS_TERMCAP_ue=$'\E[0m'        # Ends underline.
-export LESS_TERMCAP_us=$'\E[01;32m'    # Begins underline.
-export LESS_TERMCAP_mr=$(tput rev 2>/dev/null) || export LESS_TERMCAP_mr=''
-export LESS_TERMCAP_mh=$(tput dim 2>/dev/null) || export LESS_TERMCAP_mh=''
-export LESS_TERMCAP_ZN=$(tput ssubm 2>/dev/null) || export LESS_TERMCAP_ZN=''
-export LESS_TERMCAP_ZV=$(tput rsubm 2>/dev/null) || export LESS_TERMCAP_ZV=''
-export LESS_TERMCAP_ZO=$(tput ssupm 2>/dev/null) || export LESS_TERMCAP_ZO=''
-export LESS_TERMCAP_ZW=$(tput rsupm 2>/dev/null) || export LESS_TERMCAP_ZW=''
-export LESS="--raw-control-chars"
+# ===== Pager
+export LESS="--raw-control-chars --use-color --quit-if-one-screen --no-init"
 
 # ===== Locale
+# Only LANG is set on purpose: LC_ALL overrides every LC_* category and cannot
+# be selectively undone, which breaks per-category overrides like LC_TIME.
 export LANG=en_US.UTF-8
-export LC_ALL=en_US.UTF-8
 
 # ===== History
 HISTSIZE=100000
@@ -62,8 +55,8 @@ setopt bang_hist              # Treat the '!' character specially during expansi
 setopt extended_history       # Write the history file in the ":start:elapsed;command" format
 setopt share_history          # Share history between all sessions (implies inc_append_history_time)
 setopt hist_expire_dups_first # Delete duplicates first when HISTFILE size exceeds HISTSIZE.
-setopt hist_ignore_dups       # Do not record an entry that was just recorded
-setopt hist_ignore_all_dups   # Delete old recorded entry if new entry is a duplicate
+setopt hist_ignore_all_dups   # Delete old recorded entry if new entry is a duplicate (implies hist_ignore_dups)
+setopt hist_fcntl_lock        # Use fcntl locking on the history file; safer with many concurrent shells
 setopt hist_ignore_space      # Ignore commands that start with space
 setopt hist_save_no_dups      # Do not write duplicate entries in the history file
 setopt hist_verify            # Show command with history expansion to user before running it

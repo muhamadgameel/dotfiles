@@ -18,7 +18,7 @@ USAGE: $0 [archive_name.zip] [/path/to/include/into/archive]
     .7z
 
 EOF
-return 1
+  return 1
 fi
 
 # strip the path, just in case one is provided for some reason

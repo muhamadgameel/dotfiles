@@ -1,6 +1,10 @@
 # Inspired by Zap: https://github.com/zap-zsh/zap
-emulate -L zsh
-setopt extended_glob nomatch nullglob
+#
+# NOTE: deliberately no `emulate`/`setopt` at file scope. This file is sourced
+# from init.zsh outside any function, so `emulate -L zsh` would not restore on
+# return -- it would reset the options settings.zsh had just set, and leak
+# nullglob shell-wide. The globs below need neither: parenthesised alternation
+# is core zsh globbing, and `(N)` is a per-glob nullglob qualifier.
 
 # Use parameter expansion with default for XDG_DATA_HOME
 : ${XDG_DATA_HOME:=$HOME/.local/share}
@@ -48,9 +52,9 @@ _zpm_pull() {
 
 _zpm_clean() {
   print -P "%F{blue}⚡ Zpm - Clean%f\n"
-  local unused_found=0
-  for plugin in $ZPM_PLUGIN_DIR/*(/); do
-    local plugin_name=${plugin:t}
+  local unused_found=0 plugin plugin_name answer
+  for plugin in $ZPM_PLUGIN_DIR/*(N/); do
+    plugin_name=${plugin:t}
     if (( ! ${+ZPM_INSTALLED_PLUGINS[$plugin_name]} )); then
       unused_found=1
       print -P "%F{yellow}❔ Remove: $plugin_name? (y/N)%f"
@@ -68,6 +72,7 @@ _zpm_clean() {
 
 _zpm_update() {
   print -P "\n%F{blue}Updating All Plugins%f\n"
+  local plugin plugin_dir
   for plugin plugin_dir in ${(kv)ZPM_INSTALLED_PLUGINS}; do
     _zpm_pull "$plugin_dir"
   done
@@ -75,6 +80,7 @@ _zpm_update() {
 
 _zpm_list() {
   print -P "%F{blue}⚡ Zpm - List%f\n"
+  local plugin plugin_dir
   integer i=1
   for plugin plugin_dir in ${(kv)ZPM_INSTALLED_PLUGINS}; do
     print -P "%F{yellow}$i%f %F{green}$plugin%f 🔌 ($plugin_dir)"

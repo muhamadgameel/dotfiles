@@ -16,6 +16,7 @@ OPTIONS:
     -r, --remove    remove archive
 
 EOF
+  return 1
 fi
 
 remove_archive=1
