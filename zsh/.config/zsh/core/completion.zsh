@@ -7,11 +7,16 @@ ZCOMPDUMP="$ZSH_CACHE_DIR/compdump"
 # was written stay invisible forever. Do the full scan once a day and take the
 # fast path the rest of the time: the glob matches only when the dump is missing
 # or older than 24h.
+# The explicit `touch` matters: compinit only rewrites the dump when the set of
+# completions actually changed, so after the first full run the file keeps its
+# old mtime, stays >24h old forever, and every subsequent shell takes the slow
+# path. Touching it restarts the clock whether or not the contents changed.
 autoload -Uz compinit
 if [[ -n ${ZCOMPDUMP}(#qN.mh-24) ]]; then
   compinit -C -i -d ${ZCOMPDUMP}
 else
   compinit -i -d ${ZCOMPDUMP}
+  command touch ${ZCOMPDUMP}
 fi
 
 {

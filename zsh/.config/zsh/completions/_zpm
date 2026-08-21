@@ -1,9 +1,32 @@
 #compdef zpm
 
+local state state_descr line
+typeset -A opt_args
+
 local -a subcmds=(
-	"clean:Remove unused plugins"
+	"clean:Remove plugins that are no longer declared"
+	"compile:Rebuild the .zwc byte-code cache"
+	"doctor:Report problems with the current setup"
 	"help:Show help informations"
-	"list:List plugins"
-	"update:Update plugins"
+	"list:List declared plugins"
+	"update:Update all plugins"
 )
-_describe 'zpm' subcmds
+
+_arguments -C \
+	'1: :->command' \
+	'*:: :->argument'
+
+case $state in
+	(command)
+		_describe 'zpm' subcmds
+		;;
+	(argument)
+		# Room for future per-plugin subcommands; complete declared plugin names.
+		case $words[1] in
+			(clean|update)
+				local -a plugins=(${(ko)ZPM_DECLARED_PLUGINS})
+				(( $#plugins )) && _describe 'plugin' plugins
+				;;
+		esac
+		;;
+esac

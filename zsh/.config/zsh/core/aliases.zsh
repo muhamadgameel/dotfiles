@@ -31,8 +31,8 @@ alias ....="cd ../../.."
 
 # File and directory operations
 alias mkdir="mkdir -pv" # -p creates parent dirs, -v for verbose
-alias cp="cp -iv"       # Confirm before overwriting
-alias mv="mv -iv"       # Confirm before overwriting
+alias cp="cp -v"
+alias mv="mv -v"
 
 # Resources Management
 alias df='df -h'
