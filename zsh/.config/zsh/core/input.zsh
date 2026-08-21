@@ -1,6 +1,9 @@
 # Treat these characters as part of a word.
 WORDCHARS='*?_-.[]~&;!#$%^(){}<>'
 
+# Disable ^S/^Q start-stop output control so those keys are free for the line editor.
+unsetopt flow_control
+
 zmodload zsh/terminfo
 zmodload zsh/zle
 zmodload zsh/parameter  # For more efficient parameter handling

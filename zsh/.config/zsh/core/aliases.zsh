@@ -21,7 +21,7 @@ fi
 
 if (( $+commands[zoxide] )); then
   # --cmd cd makes zoxide define a real `cd` function rather than aliasing it.
-  eval "$(zoxide init zsh --cmd cd)"
+  cached-eval zoxide zoxide init zsh --cmd cd
 fi
 
 # Directory navigation
@@ -105,6 +105,10 @@ alias help="run-help"
 # Misc
 alias h="history"
 alias j="jobs -l"
-alias path='echo $PATH | tr ":" "\n"'
+alias path='print -l $path'  # builtin; no echo|tr fork
+
+# Lists the 10 most used commands
+alias history-stat="history 0 | awk '{print \$2}' | sort | uniq -c | sort -n -r | head"
+
 alias now="date +\"%T\""
 alias nowdate="date +\"%d-%m-%Y\""

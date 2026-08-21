@@ -75,5 +75,6 @@ unset _fzf_clip
 export FZF_CTRL_R_OPTS
 
 # ===== Key bindings and completion
-# fzf 0.48+ ships its shell integration behind `fzf --zsh`.
-source <(fzf --zsh)
+# fzf 0.48+ ships its shell integration behind `fzf --zsh` (cached; see
+# core/cache.zsh).
+cached-eval fzf fzf --zsh
