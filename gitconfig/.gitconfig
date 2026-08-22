@@ -1,18 +1,52 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# Identity
+# ─────────────────────────────────────────────────────────────────────────────
 [user]
   email = mgameel@pm.me
   name = Muhamad Gameel
   signingkey = 62BA848F76AF27B5
 
+# ─────────────────────────────────────────────────────────────────────────────
+# Core behaviour
+# ─────────────────────────────────────────────────────────────────────────────
 [core]
   editor = nvim
   whitespace = trailing-space,space-before-tab
   autocrlf = input
+  # Filesystem monitor + untracked cache: makes `git status` near-instant on
+  # large repos by avoiding a full worktree scan.
   fsmonitor = true
   untrackedCache = true
+  # -F quits immediately when output fits one screen, -R keeps colour,
+  # -X leaves the output in scrollback instead of wiping it.
+  pager = less -FRX
 
 [init]
   defaultBranch = main
 
+# ─────────────────────────────────────────────────────────────────────────────
+# Performance
+# ─────────────────────────────────────────────────────────────────────────────
+[index]
+  # Skip the trailing SHA-1 of the index file; pure write-speed win.
+  skipHash = true
+
+[pack]
+  # 0 = use all available cores.
+  threads = 0
+  useSparse = true
+
+[checkout]
+  # Parallel checkout workers (0 = auto).
+  workers = 0
+
+[gc]
+  # Keep the commit-graph fresh so `git log --graph` and merge-base stay fast.
+  writeCommitGraph = true
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Transfer: push / pull / fetch
+# ─────────────────────────────────────────────────────────────────────────────
 [push]
   default = current
   autoSetupRemote = true
@@ -25,70 +59,290 @@
   prune = true
   pruneTags = true
   all = true
+  # 0 = parallelise across remotes/submodules automatically.
+  parallel = 0
+  writeCommitGraph = true
 
+# ─────────────────────────────────────────────────────────────────────────────
+# History rewriting
+# ─────────────────────────────────────────────────────────────────────────────
 [rebase]
   autoSquash = true
   autoStash = true
   updateRefs = true
+  # Refuse to silently drop commits deleted from the interactive todo list.
+  missingCommitsCheck = error
+  # Show a diffstat of what the rebase brought in.
+  stat = true
 
 [merge]
   conflictstyle = zdiff3
+  autoStash = true
+  tool = nvimdiff
+  # Reference the branch names in conflict markers rather than "theirs".
+  log = true
 
+[mergetool]
+  keepBackup = false
+  prompt = false
+
+[rerere]
+  # Remember how you resolved a conflict and replay it automatically.
+  enabled = true
+  autoUpdate = true
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Diffing
+# ─────────────────────────────────────────────────────────────────────────────
 [diff]
   algorithm = histogram
   colorMoved = default
+  # Don't flag re-indented blocks as moved code.
+  colorMovedWS = allow-indentation-change
   mnemonicPrefix = true
-  renames = true
+  renames = copies
+  submodule = log
+  # Highlight whitespace errors on both sides of the diff.
+  wsErrorHighlight = all
+  tool = nvimdiff
 
-[rerere]
-  enabled = true
+[difftool]
+  prompt = false
 
-[column]
-  ui = auto
+[apply]
+  whitespace = fix
 
+# ─────────────────────────────────────────────────────────────────────────────
+# Custom diff drivers
+# Git has no built-in driver for these, so define them here. They give
+# `git diff` hunk headers the enclosing function/class name. Wired up in
+# ~/.config/git/attributes.
+# ─────────────────────────────────────────────────────────────────────────────
+[diff "typescript"]
+  xfuncname = "^[[:space:]]*((export[[:space:]]+)?(default[[:space:]]+)?(abstract[[:space:]]+)?(async[[:space:]]+)?(function|class|interface|type|enum|namespace|const|let|var)[[:space:]]+[A-Za-z_$][A-Za-z0-9_$]*.*)$"
+
+[diff "lua"]
+  xfuncname = "^[[:space:]]*((local[[:space:]]+)?function[[:space:]].*|[A-Za-z_][A-Za-z0-9_.:]*[[:space:]]*=[[:space:]]*function.*)$"
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Reading history
+# ─────────────────────────────────────────────────────────────────────────────
+[log]
+  date = human
+  # Respect .mailmap when showing authors.
+  mailmap = true
+
+[blame]
+  date = short
+  coloring = highlightRecent
+  # NB: blame.ignoreRevsFile is deliberately NOT set globally — git fails hard
+  # when the file is absent. The `bl` alias applies it only when it exists.
+  markIgnoredLines = true
+  markUnblamableLines = true
+
+[grep]
+  lineNumber = true
+  column = true
+  patternType = perl
+
+[status]
+  showStash = true
+  submoduleSummary = true
+  # Show renames in status output.
+  renames = copies
+
+[stash]
+  showPatch = true
+  showIncludeUntracked = true
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Branches, tags, worktrees, submodules
+# ─────────────────────────────────────────────────────────────────────────────
 [branch]
   sort = -committerdate
+  # Track the upstream without making it a merge base for `git pull`.
+  autoSetupMerge = simple
 
 [tag]
   sort = version:refname
   gpgSign = true
 
+[worktree]
+  guessRemote = true
+
+[submodule]
+  recurse = true
+  fetchJobs = 0
+
+[column]
+  ui = auto
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Signing
+# ─────────────────────────────────────────────────────────────────────────────
 [gpg]
   program = gpg
 
 [commit]
   gpgsign = true
+  # Show the full staged diff in the commit message editor.
   verbose = true
 
-[help]
-  autocorrect = prompt
-
+# ─────────────────────────────────────────────────────────────────────────────
+# Integrity
+# ─────────────────────────────────────────────────────────────────────────────
 [transfer]
   fsckobjects = true
 
 [receive]
   fsckObjects = true
 
+# ─────────────────────────────────────────────────────────────────────────────
+# Convenience
+# ─────────────────────────────────────────────────────────────────────────────
+[help]
+  autocorrect = prompt
+
+[credential]
+  # Store credentials in the GNOME keyring instead of plaintext.
+  helper = libsecret
+
+[url "git@github.com:"]
+  # Always push over SSH even when a remote was cloned via HTTPS.
+  pushInsteadOf = https://github.com/
+
+[advice]
+  # Quiet the walls of hint text for situations you already understand.
+  addEmptyPathspec = false
+  detachedHead = false
+  skippedCherryPicks = false
+  statusHints = false
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Pretty formats
+# ─────────────────────────────────────────────────────────────────────────────
+[pretty]
+  lg = "%C(auto)%h%d %C(reset)%s %C(dim white)— %an, %ar"
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Aliases
+# ─────────────────────────────────────────────────────────────────────────────
 [alias]
+  # ── Status & navigation ────────────────────────────────────────────────────
+  s = status -sb
   st = status -sb
+  root = rev-parse --show-toplevel
+  sha = rev-parse --short HEAD
+  # Default branch of origin, e.g. "main" — used by the aliases below. Falls back
+  # to probing common names, since origin/HEAD is often unset or stale.
+  dbr = "!f() { b=$(git symbolic-ref --short refs/remotes/origin/HEAD 2>/dev/null); b=${b#origin/}; if [ -z \"$b\" ]; then for c in main master trunk develop; do if git show-ref --verify --quiet \"refs/remotes/origin/$c\"; then b=$c; break; fi; done; fi; echo \"${b:-main}\"; }; f"
+
+  # ── Branching ──────────────────────────────────────────────────────────────
   sw = switch
   sc = switch -c
   br = branch -vv
+  # Branches by recency, with subject line — far more useful than plain `branch`.
+  recent = branch --sort=-committerdate --format='%(HEAD) %(color:yellow)%(refname:short)%(color:reset)  %(color:green)%(committerdate:relative)%(color:reset)  %(contents:subject)'
+  # Jump back to the default branch whatever it's called.
+  home = "!git switch \"$(git dbr)\""
+
+  # ── Committing ─────────────────────────────────────────────────────────────
   ci = commit
+  cm = commit -m
   ca = commit --amend
   can = commit --amend --no-edit
+  # Autosquash targets: `git fixup <sha>` then `git ri <sha>~1`.
+  fixup = commit --fixup
+  squash = commit --squash
+  wip = !git add -A && git commit --no-verify -m 'WIP'
+  unwip = "!git log -1 --pretty=%s | grep -q '^WIP$' && git reset --soft HEAD~1 || echo 'HEAD is not a WIP commit'"
+
+  # ── Undoing ────────────────────────────────────────────────────────────────
+  undo = reset --soft HEAD~1
+  uncommit = reset --mixed HEAD~1
   unstage = restore --staged
   discard = restore
-  undo = reset --soft HEAD~1
+  # Destructive: throws away all uncommitted work and untracked files.
+  nevermind = !git reset --hard HEAD && git clean -fd
+
+  # ── Diffing ────────────────────────────────────────────────────────────────
   d = diff
   ds = diff --staged
-  dw = diff --word-diff
+  dw = diff --word-diff=color
+  dt = difftool
+  # Everything this branch changed relative to the default branch.
+  dbranch = "!git diff \"$(git merge-base HEAD \"origin/$(git dbr)\")\"..HEAD"
+  changed = diff --name-only
+  # Files this branch touched — pipes nicely into a linter or formatter.
+  changed-branch = "!git diff --name-only \"$(git merge-base HEAD \"origin/$(git dbr)\")\"..HEAD"
+
+  # ── History ────────────────────────────────────────────────────────────────
+  l = log --graph --pretty=lg
+  lg = log --graph --pretty=lg
+  lga = log --graph --all --pretty=lg
   last = log -1 HEAD --stat
-  lg = log --oneline --graph --all --decorate
-  cleanup = !git branch --merged | grep -v '\\*\\|main\\|master' | xargs -n 1 git branch -d
-  gone = !git branch -vv | grep ': gone]' | awk '{print $1}'
-  prune-gone = !git gone | xargs git branch -D
-  wip = !git add -A && git commit -m 'WIP'
-  stash-all = stash push --include-untracked
+  # Commits on this branch that aren't on the default branch.
+  unmerged = "!git log --pretty=lg \"origin/$(git dbr)\"..HEAD"
+  # What did I do since yesterday?
+  standup = "!git log --since='yesterday' --author=\"$(git config user.name)\" --pretty=lg --all --no-merges"
+  # Full history of one file, following renames: git filelog path/to/file
+  filelog = log --follow -p --
+  # Blame ignoring whitespace, following code moved between files, and honouring
+  # .git-blame-ignore-revs when the repo has one.
+  bl = "!f() { r=\"$(git rev-parse --show-toplevel)/.git-blame-ignore-revs\"; if [ -f \"$r\" ]; then set -- --ignore-revs-file \"$r\" \"$@\"; fi; git blame -w -C -C -C --date=short \"$@\"; }; f"
+  who = shortlog -sne --no-merges
   contributors = shortlog -sne --all
+
+  # ── Rebasing ───────────────────────────────────────────────────────────────
+  ri = rebase -i --autosquash
+  rc = rebase --continue
+  ra = rebase --abort
+  rs = rebase --skip
+  # Fetch everything, then replay this branch on its upstream.
+  sync = !git fetch --all --prune && git rebase '@{upstream}'
+  # Replay this branch on the latest default branch.
+  update = "!git fetch origin && git rebase \"origin/$(git dbr)\""
+
+  # ── Pushing ────────────────────────────────────────────────────────────────
+  p = push
+  # Safe force-push: refuses if the remote moved or you haven't fetched it.
+  pf = push --force-with-lease --force-if-includes
+
+  # ── Stashing ───────────────────────────────────────────────────────────────
+  sta = stash push --include-untracked
+  stash-all = stash push --include-untracked
+  stl = stash list
+  stp = stash pop
+  sts = stash show -p
+
+  # ── Worktrees ──────────────────────────────────────────────────────────────
+  wt = worktree
+  wtl = worktree list
+  wta = worktree add
+  wtr = worktree remove
+
+  # ── Searching ──────────────────────────────────────────────────────────────
+  g = grep -n --heading --break
+  # Find tracked files by name: git f <pattern>
+  f = "!git ls-files | rg"
+
+  # ── Bisecting ──────────────────────────────────────────────────────────────
+  bs = bisect start
+  bgood = bisect good
+  bbad = bisect bad
+  breset = bisect reset
+
+  # ── Maintenance ────────────────────────────────────────────────────────────
+  # Delete local branches already merged into the default branch.
+  cleanup = "!git branch --merged \"origin/$(git dbr)\" | grep -vE '^\\*|^\\+|\\s(main|master|develop)$' | xargs -r -n1 git branch -d"
+  # Branches whose upstream was deleted on the remote.
+  gone = "!git for-each-ref --format='%(refname:short) %(upstream:track)' refs/heads | awk '$2 == \"[gone]\" {print $1}'"
+  prune-gone = "!git gone | xargs -r -n1 git branch -D"
   aliases = config --get-regexp ^alias
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Machine-local overrides (work identity, proxies, etc.).
+# Missing files are ignored silently, so this is safe to commit.
+# ─────────────────────────────────────────────────────────────────────────────
+[include]
+  path = ~/.gitconfig.local
