@@ -60,5 +60,12 @@ ZSH_AUTOSUGGEST_MANUAL_REBIND=1
 # Load starship Prompt (cached; see core/cache.zsh)
 cached-eval starship starship init zsh
 
+# starship's init sets RPROMPT to a second `starship prompt --right` command
+# substitution, which zsh runs on every prompt. right_format is empty, so that
+# whole process renders nothing -- measured at ~5ms per prompt, roughly a third
+# of the total. Drop it. If right_format is ever set in starship.toml, delete
+# these two lines to get the right prompt back.
+RPROMPT=''
+
 # Startup profiling: ZSH_PROFILE=1 zsh -i -c exit
 (( ${+ZSH_PROFILE} )) && zprof

@@ -1,12 +1,20 @@
-# TokyoNight Night palette:
-#   blue:    #7aa2f7    purple:  #bb9af7
-#   cyan:    #7dcfff    green:   #9ece6a
-#   yellow:  #e0af68    red:     #f7768e
-#   fg:      #c0caf5    comment: #565f89
+"$schema" = 'https://starship.rs/config-schema.json'
 
-add_newline = true
+# The blank line above each prompt lives in `format` below rather than in
+# `add_newline`, because add_newline also prepends a newline to the claude-code
+# statusline, where it costs a whole row.
+add_newline = false
+
+# Worst-case prompt lag. Every toolchain probe here is far under this (java 7ms,
+# rustc 58ms cold), so it acts purely as a safety valve: on a pathological repo
+# `git diff --shortstat` can take 100ms+, and a module that trips this renders
+# nothing rather than stalling the prompt. Leave it at the default.
+command_timeout = 500
+
+palette = 'tokyonight'
 
 format = """
+
 $username\
 $hostname\
 $localip\
@@ -18,72 +26,104 @@ $git_metrics\
 $git_status\
 $package\
 $nodejs\
+$deno\
+$bun\
 $python\
 $rust\
-$lua\
 $golang\
+$java\
+$lua\
+$c\
+$cpp\
+$zig\
+$php\
+$ruby\
+$nix_shell\
+$container\
+$direnv\
+$mise\
 $docker_context\
 $sudo\
 $cmd_duration\
-$line_break\
 $jobs\
 $status\
 $character"""
 
-[line_break]
-disabled = true
+# TokyoNight Night. Everything below refers to these by name, so retheming the
+# prompt is an edit to this table alone.
+[palettes.tokyonight]
+blue    = '#7aa2f7'
+purple  = '#bb9af7'
+cyan    = '#7dcfff'
+green   = '#9ece6a'
+yellow  = '#e0af68'
+red     = '#f7768e'
+orange  = '#ff9e64'
+fg      = '#c0caf5'
+comment = '#565f89'
 
 [character]
-success_symbol = '[❯](bold #9ece6a)'
-error_symbol = '[❯](bold #f7768e)'
+success_symbol = '[❯](bold green)'
+error_symbol = '[❯](bold red)'
 
-[localip]
-ssh_only = true
-format = '[@$localipv4](bold #f7768e) '
-disabled = false
-
+# username, hostname and localip are all SSH-gated, so they render as a group or
+# not at all -- which is why hostname carries no trailing space of its own.
 [username]
 format = '[$user]($style) '
-style_user = 'bold #7aa2f7'
-style_root = 'bold #f7768e'
+style_user = 'bold blue'
+style_root = 'bold red'
 
 [hostname]
-format = '[$hostname]($style) '
-style = 'bold #bb9af7'
+format = '[$ssh_symbol$hostname]($style)'
+ssh_symbol = ' '
+style = 'bold purple'
 ssh_only = true
 
+[localip]
+format = '[@$localipv4](bold red) '
+ssh_only = true
+disabled = false
+
 [directory]
-format = '[ $path]($style)[$read_only]($read_only_style) '
-style = 'bold #7aa2f7'
+format = '[ ](bold blue)[$path]($style)[$read_only]($read_only_style) '
+# Used instead of `format` inside a repo: dims the path above the repo root so
+# the project name is what the eye lands on.
+repo_root_format = '[ ](bold blue)[$before_root_path]($before_repo_root_style)[$repo_root]($repo_root_style)[$path]($style)[$read_only]($read_only_style) '
+style = 'blue'
+repo_root_style = 'bold blue'
+before_repo_root_style = 'comment'
 read_only = ' '
-read_only_style = '#f7768e'
+read_only_style = 'red'
 truncate_to_repo = true
 truncation_symbol = '…/'
-truncation_length = 2
+truncation_length = 3
 
 [git_branch]
 format = '[ $branch(:$remote_branch)]($style) '
-style = '#bb9af7'
+style = 'purple'
 
 [git_commit]
 format = '[\($hash$tag\)]($style) '
-style = '#565f89'
+style = 'comment'
+commit_hash_length = 7
 tag_symbol = '  '
 only_detached = true
 
 [git_state]
 format = '\([$state( $progress_current/$progress_total)]($style)\) '
-style = '#e0af68'
+style = 'yellow'
 
 [git_metrics]
 disabled = false
 format = '([+$added]($added_style) )([-$deleted]($deleted_style) )'
-added_style = '#9ece6a'
-deleted_style = '#f7768e'
+added_style = 'green'
+deleted_style = 'red'
 
 [git_status]
 format = '([$all_status$ahead_behind]($style) )'
-style = '#e0af68'
+style = 'yellow'
+# Submodule scanning is the expensive half of this module and near-useless here.
+ignore_submodules = true
 conflicted = ' '
 ahead = '⇡${count} '
 behind = '⇣${count} '
@@ -94,52 +134,170 @@ modified = ' '
 staged = ' '
 renamed = ' '
 deleted = ' '
+typechanged = ' '
 
 [package]
 format = '[ $version]($style) '
-style = '#e0af68'
+style = 'yellow'
 
 [nodejs]
 format = '[ $version]($style) '
-style = '#9ece6a'
+style = 'green'
+
+[deno]
+format = '[ $version]($style) '
+style = 'green'
+
+[bun]
+format = '[ $version]($style) '
+style = 'yellow'
 
 [python]
 format = '[ $version(\($virtualenv\))]($style) '
-style = '#e0af68'
+style = 'yellow'
 
 [rust]
 format = '[ $version]($style) '
-style = '#f7768e'
-
-[lua]
-format = '[ $version]($style) '
-style = '#7aa2f7'
+style = 'red'
 
 [golang]
 format = '[ $version]($style) '
-style = '#7dcfff'
+style = 'cyan'
+
+[java]
+format = '[ $version]($style) '
+style = 'red'
+
+[lua]
+format = '[ $version]($style) '
+style = 'blue'
+
+[c]
+format = '[ $version(-$name)]($style) '
+style = 'blue'
+
+[cpp]
+format = '[ $version(-$name)]($style) '
+style = 'blue'
+disabled = false
+
+[zig]
+format = '[ $version]($style) '
+style = 'orange'
+
+[php]
+format = '[ $version]($style) '
+style = 'purple'
+
+[ruby]
+format = '[ $version]($style) '
+style = 'red'
+
+[nix_shell]
+format = '[󱄅 $state( \($name\))]($style) '
+style = 'blue'
+
+[container]
+format = '[󰡨 $name]($style) '
+style = 'orange'
+
+[direnv]
+format = '[ $loaded/$allowed]($style) '
+style = 'yellow'
+disabled = false
+
+[mise]
+format = '[ $health]($style) '
+style = 'purple'
+disabled = false
 
 [docker_context]
 format = '[ $context]($style) '
-style = '#7dcfff'
+style = 'cyan'
 
 [sudo]
 disabled = false
 format = '[ ]($style)'
-style = 'bold #f7768e'
+style = 'bold red'
 
 [cmd_duration]
 format = '[ $duration]($style) '
-style = '#e0af68'
+style = 'yellow'
 min_time = 1_000
-
-[status]
-disabled = false
-format = '[$symbol$status]($style) '
-symbol = ' '
-style = '#f7768e'
+# Desktop notification when something long finishes and you have tabbed away.
+show_notifications = true
+min_time_to_notify = 45_000
 
 [jobs]
 format = '[$symbol$number]($style) '
 symbol = ' '
-style = '#7dcfff'
+style = 'cyan'
+symbol_threshold = 1
+number_threshold = 1
+
+[status]
+disabled = false
+# $common_meaning / $signal_name turn 139 into SEGV and 130 into INT.
+format = '[$symbol $common_meaning$signal_name$maybe_int]($style) '
+symbol = ''
+not_executable_symbol = ''
+not_found_symbol = ''
+sigint_symbol = ''
+signal_symbol = ''
+style = 'red'
+map_symbol = true
+recognize_signal_code = true
+# Shows which stage of a pipeline actually failed, not just the last one.
+pipestatus = true
+pipestatus_separator = '[|](comment)'
+pipestatus_segment_format = '[$status](comment)'
+pipestatus_format = '\[$pipestatus\] => [$symbol $common_meaning$signal_name$maybe_int]($style) '
+
+# --- Claude Code statusline (starship >= 1.26) -----------------------------
+# Rendered by `starship statusline claude-code`; wired up in ~/.claude/settings.json.
+
+[profiles]
+claude-code = '$claude_model$directory$git_branch$git_status$claude_context$claude_cost'
+
+[claude_model]
+format = '[$symbol$model]($style) '
+symbol = '󱜙 '
+style = 'bold purple'
+
+[claude_context]
+format = '[$gauge $percentage]($style) '
+gauge_width = 8
+
+[[claude_context.display]]
+threshold = 0.0
+style = 'green'
+hidden = false
+
+[[claude_context.display]]
+threshold = 60.0
+style = 'yellow'
+hidden = false
+
+[[claude_context.display]]
+threshold = 80.0
+style = 'bold red'
+hidden = false
+
+[claude_cost]
+format = '[$symbol(\$$cost)]($style) '
+symbol = ' '
+
+[[claude_cost.display]]
+threshold = 0.0
+style = 'green'
+hidden = true
+
+[[claude_cost.display]]
+threshold = 1.0
+style = 'yellow'
+hidden = false
+
+[[claude_cost.display]]
+threshold = 5.0
+style = 'bold red'
+hidden = false
