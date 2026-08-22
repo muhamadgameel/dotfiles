@@ -1,0 +1,52 @@
+# Global gitattributes — read automatically from $XDG_CONFIG_HOME/git/attributes.
+
+# Let git detect text vs binary, and normalise line endings on commit.
+* text=auto
+
+# ── Diff drivers: gives hunk headers context-aware function names ────────────
+*.c      diff=cpp
+*.h      diff=cpp
+*.cpp    diff=cpp
+*.hpp    diff=cpp
+*.cs     diff=csharp
+*.css    diff=css
+*.go     diff=golang
+*.html   diff=html
+*.java   diff=java
+*.lua    diff=lua
+*.md     diff=markdown
+*.php    diff=php
+*.pl     diff=perl
+*.py     diff=python
+*.rb     diff=ruby
+*.rs     diff=rust
+*.tex    diff=tex
+*.ts     diff=typescript
+*.tsx    diff=typescript
+*.js     diff=typescript
+*.jsx    diff=typescript
+*.mjs    diff=typescript
+*.cjs    diff=typescript
+
+# ── Binary: never try to diff or merge these ─────────────────────────────────
+*.png    binary
+*.jpg    binary
+*.jpeg   binary
+*.gif    binary
+*.webp   binary
+*.ico    binary
+*.pdf    binary
+*.zip    binary
+*.gz     binary
+*.woff   binary
+*.woff2  binary
+*.ttf    binary
+*.otf    binary
+
+# ── Lockfiles: collapse in diffs and never merge by hand ─────────────────────
+*.lock       -diff
+package-lock.json  -diff
+pnpm-lock.yaml     -diff
+yarn.lock          -diff
+Cargo.lock         -diff
+uv.lock            -diff
