@@ -24,6 +24,7 @@ local languages = {
   'regex',
   'sql',
   'svelte',
+  'xml',
   'graphql',
   'dockerfile',
   'qmldir',
@@ -51,10 +52,6 @@ return {
         if not vim.treesitter.language.add(language) then
           return
         end
-
-        -- fold
-        vim.wo.foldmethod = 'expr'
-        vim.wo.foldexpr = 'v:lua.vim.treesitter.foldexpr()'
 
         -- highlight
         vim.treesitter.start(buf, language)

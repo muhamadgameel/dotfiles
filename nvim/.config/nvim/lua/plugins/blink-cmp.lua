@@ -1,6 +1,7 @@
 return {
   'saghen/blink.cmp',
-  event = 'VimEnter',
+  -- CmdlineEnter is needed alongside InsertEnter so ':' completion still
+  event = { 'InsertEnter', 'CmdlineEnter' },
   version = '1.*',
   dependencies = {
     { 'moyiz/blink-emoji.nvim' },

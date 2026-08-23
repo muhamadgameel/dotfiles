@@ -9,6 +9,7 @@ vim.api.nvim_create_autocmd('TextYankPost', {
 
 -- Enable spell checking for markdown and text files
 vim.api.nvim_create_autocmd('FileType', {
+  group = vim.api.nvim_create_augroup('SpellCheck', { clear = true }),
   pattern = { 'markdown', 'text' },
   callback = function()
     vim.opt_local.spell = true
@@ -39,7 +40,7 @@ vim.api.nvim_create_autocmd('BufReadPost', {
 -- Close special buffers with q
 vim.api.nvim_create_autocmd('FileType', {
   group = vim.api.nvim_create_augroup('CloseWithQ', { clear = true }),
-  pattern = { 'help', 'man', 'qf', 'checkhealth', 'lspinfo', 'notify', 'query', 'startuptime' },
+  pattern = { 'help', 'man', 'qf', 'checkhealth', 'notify', 'query', 'startuptime' },
   callback = function(ev)
     vim.bo[ev.buf].buflisted = false
     vim.keymap.set('n', 'q', '<cmd>close<cr>', { buffer = ev.buf, silent = true })
