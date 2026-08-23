@@ -224,9 +224,6 @@ style = 'bold red'
 format = '[ $duration]($style) '
 style = 'yellow'
 min_time = 1_000
-# Desktop notification when something long finishes and you have tabbed away.
-show_notifications = true
-min_time_to_notify = 45_000
 
 [jobs]
 format = '[$symbol$number]($style) '
