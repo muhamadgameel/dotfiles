@@ -19,12 +19,10 @@ vim.opt.rtp:prepend(lazypath)
 
 require('lazy').setup {
   spec = { { import = 'plugins' } },
-  defaults = { lazy = false },
+  -- Lazy by default; plugins that must be present at startup opt out with lazy = false
+  defaults = { lazy = true },
   install = { colorscheme = { 'kanagawa' } },
-  checker = {
-    enabled = true,
-    notify = false,
-  },
+  checker = { enabled = false },
   change_detection = {
     enabled = true,
     notify = false,

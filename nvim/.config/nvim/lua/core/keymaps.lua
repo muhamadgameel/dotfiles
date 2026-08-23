@@ -25,10 +25,6 @@ keymap('n', '#', '#zzzv', opts)
 keymap('n', 'g*', 'g*zzzv', opts)
 keymap('n', 'g#', 'g#zzzv', opts)
 
--- Vertical scroll and center
-keymap('n', '<C-d>', '<C-d>zz', opts)
-keymap('n', '<C-u>', '<C-u>zz', opts)
-
 -- Join lines keeping cursor position
 keymap('n', 'J', 'mzJ`z', opts)
 
@@ -57,9 +53,17 @@ keymap({ 'n', 'v' }, 'L', '$', opts)
 -- Buffers
 ----------------------------------------------------------------------------------
 keymap('n', '<leader>bb', '<cmd>e #<cr>', { desc = 'Switch to last buffer' })
-keymap('n', '<leader>bd', '<cmd>bd<cr>', { desc = 'Delete buffer' })
-keymap('n', '<Tab>', ':bnext<CR>', { desc = 'Next Buffer' })
-keymap('n', '<S-Tab>', ':bprevious<CR>', { desc = 'Previous Buffer' })
+-- Snacks.bufdelete closes the buffer without collapsing the window layout
+keymap('n', '<leader>bd', function()
+  Snacks.bufdelete()
+end, { desc = 'Delete buffer' })
+keymap('n', '<leader>bo', function()
+  Snacks.bufdelete.other()
+end, { desc = 'Delete other buffers' })
+keymap('n', ']b', '<cmd>BufferLineCycleNext<cr>', { desc = 'Next buffer' })
+keymap('n', '[b', '<cmd>BufferLineCyclePrev<cr>', { desc = 'Previous buffer' })
+keymap('n', ']B', '<cmd>BufferLineMoveNext<cr>', { desc = 'Move buffer right' })
+keymap('n', '[B', '<cmd>BufferLineMovePrev<cr>', { desc = 'Move buffer left' })
 
 ----------------------------------------------------------------------------------
 -- Windows
@@ -109,8 +113,21 @@ keymap('n', '<leader>fp', function()
   print('File path copied to clipboard: ' .. filePath)
 end, { desc = 'Copy file path to clipboard' })
 
--- Replace word under cursor
-keymap('n', '<leader>rw', [[:%s/\<<C-r><C-w>\>/<C-r><C-w>/I<Left><Left>]], { desc = 'Replace word under cursor' })
+-- Replace word under cursor (buffer-wide; <leader>rW is the project-wide version)
+keymap(
+  'n',
+  '<leader>rw',
+  [[:%s/\<<C-r><C-w>\>/<C-r><C-w>/gI<Left><Left><Left>]],
+  { desc = 'Replace word under cursor' }
+)
+
+----------------------------------------------------------------------------------
+-- Quickfix & Location list
+----------------------------------------------------------------------------------
+keymap('n', ']q', '<cmd>cnext<cr>zz', { desc = 'Next quickfix item' })
+keymap('n', '[q', '<cmd>cprev<cr>zz', { desc = 'Previous quickfix item' })
+keymap('n', ']l', '<cmd>lnext<cr>zz', { desc = 'Next loclist item' })
+keymap('n', '[l', '<cmd>lprev<cr>zz', { desc = 'Previous loclist item' })
 
 ----------------------------------------------------------------------------------
 -- Built-in tools (Neovim 0.12)

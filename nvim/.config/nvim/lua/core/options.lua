@@ -8,16 +8,14 @@ opt.shiftwidth = 2 -- Spaces per indent level (>>, <<, ==)
 opt.tabstop = 2 -- Spaces per Tab character
 opt.softtabstop = 2 -- Spaces per Tab in insert mode
 opt.shiftround = true -- Round indent to shiftwidth multiple
-opt.smartindent = true
 opt.breakindent = true -- Wrapped lines preserve indent
-opt.formatoptions = 'jcroqlnt'
+opt.formatoptions = 'jcroqln'
 
 ----------------------------------------------------------------------------------
 -- Text Display & Wrapping
 ----------------------------------------------------------------------------------
 opt.wrap = false
 opt.linebreak = true -- Wrap at word boundaries
-opt.textwidth = 120
 opt.list = true -- Show invisible characters
 opt.listchars = {
   tab = '» ',
@@ -53,6 +51,7 @@ opt.pumborder = 'rounded' -- Completion popup border
 opt.pummaxwidth = 40 -- Completion popup max width
 opt.winblend = 10 -- Floating window transparency
 opt.cmdheight = 0 -- Hide command line when not used
+opt.winborder = 'rounded' -- Global border for every floating window (0.11+)
 
 ----------------------------------------------------------------------------------
 -- Navigation & Scrolling
@@ -79,7 +78,6 @@ opt.titlestring = "%{substitute(getcwd(), $HOME, '~', '')}"
 ----------------------------------------------------------------------------------
 opt.ignorecase = true
 opt.smartcase = true -- Case-sensitive if uppercase used
-opt.gdefault = true -- :s/// replaces ALL matches (not just first)
 opt.inccommand = 'split' -- Live preview :substitute in split window
 opt.grepprg = 'rg --vimgrep'
 opt.grepformat = '%f:%l:%c:%m'
@@ -92,21 +90,6 @@ opt.infercase = true -- Infer case in keyword completion
 opt.wildmode = 'longest:full,full'
 opt.wildoptions = 'pum' -- Command completion as popup
 opt.wildignorecase = true
-opt.wildignore:append {
-  '*.o',
-  '*.obj',
-  '*.bin',
-  '*.dll',
-  '*.exe',
-  '*/.git/*',
-  '*/.hg/*',
-  '*/.svn/*',
-  '*.jpg',
-  '*.bmp',
-  '*.gif',
-  '*.png',
-  '*.jpeg',
-}
 
 ----------------------------------------------------------------------------------
 -- Files & Persistence
@@ -117,6 +100,7 @@ opt.undofile = true -- Persistent undo across sessions
 opt.undolevels = 10000
 opt.swapfile = false
 opt.writebackup = false
+opt.exrc = true -- Trust-prompted project-local .nvim.lua (handy in monorepos)
 opt.sessionoptions =
   { 'blank', 'buffers', 'curdir', 'folds', 'help', 'tabpages', 'winsize', 'winpos', 'terminal', 'localoptions' }
 
@@ -128,10 +112,8 @@ opt.mouse = 'a'
 vim.schedule(function()
   opt.clipboard = 'unnamedplus'
 end)
-opt.showmatch = true -- Briefly jump to matching bracket
 opt.timeoutlen = 500 -- Wait 500ms for mapped sequences
 opt.updatetime = 250 -- CursorHold delay (affects plugins)
-opt.fixeol = false -- Don't add final newline
 opt.iskeyword:append '-' -- Treat kebab-case as one word
 
 ----------------------------------------------------------------------------------
@@ -168,7 +150,6 @@ opt.diffopt = {
 -- Performance & UI Updates
 ----------------------------------------------------------------------------------
 opt.redrawtime = 1500 -- Max time for syntax highlighting
-opt.synmaxcol = 500 -- Syntax highlight only first 500 columns
 opt.scrollback = 100000 -- Terminal scrollback lines
 
 ----------------------------------------------------------------------------------
@@ -180,4 +161,5 @@ opt.tabclose = 'left'
 -- Messages
 ----------------------------------------------------------------------------------
 opt.shortmess:append 'c' -- Don't show completion messages
-opt.report = 0 -- Always report changed lines
+-- Replaces the default 'hit-enter', which forces press-Enter prompts under cmdheight=0
+opt.messagesopt = 'wait:500,history:1000,progress:c'
