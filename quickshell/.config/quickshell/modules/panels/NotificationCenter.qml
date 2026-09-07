@@ -1,137 +1,110 @@
+pragma ComponentBehavior: Bound
+
 import QtQuick
 import QtQuick.Layouts
-import Quickshell
 
 import "../../components" as Components
 import "../../config" as Config
 import "../../core" as Core
-import "../../layouts" as Layouts
 import "../../services" as Services
 
 /**
-* NotificationCenter - Panel showing notification history
+* NotificationCenter - notification history
+*
 */
-Loader {
+Components.SlidingPanel {
   id: root
-  active: true
 
-  required property ShellScreen screen
+  panelId: "notifications"
+  namespace: "quickshell-notification-center"
+  panelWidth: 420
 
-  function toggle() {
-    if (root.item) {
-      root.item.visible = !root.item.visible;
+  headerIcon: Services.Notification.doNotDisturb ? "bell-off" : "bell"
+  headerIconColor: Services.Notification.doNotDisturb ? Config.Theme.warning : Config.Theme.accent
+  headerTitle: "Notifications"
+  headerSubtitle: {
+    const n = Services.Notification.historyList.count;
+    if (Services.Notification.doNotDisturb)
+      return n === 0 ? "Do Not Disturb" : `Do Not Disturb · ${n}`;
+    return n === 0 ? "Nothing yet" : (n === 1 ? "1 notification" : `${n} notifications`);
+  }
+
+  // The list manages its own scrolling.
+  scrollable: false
+
+  // Reading the list is what marks them read - the bar badge used to only clear
+  // by deleting entries one at a time.
+  onOpened: Services.Notification.markAllRead()
+
+  // === Toolbar ===
+  RowLayout {
+    Layout.fillWidth: true
+    spacing: Core.Style.spaceS
+
+    Components.Button {
+      variant: "secondary"
+      icon: Services.Notification.doNotDisturb ? "bell-off" : "bell"
+      text: Services.Notification.doNotDisturb ? "DND on" : "DND off"
+      textSize: Core.Style.fontS
+      iconColor: Services.Notification.doNotDisturb ? Config.Theme.warning : Config.Theme.text
+      tooltipText: "Suppress notification popups"
+      onClicked: Config.Config.toggleDoNotDisturb()
+    }
+
+    Components.Spacer {}
+
+    Components.Button {
+      variant: "danger"
+      icon: "trash"
+      text: "Clear"
+      textSize: Core.Style.fontS
+      enabled: Services.Notification.historyList.count > 0
+      tooltipText: "Clear all notifications"
+      onClicked: Services.Notification.clearHistory()
     }
   }
 
-  sourceComponent: Component {
-    Core.PositionedPanelWindow {
-      id: centerWindow
-      visible: false
+  // === Empty state ===
+  Components.EmptyState {
+    Layout.fillWidth: true
+    Layout.fillHeight: true
+    visible: Services.Notification.historyList.count === 0
+    icon: "bell-off"
+    iconSize: 64
+    message: "No notifications"
+    hint: "Your notifications will appear here"
+  }
 
-      screen: root.screen
-      location: "top_right"
-      namespace: "quickshell-notification-center"
+  // === History list ===
+  Components.ScrollArea {
+    id: historyScroll
 
-      width: 400
-      height: Math.min(800, screen?.height * 0.7 || 800)
-      topExtra: Core.Style.barHeight
+    Layout.fillWidth: true
+    Layout.fillHeight: true
+    visible: Services.Notification.historyList.count > 0
 
-      // Panel content
-      Rectangle {
-        anchors.fill: parent
-        radius: Core.Style.radiusL
-        color: Config.Theme.bg
-        border.color: Config.Theme.overlay
-        border.width: Core.Style.borderThin
+    contentHeight: historyColumn.implicitHeight
+    boundsBehavior: Flickable.StopAtBounds
+    leftMargin: 0
+    rightMargin: 0
 
-        ColumnLayout {
-          anchors.fill: parent
-          anchors.margins: Core.Style.spaceM
-          spacing: Core.Style.spaceM
+    Column {
+      id: historyColumn
 
-          // Header
-          RowLayout {
-            Layout.fillWidth: true
-            spacing: Core.Style.spaceS
+      width: historyScroll.width
+      spacing: Core.Style.spaceS
 
-            Components.Icon {
-              icon: "bell"
-              size: Core.Style.fontXXL
-              color: Config.Theme.accent
-            }
+      Repeater {
+        model: Services.Notification.historyList
 
-            Components.Text {
-              text: "Notifications"
-              size: Core.Style.fontL
-              font.weight: Font.Bold
-              color: Config.Theme.text
-              Layout.fillWidth: true
-            }
+        delegate: Components.NotificationCard {
+          required property var model
 
-            // DND toggle
-            Components.Button {
-              icon: Services.Notification.doNotDisturb ? "bell-off" : "bell"
-              iconColor: Services.Notification.doNotDisturb ? Config.Theme.warning : Config.Theme.text
-              onClicked: Services.Notification.doNotDisturb = !Services.Notification.doNotDisturb
-            }
-
-            // Clear button
-            Components.Button {
-              icon: "trash"
-              tooltipText: "Clear all"
-              onClicked: Services.Notification.clearHistory()
-            }
-
-            // Close button
-            Components.Button {
-              icon: "close"
-              variant: "danger"
-              tooltipText: "Close"
-              onClicked: centerWindow.visible = false
-            }
-          }
-
-          // Empty state
-          Layouts.EmptyState {
-            Layout.fillWidth: true
-            Layout.fillHeight: true
-            visible: Services.Notification.historyList.count === 0
-            icon: "bell-off"
-            iconSize: 64
-            message: "No notifications"
-            hint: "Your notifications will appear here"
-          }
-
-          // Notification list
-          Components.ScrollArea {
-            id: historyScrollView
-            Layout.fillWidth: true
-            Layout.fillHeight: true
-            visible: Services.Notification.historyList.count > 0
-            contentHeight: historyColumn.height
-            boundsBehavior: Flickable.DragOverBounds
-            rightMargin: 0
-            leftMargin: 0
-
-            Column {
-              id: historyColumn
-              width: historyScrollView.width
-              spacing: Core.Style.spaceS
-
-              Repeater {
-                model: Services.Notification.historyList
-
-                delegate: Layouts.NotificationCard {
-                  id: historyItem
-                  width: parent.width
-                  compact: true
-                  showProgress: false
-                  notificationData: model
-                  onCloseClicked: Services.Notification.removeFromHistory(model.id)
-                }
-              }
-            }
-          }
+          width: historyColumn.width
+          compact: true
+          showProgress: false
+          notificationData: model
+          onCloseClicked: Services.Notification.removeFromHistory(model.id)
         }
       }
     }

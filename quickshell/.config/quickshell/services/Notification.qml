@@ -4,6 +4,7 @@ import QtQuick
 import Quickshell
 import Quickshell.Services.Notifications
 
+import "../config" as Config
 import "../core" as Core
 
 /**
@@ -15,13 +16,13 @@ Singleton {
 
   // === Configuration ===
   property int maxVisible: 5
-  property int maxHistory: 100
+  readonly property int maxHistory: Config.Config.notificationHistoryLimit
 
   // Duration per urgency level: [low, normal, critical]
   property var urgencyDurations: [3000, 5000, 10000]
 
   // === State ===
-  property bool doNotDisturb: false
+  readonly property bool doNotDisturb: Config.Config.doNotDisturb
   property int unreadCount: 0
 
   // === Models ===
@@ -145,6 +146,10 @@ Singleton {
     unreadCount = 0;
   }
 
+  function markAllRead() {
+    unreadCount = 0;
+  }
+
   // === Internal Handlers ===
 
   function _handleNotification(n) {
@@ -229,7 +234,12 @@ Singleton {
     };
 
     notification.tracked = true;
-    notification.closed.connect(() => _remove(data.id));
+
+    // Kept on the entry so _cleanup can disconnect it. An anonymous closure
+    // stayed attached to the notification for its entire lifetime.
+    const onClosed = () => root._remove(data.id);
+    _active[data.id].onClosed = onClosed;
+    notification.closed.connect(onClosed);
 
     activeList.insert(0, data);
 
@@ -285,16 +295,26 @@ Singleton {
 
   function _cleanup(id) {
     const entry = _active[id];
-    if (entry) {
-      entry.watcher?.destroy();
-      delete _active[id];
+    if (!entry)
+      return;
+
+    if (entry.onClosed && entry.notification) {
+      try {
+        entry.notification.closed.disconnect(entry.onClosed);
+      } catch (e) {
+      // Notification already gone - nothing left to disconnect from.
+      }
     }
+
+    entry.watcher?.destroy();
+    delete _active[id];
   }
 
   // === Progress ===
 
   function _updateProgress() {
     const now = Date.now();
+    const expired = [];
 
     for (var i = 0; i < activeList.count; i++) {
       const item = activeList.get(i);
@@ -310,13 +330,21 @@ Singleton {
       const progress = Math.max(1.0 - elapsed / meta.duration, 0);
 
       if (progress <= 0) {
-        animateAndRemove(item.id);
-        return;  // Process one removal per tick
+        // Collected rather than dispatched here: emitting mutates activeList
+        // underneath this loop.
+        expired.push(item.id);
+        continue;
       }
 
       if (Math.abs(item.progress - progress) > 0.01) {
         activeList.setProperty(i, "progress", progress);
       }
+    }
+
+    // Everything that expired this tick goes at once. Dispatching one per tick
+    // capped removals at 10/s, so a burst visibly trickled away.
+    for (const id of expired) {
+      animateAndRemove(id);
     }
   }
 

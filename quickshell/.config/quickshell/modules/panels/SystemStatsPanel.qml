@@ -1,10 +1,11 @@
+pragma ComponentBehavior: Bound
+
 import QtQuick
 import QtQuick.Layouts
 
 import "../../components" as Components
 import "../../config" as Config
 import "../../core" as Core
-import "../../layouts" as Layouts
 import "../../services" as Services
 
 /**
@@ -17,11 +18,11 @@ import "../../services" as Services
 * - Network throughput
 * - Disk usage
 */
-Layouts.SlidingPanel {
+Components.SlidingPanel {
   id: root
 
+  panelId: "systemstats"
   namespace: "quickshell-systemstats"
-  hasBackdrop: true
 
   // Header configuration
   headerIcon: Services.SystemStats.healthIcon
@@ -41,29 +42,39 @@ Layouts.SlidingPanel {
     weight: Core.Style.weightBold
   }
 
-  Layouts.ProgressRow {
+  Components.ProgressRow {
     Layout.fillWidth: true
     value: Services.SystemStats.cpuUsage / 100
     progressColor: _statusColor(Services.SystemStats.cpuUsageStatus)
     progressHeight: 8
   }
 
-  // Per-core breakdown
-  Layouts.Collapsible {
+  // Per-core breakdown.
+  //
+  // Bound to cpuCoreCount, not the cpuCores array: the array is replaced on
+  // every poll, which rebuilt every delegate twice a second - and on a machine
+  // with 32+ threads that is the whole section.
+  Components.Collapsible {
     title: "Per-Core Details"
     expanded: false
     Layout.fillWidth: true
-    visible: Services.SystemStats.cpuCores.length > 0
+    visible: Services.SystemStats.cpuCoreCount > 0
 
     Repeater {
-      model: Services.SystemStats.cpuCores
+      model: Services.SystemStats.cpuCoreCount
 
-      Layouts.ProgressRow {
+      Components.ProgressRow {
+        id: coreRow
+
+        required property int index
+
+        readonly property real usage: Services.SystemStats.cpuCores[index] ?? 0
+
         Layout.fillWidth: true
         label: "Core " + index
-        labelInfo: Math.round(modelData) + "%"
-        value: modelData / 100
-        progressColor: modelData > 90 ? Config.Theme.error : modelData > 70 ? Config.Theme.warning : Config.Theme.accentAlt
+        labelInfo: Math.round(usage) + "%"
+        value: usage / 100
+        progressColor: usage > 90 ? Config.Theme.error : usage > 70 ? Config.Theme.warning : Config.Theme.accentAlt
         progressHeight: 4
         showPercentage: false
       }
@@ -82,21 +93,21 @@ Layouts.SlidingPanel {
     weight: Core.Style.weightBold
   }
 
-  Layouts.ProgressRow {
+  Components.ProgressRow {
     Layout.fillWidth: true
     label: "RAM"
-    labelInfo: Services.SystemStats.formatBytes(Services.SystemStats.memUsed, 1) + " / " + Services.SystemStats.formatBytes(Services.SystemStats.memTotal, 1)
+    labelInfo: Core.Utils.formatBytes(Services.SystemStats.memUsed, 1) + " / " + Core.Utils.formatBytes(Services.SystemStats.memTotal, 1)
     value: Services.SystemStats.memPercent / 100
     progressColor: _statusColor(Services.SystemStats.memStatus)
     progressHeight: 8
     showPercentage: false
   }
 
-  Layouts.ProgressRow {
+  Components.ProgressRow {
     Layout.fillWidth: true
     visible: Services.SystemStats.hasSwap
     label: "Swap"
-    labelInfo: Services.SystemStats.formatBytes(Services.SystemStats.swapUsed, 1) + " / " + Services.SystemStats.formatBytes(Services.SystemStats.swapTotal, 1)
+    labelInfo: Core.Utils.formatBytes(Services.SystemStats.swapUsed, 1) + " / " + Core.Utils.formatBytes(Services.SystemStats.swapTotal, 1)
     value: Services.SystemStats.swapPercent / 100
     progressColor: Services.SystemStats.swapPercent > 50 ? Config.Theme.warning : Config.Theme.accentAlt
     progressHeight: 6
@@ -117,27 +128,27 @@ Layouts.SlidingPanel {
   }
 
   // CPU Temperature
-  Layouts.ProgressRow {
+  Components.ProgressRow {
     Layout.fillWidth: true
     visible: Services.SystemStats.hasCpuTemp
     icon: "chip"
     iconColor: _statusColor(Services.SystemStats.cpuTempStatus, Config.Theme.text)
     label: "CPU"
     value: Services.SystemStats.cpuTemp / 100
-    valueText: Services.SystemStats.formatTemp(Services.SystemStats.cpuTemp)
+    valueText: Core.Utils.formatTemp(Services.SystemStats.cpuTemp)
     progressColor: _statusColor(Services.SystemStats.cpuTempStatus, Config.Theme.success)
     progressHeight: 6
   }
 
   // GPU Temperature
-  Layouts.ProgressRow {
+  Components.ProgressRow {
     Layout.fillWidth: true
     visible: Services.SystemStats.hasGpuTemp
     icon: "gpu"
     iconColor: _statusColor(Services.SystemStats.gpuTempStatus, Config.Theme.text)
     label: "GPU"
     value: Services.SystemStats.gpuTemp / 100
-    valueText: Services.SystemStats.formatTemp(Services.SystemStats.gpuTemp)
+    valueText: Core.Utils.formatTemp(Services.SystemStats.gpuTemp)
     progressColor: _statusColor(Services.SystemStats.gpuTempStatus, Config.Theme.success)
     progressHeight: 6
   }
@@ -190,7 +201,7 @@ Layouts.SlidingPanel {
         }
 
         Components.Text {
-          text: Services.SystemStats.formatSpeed(Services.SystemStats.netDownSpeed)
+          text: Core.Utils.formatSpeed(Services.SystemStats.netDownSpeed)
           size: Core.Style.fontM
           font.weight: Core.Style.weightBold
         }
@@ -217,7 +228,7 @@ Layouts.SlidingPanel {
         }
 
         Components.Text {
-          text: Services.SystemStats.formatSpeed(Services.SystemStats.netUpSpeed)
+          text: Core.Utils.formatSpeed(Services.SystemStats.netUpSpeed)
           size: Core.Style.fontM
           font.weight: Core.Style.weightBold
         }
@@ -244,10 +255,10 @@ Layouts.SlidingPanel {
     weight: Core.Style.weightBold
   }
 
-  Layouts.ProgressRow {
+  Components.ProgressRow {
     Layout.fillWidth: true
     label: Services.SystemStats.diskMount
-    labelInfo: Services.SystemStats.formatBytes(Services.SystemStats.diskUsed, 1) + " / " + Services.SystemStats.formatBytes(Services.SystemStats.diskTotal, 1)
+    labelInfo: Core.Utils.formatBytes(Services.SystemStats.diskUsed, 1) + " / " + Core.Utils.formatBytes(Services.SystemStats.diskTotal, 1)
     value: Services.SystemStats.diskPercent / 100
     progressColor: _statusColor(Services.SystemStats.diskStatus)
     progressHeight: 10
@@ -255,7 +266,7 @@ Layouts.SlidingPanel {
   }
 
   Components.Text {
-    text: Services.SystemStats.formatBytes(Services.SystemStats.diskTotal - Services.SystemStats.diskUsed, 1) + " free"
+    text: Core.Utils.formatBytes(Services.SystemStats.diskTotal - Services.SystemStats.diskUsed, 1) + " free"
     size: Core.Style.fontXS
     color: Services.SystemStats.diskStatus !== "normal" ? Config.Theme.warning : Config.Theme.textMuted
   }
@@ -272,7 +283,7 @@ Layouts.SlidingPanel {
     Layout.fillWidth: true
 
     Components.Text {
-      text: "Updates every 2s"
+      text: "Updates every " + (Services.SystemStats.pollingInterval / 1000) + "s"
       size: Core.Style.fontXS
       color: Config.Theme.textMuted
     }

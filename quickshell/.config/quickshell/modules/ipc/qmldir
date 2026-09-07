@@ -1,0 +1,5 @@
+module modules.ipc
+
+Ipc 1.0 Ipc.qml
+Shortcuts 1.0 Shortcuts.qml
+singleton Targets 1.0 Targets.qml

@@ -17,6 +17,10 @@ import "../core" as Core
 Singleton {
   id: root
 
+  // Set by BluetoothPanel while it is visible. Discovery keeps the radio busy
+  // and costs power, so it only runs while something is displaying the results.
+  property bool panelOpen: false
+
   // === Adapter State ===
   readonly property BluetoothAdapter adapter: Bluetooth.defaultAdapter
   readonly property bool available: adapter !== null
@@ -119,12 +123,38 @@ Singleton {
     _discoveryTimer.stop();
   }
 
+  /**
+  * Connect to a device that is already paired.
+  *
+  * Marking it trusted lets it reconnect on its own later, which is only
+  * appropriate once it is paired. Use activate() for user taps.
+  */
   function connectDevice(device) {
     if (!device)
       return;
     Core.Logger.i("Bluetooth", `Connecting: ${device.name || device.address}`);
     device.trusted = true;
     device.connect();
+  }
+
+  /**
+  * Act on a device the user tapped.
+  *
+  * An unpaired device has to be paired first. Connecting straight to one marked
+  * it trusted as a side effect, silently granting auto-reconnect to whatever
+  * happened to be in range.
+  */
+  function activate(device) {
+    if (!device || isDeviceBusy(device))
+      return;
+
+    if (device.connected) {
+      disconnectDevice(device);
+    } else if (device.paired || device.trusted) {
+      connectDevice(device);
+    } else {
+      pairDevice(device);
+    }
   }
 
   function disconnectDevice(device) {
@@ -236,12 +266,24 @@ Singleton {
     onTriggered: root.stopDiscovery()
   }
 
-  // Auto-start discovery when enabled
+  // Auto-start discovery shortly after the adapter comes up, but only if the
+  // panel is open. Enabling Bluetooth used to kick off a 30s scan whether or
+  // not anything was going to show the results.
   Timer {
     id: _autoDiscoveryTimer
     interval: 1000
     running: false
-    onTriggered: root.startDiscovery()
+    onTriggered: {
+      if (root.panelOpen)
+        root.startDiscovery();
+    }
+  }
+
+  onPanelOpenChanged: {
+    if (panelOpen)
+      startDiscovery();
+    else
+      stopDiscovery();
   }
 
   // === State Changes ===

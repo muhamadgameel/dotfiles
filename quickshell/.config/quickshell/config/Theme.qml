@@ -2,46 +2,70 @@ pragma Singleton
 
 import QtQuick
 import Quickshell
-import "../types" as Types
 
+/**
+* Theme - the active colour palette, plus derived helpers
+*
+* Colours come from Themes.palettes, selected by Config.theme, so switching is
+* `qs ipc call theme set catppuccin-latte` rather than editing this file.
+*
+* Every colour resolves through _pick(), which falls back to the default
+* palette key by key - a palette missing a colour degrades to the default's
+* rather than rendering transparent.
+*/
 Singleton {
   id: root
 
-  // Theme identifier
-  readonly property string name: "catppuccin-mocha"
+  // Active theme identifier
+  readonly property string name: Themes.has(Config.theme) ? Config.theme : Themes.defaultName
+
+  readonly property var palette: Themes.get(name)
+  readonly property var fallback: Themes.get(Themes.defaultName)
+
+  // Whether the active palette is a dark one, for anything that needs to know.
+  readonly property bool isDark: palette.dark ?? true
+
+  function _pick(key) {
+    return palette[key] ?? fallback[key];
+  }
 
   // === Base Colors ===
-  readonly property color bg: "#1e1e2e"
-  readonly property color bgAlt: "#181825"
-  readonly property color bgDark: "#11111b"
-  readonly property color surface: "#313244"
-  readonly property color surfaceHover: "#45475a"
-  readonly property color surfaceActive: "#585b70"
+  readonly property color bg: _pick("bg")
+  readonly property color bgAlt: _pick("bgAlt")
+  readonly property color bgDark: _pick("bgDark")
+  readonly property color surface: _pick("surface")
+  readonly property color surfaceHover: _pick("surfaceHover")
+  readonly property color surfaceActive: _pick("surfaceActive")
 
   // === Text Colors ===
-  readonly property color text: "#cdd6f4"
-  readonly property color textDim: "#bac2de"
-  readonly property color textMuted: "#7f849c"
+  readonly property color text: _pick("text")
+  readonly property color textDim: _pick("textDim")
+  readonly property color textMuted: _pick("textMuted")
 
   // === Accent Colors ===
-  readonly property color accent: "#cba6f7"
-  readonly property color accentAlt: "#89b4fa"
-  readonly property color accentPink: "#f5c2e7"
+  readonly property color accent: _pick("accent")
+  readonly property color accentAlt: _pick("accentAlt")
+  readonly property color accentPink: _pick("accentPink")
 
   // === Semantic Colors ===
-  readonly property color success: "#a6e3a1"
-  readonly property color warning: "#f9e2af"
-  readonly property color error: "#f38ba8"
+  readonly property color success: _pick("success")
+  readonly property color warning: _pick("warning")
+  readonly property color error: _pick("error")
 
   // === Overlay Colors ===
-  readonly property color overlay: "#6c7086"
-  readonly property color overlayLight: "#7f849c"
-  readonly property color overlayLighter: "#9399b2"
+  readonly property color overlay: _pick("overlay")
+  readonly property color overlayLight: _pick("overlayLight")
+  readonly property color overlayLighter: _pick("overlayLighter")
 
   // === Absolute Colors ===
   readonly property color transparent: "transparent"
   readonly property color black: "#000000"
   readonly property color white: "#ffffff"
+
+  // === Elevation ===
+  // Shadow colour for raised surfaces. Derived from the palette so it reads
+  // correctly on a light theme, where pure black is far too heavy.
+  readonly property color shadow: isDark ? Qt.rgba(0, 0, 0, 0.45) : Qt.rgba(0, 0, 0, 0.15)
 
   // === Helper Functions ===
 
@@ -66,13 +90,25 @@ Singleton {
   * @returns Color for the urgency level
   */
   function urgencyColor(urgency) {
-    if (urgency === Types.Enums.Urgency.Critical)
+    if (urgency === Enums.Urgency.Critical)
       return error;
-    if (urgency === Types.Enums.Urgency.Normal)
+    if (urgency === Enums.Urgency.Normal)
       return accent;
-    if (urgency === Types.Enums.Urgency.Low)
+    if (urgency === Enums.Urgency.Low)
       return textMuted;
 
     return transparent;
+  }
+
+  /**
+  * Color for a "normal"/"warning"/"critical" status string.
+  * @param normalColor - what "normal" should be; defaults to the accent.
+  */
+  function statusColor(status, normalColor) {
+    if (status === "critical")
+      return error;
+    if (status === "warning")
+      return warning;
+    return normalColor !== undefined ? normalColor : accent;
   }
 }

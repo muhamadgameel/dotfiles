@@ -1,31 +1,115 @@
 pragma Singleton
 
 import QtQuick
+import Quickshell
 import Quickshell.Services.Pipewire
 
 import "../config" as Config
+import "../core" as Core
 import "../services" as Services
 
-QtObject {
+/**
+* Audio - PipeWire sink/source state and control
+*
+* Device swaps (plugging in AirPods, docking) briefly tear down the default
+* node before the replacement is ready, so the raw *Ready flags dip false for
+* that window and anything bound straight to them flickers.
+*
+* hasSink/hasSource stay true across a swap, and the value properties hold
+* their last reading from a ready device, so the bar shows a steady value
+* instead of "--".
+*/
+Singleton {
   id: root
 
-  // Core properties
+  // === Core nodes ===
   property PwNode sink: Pipewire.defaultAudioSink
   property PwNode source: Pipewire.defaultAudioSource
+
   property bool ready: Pipewire.ready
-  property bool sinkReady: sink?.ready ?? false
-  property bool sourceReady: source?.ready ?? false
+  readonly property bool sinkReady: sink?.ready ?? false
+  readonly property bool sourceReady: source?.ready ?? false
 
-  // Sink (output) properties
-  property real volume: sinkReady ? (sink.audio?.volume ?? 0) : 0
-  property bool muted: sinkReady ? (sink.audio?.muted ?? false) : false
+  // How long a device may be missing before it is reported as actually gone.
+  // Long enough to cover a profile switch, short enough that unplugging still
+  // reads as immediate.
+  readonly property int deviceSwapGraceMs: 1500
 
-  // Source (input/microphone) properties
-  property real micVolume: sourceReady ? (source.audio?.volume ?? 0) : 0
-  property bool micMuted: sourceReady ? (source.audio?.muted ?? false) : false
+  // Sticky presence - see the type comment.
+  property bool hasSink: false
+  property bool hasSource: false
 
-  // Connection to listen to PipeWire audio changes (sink/output)
-  property var _sinkAudioConnection: Connections {
+  // The OSD bar runs to maxVolume so the over-100% range is visible, while the
+  // number stays a plain percentage of unity gain.
+  readonly property real maxVolume: 1.5
+
+  // === Sink (output) ===
+  readonly property real volume: sinkReady ? (sink.audio?.volume ?? 0) : _heldVolume
+  readonly property bool muted: sinkReady ? (sink.audio?.muted ?? false) : _heldMuted
+
+  // === Source (input/microphone) ===
+  readonly property real micVolume: sourceReady ? (source.audio?.volume ?? 0) : _heldMicVolume
+  readonly property bool micMuted: sourceReady ? (source.audio?.muted ?? false) : _heldMicMuted
+
+  // === Held values (last reading from a ready device) ===
+  property real _heldVolume: 0
+  property bool _heldMuted: false
+  property real _heldMicVolume: 0
+  property bool _heldMicMuted: false
+
+  onVolumeChanged: {
+    if (sinkReady)
+      _heldVolume = volume;
+  }
+
+  onMutedChanged: {
+    if (sinkReady)
+      _heldMuted = muted;
+  }
+
+  onMicVolumeChanged: {
+    if (sourceReady)
+      _heldMicVolume = micVolume;
+  }
+
+  onMicMutedChanged: {
+    if (sourceReady)
+      _heldMicMuted = micMuted;
+  }
+
+  onSinkReadyChanged: {
+    if (sinkReady) {
+      sinkGoneTimer.stop();
+      root.hasSink = true;
+    } else if (root.hasSink) {
+      sinkGoneTimer.restart();
+    }
+  }
+
+  onSourceReadyChanged: {
+    if (sourceReady) {
+      sourceGoneTimer.stop();
+      root.hasSource = true;
+    } else if (root.hasSource) {
+      sourceGoneTimer.restart();
+    }
+  }
+
+  Timer {
+    id: sinkGoneTimer
+    interval: root.deviceSwapGraceMs
+    onTriggered: root.hasSink = false
+  }
+
+  Timer {
+    id: sourceGoneTimer
+    interval: root.deviceSwapGraceMs
+    onTriggered: root.hasSource = false
+  }
+
+  // === OSD triggers ===
+
+  Connections {
     target: root.sink?.audio ?? null
     enabled: root.sinkReady
 
@@ -38,8 +122,7 @@ QtObject {
     }
   }
 
-  // Connection to listen to PipeWire audio changes (source/microphone)
-  property var _sourceAudioConnection: Connections {
+  Connections {
     target: root.source?.audio ?? null
     enabled: root.sourceReady
 
@@ -52,103 +135,106 @@ QtObject {
     }
   }
 
-  // Private: Show volume OSD with computed data
+  /**
+  * Build and show the volume OSD.
+  * Reads sink.audio directly instead of root.volume
+  */
   function _showVolumeOSD() {
+    const audio = root.sink?.audio ?? null;
+    const value = audio?.volume ?? root.volume;
+    const isMuted = audio?.muted ?? root.muted;
+
     Services.OSD.show("progressRow", {
-      icon: getVolumeIcon(),
-      value: volume,
-      maxValue: 1.5,
-      iconColor: muted ? Config.Theme.error : Config.Theme.text,
-      progressColor: muted ? Config.Theme.error : (volume > 1.0 ? Config.Theme.warning : Config.Theme.accent),
-      valueText: Math.round(volume / 1 * 100) + "%"
-    });
+      icon: getVolumeIcon(value, isMuted),
+      value: value,
+      maxValue: root.maxVolume,
+      iconColor: isMuted ? Config.Theme.error : Config.Theme.text,
+      progressColor: isMuted ? Config.Theme.error : (value > 1.0 ? Config.Theme.warning : Config.Theme.accent),
+      valueText: Math.round(value * 100) + "%"
+    }, "volume");
   }
 
-  // Private: Show microphone OSD with computed data
+  // Same reasoning as _showVolumeOSD().
   function _showMicOSD() {
+    const audio = root.source?.audio ?? null;
+    const value = audio?.volume ?? root.micVolume;
+    const isMuted = audio?.muted ?? root.micMuted;
+
     Services.OSD.show("progressRow", {
-      icon: getMicIcon(),
-      value: micVolume,
+      icon: getMicIcon(value, isMuted),
+      value: value,
       maxValue: 1.0,
-      iconColor: micMuted ? Config.Theme.error : Config.Theme.text,
-      progressColor: micMuted ? Config.Theme.error : Config.Theme.accent
-    });
+      iconColor: isMuted ? Config.Theme.error : Config.Theme.text,
+      progressColor: isMuted ? Config.Theme.error : Config.Theme.accent,
+      valueText: Math.round(value * 100) + "%"
+    }, "mic");
   }
 
-  // Private: Get volume icon based on level and mute state
-  function getVolumeIcon() {
-    if (muted)
+  // === Icons ===
+
+  function getVolumeIcon(value, isMuted) {
+    const vol = value !== undefined ? value : root.volume;
+    const off = isMuted !== undefined ? isMuted : root.muted;
+
+    if (off)
       return "volume-mute";
-    if (volume == 0)
+    if (vol === 0)
       return "volume-off";
-    if (volume < 0.33)
+    if (vol < 0.33)
       return "volume-low";
-    if (volume <= 0.66)
+    if (vol <= 0.66)
       return "volume-medium";
     return "volume-high";
   }
 
-  // Private: Get microphone icon based on mute state
-  function getMicIcon() {
-    if (micMuted || micVolume < 0.01)
-      return "microphone-off";
-    return "microphone";
+  function getMicIcon(value, isMuted) {
+    const vol = value !== undefined ? value : root.micVolume;
+    const off = isMuted !== undefined ? isMuted : root.micMuted;
+
+    return (off || vol < 0.01) ? "microphone-off" : "microphone";
   }
 
-  // Device detection
-  property bool isHeadphones: {
+  // === Device detection ===
+
+  readonly property bool isHeadphones: {
     if (!sinkReady || !sink)
       return false;
 
-    let desc = sink.description?.toLowerCase() || "";
-    let name = sink.name?.toLowerCase() || "";
-    let nickname = sink.nickname?.toLowerCase() || "";
-    let deviceApi = sink.properties["device.api"]?.toLowerCase() || "";
-    let bluezProfile = sink.properties["api.bluez5.profile"]?.toLowerCase() || "";
+    const deviceApi = sink.properties?.["device.api"]?.toLowerCase() ?? "";
+    const bluezProfile = sink.properties?.["api.bluez5.profile"]?.toLowerCase() ?? "";
 
-    let isBluetooth = deviceApi === "bluez5" && bluezProfile.includes("a2dp");
-    let hasHeadphoneKeyword = desc.includes("headphone") || desc.includes("headset") || desc.includes("earbuds") || desc.includes("airpods") || desc.includes("buds") || desc.includes("earpods") || name.includes("headphone") || name.includes("headset") || nickname.includes("headphone") || nickname.includes("headset");
+    // A2DP is a headset profile in practice; bluez speakers report it too, but
+    // treating them as headphones only changes the icon.
+    if (deviceApi === "bluez5" && bluezProfile.includes("a2dp"))
+      return true;
 
-    return isBluetooth || hasHeadphoneKeyword;
+    const desc = sink.description?.toLowerCase() ?? "";
+    const name = sink.name?.toLowerCase() ?? "";
+    const nickname = sink.nickname?.toLowerCase() ?? "";
+    const haystack = `${desc} ${name} ${nickname}`;
+
+    return ["headphone", "headset", "earbuds", "airpods", "buds", "earpods"].some(k => haystack.includes(k));
   }
 
-  // Reactive device lists (properties instead of functions for reactivity)
-  readonly property var sinkDevices: {
-    const nodes = Pipewire.nodes.values;
-    return nodes.filter(node => node.isSink && node.audio && !node.isStream);
+  // === Reactive device and stream lists ===
+
+  readonly property var sinkDevices: Pipewire.nodes.values.filter(n => n.isSink && n.audio && !n.isStream)
+  readonly property var sourceDevices: Pipewire.nodes.values.filter(n => n.isSource && n.audio && !n.isStream)
+  readonly property var sinkStreams: Pipewire.nodes.values.filter(n => n.isSink && n.audio && n.isStream)
+  readonly property var sourceStreams: Pipewire.nodes.values.filter(n => n.isSource && n.audio && n.isStream)
+
+  // Binding these keeps their audio properties live; without the tracker the
+  // volume and mute values on non-default nodes never update.
+  PwObjectTracker {
+    objects: [root.sink, root.source].concat(root.sinkDevices, root.sourceDevices, root.sinkStreams, root.sourceStreams)
   }
 
-  readonly property var sourceDevices: {
-    const nodes = Pipewire.nodes.values;
-    return nodes.filter(node => node.isSource && node.audio && !node.isStream);
-  }
+  // === Control ===
 
-  // Reactive stream lists
-  readonly property var sinkStreams: {
-    const nodes = Pipewire.nodes.values;
-    return nodes.filter(node => node.isSink && node.audio && node.isStream);
-  }
-
-  readonly property var sourceStreams: {
-    const nodes = Pipewire.nodes.values;
-    return nodes.filter(node => node.isSource && node.audio && node.isStream);
-  }
-
-  // Track all audio nodes to ensure proper binding
-  property var _tracker: PwObjectTracker {
-    objects: {
-      const base = [root.sink, root.source];
-      const devices = [...root.sinkDevices, ...root.sourceDevices];
-      const streams = [...root.sinkStreams, ...root.sourceStreams];
-      return base.concat(devices, streams);
-    }
-  }
-
-  // Volume control functions
   function setVolume(vol) {
     if (!sinkReady || !sink.audio)
       return;
-    sink.audio.volume = Math.max(0, Math.min(1.5, vol));
+    sink.audio.volume = Core.Utils.clamp(vol, 0, root.maxVolume);
   }
 
   function toggleMute() {
@@ -157,11 +243,10 @@ QtObject {
     sink.audio.muted = !muted;
   }
 
-  // Microphone control functions
   function setMicVolume(vol) {
     if (!sourceReady || !source.audio)
       return;
-    source.audio.volume = Math.max(0, Math.min(1.0, vol));
+    source.audio.volume = Core.Utils.clamp(vol, 0, 1.0);
   }
 
   function toggleMicMute() {
@@ -170,7 +255,6 @@ QtObject {
     source.audio.muted = !micMuted;
   }
 
-  // Device management
   function setDefaultSink(node) {
     Pipewire.preferredDefaultAudioSink = node;
   }
@@ -179,7 +263,6 @@ QtObject {
     Pipewire.preferredDefaultAudioSource = node;
   }
 
-  // Helper to get friendly device name
   function deviceName(node) {
     if (!node)
       return "Unknown";

@@ -3,11 +3,23 @@ pragma Singleton
 import QtQuick
 import Quickshell
 
+import "../config" as Config
+
+/**
+* Style - design tokens
+*
+* Every dimension, duration and easing the shell uses is named here, so a
+* change lands everywhere at once and no component invents its own spacing.
+*
+* Sizes derive from `uiScale`, which is persisted; durations go through
+* duration(), which collapses to 0 when animations are switched off.
+*/
 Singleton {
   id: root
 
-  // UI Scale (can be made configurable later)
-  readonly property real uiScale: 1.0
+  // UI scale, persisted via Settings. Every dimension below derives from it,
+  // so changing it rescales the whole shell.
+  readonly property real uiScale: Config.Config.uiScale
 
   // === Bar Dimensions ===
   readonly property int barHeight: Math.round(32 * uiScale)
@@ -20,6 +32,9 @@ Singleton {
   // === Widget Dimensions ===
   readonly property int widgetSize: Math.round(28 * uiScale)
   readonly property int iconSize: Math.round(18 * uiScale)
+
+  // Widest the focused-window title may get before it elides.
+  readonly property int windowTitleMaxWidth: Math.round(320 * uiScale)
 
   // === Font Sizes ===
   readonly property real fontXXS: 6 * uiScale
@@ -59,6 +74,42 @@ Singleton {
   readonly property int animFast: 150
   readonly property int animNormal: 250
   readonly property int animSlow: 400
+
+  // === Motion ===
+  readonly property bool motionEnabled: Config.Config.animationsEnabled
+
+  /**
+  * Length of an animation, honouring the animations-off setting.
+  *
+  * Returns 0 rather than skipping the animation, so completion signals still
+  * fire and nothing that waits on onFinished stalls.
+  */
+  function duration(ms) {
+    return root.motionEnabled ? Math.round(ms) : 0;
+  }
+
+  // === Easing ===
+  // Panels and other large surfaces settle without overshoot; overshoot is
+  // reserved for small elements popping in, where it reads as liveliness
+  // rather than as the layout wobbling.
+  readonly property int easeStandard: Easing.OutCubic
+  readonly property int easeEnter: Easing.OutBack
+  readonly property int easeExit: Easing.InCubic
+  readonly property real enterOvershoot: 1.1
+
+  // === Pop (small things appearing in place: tooltips, OSD) ===
+  readonly property int popShowDuration: animFast
+  readonly property int popHideDuration: animFaster
+  readonly property real popHiddenScale: 0.85
+
+  // === Slide (cards entering from an edge: notification popups) ===
+  readonly property int slideShowDuration: animSlow
+  readonly property int slideHideDuration: animNormal
+  readonly property real slideHiddenScale: 0.8
+  readonly property int slideDistance: Math.round(300 * uiScale)
+
+  // Gap between consecutive cards in a stack, so they arrive in sequence.
+  readonly property int slideStagger: 80
 
   // === OSD Dimensions ===
   readonly property int osdWidth: Math.round(280 * uiScale)

@@ -5,13 +5,15 @@ import Quickshell
 import Quickshell.Io
 
 import "../config" as Config
+import "../core" as Core
 import "../services" as Services
 
 /**
 * Brightness - Service for controlling display brightness
 *
-* Uses brightnessctl to manage backlight brightness.
-* Monitors /sys/class/backlight for external changes (hardware keys, etc).
+* brightnessctl writes the value; reads come straight from
+* /sys/class/backlight/<device>/brightness via the FileView that is already
+* watching it.
 *
 * Usage:
 *   Services.Brightness.brightness    // Current value (0.0 - 1.0)
@@ -25,7 +27,7 @@ Singleton {
 
   // === Public Properties ===
   property real brightness: 0.0       // Current brightness (0.0 - 1.0)
-  property int maxBrightness: 100     // Maximum raw value
+  property int maxBrightness: 0       // Maximum raw value
   property int currentBrightness: 0   // Current raw value
   property bool ready: false          // Whether brightness control is available
   property string device: ""          // Backlight device name
@@ -34,9 +36,13 @@ Singleton {
   readonly property real stepSize: 0.05       // Step for increase/decrease (5%)
   readonly property real minBrightness: 0.01  // Minimum (1%) to prevent black screen
 
+  // How long after our own write to ignore inotify events, so the change we
+  // just made does not come back as an "external change" and show a second OSD.
+  readonly property int selfWriteGraceMs: 400
+
   // === Private Properties ===
   property real _queuedBrightness: NaN
-  property bool _settingBrightness: false
+  property real _lastSelfWrite: 0
 
   // === Debounce Timer ===
   // Prevents command spam during rapid scroll/slider adjustments
@@ -94,8 +100,8 @@ Singleton {
   function set(value) {
     if (!ready)
       return;
-    value = Math.max(minBrightness, Math.min(1.0, value));
-    _setBrightnessDebounced(value);
+    root._queuedBrightness = Core.Utils.clamp(value, minBrightness, 1.0);
+    debounceTimer.restart();
   }
 
   /**
@@ -108,17 +114,13 @@ Singleton {
 
   // === Private Functions ===
 
-  function _setBrightnessDebounced(value) {
-    root._queuedBrightness = value;
-    debounceTimer.restart();
-  }
-
   function _applyBrightness(value) {
-    var percentage = Math.round(value * 100);
-    root._settingBrightness = true;
+    root._lastSelfWrite = Date.now();
     root.brightness = value;
+    root.currentBrightness = Math.round(value * root.maxBrightness);
     root._showOSD();
-    _setProc.command = ["brightnessctl", "s", percentage + "%"];
+
+    _setProc.command = ["brightnessctl", "-c", "backlight", "-q", "s", Math.round(value * 100) + "%"];
     _setProc.running = true;
   }
 
@@ -129,96 +131,100 @@ Singleton {
       maxValue: 1.0,
       iconColor: Config.Theme.text,
       progressColor: Config.Theme.accent
-    });
+    }, "brightness");
   }
 
-  function _refreshFromSystem() {
-    if (!ready || _settingBrightness)
+  // Read the value the watcher already holds - no process spawn.
+  function _refreshFromWatcher() {
+    if (!ready || maxBrightness <= 0)
       return;
-    _refreshProc.running = true;
+
+    // Our own write, echoed back by inotify.
+    if (Date.now() - root._lastSelfWrite < root.selfWriteGraceMs)
+      return;
+
+    const raw = parseInt(brightnessWatcher.text().trim(), 10);
+    if (isNaN(raw))
+      return;
+
+    const value = raw / maxBrightness;
+    if (Math.abs(value - root.brightness) < 0.005)
+      return;
+
+    root.currentBrightness = raw;
+    root.brightness = value;
+    root._showOSD();
   }
 
   // === Processes ===
 
-  // Set brightness via brightnessctl
+  // Set brightness via brightnessctl. `command` is set by _applyBrightness().
   Process {
     id: _setProc
     running: false
-    onExited: {
-      root._settingBrightness = false;
-    }
-  }
 
-  // Initialize: get device info and current brightness
-  Process {
-    id: _initProc
-    running: true
-    command: ["sh", "-c", "brightnessctl -m | head -n1"]
-    stdout: StdioCollector {
+    stderr: StdioCollector {
       onStreamFinished: {
-        // brightnessctl -m output: device,class,current,percentage,max
-        // Example: intel_backlight,backlight,15000,100%,15000
-        var output = text.trim();
-        if (output === "") {
-          root.ready = false;
-          console.log("Brightness: No backlight device found");
-          return;
-        }
-
-        var parts = output.split(",");
-        if (parts.length >= 5) {
-          root.device = parts[0];
-          root.currentBrightness = parseInt(parts[2]);
-          root.maxBrightness = parseInt(parts[4]);
-          if (root.maxBrightness > 0) {
-            root.brightness = root.currentBrightness / root.maxBrightness;
-            root.ready = true;
-            console.log("Brightness: Initialized device '" + root.device + "' at " + Math.round(root.brightness * 100) + "%");
-          }
-        }
+        const msg = text.trim();
+        if (msg)
+          Core.Logger.w("Brightness", msg);
       }
     }
   }
 
-  // Refresh brightness from system (for external changes)
+  // Initialize: resolve the device and its range.
+  // -c backlight restricts the search to display backlights, so a keyboard LED
+  // is never picked up as "the" brightness device.
   Process {
-    id: _refreshProc
-    running: false
-    command: ["sh", "-c", "brightnessctl -m | head -n1"]
+    id: _initProc
+    running: true
+    command: ["brightnessctl", "-c", "backlight", "-m"]
+
     stdout: StdioCollector {
       onStreamFinished: {
-        var output = text.trim();
-        if (output === "")
+        // brightnessctl -m output: device,class,current,percentage,max
+        // Example: intel_backlight,backlight,15000,100%,15000
+        const line = text.trim().split("\n")[0] ?? "";
+        if (line === "") {
+          root.ready = false;
+          Core.Logger.w("Brightness", "No backlight device found");
           return;
-
-        var parts = output.split(",");
-        if (parts.length >= 5) {
-          var current = parseInt(parts[2]);
-          var max = parseInt(parts[4]);
-          if (max > 0) {
-            var newBrightness = current / max;
-            // Only update if significantly different (avoids feedback loops)
-            if (Math.abs(newBrightness - root.brightness) > 0.01) {
-              root.currentBrightness = current;
-              root.brightness = newBrightness;
-              root._showOSD();
-            }
-          }
         }
+
+        const parts = line.split(",");
+        if (parts.length < 5) {
+          Core.Logger.w("Brightness", `Unexpected brightnessctl output: ${line}`);
+          return;
+        }
+
+        const current = parseInt(parts[2], 10);
+        const max = parseInt(parts[4], 10);
+        if (isNaN(current) || isNaN(max) || max <= 0) {
+          Core.Logger.w("Brightness", `Unusable brightness range: ${line}`);
+          return;
+        }
+
+        root.device = parts[0];
+        root.currentBrightness = current;
+        root.maxBrightness = max;
+        root.brightness = current / max;
+        root.ready = true;
+        Core.Logger.i("Brightness", `Device '${root.device}' at ${Math.round(root.brightness * 100)}%`);
       }
     }
   }
 
   // === File Watcher ===
-  // Watch for external brightness changes (hardware keys, other apps)
+  // Picks up external changes (hardware keys, other apps). The FileView holds
+  // the contents itself, so onLoaded reads them directly.
   FileView {
     id: brightnessWatcher
-    path: root.device !== "" ? "/sys/class/backlight/" + root.device + "/brightness" : ""
+    path: root.device !== "" ? `/sys/class/backlight/${root.device}/brightness` : ""
     watchChanges: path !== ""
+    printErrors: false
 
-    onFileChanged: {
-      // Use Qt.callLater to avoid reading stale values
-      Qt.callLater(root._refreshFromSystem);
-    }
+    onFileChanged: reload()
+
+    onLoaded: Qt.callLater(root._refreshFromWatcher)
   }
 }

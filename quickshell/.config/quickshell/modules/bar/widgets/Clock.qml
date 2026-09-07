@@ -7,13 +7,17 @@ import "../../../core" as Core
 import "../../../services" as Services
 
 /**
-* Clock - Bar widget showing time and date
+* Clock - time and date, and the way in to the calendar
+*
+* Left click opens the calendar panel.
 */
 Item {
   id: root
 
+  signal calendarRequested
+
   implicitWidth: content.implicitWidth
-  implicitHeight: parent.height
+  implicitHeight: Core.Style.widgetSize
 
   RowLayout {
     id: content
@@ -42,22 +46,23 @@ Item {
     }
   }
 
+  Component.onDestruction: Services.Tooltip.forget(root)
+
   MouseArea {
     anchors.fill: parent
     hoverEnabled: true
     cursorShape: Qt.PointingHandCursor
 
     onEntered: {
-      Services.Tooltip.show(root, Services.Time.dateLong, "bottom");
+      Services.Tooltip.show(root, `${Services.Time.dateLong}\n\nClick: Calendar`, "bottom");
     }
 
     onExited: {
       Services.Tooltip.hide();
     }
 
-    onClicked: {
-      Core.Logger.d("Clock", "Clicked - show calendar panel");
-      // TODO: Open calendar panel
-    }
+    acceptedButtons: Qt.LeftButton
+
+    onClicked: root.calendarRequested()
   }
 }

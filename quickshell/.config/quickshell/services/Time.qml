@@ -3,8 +3,16 @@ pragma Singleton
 import QtQuick
 import Quickshell
 
-/*
-* Time - Time updates and formatting
+/**
+* Time - the clock, and formatting that depends on it
+*
+* One SystemClock for the whole shell. Every widget that shows a time binds to
+* the strings below rather than running a timer of its own, so there is a single
+* wakeup per second no matter how many clocks are on screen.
+*
+* Usage:
+*   Services.Time.timeShort              // "14:05"
+*   Services.Time.formatRelativeTime(d)  // "2 minutes ago"
 */
 Singleton {
   id: root

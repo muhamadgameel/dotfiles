@@ -127,18 +127,19 @@ local shotDir = '"$(xdg-user-dir PICTURES)/Screenshots"'
 local shotFile = shotDir .. '/"$(date +%Y%m%d_%H%M%S)".png'
 local mkdir = "mkdir -p " .. shotDir .. " && "
 
-hl.bind("Print", hl.dsp.exec_cmd(mkdir .. "grim " .. shotFile), { description = "Screenshot to file" })
 hl.bind(
-	"SHIFT + Print",
+	"Print",
 	hl.dsp.exec_cmd(mkdir .. 'grim -g "$(slurp)" ' .. shotFile),
 	{ description = "Screenshot region to file" }
 )
-hl.bind(mod .. " + Print", hl.dsp.exec_cmd("grim - | wl-copy"), { description = "Screenshot to clipboard" })
+hl.bind("SHIFT + Print", hl.dsp.exec_cmd(mkdir .. "grim " .. shotFile), { description = "Screenshot to file" })
 hl.bind(
-	mod .. " + SHIFT + Print",
+	mod .. " + Print",
 	hl.dsp.exec_cmd('grim -g "$(slurp)" - | wl-copy'),
 	{ description = "Screenshot region to clipboard" }
 )
+hl.bind(mod .. " + SHIFT + Print", hl.dsp.exec_cmd("grim - | wl-copy"), { description = "Screenshot to clipboard" })
+
 
 -- ╔═══════════════════════════════════════════════════════════════════╗
 -- ║                       SYSTEM CONTROLS                             ║

@@ -8,7 +8,7 @@ import "../core" as Core
 * Text - Text display component with optional icon
 *
 * A styled text component that follows the design system.
-* Supports optional icon prefix/suffix.
+* Supports an optional icon before or after the label.
 *
 * Usage:
 *   // Simple text
@@ -20,8 +20,8 @@ import "../core" as Core
 *   // Icon on right
 *   Text { text: "Settings"; icon: "chevron-right"; iconPosition: "right" }
 *
-*   // Multi-line with wrap
-*   Text { text: "Long text..."; wrapMode: Text.Wrap; maximumLineCount: 2 }
+*   // Multi-line with wrap (give it a width via Layout.fillWidth)
+*   Text { Layout.fillWidth: true; text: "Long..."; wrapMode: Text.Wrap }
 */
 Item {
   id: root
@@ -52,50 +52,34 @@ Item {
 
   // === Internal ===
   readonly property bool hasIcon: icon !== ""
-  readonly property bool shouldWrap: label.wrapMode !== Text.NoWrap
 
-  // Auto fill width in layouts when wrapping is enabled
-  Layout.fillWidth: shouldWrap
+  // Sized from content. Callers that wrap must supply a width themselves
+  // (Layout.fillWidth or an anchor)
+  implicitWidth: row.implicitWidth
+  implicitHeight: row.implicitHeight
 
-  // Size based on content, not parent
-  implicitWidth: hasIcon ? row.implicitWidth : label.implicitWidth
-  implicitHeight: hasIcon ? row.implicitHeight : label.implicitHeight
-
-  // Simple text (no icon) - render directly for correct sizing
-  Text {
-    id: label
-    visible: !root.hasIcon
-    width: parent.width
-    font.pixelSize: root.size
-    font.weight: root.weight
-    color: Config.Theme.text
-    elide: Text.ElideRight
-    verticalAlignment: Text.AlignVCenter
-  }
-
-  // With icon - use RowLayout
   RowLayout {
     id: row
-    visible: root.hasIcon
+
     anchors.fill: parent
-    spacing: root.spacing
+    spacing: root.hasIcon ? root.spacing : 0
     layoutDirection: root.iconPosition === "right" ? Qt.RightToLeft : Qt.LeftToRight
 
     Icon {
+      visible: root.hasIcon
       icon: root.icon
       size: root.iconSize
       color: root.iconColor
     }
 
     Text {
+      id: label
+
       Layout.fillWidth: true
-      text: label.text
       font.pixelSize: root.size
       font.weight: root.weight
-      color: label.color
-      elide: label.elide
-      wrapMode: label.wrapMode
-      maximumLineCount: label.maximumLineCount
+      color: Config.Theme.text
+      elide: Text.ElideRight
       verticalAlignment: Text.AlignVCenter
     }
   }

@@ -1,5 +1,7 @@
 import QtQuick
 
+import "." as Core
+
 /**
 * SlideAnimator
 *
@@ -24,15 +26,15 @@ Item {
   required property Item target
 
   // Slide
-  property real slideDistance: 200
+  property real slideDistance: Core.Style.slideDistance
   property bool slideFromTop: true  // false = slide from bottom
 
-  // Duration (ms)
-  property int showDuration: 350
-  property int hideDuration: 250
+  // Duration
+  property int showDuration: Core.Style.duration(Core.Style.slideShowDuration)
+  property int hideDuration: Core.Style.duration(Core.Style.slideHideDuration)
 
   // Scale
-  property real hiddenScale: 0.8
+  property real hiddenScale: Core.Style.slideHiddenScale
   property real visibleScale: 1.0
 
   // Opacity
@@ -40,9 +42,9 @@ Item {
   property real visibleOpacity: 1.0
 
   // Easing
-  property int showEasing: Easing.OutBack
-  property int hideEasing: Easing.InCubic
-  property real showOvershoot: 1.2
+  property int showEasing: Core.Style.easeEnter
+  property int hideEasing: Core.Style.easeExit
+  property real showOvershoot: Core.Style.enterOvershoot
 
   // Entry delay for staggered animations
   property int entryDelay: 0
@@ -142,7 +144,7 @@ Item {
       from: root.hiddenOpacity
       to: root.visibleOpacity
       duration: root.showDuration
-      easing.type: root.showEasing
+      easing.type: Core.Style.easeStandard
     }
 
     PropertyAnimation {
