@@ -39,8 +39,8 @@ Components.Button {
 
     lines.push("");
     lines.push("Scroll: Adjust brightness");
-    lines.push("Click: Toggle min/max");
-    lines.push("Middle-click: Set to 50%");
+    lines.push("Left click: Set to 50%");
+    lines.push("Right click: Toggle min/max");
 
     return lines.join("\n");
   }

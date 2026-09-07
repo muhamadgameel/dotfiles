@@ -55,14 +55,14 @@ Components.Button {
 
     // Memory
     const memIcon = "";
-    const memUsed = stats.formatBytes(stats.memUsed, 1);
-    const memTotal = stats.formatBytes(stats.memTotal, 1);
+    const memUsed = Core.Utils.formatBytes(stats.memUsed, 1);
+    const memTotal = Core.Utils.formatBytes(stats.memTotal, 1);
     lines.push(memIcon + " RAM: " + memUsed + " / " + memTotal + " (" + stats.memPercent + "%)");
 
     // Swap (only if in use)
     if (stats.hasSwap) {
-      const swapUsed = stats.formatBytes(stats.swapUsed, 1);
-      const swapTotal = stats.formatBytes(stats.swapTotal, 1);
+      const swapUsed = Core.Utils.formatBytes(stats.swapUsed, 1);
+      const swapTotal = Core.Utils.formatBytes(stats.swapTotal, 1);
       lines.push(" Swap: " + swapUsed + " / " + swapTotal + " (" + stats.swapPercent + "%)");
     }
 
@@ -71,25 +71,25 @@ Components.Button {
       lines.push("");
       if (stats.hasCpuTemp) {
         const tempIcon = stats.cpuTemp > 70 ? "󰔐" : "󰔏";
-        lines.push(tempIcon + "  CPU: " + stats.formatTemp(stats.cpuTemp));
+        lines.push(tempIcon + "  CPU: " + Core.Utils.formatTemp(stats.cpuTemp));
       }
       if (stats.hasGpuTemp) {
         const gpuIcon = stats.gpuTemp > 70 ? "󰢮" : "󰢮";
-        lines.push(gpuIcon + "  GPU: " + stats.formatTemp(stats.gpuTemp));
+        lines.push(gpuIcon + "  GPU: " + Core.Utils.formatTemp(stats.gpuTemp));
       }
     }
 
     // Network
     lines.push("");
     lines.push("󰛳 Network:");
-    lines.push("↓ " + stats.formatSpeed(stats.netDownSpeed));
-    lines.push("↑ " + stats.formatSpeed(stats.netUpSpeed));
+    lines.push("↓ " + Core.Utils.formatSpeed(stats.netDownSpeed));
+    lines.push("↑ " + Core.Utils.formatSpeed(stats.netUpSpeed));
 
     // Disk
     lines.push("");
     const diskIcon = stats.diskPercent > 85 ? "󰋊" : "󰋊";
-    const diskUsed = stats.formatBytes(stats.diskUsed, 1);
-    const diskTotal = stats.formatBytes(stats.diskTotal, 1);
+    const diskUsed = Core.Utils.formatBytes(stats.diskUsed, 1);
+    const diskTotal = Core.Utils.formatBytes(stats.diskTotal, 1);
     lines.push(diskIcon + "  Disk (/): " + diskUsed + " / " + diskTotal + " (" + stats.diskPercent + "%)");
 
     // Footer hint

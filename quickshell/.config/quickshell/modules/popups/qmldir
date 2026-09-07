@@ -1,0 +1,6 @@
+module modules.popups
+
+NotificationPopups 1.0 NotificationPopups.qml
+OSD 1.0 OSD.qml
+OSDLayouts 1.0 OSDLayouts.qml
+TooltipWindow 1.0 TooltipWindow.qml

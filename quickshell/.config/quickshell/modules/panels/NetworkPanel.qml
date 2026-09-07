@@ -1,18 +1,20 @@
+pragma ComponentBehavior: Bound
+
 import QtQuick
 import QtQuick.Layouts
 
 import "../../components" as Components
 import "../../config" as Config
 import "../../core" as Core
-import "../../layouts" as Layouts
 import "../../services" as Services
 
 /**
 * NetworkPanel - Sliding panel for WiFi and Ethernet management
 */
-Layouts.SlidingPanel {
+Components.SlidingPanel {
   id: root
 
+  panelId: "network"
   namespace: "quickshell-network-panel"
   scrollable: false
 
@@ -22,7 +24,12 @@ Layouts.SlidingPanel {
   headerTitle: "Network"
   headerSubtitle: Services.Network.connectionStatusText
 
-  onOpened: Services.Network.scan()
+  // panelOpen gates active rescans in the service; see Network.scan().
+  onOpened: {
+    Services.Network.panelOpen = true;
+    Services.Network.scan(true);
+  }
+  onClosed: Services.Network.panelOpen = false
 
   // Panel content wrapper with padding
   Item {
@@ -34,7 +41,7 @@ Layouts.SlidingPanel {
       spacing: Core.Style.spaceM
 
       // WiFi Toggle
-      Layouts.FormRow {
+      Components.FormRow {
         Layout.fillWidth: true
         label: "Wi-Fi"
         hasToggle: true
@@ -43,7 +50,7 @@ Layouts.SlidingPanel {
       }
 
       // Error Message
-      Layouts.StatusBanner {
+      Components.StatusBanner {
         Layout.fillWidth: true
         visible: Services.Network.lastError !== ""
         message: Services.Network.lastError
@@ -102,6 +109,8 @@ Layouts.SlidingPanel {
               Repeater {
                 model: Services.Network.sortedNetworks
                 delegate: NetworkItem {
+                  required property var modelData
+
                   Layout.fillWidth: true
                   network: modelData
                   onConnectRequested: ssid => Services.Network.connect(ssid)
@@ -113,7 +122,7 @@ Layouts.SlidingPanel {
               }
 
               // Empty state
-              Layouts.EmptyState {
+              Components.EmptyState {
                 Layout.fillWidth: true
                 visible: Object.keys(Services.Network.networks).length === 0 && !Services.Network.scanning
                 icon: "wifi-off"
@@ -124,7 +133,7 @@ Layouts.SlidingPanel {
         }
 
         // WiFi Disabled State
-        Layouts.EmptyState {
+        Components.EmptyState {
           anchors.centerIn: parent
           visible: !Services.Network.wifiEnabled
           icon: "wifi-off"
@@ -141,7 +150,7 @@ Layouts.SlidingPanel {
   // ==========================================================================
 
   // --- Connection Info Section ---
-  component ConnectionInfoSection: Layouts.Collapsible {
+  component ConnectionInfoSection: Components.Collapsible {
     id: connInfoRoot
     title: "Connection Info"
     icon: "chart"
@@ -187,7 +196,7 @@ Layouts.SlidingPanel {
 
     Repeater {
       model: connInfoRoot.infoRows
-      Layouts.FormRow {
+      Components.FormRow {
         required property var modelData
         label: modelData.label
         valueText: modelData.value
@@ -196,7 +205,7 @@ Layouts.SlidingPanel {
 
     Repeater {
       model: Services.Network.wifiConnected ? connInfoRoot.wifiRows : []
-      Layouts.FormRow {
+      Components.FormRow {
         required property var modelData
         label: modelData.label
         valueText: modelData.value
@@ -235,8 +244,13 @@ Layouts.SlidingPanel {
     readonly property bool isForgetting: Services.Network.forgettingNetwork === ssid
     readonly property bool isBusy: isConnecting || isDisconnecting || isForgetting
 
-    implicitHeight: Core.Style.widgetSize + Core.Style.spaceL + Core.Style.spaceS
-    interactive: true
+    // This is the network NetworkManager asked for a key for.
+    readonly property bool needsPassword: ssid !== "" && Services.Network.passwordRequiredFor === ssid
+
+    readonly property int rowHeight: Core.Style.widgetSize + Core.Style.spaceL + Core.Style.spaceS
+
+    implicitHeight: itemColumn.implicitHeight
+    interactive: !needsPassword
 
     onClicked: {
       if (!connected && !isBusy) {
@@ -244,11 +258,20 @@ Layouts.SlidingPanel {
       }
     }
 
-    RowLayout {
-      anchors.fill: parent
-      anchors.leftMargin: Core.Style.spaceM
-      anchors.rightMargin: Core.Style.spaceS
-      spacing: Core.Style.spaceM
+    ColumnLayout {
+      id: itemColumn
+
+      anchors.left: parent.left
+      anchors.right: parent.right
+      anchors.top: parent.top
+      spacing: 0
+
+      RowLayout {
+        Layout.fillWidth: true
+        Layout.preferredHeight: netItem.rowHeight
+        Layout.leftMargin: Core.Style.spaceM
+        Layout.rightMargin: Core.Style.spaceS
+        spacing: Core.Style.spaceM
 
       // Signal icon
       Components.Icon {
@@ -312,35 +335,121 @@ Layouts.SlidingPanel {
       }
 
       // Action buttons
-      RowLayout {
-        spacing: Core.Style.spaceXS
-        visible: netItem.connected && !netItem.isBusy
+        RowLayout {
+          spacing: Core.Style.spaceXS
+          visible: !netItem.isBusy && (netItem.connected || netItem.hovered)
 
-        // Disconnect button
-        Components.Button {
-          icon: "close"
-          iconSize: Core.Style.fontM
-          variant: "danger"
-          tooltipText: "Disconnect"
-          onClicked: Services.Network.disconnect(netItem.ssid)
+          // Disconnect button
+          Components.Button {
+            visible: netItem.connected
+            icon: "close"
+            iconSize: Core.Style.fontM
+            variant: "danger"
+            tooltipText: "Disconnect"
+            onClicked: Services.Network.disconnect(netItem.ssid)
+          }
+
+          // Forget button. Offered on hover for any network, not only the
+          // connected one - it sat inside a row that was itself visible only
+          // when connected, so a saved network could never be removed.
+          Components.Button {
+            icon: "trash"
+            iconSize: Core.Style.fontM
+            variant: "danger"
+            tooltipText: "Forget network"
+            onClicked: Services.Network.forget(netItem.ssid)
+          }
         }
 
-        // Forget button
-        Components.Button {
-          visible: netItem.connected
-          icon: "trash"
-          variant: "danger"
-          tooltipText: "Forget network"
-          onClicked: Services.Network.forget(netItem.ssid)
+        // Arrow indicator (shows on hover for available networks)
+        Components.Icon {
+          visible: netItem.hovered && !netItem.connected && !netItem.isBusy
+          icon: "chevron-right"
+          size: Core.Style.fontM
+          color: Config.Theme.textDim
         }
       }
 
-      // Arrow indicator (shows on hover for available devices)
-      Components.Icon {
-        visible: netItem.hovered && !netItem.connected && !netItem.isBusy
-        icon: "chevron-right"
-        size: Core.Style.fontM
-        color: Config.Theme.textDim
+      // Inline password prompt.
+      //
+      // Only appears once NetworkManager has said it has no key for this
+      // network, so open and already-saved networks still join on one click.
+      // Previously that failure surfaced as a raw "Secrets were required"
+      // string with no way to supply one.
+      ColumnLayout {
+        id: passwordPrompt
+
+        Layout.fillWidth: true
+        Layout.leftMargin: Core.Style.spaceM
+        Layout.rightMargin: Core.Style.spaceM
+        Layout.bottomMargin: Core.Style.spaceM
+        spacing: Core.Style.spaceXS
+
+        visible: netItem.needsPassword
+
+        function submit() {
+          if (passwordField.text.length === 0)
+            return;
+          Services.Network.connect(netItem.ssid, passwordField.text);
+          passwordField.clear();
+        }
+
+        onVisibleChanged: {
+          if (visible) {
+            passwordField.clear();
+            passwordField.forceActiveFocus();
+          }
+        }
+
+        Components.Text {
+          Layout.fillWidth: true
+          text: Services.Network.lastError !== "" ? Services.Network.lastError : `Password for "${netItem.ssid}"`
+          size: Core.Style.fontS
+          color: Services.Network.lastError !== "" ? Config.Theme.error : Config.Theme.textDim
+        }
+
+        RowLayout {
+          Layout.fillWidth: true
+          spacing: Core.Style.spaceXS
+
+          Components.TextField {
+            id: passwordField
+
+            Layout.fillWidth: true
+            placeholder: "Network password"
+            echoMode: showPassword.revealed ? TextInput.Normal : TextInput.Password
+            onAccepted: passwordPrompt.submit()
+            onCancelled: Services.Network.cancelPasswordPrompt()
+          }
+
+          Components.Button {
+            id: showPassword
+
+            property bool revealed: false
+
+            icon: revealed ? "eye-off" : "eye"
+            iconSize: Core.Style.fontM
+            tooltipText: revealed ? "Hide password" : "Show password"
+            onClicked: revealed = !revealed
+          }
+
+          Components.Button {
+            icon: "check"
+            iconSize: Core.Style.fontM
+            variant: "primary"
+            tooltipText: "Connect"
+            enabled: passwordField.text.length > 0
+            onClicked: passwordPrompt.submit()
+          }
+
+          Components.Button {
+            icon: "close"
+            iconSize: Core.Style.fontM
+            variant: "danger"
+            tooltipText: "Cancel"
+            onClicked: Services.Network.cancelPasswordPrompt()
+          }
+        }
       }
     }
   }

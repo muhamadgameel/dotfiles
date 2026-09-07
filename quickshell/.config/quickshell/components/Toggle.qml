@@ -3,11 +3,26 @@ import QtQuick
 import "../config" as Config
 import "../core" as Core
 
+/**
+* Toggle - on/off switch
+*
+* Reports the change rather than applying it: `checked` is not flipped here, so
+* a caller can bind it to the setting it represents and let the round trip
+* through Settings decide the visual state. Assigning it locally would make the
+* switch show a state the system has not actually reached.
+*
+* Uses the inherited `enabled`, so a disabled parent disables it.
+*
+* Usage:
+*   Toggle {
+*     checked: Config.Config.doNotDisturb
+*     onToggled: on => Config.Config.setDoNotDisturb(on)
+*   }
+*/
 Rectangle {
   id: root
 
   property bool checked: false
-  property bool enabled: true
 
   signal toggled(bool checked)
 

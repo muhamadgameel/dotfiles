@@ -1,8 +1,11 @@
 module modules.panels
 
 AudioPanel 1.0 AudioPanel.qml
-NotificationCenter 1.0 NotificationCenter.qml
-NetworkPanel 1.0 NetworkPanel.qml
 BluetoothPanel 1.0 BluetoothPanel.qml
+CalendarPanel 1.0 CalendarPanel.qml
+MediaPanel 1.0 MediaPanel.qml
+NetworkPanel 1.0 NetworkPanel.qml
+NotificationCenter 1.0 NotificationCenter.qml
+PowerPanel 1.0 PowerPanel.qml
+ScreenshotPanel 1.0 ScreenshotPanel.qml
 SystemStatsPanel 1.0 SystemStatsPanel.qml
-TestPanel 1.0 TestPanel.qml

@@ -22,8 +22,6 @@ import "../config" as Config
 PanelWindow {
   id: root
 
-  // The screen this panel is associated with.
-  property ShellScreen screen
   property string namespace
 
   // === Position Configuration ===
@@ -59,7 +57,7 @@ PanelWindow {
   color: Config.Theme.transparent
 
   // Wayland layer settings
-  WlrLayershell.namespace: namespace + (screen?.name || "unknown")
+  WlrLayershell.namespace: namespace + "-" + (screen?.name ?? "unknown")
   WlrLayershell.layer: WlrLayer.Overlay
   WlrLayershell.exclusionMode: ExclusionMode.Ignore
   WlrLayershell.keyboardFocus: WlrKeyboardFocus.None

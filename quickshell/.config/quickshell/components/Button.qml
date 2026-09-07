@@ -70,11 +70,8 @@ Rectangle {
   property string tooltipText: ""
   property string tooltipDirection: "auto"
 
-  // === Behavior Properties ===
-  property bool enabled: true
-
   // === Signals ===
-  signal clicked(var mouse)
+  signal clicked(int button)
   signal wheel(var wheel)
   signal entered
   signal exited
@@ -228,4 +225,8 @@ Rectangle {
       Services.Tooltip.hide();
     }
   }
+
+  // Repeater and Variants delegates get destroyed while still hovered, which
+  // would otherwise leave the tooltip service tracking a dead item.
+  Component.onDestruction: Services.Tooltip.forget(root)
 }

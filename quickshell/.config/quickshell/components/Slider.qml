@@ -51,7 +51,6 @@ Item {
   property bool showHandle: true
 
   // === Behavior Properties ===
-  property bool enabled: true
   property bool liveUpdate: true  // Emit valueChanged while dragging
 
   // === State (readonly) ===

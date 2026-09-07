@@ -6,8 +6,24 @@ import "../../config" as Config
 import "../../core" as Core
 import "widgets" as Widgets
 
+/**
+* Bar - the bar contents
+*
+* The clock is positioned absolutely at the centre of the bar, and the two side
+* sections are anchored *to it* rather than sharing a row with it.
+*
+* A three-cell RowLayout cannot actually centre the middle cell: the side
+* sections are sized by their content's minimums, so the centre lands wherever
+* those happen to leave it.
+*
+* Anchoring the sections to the clock's edges gives both properties at once:
+* the clock is always exactly centred, and neither section can reach it.
+*/
 Rectangle {
   id: root
+
+  // The screen this bar is on, so per-monitor widgets can filter.
+  property var screen: null
 
   // Signals for external communication
   signal audioClicked
@@ -15,88 +31,137 @@ Rectangle {
   signal networkClicked
   signal bluetoothClicked
   signal systemStatsClicked
-  signal testPanelClicked
+  signal mediaClicked
+  signal calendarClicked
+  signal powerClicked
+  signal screenshotClicked
 
   color: Config.Theme.alpha(Config.Theme.bg, 0.95)
 
-  // === CENTER SECTION (absolutely centered) ===
+  // ===================================================================
+  // CENTRE - absolutely centred, never overlapped
+  // ===================================================================
   Widgets.Clock {
+    id: clock
+
     anchors.centerIn: parent
     visible: Config.Config.barShowClock
+
+    onCalendarRequested: root.calendarClicked()
   }
 
-  // === LEFT & RIGHT SECTIONS ===
+  // ===================================================================
+  // LEFT
+  // ===================================================================
   RowLayout {
-    anchors.fill: parent
+    anchors.left: parent.left
     anchors.leftMargin: Core.Style.spaceM
+    // Bounded by the clock, so the window title elides instead of running underneath it.
+    anchors.right: clock.visible ? clock.left : parent.right
     anchors.rightMargin: Core.Style.spaceM
-    spacing: Core.Style.spaceM
+    anchors.verticalCenter: parent.verticalCenter
 
-    // === LEFT SECTION ===
-    RowLayout {
-      spacing: Core.Style.spaceS
+    spacing: Core.Style.spaceS
 
-      Widgets.Launcher {
-        visible: Config.Config.barShowLauncher
-      }
-
-      Widgets.Workspaces {}
+    Widgets.Launcher {
+      visible: Config.Config.barShowLauncher
     }
 
-    // === SPACER ===
-    Item {
+    Widgets.Workspaces {
+      screen: root.screen
+    }
+
+    Widgets.WindowTitle {
       Layout.fillWidth: true
+      Layout.maximumWidth: Core.Style.windowTitleMaxWidth
+      visible: Config.Config.barShowWindowTitle
     }
 
-    // === RIGHT SECTION ===
-    RowLayout {
-      spacing: Core.Style.spaceXS
+    // Takes up whatever the title does not, keeping the widgets left-packed.
+    Components.Spacer {}
+  }
 
-      Widgets.Network {
-        visible: Config.Config.barShowNetwork
-        onPanelRequested: root.networkClicked()
-      }
+  // ===================================================================
+  // RIGHT
+  // ===================================================================
+  RowLayout {
+    anchors.left: clock.visible ? clock.right : parent.left
+    anchors.leftMargin: Core.Style.spaceM
+    anchors.right: parent.right
+    anchors.rightMargin: Core.Style.spaceM
+    anchors.verticalCenter: parent.verticalCenter
 
-      Widgets.Bluetooth {
-        visible: Config.Config.barShowBluetooth
-        onPanelRequested: root.bluetoothClicked()
-      }
+    spacing: Core.Style.spaceXS
 
-      Widgets.Volume {
-        visible: Config.Config.barShowVolume
-        onPanelRequested: root.audioClicked()
-      }
+    // Pushes everything to the right edge.
+    Components.Spacer {}
 
-      Widgets.Microphone {
-        visible: Config.Config.barShowMicrophone
-        onPanelRequested: root.audioClicked()
-      }
+    Widgets.Media {
+      visible: Config.Config.barShowMedia
+      onPanelRequested: root.mediaClicked()
+    }
 
-      Widgets.Brightness {
-        visible: Config.Config.barShowBrightness
-      }
+    Widgets.Tray {
+      visible: Config.Config.barShowTray
+    }
 
-      Widgets.SystemStats {
-        visible: Config.Config.barShowSystemStats
-        onPanelRequested: root.systemStatsClicked()
-      }
+    Components.Divider {
+      Layout.fillHeight: false
+      Layout.preferredHeight: Core.Style.iconSize
+      vertical: true
+    }
 
-      Widgets.Battery {
-        visible: Config.Config.barShowBattery
-      }
+    Widgets.IdleInhibitor {
+      visible: Config.Config.barShowIdleInhibitor
+    }
 
-      Widgets.Notification {
-        visible: Config.Config.barShowNotification
-        onPanelRequested: root.notificationClicked()
-      }
+    Widgets.Network {
+      visible: Config.Config.barShowNetwork
+      onPanelRequested: root.networkClicked()
+    }
 
-      Components.Divider {
-        vertical: true
-      }
+    Widgets.Bluetooth {
+      visible: Config.Config.barShowBluetooth
+      onPanelRequested: root.bluetoothClicked()
+    }
 
-      Widgets.Test {
-        onPanelRequested: root.testPanelClicked()
-      }
+    Widgets.Volume {
+      visible: Config.Config.barShowVolume
+      onPanelRequested: root.audioClicked()
+    }
+
+    Widgets.Microphone {
+      visible: Config.Config.barShowMicrophone
+      onPanelRequested: root.audioClicked()
+    }
+
+    Widgets.Brightness {
+      visible: Config.Config.barShowBrightness
+    }
+
+    Widgets.SystemStats {
+      visible: Config.Config.barShowSystemStats
+      onPanelRequested: root.systemStatsClicked()
+    }
+
+    Widgets.Battery {
+      visible: Config.Config.barShowBattery
+    }
+
+    Widgets.NotificationBell {
+      visible: Config.Config.barShowNotification
+      onPanelRequested: root.notificationClicked()
+    }
+
+    Components.Divider {
+      Layout.fillHeight: false
+      Layout.preferredHeight: Core.Style.iconSize
+      vertical: true
+    }
+
+    Widgets.QuickActions {
+      onScreenshotRequested: root.screenshotClicked()
+      onPowerRequested: root.powerClicked()
     }
   }
 }

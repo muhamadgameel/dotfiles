@@ -1,10 +1,11 @@
+pragma ComponentBehavior: Bound
+
 import QtQuick
 import QtQuick.Layouts
 
 import "../../components" as Components
 import "../../config" as Config
 import "../../core" as Core
-import "../../layouts" as Layouts
 import "../../services" as Services
 
 /**
@@ -17,9 +18,10 @@ import "../../services" as Services
 * - Connected/paired/available device lists
 * - Connect/disconnect/forget actions
 */
-Layouts.SlidingPanel {
+Components.SlidingPanel {
   id: root
 
+  panelId: "bluetooth"
   namespace: "quickshell-bluetooth-panel"
   scrollable: false
 
@@ -28,8 +30,11 @@ Layouts.SlidingPanel {
   headerTitle: "Bluetooth"
   headerSubtitle: Services.Bluetooth.statusText
 
-  onOpened: Services.Bluetooth.startDiscovery()
-  onClosed: Services.Bluetooth.stopDiscovery()
+  // The service gates discovery on this. Uses the opened/closed signals rather
+  // than onIsOpenChanged, which SlidingPanel already declares - a second
+  // declaration on the same object would override the base one.
+  onOpened: Services.Bluetooth.panelOpen = true
+  onClosed: Services.Bluetooth.panelOpen = false
 
   Item {
     Layout.fillWidth: true
@@ -40,7 +45,7 @@ Layouts.SlidingPanel {
       spacing: Core.Style.spaceM
 
       // Bluetooth Toggle
-      Layouts.FormRow {
+      Components.FormRow {
         Layout.fillWidth: true
         label: "Bluetooth"
         hasToggle: true
@@ -140,7 +145,7 @@ Layouts.SlidingPanel {
 
             readonly property int _totalDevices: Services.Bluetooth.connectedDevices.length + Services.Bluetooth.pairedDevices.length + Services.Bluetooth.availableDevices.length
 
-            sourceComponent: Layouts.EmptyState {
+            sourceComponent: Components.EmptyState {
               anchors.centerIn: parent
               icon: Services.Bluetooth.discovering ? "refresh" : "bluetooth"
               message: Services.Bluetooth.discovering ? "Scanning for devices..." : "No devices found"
@@ -150,7 +155,7 @@ Layouts.SlidingPanel {
         }
 
         // Bluetooth Disabled State
-        Layouts.EmptyState {
+        Components.EmptyState {
           anchors.centerIn: parent
           visible: !Services.Bluetooth.enabled && Services.Bluetooth.available
           icon: "bluetooth-off"
@@ -160,7 +165,7 @@ Layouts.SlidingPanel {
         }
 
         // No Adapter State
-        Layouts.EmptyState {
+        Components.EmptyState {
           anchors.centerIn: parent
           visible: !Services.Bluetooth.available
           icon: "bluetooth-off"
@@ -177,7 +182,7 @@ Layouts.SlidingPanel {
   // ==========================================================================
 
   // --- Adapter Info Section ---
-  component AdapterInfoSection: Layouts.Collapsible {
+  component AdapterInfoSection: Components.Collapsible {
     id: adapterInfo
     title: "Adapter Info"
     icon: "info"
@@ -200,7 +205,7 @@ Layouts.SlidingPanel {
 
     Repeater {
       model: adapterInfo.infoRows
-      Layouts.FormRow {
+      Components.FormRow {
         required property var modelData
         label: modelData.label
         valueText: modelData.value
@@ -238,6 +243,8 @@ Layouts.SlidingPanel {
     Repeater {
       model: section.devices
       delegate: DeviceItem {
+        required property var modelData
+
         Layout.fillWidth: true
         device: modelData
       }
@@ -264,15 +271,9 @@ Layouts.SlidingPanel {
     implicitHeight: 52
     interactive: !isBusy
 
-    onClicked: {
-      if (!device)
-        return;
-      if (isConnected) {
-        Services.Bluetooth.disconnectDevice(device);
-      } else {
-        Services.Bluetooth.connectDevice(device);
-      }
-    }
+    // Pairs, connects or disconnects as appropriate. Tapping an unpaired device
+    // used to connect and silently trust it.
+    onClicked: Services.Bluetooth.activate(devItem.device)
 
     RowLayout {
       anchors.left: parent.left

@@ -1,3 +1,5 @@
+pragma ComponentBehavior: Bound
+
 import QtQuick
 import QtQuick.Layouts
 import Quickshell.Services.Pipewire
@@ -5,7 +7,6 @@ import Quickshell.Services.Pipewire
 import "../../components" as Components
 import "../../config" as Config
 import "../../core" as Core
-import "../../layouts" as Layouts
 import "../../services" as Services
 
 /**
@@ -17,9 +18,10 @@ import "../../services" as Services
 * - Per-application volume controls for playback and recording streams
 * - Visual indicators for volume levels and boost
 */
-Layouts.SlidingPanel {
+Components.SlidingPanel {
   id: root
 
+  panelId: "audio"
   namespace: "quickshell-audio-panel"
   scrollable: true
 
@@ -97,7 +99,7 @@ Layouts.SlidingPanel {
         }
 
         // Empty State
-        Layouts.EmptyState {
+        Components.EmptyState {
           Layout.fillWidth: true
           visible: Services.Audio.sinkStreams.length === 0 && Services.Audio.sourceStreams.length === 0
           icon: "volume-off"
@@ -240,7 +242,7 @@ Layouts.SlidingPanel {
   }
 
   // --- Device Selector ---
-  component DeviceSelector: Layouts.Collapsible {
+  component DeviceSelector: Components.Collapsible {
     id: deviceSelectorRoot
 
     property var devices: []
@@ -460,7 +462,7 @@ Layouts.SlidingPanel {
         maxValue: 1.5
         onValueUpdated: newValue => {
           if (streamRoot.node?.audio) {
-            streamRoot.node.audio.volume = Math.max(0, Math.min(1.5, newValue));
+            streamRoot.node.audio.volume = Core.Utils.clamp(newValue, 0, 1.5);
           }
         }
         progressColor: streamRoot.streamMuted ? Config.Theme.error : (streamRoot.streamVolume > 1.0 ? Config.Theme.warning : Config.Theme.accent)

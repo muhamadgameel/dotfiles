@@ -1,4 +1,0 @@
-module modules.osd
-
-OSD 1.0 OSD.qml
-OSDLayouts 1.0 OSDLayouts.qml

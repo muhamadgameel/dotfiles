@@ -1,14 +1,18 @@
 module modules.bar.widgets
 
 Battery 1.0 Battery.qml
-Clock 1.0 Clock.qml
-Volume 1.0 Volume.qml
-Microphone 1.0 Microphone.qml
-Brightness 1.0 Brightness.qml
-Launcher 1.0 Launcher.qml
-Workspaces 1.0 Workspaces.qml
-Notification 1.0 Notification.qml
-Network 1.0 Network.qml
 Bluetooth 1.0 Bluetooth.qml
+Brightness 1.0 Brightness.qml
+Clock 1.0 Clock.qml
+IdleInhibitor 1.0 IdleInhibitor.qml
+Launcher 1.0 Launcher.qml
+Media 1.0 Media.qml
+Microphone 1.0 Microphone.qml
+Network 1.0 Network.qml
+NotificationBell 1.0 NotificationBell.qml
+QuickActions 1.0 QuickActions.qml
 SystemStats 1.0 SystemStats.qml
-Test 1.0 Test.qml
+Tray 1.0 Tray.qml
+Volume 1.0 Volume.qml
+WindowTitle 1.0 WindowTitle.qml
+Workspaces 1.0 Workspaces.qml

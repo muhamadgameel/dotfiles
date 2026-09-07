@@ -206,6 +206,11 @@ Singleton {
       "gauge": "󰓅",
       "fire": "󰈸",
 
+      // === Capture ===
+      "crop": "󰆞",
+      "screenshot": "󰹑",
+      "region": "󰆞",
+
       // === Misc ===
       "loading": "󰑓",
       "spinner": "󰑓",
@@ -231,10 +236,13 @@ Singleton {
   /**
   * Get icon glyph by name
   * @param name - Icon name
-  * @returns Nerd Font glyph or "?" if not found
+  * @returns Nerd Font glyph, or "" when the name is unknown
+  *
+  * Unknown names return empty rather than "?" so a typo renders as nothing
+  * instead of a literal question mark in the bar. Use has() to assert a name.
   */
   function get(name) {
-    return _icons[name] || "?";
+    return name ? (_icons[name] ?? "") : "";
   }
 
   function has(name) {

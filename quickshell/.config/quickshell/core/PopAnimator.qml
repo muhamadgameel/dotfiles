@@ -1,5 +1,7 @@
 import QtQuick
 
+import "." as Core
+
 /**
 * PopAnimator
 *
@@ -22,12 +24,12 @@ Item {
   // === Configuration ===
   required property Item target
 
-  // Duration (ms)
-  property int showDuration: 150
-  property int hideDuration: 75
+  // Duration
+  property int showDuration: Core.Style.duration(Core.Style.popShowDuration)
+  property int hideDuration: Core.Style.duration(Core.Style.popHideDuration)
 
   // Scale
-  property real hiddenScale: 0.85
+  property real hiddenScale: Core.Style.popHiddenScale
   property real visibleScale: 1.0
 
   // Opacity
@@ -35,9 +37,9 @@ Item {
   property real visibleOpacity: 1.0
 
   // Easing
-  property int showEasing: Easing.OutBack
-  property int hideEasing: Easing.InCubic
-  property real showOvershoot: 1.2
+  property int showEasing: Core.Style.easeEnter
+  property int hideEasing: Core.Style.easeExit
+  property real showOvershoot: Core.Style.enterOvershoot
 
   // === Signals ===
   signal showStarted
@@ -95,7 +97,7 @@ Item {
       from: root.hiddenOpacity
       to: root.visibleOpacity
       duration: root.showDuration
-      easing.type: root.showEasing
+      easing.type: Core.Style.easeStandard
     }
 
     PropertyAnimation {

@@ -52,7 +52,12 @@ Item {
   }
 
   readonly property string _source: {
-    // if it's a file path or a direct glyph (non-ASCII, likely a Nerd Font character) return the icon
+    // charCodeAt on "" is NaN, and NaN > 127 is false, so an empty icon used to
+    // fall through to the registry and render its "?" placeholder.
+    if (root.icon === "")
+      return "";
+
+    // A file path, or a direct glyph (non-ASCII, so a Nerd Font character)
     const firstChar = root.icon.charCodeAt(0);
     if (root._isFilePath || firstChar > 127) {
       return root.icon;
@@ -78,7 +83,7 @@ Item {
   Image {
     id: iconImage
     visible: root._isFilePath && root._source !== ""
-    source: root._source
+    source: root._isFilePath ? root._source : ""
     width: root.size
     height: root.size
     sourceSize.width: root.size * 2

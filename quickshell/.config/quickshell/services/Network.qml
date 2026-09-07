@@ -21,6 +21,14 @@ Singleton {
   property string forgettingNetwork: ""
   property string lastError: ""
 
+  // SSID that NetworkManager reported it has no key for, and which is now
+  // waiting on a password. Empty when no prompt is pending.
+  property string passwordRequiredFor: ""
+
+  // Set by NetworkPanel while it is visible. Gates active rescans, which stall
+  // the current connection briefly and are not worth running unattended.
+  property bool panelOpen: false
+
   // WiFi
   property bool wifiEnabled: false
   property bool wifiConnected: false
@@ -92,25 +100,61 @@ Singleton {
   }
 
   function setWifiEnabled(enabled) {
-    wifiEnabled = enabled;
+    // The desired state goes to the process explicitly. Binding the command to
+    // `wifiEnabled` and mutating it in the same call relied on the binding
+    // re-evaluating before `running` was set.
+    _wifiToggleProcess.command = ["nmcli", "radio", "wifi", enabled ? "on" : "off"];
     _wifiToggleProcess.running = true;
+    wifiEnabled = enabled;
   }
 
-  function scan() {
+  /**
+  * Refresh the network list.
+  *
+  * @param force - Run an active rescan. That makes the radio hop every channel,
+  *   which interrupts the current connection for a moment and costs power, so
+  *   it is only worth doing while someone is looking at the list. Omit to mean
+  *   "active only if the panel is open".
+  */
+  function scan(force) {
     if (!wifiEnabled || scanning)
       return;
+
+    const active = force ?? panelOpen;
+
     scanning = true;
     lastError = "";
+    _scanProcess.command = ["nmcli", "-t", "-e", "yes", "-f", "SSID,SECURITY,SIGNAL,IN-USE", "device", "wifi", "list", "--rescan", active ? "yes" : "no"];
     _scanProcess.running = true;
   }
 
-  function connect(ssid) {
+  /**
+  * Connect to a wireless network.
+  *
+  * @param ssid - Network to join
+  * @param password - Optional pre-shared key. Omit for open or already-saved
+  *   networks; if NetworkManager then reports that secrets are required,
+  *   passwordRequiredFor is set so the UI can prompt and call this again.
+  */
+  function connect(ssid, password) {
     if (connecting)
       return;
+
     connectingTo = ssid;
     lastError = "";
+    passwordRequiredFor = "";
+
     _connectProcess.ssid = ssid;
+    _connectProcess.command = password ? ["nmcli", "device", "wifi", "connect", ssid, "password", password] : ["nmcli", "device", "wifi", "connect", ssid];
     _connectProcess.running = true;
+  }
+
+  /**
+  * Dismiss a pending password prompt without connecting.
+  */
+  function cancelPasswordPrompt() {
+    passwordRequiredFor = "";
+    lastError = "";
   }
 
   function disconnect(ssid) {
@@ -138,22 +182,53 @@ Singleton {
   readonly property var _wifiTypes: ["802-11-wireless", "wifi"]
   readonly property var _ethernetTypes: ["802-3-ethernet", "ethernet"]
   readonly property var _connectionEvents: [": connected", ": using connection", ": disconnected", ": deactivating", ": unmanaged"]
-  readonly property var _errorMappings: [[/psk.*invalid|password.*invalid|incorrect password/i, "Incorrect password"], [/No network with SSID/i, "Network not found"], [/Timeout/i, "Connection timeout"]]
+  readonly property var _errorMappings: [[/No network with SSID/i, "Network not found"], [/Timeout/i, "Connection timeout"]]
 
-  // Parse nmcli colon-separated line from the end (handles SSIDs with colons)
+  // NetworkManager holds no key for the network - a prompt, not a failure.
+  readonly property var _secretsRequired: /secrets? (were|was) required|no secrets provided|secrets are required/i
+
+  // The key we supplied was rejected - re-prompt rather than dead-end.
+  readonly property var _badPassword: /psk.*invalid|password.*invalid|incorrect password|invalid.*key/i
+
+  /**
+  * Split one line of `nmcli -t` output into its fields.
+  *
+  * nmcli escapes a literal colon inside a value as "\:" and a literal
+  * backslash as "\\". Splitting on every colon - from either end - therefore
+  * mangles any SSID containing one. This walks left to right, honours the
+  * escapes, and unescapes the values.
+  *
+  * @returns array of fieldCount strings, or null if the line does not match
+  */
   function _parseNmcliLine(line, fieldCount) {
-    const result = [];
-    let remaining = line;
+    if (!line)
+      return null;
 
-    for (let i = 0; i < fieldCount - 1; i++) {
-      const idx = remaining.lastIndexOf(":");
-      if (idx === -1)
-        return null;
-      result.unshift(remaining.substring(idx + 1));
-      remaining = remaining.substring(0, idx);
+    const fields = [];
+    let current = "";
+
+    for (let i = 0; i < line.length; i++) {
+      const ch = line[i];
+
+      if (ch === "\\" && i + 1 < line.length) {
+        current += line[i + 1];
+        i++;
+      } else if (ch === ":") {
+        fields.push(current);
+        current = "";
+      } else {
+        current += ch;
+      }
     }
-    result.unshift(remaining);
-    return result;
+    fields.push(current);
+
+    return fields.length === fieldCount ? fields : null;
+  }
+
+  // Undo nmcli's terse-mode escaping for a value that was split by something
+  // other than _parseNmcliLine (a KEY:VALUE line cut at its first colon).
+  function _unescapeNmcli(value) {
+    return value ? value.replace(/\\(.)/g, "$1") : "";
   }
 
   function _logError(tag, text) {
@@ -192,9 +267,11 @@ Singleton {
     onTriggered: _connectionStatusProcess.running = true
   }
 
+  // Brisk active scans while the panel is open, slow passive cache reads
+  // otherwise. This used to force an active rescan every 60s indefinitely.
   Timer {
     id: _scanTimer
-    interval: 60000
+    interval: root.panelOpen ? 20000 : 120000
     running: root.wifiEnabled
     repeat: true
     onTriggered: root.scan()
@@ -246,9 +323,38 @@ Singleton {
     }
 
     onExited: {
-      Core.Logger.w("Network", "Monitor exited, restarting...");
-      Qt.callLater(() => _monitorProcess.running = true);
+      // `nmcli monitor` exits at once when NetworkManager is not running, so
+      // restarting on the spot spun a process as fast as it could fail. Back
+      // off, and reset once a run has survived a while.
+      const uptime = Date.now() - root._monitorStartedAt;
+      if (uptime > root._monitorHealthyMs) {
+        root._monitorBackoffMs = root._monitorMinBackoffMs;
+      } else {
+        root._monitorBackoffMs = Math.min(root._monitorBackoffMs * 2, root._monitorMaxBackoffMs);
+      }
+
+      Core.Logger.w("Network", `Monitor exited, retrying in ${root._monitorBackoffMs}ms`);
+      _monitorRestart.interval = root._monitorBackoffMs;
+      _monitorRestart.restart();
     }
+
+    onRunningChanged: {
+      if (running)
+        root._monitorStartedAt = Date.now();
+    }
+  }
+
+  // Backoff state for the nmcli monitor
+  property real _monitorStartedAt: 0
+  property int _monitorBackoffMs: 1000
+  readonly property int _monitorMinBackoffMs: 1000
+  readonly property int _monitorMaxBackoffMs: 60000
+  readonly property int _monitorHealthyMs: 30000
+
+  Timer {
+    id: _monitorRestart
+    repeat: false
+    onTriggered: _monitorProcess.running = true
   }
 
   // WiFi radio state check
@@ -266,16 +372,15 @@ Singleton {
     }
   }
 
-  // WiFi radio toggle
+  // WiFi radio toggle. `command` is set by setWifiEnabled() before each run.
   Process {
     id: _wifiToggleProcess
-    command: ["nmcli", "radio", "wifi", root.wifiEnabled ? "on" : "off"]
   }
 
   // Active connection status
   Process {
     id: _connectionStatusProcess
-    command: ["nmcli", "-t", "-f", "NAME,TYPE,DEVICE", "connection", "show", "--active"]
+    command: ["nmcli", "-t", "-e", "yes", "-f", "NAME,TYPE,DEVICE", "connection", "show", "--active"]
 
     stdout: StdioCollector {
       onStreamFinished: {
@@ -322,7 +427,7 @@ Singleton {
   Process {
     id: _connectionDetailsProcess
     property string device: ""
-    command: ["nmcli", "-t", "-f", "IP4.ADDRESS,IP4.GATEWAY,IP4.DNS", "device", "show", device]
+    command: ["nmcli", "-t", "-e", "yes", "-f", "IP4.ADDRESS,IP4.GATEWAY,IP4.DNS", "device", "show", device]
 
     stdout: StdioCollector {
       onStreamFinished: {
@@ -335,7 +440,7 @@ Singleton {
             continue;
 
           const key = line.substring(0, idx);
-          const value = line.substring(idx + 1);
+          const value = root._unescapeNmcli(line.substring(idx + 1));
 
           if (key.startsWith("IP4.ADDRESS") && !ip)
             ip = value;
@@ -361,10 +466,9 @@ Singleton {
     }
   }
 
-  // WiFi scan
+  // WiFi scan. `command` is set by scan(), which picks the rescan mode.
   Process {
     id: _scanProcess
-    command: ["nmcli", "-t", "-f", "SSID,SECURITY,SIGNAL,IN-USE", "device", "wifi", "list", "--rescan", "yes"]
 
     stdout: StdioCollector {
       onStreamFinished: {
@@ -415,11 +519,11 @@ Singleton {
     }
   }
 
-  // WiFi connect
+  // WiFi connect. `command` is set by connect(), which decides whether a
+  // password is included.
   Process {
     id: _connectProcess
     property string ssid: ""
-    command: ["nmcli", "device", "wifi", "connect", ssid]
 
     stdout: StdioCollector {
       onStreamFinished: {
@@ -439,6 +543,22 @@ Singleton {
         const error = text.trim();
         if (!error)
           return;
+
+        // No stored key for this network. That is a prompt, not a failure.
+        if (root._secretsRequired.test(error)) {
+          root.passwordRequiredFor = _connectProcess.ssid;
+          root.lastError = "";
+          Core.Logger.d("Network", `Password required for ${_connectProcess.ssid}`);
+          return;
+        }
+
+        // Wrong key - ask again rather than dead-ending on the raw message.
+        if (root._badPassword.test(error)) {
+          root.passwordRequiredFor = _connectProcess.ssid;
+          root.lastError = "Incorrect password";
+          Core.Logger.w("Network", `Connect: ${error}`);
+          return;
+        }
 
         // Map common errors to user-friendly messages
         for (const [pattern, message] of root._errorMappings) {

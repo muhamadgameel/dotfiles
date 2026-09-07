@@ -1,5 +1,5 @@
 import QtQuick
-import "../components" as Components
+import "." as Components
 
 import "../config" as Config
 import "../core" as Core

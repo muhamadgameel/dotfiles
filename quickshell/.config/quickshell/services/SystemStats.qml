@@ -10,23 +10,26 @@ import "../core" as Core
 * SystemStats - Service for monitoring system hardware metrics
 *
 * Provides real-time monitoring of:
-* - CPU temperature (Intel coretemp, AMD k10temp/zenpower)
-* - GPU temperature (NVIDIA via nvidia-smi, AMD via hwmon)
+* - CPU temperature (Intel coretemp package, AMD k10temp/zenpower Tctl)
+* - GPU temperature (AMD via hwmon, NVIDIA via nvidia-smi)
 * - CPU usage (overall and per-core)
 * - Memory usage (RAM + Swap)
 * - Network speeds (download/upload)
 * - Disk usage (root filesystem)
 *
-* Features:
-* - Efficient FileView-based reading (no process spawning for most metrics)
-* - Auto-detection of CPU/GPU sensors
-* - Configurable thresholds for warning/critical states
-* - Health status computation
+* Sensor discovery is a single shell pass over /sys/class/hwmon at startup that
+* caches the exact sysfs paths. Each poll is then one file read per metric.
+*
+* On Intel this resolves the "Package id 0" sensor specifically. Averaging
+* temp1..temp20 (as this previously did) mixes the package reading with the
+* per-core readings and silently ignores any core sensor numbered above 20 -
+* on a 48-sensor part that averaged an arbitrary 6 of them and under-reported
+* the package by several degrees.
 *
 * Usage:
 *   import "../services" as Services
-*   Text { text: Services.SystemStats.cpuTemp + "°C" }
-*   Text { text: Services.SystemStats.cpuTempStatus }  // "normal", "warning", "critical"
+*   Text { text: Core.Utils.formatTemp(Services.SystemStats.cpuTemp) }
+*   Text { text: Services.SystemStats.cpuTempStatus }  // normal/warning/critical
 */
 Singleton {
   id: root
@@ -36,6 +39,11 @@ Singleton {
   // ═══════════════════════════════════════════════════════════════════════════
 
   readonly property int pollingInterval: 2000
+
+  // nvidia-smi costs a process spawn of ~100-300ms, so it runs far less often
+  // than the sysfs reads rather than on every tick.
+  readonly property int nvidiaPollingInterval: 10000
+  readonly property int diskPollingInterval: 60000
 
   // Thresholds (used by statusLevel function and widgets)
   readonly property real tempWarning: 70
@@ -54,7 +62,9 @@ Singleton {
   // === CPU ===
   property real cpuTemp: 0
   property real cpuUsage: 0
-  property var cpuCores: []  // Per-core usage percentages
+  property var cpuCores: []      // Per-core usage, indexed by real core id
+  property int cpuCoreCount: 0   // Stable count so views can bind without
+                                 // rebuilding their delegates every poll
 
   // === GPU ===
   property real gpuTemp: 0
@@ -117,26 +127,26 @@ Singleton {
   // PRIVATE STATE
   // ═══════════════════════════════════════════════════════════════════════════
 
-  // Sensor detection
+  // Resolved sensor paths (empty until detection finishes)
   property string _cpuSensorType: ""   // "coretemp", "k10temp", "zenpower"
-  property string _cpuHwmonPath: ""
-  property string _gpuType: ""         // "nvidia", "amd"
-  property string _gpuHwmonPath: ""
+  property string _cpuTempPath: ""
+  property string _gpuType: ""         // "amd", "nvidia"
+  property string _gpuTempPath: ""
 
   // CPU stats delta tracking
   property var _prevCpuStats: null
-  property var _prevCpuCoreStats: []
+  property var _prevCpuCoreStats: ({})
 
-  // Network delta tracking
-  property real _prevRxBytes: 0
-  property real _prevTxBytes: 0
+  // Network delta tracking: iface -> { rx, tx }
+  property var _prevNetStats: ({})
   property real _prevNetTime: 0
 
-  // Intel multi-core temp collection
-  property var _intelTemps: []
-  property int _intelTempIndex: 0
-
-  readonly property var _supportedCpuSensors: ["coretemp", "k10temp", "zenpower"]
+  // Interfaces excluded from the totals.
+  //
+  // Bridges and container/VM taps carry a copy of traffic already counted on
+  // the physical interface, and a VPN tunnel carries a re-encapsulated copy of
+  // the same bytes - including either double-counts throughput.
+  readonly property var _ignoredIfacePrefixes: ["lo", "veth", "docker", "br-", "virbr", "vnet", "tun", "tap", "wg", "tailscale", "podman", "cni", "flannel", "kube", "ifb", "dummy", "bond", "sit", "gre", "waydroid"]
 
   // ═══════════════════════════════════════════════════════════════════════════
   // PUBLIC FUNCTIONS
@@ -154,92 +164,106 @@ Singleton {
     return "normal";
   }
 
-  /**
-  * Format bytes as human-readable size
-  */
-  function formatBytes(bytes, decimals) {
-    if (!bytes || bytes === 0)
-      return "0 B";
-    const k = 1024;
-    const dm = decimals !== undefined ? decimals : 1;
-    const sizes = ["B", "KB", "MB", "GB", "TB"];
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + " " + sizes[i];
-  }
-
-  /**
-  * Format bytes per second as human-readable speed
-  */
-  function formatSpeed(bytesPerSecond) {
-    if (!bytesPerSecond || bytesPerSecond === 0)
-      return "0 B/s";
-    const k = 1024;
-    const sizes = ["B/s", "KB/s", "MB/s", "GB/s"];
-    const i = Math.floor(Math.log(bytesPerSecond) / Math.log(k));
-    return parseFloat((bytesPerSecond / Math.pow(k, i)).toFixed(1)) + " " + sizes[i];
-  }
-
-  /**
-  * Format temperature with degree symbol
-  */
-  function formatTemp(temp) {
-    return Math.round(temp) + "°C";
-  }
-
   // ═══════════════════════════════════════════════════════════════════════════
-  // INITIALIZATION
+  // SENSOR DETECTION
   // ═══════════════════════════════════════════════════════════════════════════
 
-  Component.onCompleted: {
-    Core.Logger.i("SystemStats", "Service initializing...");
-    _detectCpuSensor();
-    _detectGpu();
+  // One shell pass resolves both the CPU and the GPU sensor path, replacing two
+  // separate 16-iteration async walks over the same hwmon directories.
+  Process {
+    id: _sensorDetect
+    running: true
+    command: ["sh", "-c", root._detectScript]
+
+    stdout: StdioCollector {
+      onStreamFinished: {
+        for (const line of text.split("\n")) {
+          const parts = line.trim().split(/\s+/);
+          if (parts.length < 3)
+            continue;
+
+          const kind = parts[0];
+          const type = parts[1];
+          const path = parts[2];
+
+          if (kind === "cpu" && root._cpuTempPath === "") {
+            root._cpuSensorType = type;
+            root._cpuTempPath = path;
+            Core.Logger.i("SystemStats", `CPU sensor: ${type} at ${path}`);
+          } else if (kind === "gpu" && root._gpuTempPath === "") {
+            root._gpuType = type;
+            root._gpuTempPath = path;
+            Core.Logger.i("SystemStats", `GPU sensor: ${type} at ${path}`);
+          }
+        }
+
+        if (root._cpuTempPath === "")
+          Core.Logger.w("SystemStats", "No supported CPU temperature sensor found");
+
+        // No hwmon GPU: probe NVIDIA once. If it answers, its slow timer starts.
+        if (root._gpuType === "")
+          _nvidiaProcess.running = true;
+      }
+    }
   }
+
+  // Kept as a plain string so the shell body is not fighting QML template
+  // interpolation for its "$" and "${...}" syntax.
+  readonly property string _detectScript: 'for h in /sys/class/hwmon/hwmon*/; do
+  [ -r "$h/name" ] || continue
+  n=$(cat "$h/name" 2>/dev/null) || continue
+  case "$n" in
+    coretemp|k10temp|zenpower|zenpower3)
+      f=""
+      for lbl in "$h"temp*_label; do
+        [ -e "$lbl" ] || continue
+        case "$(cat "$lbl" 2>/dev/null)" in
+          "Package id 0"|Tctl|Tdie) f="${lbl%_label}_input"; break ;;
+        esac
+      done
+      [ -n "$f" ] && [ -e "$f" ] || f="${h}temp1_input"
+      [ -e "$f" ] && echo "cpu $n $f"
+      ;;
+    amdgpu)
+      [ -e "${h}temp1_input" ] && echo "gpu amd ${h}temp1_input"
+      ;;
+  esac
+done'
 
   // ═══════════════════════════════════════════════════════════════════════════
   // POLLING TIMERS
   // ═══════════════════════════════════════════════════════════════════════════
 
-  // CPU Temperature polling
-  Timer {
-    interval: root.pollingInterval
-    repeat: true
-    running: root._cpuHwmonPath !== ""
-    triggeredOnStart: true
-    onTriggered: root._readCpuTemp()
-  }
-
-  // GPU Temperature polling
-  Timer {
-    interval: root.pollingInterval
-    repeat: true
-    running: root._gpuType !== ""
-    triggeredOnStart: true
-    onTriggered: {
-      if (root._gpuType === "nvidia") {
-        _nvidiaProcess.running = true;
-      } else {
-        _gpuTempFile.reload();
-      }
-    }
-  }
-
-  // System metrics polling (CPU, Memory, Network)
+  // Sysfs metrics: CPU temp, AMD GPU temp, CPU usage, memory, network.
+  // Every one of these is a single file read.
   Timer {
     interval: root.pollingInterval
     repeat: true
     running: true
     triggeredOnStart: true
     onTriggered: {
+      if (root._cpuTempPath !== "")
+        _cpuTempFile.reload();
+      if (root._gpuType === "amd")
+        _gpuTempFile.reload();
+
       _cpuStatFile.reload();
       _memInfoFile.reload();
       _netDevFile.reload();
     }
   }
 
-  // Disk polling (less frequent - every 1 minute)
+  // NVIDIA needs a process spawn, so it polls on its own slower cadence.
   Timer {
-    interval: 600000
+    interval: root.nvidiaPollingInterval
+    repeat: true
+    running: root._gpuType === "nvidia"
+    onTriggered: _nvidiaProcess.running = true
+  }
+
+  // Disk usage barely moves; once a minute is plenty.
+  Timer {
+    interval: root.diskPollingInterval
     repeat: true
     running: true
     triggeredOnStart: true
@@ -247,148 +271,30 @@ Singleton {
   }
 
   // ═══════════════════════════════════════════════════════════════════════════
-  // CPU SENSOR DETECTION
-  // ═══════════════════════════════════════════════════════════════════════════
-
-  function _detectCpuSensor() {
-    _cpuSensorDetector.currentIndex = 0;
-    _cpuSensorDetector.checkNext();
-  }
-
-  FileView {
-    id: _cpuSensorDetector
-    property int currentIndex: 0
-    printErrors: false
-
-    function checkNext() {
-      if (currentIndex >= 16) {
-        Core.Logger.w("SystemStats", "No supported CPU sensor found");
-        return;
-      }
-      path = `/sys/class/hwmon/hwmon${currentIndex}/name`;
-      reload();
-    }
-
-    onLoaded: {
-      const name = text().trim();
-      if (root._supportedCpuSensors.includes(name)) {
-        root._cpuSensorType = name;
-        root._cpuHwmonPath = `/sys/class/hwmon/hwmon${currentIndex}`;
-        Core.Logger.i("SystemStats", `CPU sensor: ${name} at hwmon${currentIndex}`);
-      } else {
-        currentIndex++;
-        Qt.callLater(checkNext);
-      }
-    }
-
-    onLoadFailed: {
-      currentIndex++;
-      Qt.callLater(checkNext);
-    }
-  }
-
-  // ═══════════════════════════════════════════════════════════════════════════
-  // GPU DETECTION
-  // ═══════════════════════════════════════════════════════════════════════════
-
-  function _detectGpu() {
-    _gpuDetector.currentIndex = 0;
-    _gpuDetector.checkNext();
-  }
-
-  FileView {
-    id: _gpuDetector
-    property int currentIndex: 0
-    printErrors: false
-
-    function checkNext() {
-      if (currentIndex >= 16) {
-        // No AMD GPU found, try NVIDIA
-        _nvidiaProcess.running = true;
-        return;
-      }
-      path = `/sys/class/hwmon/hwmon${currentIndex}/name`;
-      reload();
-    }
-
-    onLoaded: {
-      const name = text().trim();
-      if (name === "amdgpu") {
-        root._gpuType = "amd";
-        root._gpuHwmonPath = `/sys/class/hwmon/hwmon${currentIndex}`;
-        Core.Logger.i("SystemStats", `AMD GPU at hwmon${currentIndex}`);
-      } else {
-        currentIndex++;
-        Qt.callLater(checkNext);
-      }
-    }
-
-    onLoadFailed: {
-      currentIndex++;
-      Qt.callLater(checkNext);
-    }
-  }
-
-  // ═══════════════════════════════════════════════════════════════════════════
   // TEMPERATURE READERS
   // ═══════════════════════════════════════════════════════════════════════════
 
-  function _readCpuTemp() {
-    if (_cpuSensorType === "coretemp") {
-      // Intel: collect temps from multiple cores and average
-      root._intelTemps = [];
-      root._intelTempIndex = 1;
-      _readNextIntelCore();
-    } else {
-      // AMD: read single Tctl value
-      _cpuTempFile.path = `${_cpuHwmonPath}/temp1_input`;
-      _cpuTempFile.reload();
-    }
-  }
-
-  function _readNextIntelCore() {
-    if (_intelTempIndex > 20) {
-      // Done collecting, calculate average
-      if (_intelTemps.length > 0) {
-        const sum = _intelTemps.reduce((a, b) => a + b, 0);
-        cpuTemp = Math.round(sum / _intelTemps.length);
-      }
-      return;
-    }
-    _cpuTempFile.path = `${_cpuHwmonPath}/temp${_intelTempIndex}_input`;
-    _cpuTempFile.reload();
-  }
-
   FileView {
     id: _cpuTempFile
+    path: root._cpuTempPath
     printErrors: false
 
     onLoaded: {
-      const temp = parseInt(text().trim()) / 1000;
-      if (root._cpuSensorType === "coretemp") {
-        root._intelTemps.push(temp);
-        root._intelTempIndex++;
-        Qt.callLater(root._readNextIntelCore);
-      } else {
-        root.cpuTemp = Math.round(temp);
-      }
-    }
-
-    onLoadFailed: {
-      if (root._cpuSensorType === "coretemp") {
-        root._intelTempIndex++;
-        Qt.callLater(root._readNextIntelCore);
-      }
+      const milli = parseInt(text().trim(), 10);
+      if (!isNaN(milli))
+        root.cpuTemp = Math.round(milli / 1000);
     }
   }
 
   FileView {
     id: _gpuTempFile
-    path: root._gpuHwmonPath ? `${root._gpuHwmonPath}/temp1_input` : ""
+    path: root._gpuType === "amd" ? root._gpuTempPath : ""
     printErrors: false
 
     onLoaded: {
-      root.gpuTemp = Math.round(parseInt(text().trim()) / 1000);
+      const milli = parseInt(text().trim(), 10);
+      if (!isNaN(milli))
+        root.gpuTemp = Math.round(milli / 1000);
     }
   }
 
@@ -399,22 +305,22 @@ Singleton {
 
     stdout: StdioCollector {
       onStreamFinished: {
-        const temp = parseInt(text.trim());
-        if (!isNaN(temp) && temp > 0) {
-          root.gpuTemp = temp;
-          if (root._gpuType === "") {
-            root._gpuType = "nvidia";
-            Core.Logger.i("SystemStats", "NVIDIA GPU detected");
-          }
+        const temp = parseInt(text.trim(), 10);
+        if (isNaN(temp) || temp <= 0)
+          return;
+
+        root.gpuTemp = temp;
+        if (root._gpuType === "") {
+          root._gpuType = "nvidia";
+          Core.Logger.i("SystemStats", "NVIDIA GPU detected");
         }
       }
     }
 
     stderr: StdioCollector {
       onStreamFinished: {
-        if (!text.includes("NVIDIA") && root._gpuType === "") {
+        if (root._gpuType === "")
           Core.Logger.d("SystemStats", "No NVIDIA GPU detected");
-        }
       }
     }
   }
@@ -423,68 +329,89 @@ Singleton {
   // CPU USAGE READER
   // ═══════════════════════════════════════════════════════════════════════════
 
+  // Percentage of non-idle jiffies between two /proc/stat samples.
+  // Returns null when there is no usable previous sample.
+  function _deltaUsage(prev, current) {
+    if (!prev)
+      return null;
+
+    const total = current.user + current.nice + current.system + current.idle + current.iowait + current.irq + current.softirq + current.steal;
+    const prevTotal = prev.user + prev.nice + prev.system + prev.idle + prev.iowait + prev.irq + prev.softirq + prev.steal;
+
+    const diffTotal = total - prevTotal;
+    if (diffTotal <= 0)
+      return null;
+
+    const diffIdle = (current.idle + current.iowait) - (prev.idle + prev.iowait);
+    return parseFloat(((diffTotal - diffIdle) / diffTotal * 100).toFixed(1));
+  }
+
   FileView {
     id: _cpuStatFile
     path: "/proc/stat"
+    printErrors: false
 
     onLoaded: {
-      const lines = text().split('\n');
-      const coreUsages = [];
+      const cores = root.cpuCores.slice();
+      let maxCoreIndex = -1;
 
-      for (const line of lines) {
-        if (!line.startsWith('cpu'))
+      for (const line of text().split("\n")) {
+        if (!line.startsWith("cpu"))
           continue;
 
         const parts = line.split(/\s+/);
         const name = parts[0];
 
         const stats = {
-          user: parseInt(parts[1]) || 0,
-          nice: parseInt(parts[2]) || 0,
-          system: parseInt(parts[3]) || 0,
-          idle: parseInt(parts[4]) || 0,
-          iowait: parseInt(parts[5]) || 0,
-          irq: parseInt(parts[6]) || 0,
-          softirq: parseInt(parts[7]) || 0,
-          steal: parseInt(parts[8]) || 0
+          user: parseInt(parts[1], 10) || 0,
+          nice: parseInt(parts[2], 10) || 0,
+          system: parseInt(parts[3], 10) || 0,
+          idle: parseInt(parts[4], 10) || 0,
+          iowait: parseInt(parts[5], 10) || 0,
+          irq: parseInt(parts[6], 10) || 0,
+          softirq: parseInt(parts[7], 10) || 0,
+          steal: parseInt(parts[8], 10) || 0
         };
 
-        const idle = stats.idle + stats.iowait;
-        const total = Object.values(stats).reduce((a, b) => a + b, 0);
-
         if (name === "cpu") {
-          // Overall CPU
-          if (root._prevCpuStats) {
-            const prevIdle = root._prevCpuStats.idle + root._prevCpuStats.iowait;
-            const prevTotal = Object.values(root._prevCpuStats).reduce((a, b) => a + b, 0);
-            const diffTotal = total - prevTotal;
-            const diffIdle = idle - prevIdle;
-            if (diffTotal > 0) {
-              root.cpuUsage = parseFloat(((diffTotal - diffIdle) / diffTotal * 100).toFixed(1));
-            }
-          }
+          const overall = root._deltaUsage(root._prevCpuStats, stats);
+          if (overall !== null)
+            root.cpuUsage = overall;
           root._prevCpuStats = stats;
-        } else {
-          // Per-core CPU
-          const coreIndex = parseInt(name.substring(3));
-          const prevCore = root._prevCpuCoreStats[coreIndex];
-
-          if (prevCore) {
-            const prevIdle = prevCore.idle + prevCore.iowait;
-            const prevTotal = Object.values(prevCore).reduce((a, b) => a + b, 0);
-            const diffTotal = total - prevTotal;
-            const diffIdle = idle - prevIdle;
-            if (diffTotal > 0) {
-              coreUsages[coreIndex] = parseFloat(((diffTotal - diffIdle) / diffTotal * 100).toFixed(1));
-            }
-          }
-          root._prevCpuCoreStats[coreIndex] = stats;
+          continue;
         }
+
+        // Per-core. Indexed by the real core id so panel labels stay correct -
+        // compacting the array with filter() used to shift "Core N" labels off
+        // the cores they described.
+        const coreIndex = parseInt(name.substring(3), 10);
+        if (isNaN(coreIndex))
+          continue;
+
+        if (coreIndex > maxCoreIndex)
+          maxCoreIndex = coreIndex;
+
+        const usage = root._deltaUsage(root._prevCpuCoreStats[coreIndex], stats);
+        cores[coreIndex] = usage !== null ? usage : (cores[coreIndex] ?? 0);
+        root._prevCpuCoreStats[coreIndex] = stats;
       }
 
-      if (coreUsages.length > 0) {
-        root.cpuCores = coreUsages.filter(u => u !== undefined);
+      if (maxCoreIndex < 0)
+        return;
+
+      const count = maxCoreIndex + 1;
+      cores.length = count;
+      for (let i = 0; i < count; i++) {
+        if (cores[i] === undefined)
+          cores[i] = 0;
       }
+
+      root.cpuCores = cores;
+
+      // Assigned separately, and only on change, so views bound to the count do
+      // not rebuild their delegates on every poll.
+      if (root.cpuCoreCount !== count)
+        root.cpuCoreCount = count;
     }
   }
 
@@ -495,22 +422,21 @@ Singleton {
   FileView {
     id: _memInfoFile
     path: "/proc/meminfo"
+    printErrors: false
 
     onLoaded: {
-      const lines = text().split('\n');
       const values = {};
 
-      for (const line of lines) {
+      for (const line of text().split("\n")) {
         const match = line.match(/^(\w+):\s+(\d+)/);
-        if (match) {
-          values[match[1]] = parseInt(match[2]) * 1024;  // Convert KB to bytes
-        }
+        if (match)
+          values[match[1]] = parseInt(match[2], 10) * 1024;  // kB -> bytes
       }
 
       // RAM
       const memTotal = values["MemTotal"] || 0;
-      const memAvailable = values["MemAvailable"] || values["MemFree"] || 0;
-      const memUsed = memTotal - memAvailable;
+      const memAvailable = values["MemAvailable"] ?? values["MemFree"] ?? 0;
+      const memUsed = Math.max(0, memTotal - memAvailable);
 
       root.memTotal = memTotal;
       root.memUsed = memUsed;
@@ -519,7 +445,7 @@ Singleton {
       // Swap
       const swapTotal = values["SwapTotal"] || 0;
       const swapFree = values["SwapFree"] || 0;
-      const swapUsed = swapTotal - swapFree;
+      const swapUsed = Math.max(0, swapTotal - swapFree);
 
       root.swapTotal = swapTotal;
       root.swapUsed = swapUsed;
@@ -531,55 +457,89 @@ Singleton {
   // NETWORK READER
   // ═══════════════════════════════════════════════════════════════════════════
 
+  function _isIgnoredInterface(iface) {
+    for (const prefix of root._ignoredIfacePrefixes) {
+      if (iface === prefix || iface.startsWith(prefix))
+        return true;
+    }
+    return false;
+  }
+
   FileView {
     id: _netDevFile
     path: "/proc/net/dev"
+    printErrors: false
 
     onLoaded: {
       const now = Date.now() / 1000;
-      const lines = text().split('\n');
-      let totalRx = 0, totalTx = 0;
-      let activeIface = "";
+      const lines = text().split("\n");
+      const current = {};
+
+      let totalRx = 0;
+      let totalTx = 0;
 
       for (let i = 2; i < lines.length; i++) {
         const line = lines[i].trim();
         if (!line)
           continue;
 
-        const colonIdx = line.indexOf(':');
+        const colonIdx = line.indexOf(":");
         if (colonIdx === -1)
           continue;
 
         const iface = line.substring(0, colonIdx).trim();
-
-        // Skip loopback and virtual interfaces
-        if (iface === 'lo' || iface.startsWith('veth') || iface.startsWith('docker') || iface.startsWith('br-') || iface.startsWith('virbr'))
+        if (root._isIgnoredInterface(iface))
           continue;
 
         const stats = line.substring(colonIdx + 1).trim().split(/\s+/);
         const rx = parseInt(stats[0], 10) || 0;
         const tx = parseInt(stats[8], 10) || 0;
 
+        current[iface] = {
+          rx: rx,
+          tx: tx
+        };
         totalRx += rx;
         totalTx += tx;
-
-        if (!activeIface && (rx > 0 || tx > 0)) {
-          activeIface = iface;
-        }
       }
 
-      if (root._prevNetTime > 0) {
-        const dt = now - root._prevNetTime;
-        if (dt > 0) {
-          root.netDownSpeed = Math.max(0, Math.round((totalRx - root._prevRxBytes) / dt));
-          root.netUpSpeed = Math.max(0, Math.round((totalTx - root._prevTxBytes) / dt));
+      const dt = now - root._prevNetTime;
+      if (root._prevNetTime > 0 && dt > 0) {
+        let prevRx = 0;
+        let prevTx = 0;
+        let busiestIface = "";
+        let busiestDelta = 0;
+
+        for (const iface in current) {
+          const prev = root._prevNetStats[iface];
+          if (!prev)
+            continue;  // Appeared this tick - no delta to take yet
+
+          prevRx += prev.rx;
+          prevTx += prev.tx;
+
+          // The active interface is the one moving bytes right now, not merely
+          // the first one with a non-zero lifetime counter.
+          const delta = (current[iface].rx - prev.rx) + (current[iface].tx - prev.tx);
+          if (delta > busiestDelta) {
+            busiestDelta = delta;
+            busiestIface = iface;
+          }
         }
+
+        // Counters vanish with their interface; clamp instead of reporting the
+        // resulting negative as a spike.
+        root.netDownSpeed = Math.max(0, Math.round((totalRx - prevRx) / dt));
+        root.netUpSpeed = Math.max(0, Math.round((totalTx - prevTx) / dt));
+
+        if (busiestIface !== "")
+          root.netInterface = busiestIface;
+        else if (!(root.netInterface in current))
+          root.netInterface = Object.keys(current)[0] ?? "";
       }
 
-      root._prevRxBytes = totalRx;
-      root._prevTxBytes = totalTx;
+      root._prevNetStats = current;
       root._prevNetTime = now;
-      root.netInterface = activeIface;
     }
   }
 
@@ -589,27 +549,40 @@ Singleton {
 
   Process {
     id: _diskProcess
-    command: ["df", "-B1", "/"]
+    command: ["df", "-B1", "--output=size,used,target", "/"]
 
     stdout: StdioCollector {
       onStreamFinished: {
-        const lines = text.split("\n");
+        const lines = text.trim().split("\n");
         if (lines.length < 2)
           return;
 
-        // Parse the second line (first is header)
-        const parts = lines[1].split(/\s+/);
-        if (parts.length < 6)
+        const parts = lines[1].trim().split(/\s+/);
+        if (parts.length < 3)
           return;
 
-        const total = parseInt(parts[1]) || 0;
-        const used = parseInt(parts[2]) || 0;
+        const total = parseInt(parts[0], 10) || 0;
+        const used = parseInt(parts[1], 10) || 0;
 
         root.diskTotal = total;
         root.diskUsed = used;
         root.diskPercent = total > 0 ? Math.round((used / total) * 100) : 0;
-        root.diskMount = parts[5] || "/";
+        root.diskMount = parts[2] || "/";
+      }
+    }
+
+    stderr: StdioCollector {
+      onStreamFinished: {
+        const msg = text.trim();
+        if (msg)
+          Core.Logger.w("SystemStats", `df: ${msg}`);
       }
     }
   }
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // INITIALIZATION
+  // ═══════════════════════════════════════════════════════════════════════════
+
+  Component.onCompleted: Core.Logger.i("SystemStats", "Service initializing...")
 }
