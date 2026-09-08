@@ -89,6 +89,44 @@ Item {
   readonly property int topOffset: Core.Style.barHeight + Core.Style.spaceM
   readonly property bool hasHeader: headerTitle !== ""
 
+  // === Sizing ===
+  property bool fillHeight: !root.scrollable
+
+  // Transparent room around the surface, for a drop shadow to land in later.
+  // Sized through elevationRoom() so switching shadows off returns the window
+  // to exactly its old geometry rather than leaving a dead margin.
+  readonly property int surfaceInset: Math.max(Core.Style.spaceS, Core.Style.elevationRoom(root.elevation))
+  property int elevation: 0
+
+  // A layer surface committed at height 0 before the layouts have polished is a
+  // protocol hazard, so the height has a floor.
+  readonly property int minWindowHeight: Core.Style.barHeight * 2
+  readonly property int maxWindowHeight: Math.max(root.minWindowHeight, (root.screen?.height ?? 0) - root.topOffset - Core.Style.spaceM)
+
+  property int frameHeight: 0
+
+  readonly property int naturalWindowHeight: root.frameHeight + root.surfaceInset * 2
+
+  readonly property int surfaceHeight: root.fillHeight ? root.maxWindowHeight : Core.Utils.clamp(root.naturalWindowHeight, root.minWindowHeight, root.maxWindowHeight)
+
+  // Content that reports no height is almost always a Layout.fillHeight child
+  // inside a content-sized panel. It fails silently - the panel just collapses -
+  // so say so rather than leaving it to be discovered visually.
+  //
+  // Checked on a timer rather than on change: frameHeight is legitimately 0 for
+  // the frame or two between construction and the first layout pass, and warning
+  // there would cry wolf on every panel that opens.
+  Timer {
+    id: heightCheck
+    interval: Core.Style.animNormal * 2
+    repeat: false
+    onTriggered: {
+      if (!root.fillHeight && root.frameHeight <= 0)
+        Core.Logger.w("SlidingPanel", `${root.panelId}: content reports no height - a Layout.fillHeight child?`);
+    }
+  }
+
+
   // === Public API ===
   function open() {
     Services.Panels.open(root.panelId, root.screen);
@@ -104,6 +142,7 @@ Item {
 
   onIsOpenChanged: {
     if (isOpen) {
+      heightCheck.restart();
       Qt.callLater(root._reveal);
       Qt.callLater(() => contentRect.forceActiveFocus());
       root.opened();
@@ -120,18 +159,18 @@ Item {
     screen: root.screen
     visible: root.isOpen || root.revealed || slideAnim.running
     color: Config.Theme.transparent
-    implicitWidth: root.panelWidth
+
+    implicitWidth: root.panelWidth + (root.surfaceInset - Core.Style.spaceS) * 2
+    implicitHeight: root.surfaceHeight
 
     anchors {
       top: true
       right: true
-      bottom: true
     }
 
     margins {
       top: root.topOffset
       right: 0
-      bottom: Core.Style.spaceM
     }
 
     WlrLayershell.namespace: root.namespace
@@ -153,8 +192,9 @@ Item {
       width: parent.width
       height: parent.height
 
-      // Off to the right when hidden, flush when revealed.
-      x: root.revealed ? 0 : root.panelWidth
+      // Off to the right when hidden, flush when revealed. Measured from the
+      // slider's own width rather than panelWidth
+      x: root.revealed ? 0 : slider.width
 
       Behavior on x {
         NumberAnimation {
@@ -168,10 +208,19 @@ Item {
     Rectangle {
       id: contentRect
 
-      anchors.fill: parent
-      anchors.margins: Core.Style.spaceS
+      // Top-anchored with an explicit height rather than anchors.fill, so the
+      // visible surface and the window can be sized separately - the window
+      // carries extra transparent room for the shadow.
+      anchors {
+        left: parent.left
+        right: parent.right
+        top: parent.top
+        margins: root.surfaceInset
+      }
+      height: root.surfaceHeight - root.surfaceInset * 2
+
       radius: Core.Style.radiusL
-      color: Config.Theme.alpha(Config.Theme.bg, 0.98)
+      color: Config.Theme.panelBg
 
       border {
         color: Config.Theme.surfaceHover
@@ -188,8 +237,13 @@ Item {
       }
 
       ColumnLayout {
+        id: frameColumn
+
         anchors.fill: parent
         spacing: 0
+
+        onImplicitHeightChanged: root.frameHeight = implicitHeight
+        Component.onCompleted: root.frameHeight = implicitHeight
 
         // === Optional Header ===
         PanelHeader {
@@ -212,6 +266,14 @@ Item {
 
           Layout.fillWidth: true
           Layout.fillHeight: true
+
+          // What the content would like to be. -1 falls back to implicitHeight
+          // (0), which is what a fill-height panel wants; otherwise this is the
+          // number that ends up driving the whole window's height.
+          Layout.preferredHeight: root.fillHeight ? -1 : contentColumn.implicitHeight + Core.Style.panelPadding * 2
+
+          // So it can still be squeezed once the content exceeds the cap.
+          Layout.minimumHeight: 0
 
           clip: true
           interactive: root.scrollable

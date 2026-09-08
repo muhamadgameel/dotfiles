@@ -24,6 +24,7 @@ Components.SlidingPanel {
   panelId: "audio"
   namespace: "quickshell-audio-panel"
   scrollable: true
+  contentSpacing: Core.Style.spaceM
 
   // Header configuration
   headerIcon: Services.Audio.getVolumeIcon()
@@ -31,82 +32,69 @@ Components.SlidingPanel {
   headerTitle: "Sound"
   headerSubtitle: Services.Audio.deviceName(Services.Audio.sink)
 
-  // Panel content
-  Item {
+  // === OUTPUT SECTION ===
+  OutputSection {
     Layout.fillWidth: true
-    Layout.fillHeight: true
+  }
 
-    ColumnLayout {
-      anchors.fill: parent
-      spacing: Core.Style.spaceM
+  Components.Divider {}
 
-      Components.Spacer {}
+  // === INPUT SECTION (Collapsible) ===
+  InputSection {
+    Layout.fillWidth: true
+  }
 
-      // === OUTPUT SECTION ===
-      OutputSection {
+  Components.Divider {}
+
+  // === STREAMS SECTION ===
+  RowLayout {
+    Layout.fillWidth: true
+    spacing: Core.Style.spaceS
+
+    Components.Text {
+      text: "Applications"
+      weight: Core.Style.weightBold
+      Layout.fillWidth: true
+    }
+
+    Components.Text {
+      text: _streamCount + " active"
+      color: Config.Theme.textDim
+      size: Core.Style.fontS
+
+      readonly property int _streamCount: Services.Audio.sinkStreams.length + Services.Audio.sourceStreams.length
+    }
+  }
+  ColumnLayout {
+    id: streamList
+    width: parent.width
+    spacing: Core.Style.spaceXS
+
+    // Playback Streams
+    Repeater {
+      model: Services.Audio.sinkStreams
+      delegate: StreamItem {
         Layout.fillWidth: true
+        isOutput: true
       }
+    }
 
-      Components.Divider {}
-
-      // === INPUT SECTION (Collapsible) ===
-      InputSection {
+    // Recording Streams
+    Repeater {
+      model: Services.Audio.sourceStreams
+      delegate: StreamItem {
         Layout.fillWidth: true
+        isOutput: false
       }
+    }
 
-      Components.Divider {}
-
-      // === STREAMS SECTION ===
-      RowLayout {
-        Layout.fillWidth: true
-        spacing: Core.Style.spaceS
-
-        Components.Text {
-          text: "Applications"
-          weight: Core.Style.weightBold
-          Layout.fillWidth: true
-        }
-
-        Components.Text {
-          text: _streamCount + " active"
-          color: Config.Theme.textDim
-          size: Core.Style.fontS
-
-          readonly property int _streamCount: Services.Audio.sinkStreams.length + Services.Audio.sourceStreams.length
-        }
-      }
-      ColumnLayout {
-        id: streamList
-        width: parent.width
-        spacing: Core.Style.spaceXS
-
-        // Playback Streams
-        Repeater {
-          model: Services.Audio.sinkStreams
-          delegate: StreamItem {
-            Layout.fillWidth: true
-            isOutput: true
-          }
-        }
-
-        // Recording Streams
-        Repeater {
-          model: Services.Audio.sourceStreams
-          delegate: StreamItem {
-            Layout.fillWidth: true
-            isOutput: false
-          }
-        }
-
-        // Empty State
-        Components.EmptyState {
-          Layout.fillWidth: true
-          visible: Services.Audio.sinkStreams.length === 0 && Services.Audio.sourceStreams.length === 0
-          icon: "volume-off"
-          message: "No active streams"
-          hint: "Applications will appear here when playing or recording audio"
-        }
-      }
+    // Empty State
+    Components.EmptyState {
+      Layout.fillWidth: true
+      visible: Services.Audio.sinkStreams.length === 0 && Services.Audio.sourceStreams.length === 0
+      icon: "volume-off"
+      message: "No active streams"
+      hint: "Applications will appear here when playing or recording audio"
     }
   }
 

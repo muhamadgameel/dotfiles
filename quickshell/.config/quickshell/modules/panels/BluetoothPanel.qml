@@ -24,6 +24,8 @@ Components.SlidingPanel {
   panelId: "bluetooth"
   namespace: "quickshell-bluetooth-panel"
   scrollable: false
+  fillHeight: false
+  contentSpacing: Core.Style.spaceM
 
   headerIcon: Services.Bluetooth.statusIcon
   headerIconColor: Services.Bluetooth.enabled ? Config.Theme.accentAlt : Config.Theme.textMuted
@@ -39,8 +41,11 @@ Components.SlidingPanel {
   Item {
     Layout.fillWidth: true
     Layout.fillHeight: true
+    Layout.preferredHeight: bodyColumn.implicitHeight
 
     ColumnLayout {
+      id: bodyColumn
+
       anchors.fill: parent
       spacing: Core.Style.spaceM
 
@@ -63,9 +68,12 @@ Components.SlidingPanel {
       Item {
         Layout.fillWidth: true
         Layout.fillHeight: true
+        Layout.preferredHeight: Services.Bluetooth.enabled ? devicesColumn.implicitHeight : Core.Style.controlHeightL * 4
 
         // Devices List (when enabled)
         ColumnLayout {
+          id: devicesColumn
+
           anchors.fill: parent
           spacing: Core.Style.spaceS
           visible: Services.Bluetooth.enabled
@@ -94,7 +102,11 @@ Components.SlidingPanel {
           // Device List
           Flickable {
             Layout.fillWidth: true
+
             Layout.fillHeight: true
+            Layout.preferredHeight: deviceList.implicitHeight
+            Layout.minimumHeight: 0
+
             contentHeight: deviceList.implicitHeight
             clip: true
             boundsBehavior: Flickable.StopAtBounds
@@ -139,7 +151,7 @@ Components.SlidingPanel {
           // Empty States (shown when no devices)
           Loader {
             Layout.fillWidth: true
-            Layout.fillHeight: true
+            Layout.preferredHeight: Core.Style.controlHeightL * 4
             active: _totalDevices === 0
             visible: active
 

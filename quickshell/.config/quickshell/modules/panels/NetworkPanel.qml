@@ -17,6 +17,8 @@ Components.SlidingPanel {
   panelId: "network"
   namespace: "quickshell-network-panel"
   scrollable: false
+  fillHeight: false
+  contentSpacing: Core.Style.spaceM
 
   // Header configuration
   headerIcon: Services.Network.connectionIcon
@@ -31,118 +33,104 @@ Components.SlidingPanel {
   }
   onClosed: Services.Network.panelOpen = false
 
-  // Panel content wrapper with padding
-  Item {
+  // WiFi Toggle
+  Components.FormRow {
     Layout.fillWidth: true
-    Layout.fillHeight: true
+    label: "Wi-Fi"
+    hasToggle: true
+    toggleChecked: Services.Network.wifiEnabled
+    onToggled: checked => Services.Network.setWifiEnabled(checked)
+  }
 
-    ColumnLayout {
-      anchors.fill: parent
-      spacing: Core.Style.spaceM
+  // Error Message
+  Components.StatusBanner {
+    Layout.fillWidth: true
+    visible: Services.Network.lastError !== ""
+    message: Services.Network.lastError
+  }
 
-      // WiFi Toggle
-      Components.FormRow {
+  // Connection Info (collapsible)
+  ConnectionInfoSection {
+    Layout.fillWidth: true
+    visible: Services.Network.isConnected
+  }
+
+  // WiFi Content (networks list or disabled state)
+  ColumnLayout {
+Layout.fillWidth: true
+    spacing: Core.Style.spaceS
+    visible: Services.Network.wifiEnabled
+
+    // Header with scan button
+    RowLayout {
+      Layout.fillWidth: true
+      spacing: Core.Style.spaceS
+
+      Components.Text {
+        text: "Available Networks"
+        weight: Core.Style.weightBold
         Layout.fillWidth: true
-        label: "Wi-Fi"
-        hasToggle: true
-        toggleChecked: Services.Network.wifiEnabled
-        onToggled: checked => Services.Network.setWifiEnabled(checked)
       }
 
-      // Error Message
-      Components.StatusBanner {
-        Layout.fillWidth: true
-        visible: Services.Network.lastError !== ""
-        message: Services.Network.lastError
+      Components.Text {
+        text: Services.Network.scanning ? "Scanning..." : `${Object.keys(Services.Network.networks).length} networks`
+        color: Config.Theme.textDim
+        size: Core.Style.fontS
       }
 
-      // Connection Info (collapsible)
-      ConnectionInfoSection {
-        Layout.fillWidth: true
-        visible: Services.Network.isConnected
-      }
+      ScanButton {}
+    }
 
-      // WiFi Content (networks list or disabled state)
-      Item {
-        Layout.fillWidth: true
-        Layout.fillHeight: true
+    // Network List
+    Flickable {
+      Layout.fillWidth: true
+      Layout.fillHeight: true
+      Layout.preferredHeight: networkList.implicitHeight
+      Layout.minimumHeight: 0
 
-        // Networks List (when WiFi enabled)
-        ColumnLayout {
-          anchors.fill: parent
-          spacing: Core.Style.spaceS
-          visible: Services.Network.wifiEnabled
+      contentHeight: networkList.height
+      clip: true
+      boundsBehavior: Flickable.StopAtBounds
 
-          // Header with scan button
-          RowLayout {
+      ColumnLayout {
+        id: networkList
+        width: parent.width
+        spacing: Core.Style.spaceXS
+
+        Repeater {
+          model: Services.Network.sortedNetworks
+          delegate: NetworkItem {
+            required property var modelData
+
             Layout.fillWidth: true
-            spacing: Core.Style.spaceS
-
-            Components.Text {
-              text: "Available Networks"
-              weight: Core.Style.weightBold
-              Layout.fillWidth: true
-            }
-
-            Components.Text {
-              text: Services.Network.scanning ? "Scanning..." : `${Object.keys(Services.Network.networks).length} networks`
-              color: Config.Theme.textDim
-              size: Core.Style.fontS
-            }
-
-            ScanButton {}
-          }
-
-          // Network List
-          Flickable {
-            Layout.fillWidth: true
-            Layout.fillHeight: true
-            contentHeight: networkList.height
-            clip: true
-            boundsBehavior: Flickable.StopAtBounds
-
-            ColumnLayout {
-              id: networkList
-              width: parent.width
-              spacing: Core.Style.spaceXS
-
-              Repeater {
-                model: Services.Network.sortedNetworks
-                delegate: NetworkItem {
-                  required property var modelData
-
-                  Layout.fillWidth: true
-                  network: modelData
-                  onConnectRequested: ssid => Services.Network.connect(ssid)
-                }
-              }
-
-              Components.Spacer {
-                size: 32
-              }
-
-              // Empty state
-              Components.EmptyState {
-                Layout.fillWidth: true
-                visible: Object.keys(Services.Network.networks).length === 0 && !Services.Network.scanning
-                icon: "wifi-off"
-                message: "No networks found"
-              }
-            }
+            network: modelData
+            onConnectRequested: ssid => Services.Network.connect(ssid)
           }
         }
 
-        // WiFi Disabled State
+        Components.Spacer {
+          size: 32
+        }
+
+        // Empty state
         Components.EmptyState {
-          anchors.centerIn: parent
-          visible: !Services.Network.wifiEnabled
+          Layout.fillWidth: true
+          visible: Object.keys(Services.Network.networks).length === 0 && !Services.Network.scanning
           icon: "wifi-off"
-          iconSize: Core.Style.fontXXL * 2
-          message: "Wi-Fi is disabled"
-          hint: "Enable Wi-Fi to see available networks"
+          message: "No networks found"
         }
       }
     }
+  }
+
+  Components.EmptyState {
+    Layout.fillWidth: true
+    Layout.topMargin: Core.Style.spaceXL
+    visible: !Services.Network.wifiEnabled
+    icon: "wifi-off"
+    iconSize: Core.Style.fontXXL * 2
+    message: "Wi-Fi is disabled"
+    hint: "Enable Wi-Fi to see available networks"
   }
 
   // ==========================================================================

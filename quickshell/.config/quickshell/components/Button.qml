@@ -176,12 +176,6 @@ Rectangle {
       size: root.iconSize
       spinning: root.iconSpinning
       color: root._iconColor
-
-      Behavior on color {
-        ColorAnimation {
-          duration: Core.Style.duration(Core.Style.animFast)
-        }
-      }
     }
 
     Text {
@@ -192,12 +186,6 @@ Rectangle {
       font.pixelSize: root.textSize
       font.weight: Core.Style.weightMedium
       color: root._textColor
-
-      Behavior on color {
-        ColorAnimation {
-          duration: Core.Style.duration(Core.Style.animFast)
-        }
-      }
     }
   }
 
