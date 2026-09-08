@@ -3,6 +3,7 @@ pragma ComponentBehavior: Bound
 import QtQuick
 import Quickshell
 
+import "../../components" as Components
 import "../../config" as Config
 import "../../core" as Core
 import "../../services" as Services
@@ -55,8 +56,10 @@ Variants {
       margin: Core.Style.osdMargin
       topExtra: Core.Style.barHeight
 
-      implicitWidth: Core.Style.osdWidth
-      implicitHeight: Core.Style.osdHeight
+      readonly property int shadowRoom: Math.max(Core.Style.spaceXS, Core.Style.elevationRoom(2))
+
+      implicitWidth: Core.Style.osdWidth + (shadowRoom - Core.Style.spaceXS) * 2
+      implicitHeight: Core.Style.osdHeight + (shadowRoom - Core.Style.spaceXS) * 2
       visible: content.visible
 
       function show() {
@@ -93,13 +96,21 @@ Variants {
         anchors.fill: parent
         visible: false
 
+        Components.Elevation {
+          surface: osdBody
+          level: 2
+          radius: osdBody.radius
+        }
+
         Rectangle {
+          id: osdBody
+
           anchors.fill: parent
-          anchors.margins: Core.Style.spaceXS
+          anchors.margins: osdWindow.shadowRoom
           radius: Core.Style.radiusL
-          color: Config.Theme.alpha(Config.Theme.bg, 0.95)
+          color: Config.Theme.panelBg
           border.color: Config.Theme.surfaceHover
-          border.width: 1
+          border.width: Core.Style.borderThin
 
           // Dynamic layout based on OSD type
           Loader {

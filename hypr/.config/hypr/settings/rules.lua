@@ -93,8 +93,18 @@ end
 -- fuzzel
 hl.layer_rule({ match = { namespace = "launcher" }, blur = true, animation = "slide" })
 
--- quickshell: bar today, panels open on demand -- match the whole family.
-hl.layer_rule({ match = { namespace = "^quickshell-" }, blur = true })
+-- quickshell: the bar, the OSD, the notification popups and the sliding panels
+-- all draw a translucent rounded body inside a slightly larger transparent
+-- window - that extra room is where their drop shadows land.
+hl.layer_rule({
+	match = { namespace = "^quickshell-" },
+	blur = true,
+	ignore_alpha = 0.4,
+})
+
+-- The panels run their own slide animation; a compositor animation on top of it
+-- animates the open twice.
+hl.layer_rule({ match = { namespace = "^quickshell-.*panel$" }, no_anim = true })
 
 -- ── Workspace rules: smart gaps ──────────────────────────────────────
 -- One tiled window (w[tv1]) or one fullscreen window (f[1]) gets no gaps,

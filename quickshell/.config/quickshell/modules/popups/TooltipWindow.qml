@@ -25,8 +25,10 @@ PopupWindow {
   visible: false
   color: Config.Theme.transparent
 
-  implicitWidth: content.implicitWidth
-  implicitHeight: content.implicitHeight
+  readonly property int shadowRoom: Core.Style.elevationRoom(1)
+
+  implicitWidth: content.implicitWidth + shadowRoom * 2
+  implicitHeight: content.implicitHeight + shadowRoom * 2
 
   anchor {
     edges: root._edgeFor(root.direction)
@@ -34,10 +36,10 @@ PopupWindow {
     adjustment: PopupAdjustment.All
 
     margins {
-      left: Core.Style.spaceS
-      right: Core.Style.spaceS
-      top: Core.Style.spaceS
-      bottom: Core.Style.spaceS
+      left: Core.Style.spaceS - root.shadowRoom
+      right: Core.Style.spaceS - root.shadowRoom
+      top: Core.Style.spaceS - root.shadowRoom
+      bottom: Core.Style.spaceS - root.shadowRoom
     }
   }
 
@@ -117,8 +119,16 @@ PopupWindow {
     }
   }
 
+  Components.Elevation {
+    surface: content
+    level: 1
+    radius: content.radius
+  }
+
   Components.TooltipBubble {
     id: content
+
+    anchors.centerIn: parent
     text: root.text
     transformOrigin: Item.Center
     opacity: 0

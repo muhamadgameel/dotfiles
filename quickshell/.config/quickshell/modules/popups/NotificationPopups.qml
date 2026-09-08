@@ -39,7 +39,9 @@ Variants {
 
       readonly property int notifWidth: 400
 
-      implicitWidth: notifWidth
+      readonly property int shadowRoom: Math.max(Core.Style.spaceXS, Core.Style.elevationRoom(2))
+
+      implicitWidth: notifWidth + (shadowRoom - Core.Style.spaceXS) * 2
       implicitHeight: notificationStack.implicitHeight + Core.Style.spaceL
 
       property var animateConnection: null
@@ -82,7 +84,7 @@ Variants {
         }
 
         spacing: Core.Style.spaceS
-        width: notifWidth
+        width: notifWindow.notifWidth + (notifWindow.shadowRoom - Core.Style.spaceXS) * 2
 
         Behavior on implicitHeight {
           SpringAnimation {
@@ -109,8 +111,8 @@ Variants {
 
             readonly property int animationDelay: index * Core.Style.slideStagger
 
-            Layout.preferredWidth: notifWidth
-            Layout.preferredHeight: cardContent.implicitHeight + Core.Style.spaceL * 2
+            Layout.preferredWidth: notifWindow.notifWidth + (notifWindow.shadowRoom - Core.Style.spaceXS) * 2
+            Layout.preferredHeight: cardContent.implicitHeight + notifWindow.shadowRoom * 2
             Layout.maximumHeight: Layout.preferredHeight
 
             // === Slide Animator ===
@@ -126,10 +128,17 @@ Variants {
             onNotificationIdChanged: slideAnimator.show()
 
             // === Notification Card ===
+            // Inside the animated card Item, so SlideAnimator carries it.
+            Components.Elevation {
+              surface: cardContent
+              level: 2
+              radius: cardContent.radius
+            }
+
             Components.NotificationCard {
               id: cardContent
               anchors.fill: parent
-              anchors.margins: Core.Style.spaceXS
+              anchors.margins: notifWindow.shadowRoom
 
               notificationData: card.notificationData
               showProgress: true
