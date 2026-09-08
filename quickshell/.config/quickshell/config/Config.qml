@@ -48,6 +48,8 @@ Singleton {
   readonly property string theme: Settings.get("theme", Themes.defaultName)
   readonly property real uiScale: Settings.get("uiScale", 1.0)
 
+  readonly property string fontFamily: Settings.get("fontFamily", "Roboto")
+
   readonly property real surfaceOpacity: Settings.get("surfaceOpacity", 0.85)
 
   // === OSD Configuration ===
@@ -79,6 +81,10 @@ Singleton {
 
   function setTheme(name) {
     Settings.set("theme", name);
+  }
+
+  function setFontFamily(name) {
+    Settings.set("fontFamily", name);
   }
 
   function setUiScale(scale) {
