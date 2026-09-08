@@ -36,6 +36,18 @@ Singleton {
   // Widest the focused-window title may get before it elides.
   readonly property int windowTitleMaxWidth: Math.round(320 * uiScale)
 
+  // === Control Dimensions ===
+  readonly property int controlHeightS: Math.round(32 * uiScale)
+  readonly property int controlHeightM: Math.round(40 * uiScale)
+  readonly property int controlHeightL: Math.round(52 * uiScale)
+
+  // === Typography ===
+  readonly property string fontFamily: "JetBrainsMono Nerd Font Propo"
+  readonly property string fontMono: "JetBrainsMono Nerd Font"
+
+  readonly property real letterSpacingTight: -0.2
+  readonly property real letterSpacingWide: 0.6
+
   // === Font Sizes ===
   readonly property real fontXXS: 6 * uiScale
   readonly property real fontXS: 8 * uiScale
@@ -61,13 +73,71 @@ Singleton {
   readonly property int spaceXXL: Math.round(32 * uiScale)
 
   // === Border Radii ===
+  readonly property int radiusXS: Math.round(4 * uiScale)
   readonly property int radiusS: Math.round(6 * uiScale)
   readonly property int radiusM: Math.round(10 * uiScale)
   readonly property int radiusL: Math.round(14 * uiScale)
+  readonly property int radiusXL: Math.round(20 * uiScale)
+  readonly property int radiusFull: 9999
 
   // === Border Widths ===
   readonly property int borderThin: 1
   readonly property int borderMedium: 2
+
+  // === State Layers ===
+  // How strongly an interaction state tints the surface underneath it. Used via
+  // Theme.stateLayer(), so hover on an accent button and hover on a card are
+  // the same strength rather than each call site inventing a number.
+  readonly property real opacityHover: 0.08
+  readonly property real opacityPressed: 0.14
+  readonly property real opacityDisabled: 0.4
+  readonly property real opacityMuted: 0.6
+
+  // === Focus ===
+  readonly property int focusRingWidth: Math.max(2, Math.round(2 * uiScale))
+  readonly property int focusRingOffset: Math.max(2, Math.round(2 * uiScale))
+
+  // === Elevation ===
+  // How far a surface floats above the desktop: 1 a tooltip, 2 the bar and the
+  // notification popups, 3 the panels and the OSD. Indexed by level so a caller
+  // passes one number instead of picking three tokens apart.
+  //
+  // Note there is no `spread` token: this Qt build's RectangularShadow exposes
+  // only offset/color/blur/radius (checked against plugins.qmltypes), so a
+  // spread token would be a value nothing could consume.
+  readonly property bool shadowsEnabled: Config.Config.shadowsEnabled
+
+  readonly property var _shadowBlur: [0, 10, 18, 28]
+  readonly property var _shadowOffsetY: [0, 2, 3, 6]
+  readonly property var _shadowAlpha: [0, 0.22, 0.28, 0.34]
+
+  function shadowBlur(level) {
+    return Math.round((root._shadowBlur[level] ?? 0) * uiScale);
+  }
+
+  function shadowOffsetY(level) {
+    return Math.round((root._shadowOffsetY[level] ?? 0) * uiScale);
+  }
+
+  function shadowAlpha(level) {
+    return root._shadowAlpha[level] ?? 0;
+  }
+
+  /**
+  * Transparent space a surface needs around it for its shadow to land in, px.
+  *
+  * A shadow draws outside the surface, so the *window* has to be bigger than
+  * the surface or it clips at the window edge. Windows size themselves through
+  * this rather than through a constant, so switching shadows off shrinks every
+  * window back to exactly its old geometry instead of leaving dead margins.
+  *
+  * blur/2 because Qt's blur straddles the edge rather than extending from it.
+  */
+  function elevationRoom(level) {
+    if (!root.shadowsEnabled || level <= 0)
+      return 0;
+    return Math.ceil(root.shadowBlur(level) / 2) + root.shadowOffsetY(level) + root.spaceXXS;
+  }
 
   // === Animation Durations (ms) ===
   readonly property int animFaster: 75
@@ -110,6 +180,13 @@ Singleton {
 
   // Gap between consecutive cards in a stack, so they arrive in sequence.
   readonly property int slideStagger: 80
+
+  // One turn of a spinner. Icon.qml and Spinner.qml each had their own 1000.
+  readonly property int spinDuration: 1000
+
+  // Stacking order for things that float over panel content (scrollbars,
+  // overlays). ScrollArea was hardcoding `z: 100` in two places.
+  readonly property int zOverlay: 100
 
   // === OSD Dimensions ===
   readonly property int osdWidth: Math.round(280 * uiScale)

@@ -81,7 +81,7 @@ Rectangle {
 
   Behavior on color {
     ColorAnimation {
-      duration: Core.Style.animFast
+      duration: Core.Style.duration(Core.Style.animFast)
     }
   }
 

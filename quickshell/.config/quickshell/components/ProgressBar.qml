@@ -49,8 +49,8 @@ Rectangle {
 
     Behavior on width {
       NumberAnimation {
-        duration: Core.Style.animFast
-        easing.type: Easing.OutQuad
+        duration: Core.Style.duration(Core.Style.animFast)
+        easing.type: Core.Style.easeStandard
       }
     }
   }

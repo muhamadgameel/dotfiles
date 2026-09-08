@@ -88,7 +88,7 @@ Rectangle {
 
   Behavior on width {
     NumberAnimation {
-      duration: Core.Style.animFast
+      duration: Core.Style.duration(Core.Style.animFast)
     }
   }
 

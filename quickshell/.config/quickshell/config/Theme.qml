@@ -63,9 +63,21 @@ Singleton {
   readonly property color white: "#ffffff"
 
   // === Elevation ===
-  // Shadow colour for raised surfaces. Derived from the palette so it reads
-  // correctly on a light theme, where pure black is far too heavy.
-  readonly property color shadow: isDark ? Qt.rgba(0, 0, 0, 0.45) : Qt.rgba(0, 0, 0, 0.15)
+  // Shadows are black; *how much* of it lands is Style.shadowAlpha(level).
+  // Splitting it that way means one strength curve serves every palette, scaled
+  // by this so a light theme does not get a bruise under every panel.
+  readonly property color shadow: root.black
+  readonly property real shadowStrength: isDark ? 1.0 : 0.45
+
+  // === Surfaces ===
+  // Panels and the bar are drawn translucent and lean on the compositor's blur.
+  // Single source of truth so a legibility tweak is one edit, not thirteen.
+  readonly property color panelBg: alpha(bg, Config.surfaceOpacity)
+  readonly property color barBg: alpha(bg, Math.max(0.5, Config.surfaceOpacity - 0.05))
+  readonly property color popupBg: alpha(bg, Math.min(1.0, Config.surfaceOpacity + 0.05))
+
+  // === Focus ===
+  readonly property color focusRing: accent
 
   // === Helper Functions ===
 
@@ -82,6 +94,33 @@ Singleton {
   // Darken a color
   function darken(baseColor, amount) {
     return Qt.darker(baseColor, 1 + amount);
+  }
+
+  /**
+  * Tint a surface to show an interaction state.
+  *
+  * @param baseColor - the surface being tinted
+  * @param strength - 0..1, from the Style opacity tokens
+  * @param tint - what to tint with; defaults to the palette's foreground
+  */
+  function stateLayer(baseColor, strength, tint) {
+    if (!(strength > 0))
+      return baseColor;
+
+    const over = tint !== undefined ? tint : (isDark ? white : black);
+    return Qt.rgba(baseColor.r + (over.r - baseColor.r) * strength, baseColor.g + (over.g - baseColor.g) * strength, baseColor.b + (over.b - baseColor.b) * strength, baseColor.a);
+  }
+
+  /**
+  * The same colour at zero alpha.
+  *
+  * Animating a colour to or from `transparent` runs the RGB channels down to
+  * black on the way, which shows as a dark flash mid-fade. Fading to the same
+  * hue at alpha 0 keeps the channels put. Card and Button each carried their
+  * own copy of this workaround.
+  */
+  function transparentOf(baseColor) {
+    return Qt.rgba(baseColor.r, baseColor.g, baseColor.b, 0);
   }
 
   /**

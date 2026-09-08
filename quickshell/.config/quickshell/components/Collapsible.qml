@@ -64,8 +64,8 @@ ColumnLayout {
 
         Behavior on rotation {
           NumberAnimation {
-            duration: Core.Style.animFast
-            easing.type: Easing.OutCubic
+            duration: Core.Style.duration(Core.Style.animFast)
+            easing.type: Core.Style.easeStandard
           }
         }
       }
@@ -84,8 +84,8 @@ ColumnLayout {
 
     Behavior on Layout.preferredHeight {
       NumberAnimation {
-        duration: Core.Style.animNormal
-        easing.type: Easing.OutCubic
+        duration: Core.Style.duration(Core.Style.animNormal)
+        easing.type: Core.Style.easeStandard
       }
     }
 

@@ -64,7 +64,7 @@ Rectangle {
 
   Behavior on border.color {
     ColorAnimation {
-      duration: Core.Style.animFast
+      duration: Core.Style.duration(Core.Style.animFast)
     }
   }
 

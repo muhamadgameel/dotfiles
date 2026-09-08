@@ -67,7 +67,7 @@ ColumnLayout {
 
       Behavior on color {
         ColorAnimation {
-          duration: Core.Style.animNormal
+          duration: Core.Style.duration(Core.Style.animNormal)
         }
       }
     }
@@ -128,7 +128,7 @@ ColumnLayout {
 
       Behavior on color {
         ColorAnimation {
-          duration: Core.Style.animNormal
+          duration: Core.Style.duration(Core.Style.animNormal)
         }
       }
     }
