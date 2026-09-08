@@ -96,7 +96,7 @@ Item {
   // Sized through elevationRoom() so switching shadows off returns the window
   // to exactly its old geometry rather than leaving a dead margin.
   readonly property int surfaceInset: Math.max(Core.Style.spaceS, Core.Style.elevationRoom(root.elevation))
-  property int elevation: 0
+  property int elevation: 2
 
   // A layer surface committed at height 0 before the layouts have polished is a
   // protocol hazard, so the height has a floor.
@@ -205,6 +205,12 @@ Item {
       }
 
     // === Content Container ===
+    Components.Elevation {
+      surface: contentRect
+      level: root.elevation
+      radius: contentRect.radius
+    }
+
     Rectangle {
       id: contentRect
 

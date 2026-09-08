@@ -4,6 +4,7 @@ import QtQuick
 import Quickshell
 import Quickshell.Wayland
 
+import "../../components" as Components
 import "../../config" as Config
 import "../../core" as Core
 import "../../services" as Services
@@ -42,6 +43,8 @@ Variants {
       right: true
     }
 
+    readonly property bool atTop: Config.Config.barPosition === "top"
+
     implicitHeight: Core.Style.barHeight
     color: Config.Theme.transparent
 
@@ -51,7 +54,14 @@ Variants {
 
     // Bar Component
     Bar {
-      anchors.fill: parent
+      id: bar
+
+      anchors.left: parent.left
+      anchors.right: parent.right
+      anchors.top: barWindow.atTop ? parent.top : undefined
+      anchors.bottom: barWindow.atTop ? undefined : parent.bottom
+      height: Core.Style.barHeight
+
       screen: barWindow.modelData
 
       onAudioClicked: Services.Panels.toggle("audio", barWindow.modelData)

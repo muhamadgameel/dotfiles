@@ -36,7 +36,7 @@ Rectangle {
   signal powerClicked
   signal screenshotClicked
 
-  color: Config.Theme.alpha(Config.Theme.bg, 0.95)
+  color: Config.Theme.barBg
 
   // ===================================================================
   // CENTRE - absolutely centred, never overlapped

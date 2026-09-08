@@ -50,7 +50,7 @@ Singleton {
 
   readonly property string fontFamily: Settings.get("fontFamily", "Roboto")
 
-  readonly property real surfaceOpacity: Settings.get("surfaceOpacity", 0.85)
+  readonly property real surfaceOpacity: Settings.get("surfaceOpacity", 0.9)
 
   // === OSD Configuration ===
   readonly property string osdPosition: Settings.get("osdPosition", "top_right")
