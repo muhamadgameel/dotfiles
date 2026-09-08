@@ -159,7 +159,7 @@ Item {
       Behavior on x {
         NumberAnimation {
           id: slideAnim
-          duration: Core.Style.animNormal
+          duration: Core.Style.duration(Core.Style.animNormal)
           easing.type: Core.Style.easeStandard
         }
       }

@@ -76,11 +76,19 @@ Item {
       id: label
 
       Layout.fillWidth: true
+      font.family: Core.Style.fontFamily
       font.pixelSize: root.size
       font.weight: root.weight
       color: Config.Theme.text
       elide: Text.ElideRight
       verticalAlignment: Text.AlignVCenter
+
+      Behavior on color {
+        ColorAnimation {
+          duration: Core.Style.duration(Core.Style.animFast)
+          easing.type: Core.Style.easeStandard
+        }
+      }
     }
   }
 }

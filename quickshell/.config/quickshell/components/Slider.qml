@@ -104,8 +104,8 @@ Item {
     Behavior on width {
       enabled: !root.dragging
       NumberAnimation {
-        duration: Core.Style.animFast
-        easing.type: Easing.OutQuad
+        duration: Core.Style.duration(Core.Style.animFast)
+        easing.type: Core.Style.easeStandard
       }
     }
   }
@@ -124,14 +124,14 @@ Item {
 
     Behavior on color {
       ColorAnimation {
-        duration: Core.Style.animFast
+        duration: Core.Style.duration(Core.Style.animFast)
       }
     }
 
     Behavior on scale {
       NumberAnimation {
-        duration: Core.Style.animFast
-        easing.type: Easing.OutQuad
+        duration: Core.Style.duration(Core.Style.animFast)
+        easing.type: Core.Style.easeStandard
       }
     }
   }

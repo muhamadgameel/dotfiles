@@ -43,7 +43,7 @@ Item {
 
   // === Animation ===
   property bool spinning: false
-  property int spinDuration: 1000
+  property int spinDuration: Core.Style.spinDuration
 
   // === Internal: Determine icon type ===
   readonly property bool _isFilePath: {
@@ -77,6 +77,12 @@ Item {
     anchors.fill: parent
     color: Config.Theme.transparent
     radius: 0
+    Behavior on color {
+      ColorAnimation {
+        duration: Core.Style.duration(Core.Style.animFast)
+        easing.type: Core.Style.easeStandard
+      }
+    }
   }
 
   // === Image Display ===
@@ -105,11 +111,18 @@ Item {
     anchors.centerIn: parent
 
     RotationAnimation on rotation {
-      running: root.spinning
+      running: root.spinning && Core.Style.motionEnabled
       from: 0
       to: 360
       duration: root.spinDuration
       loops: Animation.Infinite
+    }
+
+    Behavior on color {
+      ColorAnimation {
+        duration: Core.Style.duration(Core.Style.animFast)
+        easing.type: Core.Style.easeStandard
+      }
     }
   }
 }

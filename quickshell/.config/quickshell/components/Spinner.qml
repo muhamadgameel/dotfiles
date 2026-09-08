@@ -34,7 +34,7 @@ Item {
   property bool running: true
   property real size: Core.Style.fontL
   property color color: Config.Theme.text
-  property int duration: 1000
+  property int duration: Core.Style.spinDuration
   property string icon: "loading"
 
   // === Dimensions ===

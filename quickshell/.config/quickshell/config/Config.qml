@@ -22,6 +22,7 @@ Singleton {
 
   // === Feature Toggles ===
   readonly property bool animationsEnabled: Settings.get("animationsEnabled", true)
+  readonly property bool shadowsEnabled: Settings.get("shadowsEnabled", true)
   readonly property bool debugMode: Settings.get("debugMode", false)
 
   // === Bar Configuration ===
@@ -46,6 +47,8 @@ Singleton {
   // === Appearance ===
   readonly property string theme: Settings.get("theme", Themes.defaultName)
   readonly property real uiScale: Settings.get("uiScale", 1.0)
+
+  readonly property real surfaceOpacity: Settings.get("surfaceOpacity", 0.85)
 
   // === OSD Configuration ===
   readonly property string osdPosition: Settings.get("osdPosition", "top_right")
@@ -96,5 +99,13 @@ Singleton {
 
   function toggleDebugMode() {
     return Settings.toggle("debugMode");
+  }
+
+  function toggleShadows() {
+    return Settings.toggle("shadowsEnabled", true);
+  }
+
+  function setSurfaceOpacity(value) {
+    Settings.set("surfaceOpacity", Core.Utils.clamp(value, 0.3, 1.0));
   }
 }

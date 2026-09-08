@@ -35,7 +35,7 @@ Rectangle {
 
   Behavior on color {
     ColorAnimation {
-      duration: Core.Style.animFast
+      duration: Core.Style.duration(Core.Style.animFast)
     }
   }
 
@@ -52,8 +52,8 @@ Rectangle {
 
     Behavior on x {
       NumberAnimation {
-        duration: Core.Style.animFast
-        easing.type: Easing.OutQuad
+        duration: Core.Style.duration(Core.Style.animFast)
+        easing.type: Core.Style.easeStandard
       }
     }
   }

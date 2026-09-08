@@ -52,7 +52,7 @@ Rectangle {
 
   // === Pulse Animation ===
   SequentialAnimation on opacity {
-    running: root.pulse && root.visible
+    running: root.pulse && root.visible && Core.Style.motionEnabled
     loops: Animation.Infinite
 
     NumberAnimation {
