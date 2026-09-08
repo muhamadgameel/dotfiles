@@ -31,6 +31,7 @@ Components.SlidingPanel {
 
   // The list manages its own scrolling.
   scrollable: false
+  fillHeight: false
 
   // Reading the list is what marks them read - the bar badge used to only clear
   // by deleting entries one at a time.
@@ -67,7 +68,7 @@ Components.SlidingPanel {
   // === Empty state ===
   Components.EmptyState {
     Layout.fillWidth: true
-    Layout.fillHeight: true
+    Layout.preferredHeight: Core.Style.controlHeightL * 4
     visible: Services.Notification.historyList.count === 0
     icon: "bell-off"
     iconSize: 64
@@ -80,7 +81,16 @@ Components.SlidingPanel {
     id: historyScroll
 
     Layout.fillWidth: true
+
+    // fillHeight *and* preferredHeight, deliberately. preferredHeight is what
+    // the panel measures to size itself; fillHeight is what lets the layout take
+    // that height back once the panel hits the screen cap. Without it the layout
+    // hands over the full preferred height, the outer Flickable clips the
+    // overflow, and this ends up exactly as tall as its own content - which
+    // means there is nothing left to scroll.
     Layout.fillHeight: true
+    Layout.preferredHeight: historyColumn.implicitHeight
+    Layout.minimumHeight: 0
     visible: Services.Notification.historyList.count > 0
 
     contentHeight: historyColumn.implicitHeight

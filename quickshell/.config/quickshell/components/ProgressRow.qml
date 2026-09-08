@@ -65,11 +65,6 @@ ColumnLayout {
       color: root.iconColor
       visible: root.hasIcon
 
-      Behavior on color {
-        ColorAnimation {
-          duration: Core.Style.duration(Core.Style.animNormal)
-        }
-      }
     }
 
     // Label column with progress (when label is present)
@@ -126,11 +121,6 @@ ColumnLayout {
       font.weight: root.hasValueText ? Core.Style.weightBold : Core.Style.weightMedium
       color: root.hasValueText ? root.iconColor : Config.Theme.text
 
-      Behavior on color {
-        ColorAnimation {
-          duration: Core.Style.duration(Core.Style.animNormal)
-        }
-      }
     }
   }
 }
