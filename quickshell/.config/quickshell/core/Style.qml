@@ -42,7 +42,7 @@ Singleton {
   readonly property int controlHeightL: Math.round(52 * uiScale)
 
   // === Typography ===
-  readonly property string fontFamily: "JetBrainsMono Nerd Font Propo"
+  readonly property string fontFamily: Config.Config.fontFamily
   readonly property string fontMono: "JetBrainsMono Nerd Font"
 
   readonly property real letterSpacingTight: -0.2
