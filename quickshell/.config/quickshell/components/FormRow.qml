@@ -1,9 +1,9 @@
 import QtQuick
 import QtQuick.Layouts
-
-import "." as Components
 import "../config" as Config
 import "../core" as Core
+
+import "." as Components
 
 /**
 * FormRow - Row with label and optional control (toggle/value)

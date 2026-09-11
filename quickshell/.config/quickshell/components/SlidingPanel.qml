@@ -3,11 +3,11 @@ import QtQuick.Layouts
 import Quickshell
 import Quickshell.Hyprland
 import Quickshell.Wayland
-
-import "." as Components
 import "../config" as Config
 import "../core" as Core
 import "../services" as Services
+
+import "." as Components
 
 /**
 * SlidingPanel - base for the right-hand sliding panels
@@ -45,7 +45,10 @@ Item {
   property string panelId: ""
 
   // === Panel Configuration ===
-  property string namespace: "quickshell-panel"
+  // Layer-shell namespace, derived from the id rather than written per panel.
+  // Hyprland's no-animation rule matches "^quickshell-.*panel$"; two panels once
+  // spelled theirs differently and got the compositor fade on top of the slide.
+  readonly property string namespace: "quickshell-" + root.panelId + "-panel"
 
   // === Header Properties (shown when headerTitle is set) ===
   property string headerIcon: ""
@@ -149,7 +152,6 @@ Item {
         Core.Logger.w("SlidingPanel", `${root.panelId}: content reports no height - a Layout.fillHeight child?`);
     }
   }
-
 
   // === Public API ===
   function open() {
@@ -257,156 +259,156 @@ Item {
         }
       }
 
-    // === Content Container ===
-    Components.Elevation {
-      surface: contentRect
-      level: root.elevation
-      radius: contentRect.radius
-    }
-
-    Rectangle {
-      id: contentRect
-
-      // Top-anchored with an explicit height rather than anchors.fill: the
-      // window is a fixed column, and this is the part of it that is drawn.
-      anchors {
-        left: parent.left
-        right: parent.right
-        top: parent.top
-        margins: root.surfaceInset
-      }
-      height: root.surfaceHeight
-
-      // The edge glides to the new height while the content underneath is
-      // already laid out at it. Off until the slide-in has finished, so the
-      // panel arrives at its size instead of growing on the way in.
-      Behavior on height {
-        enabled: root.revealed && !slideAnim.running
-
-        NumberAnimation {
-          duration: Core.Style.duration(Core.Style.animNormal)
-          easing.type: Core.Style.easeStandard
-        }
+      // === Content Container ===
+      Components.Elevation {
+        surface: contentRect
+        level: root.elevation
+        radius: contentRect.radius
       }
 
-      // The content is laid out at the target height, so while the edge is
-      // still catching up it has to be cut off here.
-      clip: true
+      Rectangle {
+        id: contentRect
 
-      radius: Core.Style.radiusL
-      color: Config.Theme.panelBg
-
-      border {
-        color: Config.Theme.surfaceHover
-        width: Core.Style.borderThin
-      }
-
-      focus: root.isOpen
-
-      Keys.onEscapePressed: root.close()
-
-      MouseArea {
-        anchors.fill: parent
-        onClicked: contentRect.forceActiveFocus()
-      }
-
-      ColumnLayout {
-        id: frameColumn
-
-        // Laid out at the target height, not the animated one, so an animating
-        // edge does not re-run the layout on every frame.
+        // Top-anchored with an explicit height rather than anchors.fill: the
+        // window is a fixed column, and this is the part of it that is drawn.
         anchors {
           left: parent.left
           right: parent.right
           top: parent.top
+          margins: root.surfaceInset
         }
         height: root.surfaceHeight
-        spacing: 0
 
-        onImplicitHeightChanged: root.frameHeight = implicitHeight
-        Component.onCompleted: root.frameHeight = implicitHeight
+        // The edge glides to the new height while the content underneath is
+        // already laid out at it. Off until the slide-in has finished, so the
+        // panel arrives at its size instead of growing on the way in.
+        Behavior on height {
+          enabled: root.revealed && !slideAnim.running
 
-        // === Optional Header ===
-        PanelHeader {
-          Layout.fillWidth: true
-          visible: root.hasHeader
-          icon: root.headerIcon
-          iconColor: root.headerIconColor
-          title: root.headerTitle
-          subtitle: root.headerSubtitle
-          onCloseClicked: root.close()
+          NumberAnimation {
+            duration: Core.Style.duration(Core.Style.animNormal)
+            easing.type: Core.Style.easeStandard
+          }
         }
 
-        Components.Divider {
-          visible: root.hasHeader
-        }
+        // The content is laid out at the target height, so while the edge is
+        // still catching up it has to be cut off here.
+        clip: true
 
-        // === Optional Pinned Area ===
-        ColumnLayout {
-          id: pinnedColumn
+        radius: Core.Style.radiusL
+        color: Config.Theme.panelBg
 
-          Layout.fillWidth: true
-          Layout.leftMargin: Core.Style.panelPadding
-          Layout.rightMargin: Core.Style.panelPadding
-          Layout.topMargin: Core.Style.panelPadding
-          visible: root.hasPinned
-          spacing: root.contentSpacing
-        }
-
-        // Only while the body is scrolled beneath the pinned area, so it reads as
-        // "more above" rather than as a divider that is always there.
-        Rectangle {
-          Layout.fillWidth: true
-          Layout.topMargin: root._pinnedGap
-          Layout.preferredHeight: Core.Style.borderThin
-          visible: root.hasPinned
+        border {
           color: Config.Theme.surfaceHover
-          opacity: scrollArea.contentY > 0 ? 1 : 0
+          width: Core.Style.borderThin
+        }
 
-          Behavior on opacity {
-            NumberAnimation {
-              duration: Core.Style.duration(Core.Style.animFast)
-              easing.type: Core.Style.easeStandard
+        focus: root.isOpen
+
+        Keys.onEscapePressed: root.close()
+
+        MouseArea {
+          anchors.fill: parent
+          onClicked: contentRect.forceActiveFocus()
+        }
+
+        ColumnLayout {
+          id: frameColumn
+
+          // Laid out at the target height, not the animated one, so an animating
+          // edge does not re-run the layout on every frame.
+          anchors {
+            left: parent.left
+            right: parent.right
+            top: parent.top
+          }
+          height: root.surfaceHeight
+          spacing: 0
+
+          onImplicitHeightChanged: root.frameHeight = implicitHeight
+          Component.onCompleted: root.frameHeight = implicitHeight
+
+          // === Optional Header ===
+          PanelHeader {
+            Layout.fillWidth: true
+            visible: root.hasHeader
+            icon: root.headerIcon
+            iconColor: root.headerIconColor
+            title: root.headerTitle
+            subtitle: root.headerSubtitle
+            onCloseClicked: root.close()
+          }
+
+          Components.Divider {
+            visible: root.hasHeader
+          }
+
+          // === Optional Pinned Area ===
+          ColumnLayout {
+            id: pinnedColumn
+
+            Layout.fillWidth: true
+            Layout.leftMargin: Core.Style.panelPadding
+            Layout.rightMargin: Core.Style.panelPadding
+            Layout.topMargin: Core.Style.panelPadding
+            visible: root.hasPinned
+            spacing: root.contentSpacing
+          }
+
+          // Only while the body is scrolled beneath the pinned area, so it reads as
+          // "more above" rather than as a divider that is always there.
+          Rectangle {
+            Layout.fillWidth: true
+            Layout.topMargin: root._pinnedGap
+            Layout.preferredHeight: Core.Style.borderThin
+            visible: root.hasPinned
+            color: Config.Theme.surfaceHover
+            opacity: scrollArea.contentY > 0 ? 1 : 0
+
+            Behavior on opacity {
+              NumberAnimation {
+                duration: Core.Style.duration(Core.Style.animFast)
+                easing.type: Core.Style.easeStandard
+              }
+            }
+          }
+
+          // === Content Area ===
+          Components.ScrollArea {
+            id: scrollArea
+
+            Layout.fillWidth: true
+            Layout.fillHeight: true
+
+            // What the content would like to be. -1 falls back to implicitHeight
+            // (0), which is what a fill-height panel wants; otherwise this is the
+            // number that ends up driving the whole window's height.
+            Layout.preferredHeight: root.fillHeight ? -1 : contentColumn.implicitHeight + root._bodyTopPadding + Core.Style.panelPadding
+
+            // So it can still be squeezed once the content exceeds the cap.
+            Layout.minimumHeight: 0
+
+            // The column places itself inside the padding, so no Flickable margins.
+            leftMargin: 0
+            rightMargin: 0
+
+            interactive: root.scrollable
+            showScrollbar: root.scrollable
+            contentWidth: width
+            contentHeight: root.scrollable ? contentColumn.implicitHeight + root._bodyTopPadding + Core.Style.panelPadding : height
+
+            ColumnLayout {
+              id: contentColumn
+
+              x: Core.Style.panelPadding
+              y: root._bodyTopPadding
+              width: scrollArea.width - Core.Style.panelPadding * 2
+              height: root.scrollable ? implicitHeight : scrollArea.height - root._bodyTopPadding - Core.Style.panelPadding
+              spacing: root.contentSpacing
             }
           }
         }
-
-        // === Content Area ===
-        Components.ScrollArea {
-          id: scrollArea
-
-          Layout.fillWidth: true
-          Layout.fillHeight: true
-
-          // What the content would like to be. -1 falls back to implicitHeight
-          // (0), which is what a fill-height panel wants; otherwise this is the
-          // number that ends up driving the whole window's height.
-          Layout.preferredHeight: root.fillHeight ? -1 : contentColumn.implicitHeight + root._bodyTopPadding + Core.Style.panelPadding
-
-          // So it can still be squeezed once the content exceeds the cap.
-          Layout.minimumHeight: 0
-
-          // The column places itself inside the padding, so no Flickable margins.
-          leftMargin: 0
-          rightMargin: 0
-
-          interactive: root.scrollable
-          showScrollbar: root.scrollable
-          contentWidth: width
-          contentHeight: root.scrollable ? contentColumn.implicitHeight + root._bodyTopPadding + Core.Style.panelPadding : height
-
-          ColumnLayout {
-            id: contentColumn
-
-            x: Core.Style.panelPadding
-            y: root._bodyTopPadding
-            width: scrollArea.width - Core.Style.panelPadding * 2
-            height: root.scrollable ? implicitHeight : scrollArea.height - root._bodyTopPadding - Core.Style.panelPadding
-            spacing: root.contentSpacing
-          }
-        }
       }
-    }
     }
   }
 }

@@ -15,7 +15,6 @@ Components.SlidingPanel {
   id: root
 
   panelId: "network"
-  namespace: "quickshell-network-panel"
   contentSpacing: Core.Style.spaceM
 
   // Header configuration

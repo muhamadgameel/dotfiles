@@ -16,7 +16,6 @@ Components.SlidingPanel {
   id: root
 
   panelId: "notifications"
-  namespace: "quickshell-notification-panel"
   panelWidth: Math.round(420 * Core.Style.uiScale)
 
   headerIcon: Services.Notification.doNotDisturb ? "bell-off" : "bell"
@@ -68,7 +67,7 @@ Components.SlidingPanel {
     Layout.preferredHeight: Core.Style.controlHeightL * 4
     visible: Services.Notification.historyList.count === 0
     icon: "bell-off"
-    iconSize: 64
+    iconSize: Core.Style.fontXXXL * 2
     message: "No notifications"
     hint: "Your notifications will appear here"
   }

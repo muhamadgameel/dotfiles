@@ -67,7 +67,7 @@ RowLayout {
         anchors.bottom: parent.bottom
         anchors.horizontalCenter: parent.horizontalCenter
         anchors.bottomMargin: 1
-        size: 4
+        size: Core.Style.px(4)
         visible: entry.item?.status === Status.NeedsAttention
         pulse: true
         color: Config.Theme.warning

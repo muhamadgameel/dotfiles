@@ -1,9 +1,9 @@
 import QtQuick
 import QtQuick.Layouts
-
-import "." as Components
 import "../config" as Config
 import "../core" as Core
+
+import "." as Components
 
 /**
 * Collapsible - Expandable/collapsible section with title

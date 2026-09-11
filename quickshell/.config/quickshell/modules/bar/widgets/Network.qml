@@ -2,6 +2,7 @@ import QtQuick
 
 import "../../../components" as Components
 import "../../../config" as Config
+import "../../../core" as Core
 import "../../../services" as Services
 
 /**
@@ -61,7 +62,7 @@ Components.Button {
   Components.StatusDot {
     anchors.bottom: parent.bottom
     anchors.horizontalCenter: parent.horizontalCenter
-    anchors.bottomMargin: 2
+    anchors.bottomMargin: Core.Style.spaceXXS
     visible: Services.Network.connecting || Services.Network.scanning
     pulse: true
     color: Config.Theme.accent

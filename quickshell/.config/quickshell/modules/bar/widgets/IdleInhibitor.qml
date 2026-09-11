@@ -32,7 +32,7 @@ Components.Button {
   Components.StatusDot {
     anchors.bottom: parent.bottom
     anchors.horizontalCenter: parent.horizontalCenter
-    anchors.bottomMargin: 2
+    anchors.bottomMargin: Core.Style.spaceXXS
     visible: Services.Idle.inhibited
     pulse: true
     color: Config.Theme.warning

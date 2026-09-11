@@ -18,7 +18,6 @@ Components.SlidingPanel {
   id: root
 
   panelId: "power"
-  namespace: "quickshell-power-panel"
 
   headerIcon: "power"
   headerIconColor: Config.Theme.error

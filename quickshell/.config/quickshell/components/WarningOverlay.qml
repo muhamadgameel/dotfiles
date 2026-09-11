@@ -45,7 +45,7 @@ Rectangle {
 
   // === Appearance ===
   anchors.fill: parent
-  radius: parent.radius ?? 0
+  radius: (parent as Rectangle)?.radius ?? 0
 
   color: {
     if (severity === "critical")

@@ -22,7 +22,6 @@ Components.SlidingPanel {
   id: root
 
   panelId: "bluetooth"
-  namespace: "quickshell-bluetooth-panel"
   contentSpacing: Core.Style.spaceM
 
   headerIcon: Services.Bluetooth.statusIcon

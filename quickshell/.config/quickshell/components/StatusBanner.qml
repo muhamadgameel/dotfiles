@@ -1,9 +1,9 @@
 import QtQuick
 import QtQuick.Layouts
-
-import "." as Components
 import "../config" as Config
 import "../core" as Core
+
+import "." as Components
 
 /**
 * StatusBanner - Displays a status message in a colored banner

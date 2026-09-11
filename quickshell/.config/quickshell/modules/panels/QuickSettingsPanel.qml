@@ -2,6 +2,7 @@ pragma ComponentBehavior: Bound
 
 import QtQuick
 import QtQuick.Layouts
+import Quickshell.Services.UPower
 
 import "../../components" as Components
 import "../../config" as Config
@@ -23,7 +24,6 @@ Components.SlidingPanel {
   id: root
 
   panelId: "quicksettings"
-  namespace: "quickshell-quicksettings-panel"
 
   headerIcon: "dashboard"
   headerIconColor: Config.Theme.accent
@@ -123,6 +123,53 @@ Components.SlidingPanel {
     }
   }
 
+  // === Power mode ===
+  // Talks to power-profiles-daemon through Quickshell's UPower module, so there
+  // is no powerprofilesctl process to spawn. Performance only appears when the
+  // hardware offers it.
+  RowLayout {
+    Layout.fillWidth: true
+    spacing: Core.Style.spaceXS
+
+    Repeater {
+      model: [
+        {
+          profile: PowerProfile.PowerSaver,
+          label: "Saver",
+          icon: "battery-medium"
+        },
+        {
+          profile: PowerProfile.Balanced,
+          label: "Balanced",
+          icon: "gauge"
+        },
+        {
+          profile: PowerProfile.Performance,
+          label: "Performance",
+          icon: "rocket"
+        },
+      ]
+
+      delegate: Components.Button {
+        id: modeButton
+
+        required property var modelData
+
+        readonly property bool current: PowerProfiles.profile === modeButton.modelData.profile
+
+        Layout.fillWidth: true
+        visible: modeButton.modelData.profile !== PowerProfile.Performance || PowerProfiles.hasPerformanceProfile
+        variant: modeButton.current ? "primary" : "secondary"
+        icon: modeButton.modelData.icon
+        iconSize: Core.Style.fontM
+        text: modeButton.modelData.label
+        textSize: Core.Style.fontS
+        tooltipText: `${modeButton.modelData.label} power mode`
+        onClicked: PowerProfiles.profile = modeButton.modelData.profile
+      }
+    }
+  }
+
   // === Sliders ===
   Components.Card {
     Layout.fillWidth: true
@@ -159,6 +206,97 @@ Components.SlidingPanel {
         value: Services.Brightness.brightness
 
         onMoved: value => Services.Brightness.set(value)
+      }
+    }
+  }
+
+  // === Now playing ===
+  // Only while a player exists. Tapping the card opens the full media panel.
+  Components.Card {
+    Layout.fillWidth: true
+    visible: Services.Media.hasPlayer
+    implicitHeight: Core.Style.controlHeightL + Core.Style.spaceS * 2
+    radius: Core.Style.radiusM
+    interactive: true
+    onClicked: root._openPanel("media")
+
+    RowLayout {
+      anchors.fill: parent
+      anchors.margins: Core.Style.spaceS
+      spacing: Core.Style.spaceS
+
+      Item {
+        Layout.preferredWidth: Core.Style.controlHeightL
+        Layout.preferredHeight: Core.Style.controlHeightL
+
+        Rectangle {
+          anchors.fill: parent
+          radius: Core.Style.radiusS
+          color: Config.Theme.surface
+        }
+
+        Components.Icon {
+          anchors.centerIn: parent
+          visible: thumb.status !== Image.Ready
+          icon: "music"
+          size: Core.Style.fontL
+          color: Config.Theme.textDim
+        }
+
+        Components.RoundedImage {
+          id: thumb
+
+          anchors.fill: parent
+          radius: Core.Style.radiusS
+          source: Services.Media.trackArtUrl
+          sourceSize: Qt.size(Core.Style.px(96), Core.Style.px(96))
+        }
+      }
+
+      ColumnLayout {
+        Layout.fillWidth: true
+        spacing: 0
+
+        Components.Text {
+          Layout.fillWidth: true
+          text: Services.Media.trackTitle || Services.Media.identity
+          weight: Core.Style.weightBold
+          elide: Text.ElideRight
+        }
+
+        Components.Text {
+          Layout.fillWidth: true
+          visible: Services.Media.trackArtist !== ""
+          text: Services.Media.trackArtist
+          size: Core.Style.fontXS
+          color: Config.Theme.textDim
+          elide: Text.ElideRight
+        }
+      }
+
+      Components.Button {
+        icon: "skip-previous"
+        iconSize: Core.Style.fontM
+        enabled: Services.Media.canGoPrevious
+        tooltipText: "Previous"
+        onClicked: Services.Media.previous()
+      }
+
+      Components.Button {
+        variant: "primary"
+        icon: Services.Media.statusIcon
+        iconSize: Core.Style.fontM
+        enabled: Services.Media.isPlaying ? Services.Media.canPause : Services.Media.canPlay
+        tooltipText: Services.Media.isPlaying ? "Pause" : "Play"
+        onClicked: Services.Media.playPause()
+      }
+
+      Components.Button {
+        icon: "skip-next"
+        iconSize: Core.Style.fontM
+        enabled: Services.Media.canGoNext
+        tooltipText: "Next"
+        onClicked: Services.Media.next()
       }
     }
   }

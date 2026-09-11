@@ -21,6 +21,15 @@ Singleton {
   // so changing it rescales the whole shell.
   readonly property real uiScale: Config.Config.uiScale
 
+  /**
+  * A raw pixel size, scaled with the UI. For the one-off dimensions too specific
+  * to earn a named token below - a toggle knob, a status dot, a hairline. Never
+  * below 1, so a hairline cannot scale away.
+  */
+  function px(n) {
+    return Math.max(1, Math.round(n * root.uiScale));
+  }
+
   // === Bar Dimensions ===
   readonly property int barHeight: Math.round(32 * uiScale)
   readonly property int barPadding: Math.round(8 * uiScale)

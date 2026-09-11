@@ -2,11 +2,11 @@ pragma ComponentBehavior: Bound
 
 import QtQuick
 import QtQuick.Layouts
-
-import "." as Components
 import "../config" as Config
 import "../core" as Core
 import "../services" as Services
+
+import "." as Components
 
 /**
 * NotificationCard - Reusable notification card layout
@@ -73,7 +73,7 @@ Components.Card {
     value: root.progressValue
     trackColor: Config.Theme.transparent
     progressColor: Config.Theme.urgencyColor(root.urgency)
-    height: 2
+    height: Core.Style.px(2)
     width: root.width - (2 * root.radius)
     anchors.horizontalCenter: parent.horizontalCenter
     reversed: true
@@ -116,7 +116,7 @@ Components.Card {
           Components.StatusDot {
             Layout.alignment: Qt.AlignVCenter
             visible: root.showUrgencyDot
-            size: 6
+            size: Core.Style.px(6)
             color: Config.Theme.urgencyColor(root.urgency)
           }
 
@@ -175,7 +175,7 @@ Components.Card {
 
               text: actionData.text
               variant: "secondary"
-              implicitHeight: 26
+              implicitHeight: Core.Style.px(26)
               onClicked: root.actionClicked(actionData.identifier || "")
             }
           }
