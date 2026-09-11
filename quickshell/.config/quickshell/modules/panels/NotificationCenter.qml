@@ -16,8 +16,8 @@ Components.SlidingPanel {
   id: root
 
   panelId: "notifications"
-  namespace: "quickshell-notification-center"
-  panelWidth: 420
+  namespace: "quickshell-notification-panel"
+  panelWidth: Math.round(420 * Core.Style.uiScale)
 
   headerIcon: Services.Notification.doNotDisturb ? "bell-off" : "bell"
   headerIconColor: Services.Notification.doNotDisturb ? Config.Theme.warning : Config.Theme.accent
@@ -29,16 +29,13 @@ Components.SlidingPanel {
     return n === 0 ? "Nothing yet" : (n === 1 ? "1 notification" : `${n} notifications`);
   }
 
-  // The list manages its own scrolling.
-  scrollable: false
-  fillHeight: false
-
   // Reading the list is what marks them read - the bar badge used to only clear
   // by deleting entries one at a time.
   onOpened: Services.Notification.markAllRead()
 
   // === Toolbar ===
-  RowLayout {
+  // Pinned, so DND and Clear stay in reach however far the list is scrolled.
+  pinned: RowLayout {
     Layout.fillWidth: true
     spacing: Core.Style.spaceS
 
@@ -77,104 +74,68 @@ Components.SlidingPanel {
   }
 
   // === History list ===
-  Components.ScrollArea {
-    id: historyScroll
+  // A notification arriving while the centre is open slides in from the right,
+  // the same way its popup does, so the two read as the same object in two
+  // places rather than two unrelated lists. Newest is inserted at the top, so
+  // the column carries everything else down to make room, and back up again
+  // when one is dismissed.
+  Components.AnimatedColumn {
+    id: historyColumn
 
     Layout.fillWidth: true
-
-    // fillHeight *and* preferredHeight, deliberately. preferredHeight is what
-    // the panel measures to size itself; fillHeight is what lets the layout take
-    // that height back once the panel hits the screen cap. Without it the layout
-    // hands over the full preferred height, the outer Flickable clips the
-    // overflow, and this ends up exactly as tall as its own content - which
-    // means there is nothing left to scroll.
-    Layout.fillHeight: true
-    Layout.preferredHeight: historyColumn.implicitHeight
-    Layout.minimumHeight: 0
     visible: Services.Notification.historyList.count > 0
+    spacing: Core.Style.spaceS
+    animated: root.revealed
+    enterOffset: historyColumn.width
 
-    contentHeight: historyColumn.implicitHeight
-    boundsBehavior: Flickable.StopAtBounds
-    leftMargin: 0
-    rightMargin: 0
+    Repeater {
+      model: Services.Notification.historyList
 
-    Column {
-      id: historyColumn
+      // The row is what the column positions and animates; the card inside it
+      // runs its own exit. Kept apart so a card that is closing while the list
+      // shifts is not pulled back into view by the column's move transition.
+      delegate: Item {
+        id: historyRow
 
-      width: historyScroll.width
-      spacing: Core.Style.spaceS
+        required property var model
 
-      // A notification arriving while the centre is open enters the same way as
-      // its popup does - in from the right - so the two read as the same object
-      // in two places rather than two unrelated lists.
-      //
-      // Newest is inserted at the top, so `move` is what carries everything else
-      // down to make room, and back up again when one is dismissed. Without it
-      // the rest of the list jumps.
-      add: Transition {
-        NumberAnimation {
-          property: "x"
-          from: historyColumn.width
-          duration: Core.Style.duration(Core.Style.slideShowDuration)
-          easing.type: Core.Style.easeStandard
-        }
+        width: historyColumn.width
+        height: historyCard.height
 
-        NumberAnimation {
-          property: "opacity"
-          from: 0
-          to: 1
-          duration: Core.Style.duration(Core.Style.slideShowDuration)
-          easing.type: Core.Style.easeStandard
-        }
-      }
-
-      move: Transition {
-        NumberAnimation {
-          property: "y"
-          duration: Core.Style.duration(Core.Style.animNormal)
-          easing.type: Core.Style.easeStandard
-        }
-      }
-
-      Repeater {
-        model: Services.Notification.historyList
-
-        delegate: Components.NotificationCard {
+        Components.NotificationCard {
           id: historyCard
 
-          required property var model
-
-          width: historyColumn.width
+          width: parent.width
           compact: true
           showProgress: false
-          notificationData: model
+          notificationData: historyRow.model
 
-          // A Repeater destroys its delegate the instant the model row goes, so
-          // there is nothing left to animate afterwards. Slide it out first and
-          // remove the row when that finishes - the same hide-then-dismiss order
-          // the popup stack uses.
+          // A Repeater destroys its delegate the instant the model row goes,
+          // so there is nothing left to animate afterwards. Slide it out first
+          // and remove the row when that finishes - the same hide-then-dismiss
+          // order the popup stack uses.
           onCloseClicked: exitAnim.start()
+        }
 
-          ParallelAnimation {
-            id: exitAnim
+        ParallelAnimation {
+          id: exitAnim
 
-            onFinished: Services.Notification.removeFromHistory(historyCard.model.id)
+          onFinished: Services.Notification.removeFromHistory(historyRow.model.id)
 
-            NumberAnimation {
-              target: historyCard
-              property: "x"
-              to: historyColumn.width
-              duration: Core.Style.duration(Core.Style.slideHideDuration)
-              easing.type: Core.Style.easeExit
-            }
+          NumberAnimation {
+            target: historyCard
+            property: "x"
+            to: historyRow.width
+            duration: Core.Style.duration(Core.Style.slideHideDuration)
+            easing.type: Core.Style.easeExit
+          }
 
-            NumberAnimation {
-              target: historyCard
-              property: "opacity"
-              to: 0
-              duration: Core.Style.duration(Core.Style.slideHideDuration)
-              easing.type: Core.Style.easeExit
-            }
+          NumberAnimation {
+            target: historyCard
+            property: "opacity"
+            to: 0
+            duration: Core.Style.duration(Core.Style.slideHideDuration)
+            easing.type: Core.Style.easeExit
           }
         }
       }

@@ -37,14 +37,25 @@ Variants {
       margin: Core.Style.spaceL
       topExtra: Core.Style.barHeight
 
-      readonly property int notifWidth: 400
+      // A fixed full-height column rather than one sized to the stack: that
+      // resized the layer surface on every arrival and every dismissal, a
+      // compositor round trip each time. Same approach as SlidingPanel.
+      anchors.bottom: true
+      margins.bottom: Core.Style.spaceL
+
+      // Input only lands on the stack; the empty column below it passes clicks
+      // through to whatever is underneath.
+      mask: Region {
+        item: notificationStack
+      }
+
+      readonly property int notifWidth: Math.round(400 * Core.Style.uiScale)
 
       readonly property int shadowRoom: Math.max(Core.Style.spaceXS, Core.Style.elevationRoom(2))
 
       implicitWidth: notifWidth + (shadowRoom - Core.Style.spaceXS) * 2
-      implicitHeight: notificationStack.implicitHeight + Core.Style.spaceL
 
-      ColumnLayout {
+      Components.AnimatedColumn {
         id: notificationStack
 
         anchors {
@@ -52,6 +63,7 @@ Variants {
           right: parent.right
         }
 
+        fadeIn: false
         spacing: Core.Style.spaceS
         width: notifWindow.notifWidth + (notifWindow.shadowRoom - Core.Style.spaceXS) * 2
 
@@ -68,16 +80,15 @@ Variants {
             property var notificationData: model
 
             // Only the first maxVisible have room on screen; the rest are queued
-            // and counted by the pill at the bottom of the stack. A ColumnLayout
+            // and counted by the pill at the bottom of the stack. The column
             // skips invisible children entirely, so a queued card contributes no
             // height and no spacing.
             readonly property bool onScreen: card.index < Services.Notification.maxVisible
 
             visible: card.onScreen
 
-            Layout.preferredWidth: notifWindow.notifWidth + (notifWindow.shadowRoom - Core.Style.spaceXS) * 2
-            Layout.preferredHeight: cardContent.implicitHeight + notifWindow.shadowRoom * 2
-            Layout.maximumHeight: Layout.preferredHeight
+            width: notificationStack.width
+            height: cardContent.implicitHeight + notifWindow.shadowRoom * 2
 
             Connections {
               target: Services.Notification
@@ -185,12 +196,26 @@ Variants {
           id: overflowPill
 
           readonly property int count: Services.Notification.hiddenCount
+          readonly property bool shown: overflowPill.count > 0
 
-          visible: overflowPill.count > 0
+          // The last non-zero count, so the text does not read "0 more" while
+          // the pill is fading out.
+          property int shownCount: 0
+          onCountChanged: {
+            if (overflowPill.count > 0)
+              overflowPill.shownCount = overflowPill.count;
+          }
+          Component.onCompleted: overflowPill.shownCount = overflowPill.count
 
-          Layout.alignment: Qt.AlignHCenter
-          Layout.preferredWidth: overflowRow.implicitWidth + Core.Style.spaceL * 2
-          Layout.preferredHeight: Core.Style.controlHeightS
+          // Kept visible until the fade-out has finished. Driving opacity off
+          // `visible` itself meant the pill was already hidden by the time the
+          // animation would have started, so neither direction ever played.
+          visible: overflowPill.shown || overflowPill.opacity > 0
+          enabled: overflowPill.shown
+
+          x: (notificationStack.width - width) / 2
+          width: overflowRow.implicitWidth + Core.Style.spaceL * 2
+          height: Core.Style.controlHeightS
 
           radius: Core.Style.radiusFull
           interactive: true
@@ -198,8 +223,8 @@ Variants {
 
           // Grows from the middle as it appears, so it reads as part of the
           // stack settling rather than as a row that blinked into existence.
-          opacity: overflowPill.visible ? 1 : 0
-          scale: overflowPill.visible ? 1 : Core.Style.popHiddenScale
+          opacity: overflowPill.shown ? 1 : 0
+          scale: overflowPill.shown ? 1 : Core.Style.popHiddenScale
 
           Behavior on opacity {
             NumberAnimation {
@@ -229,7 +254,7 @@ Variants {
             }
 
             Components.Text {
-              text: overflowPill.count === 1 ? "1 more notification" : `${overflowPill.count} more notifications`
+              text: overflowPill.shownCount === 1 ? "1 more notification" : `${overflowPill.shownCount} more notifications`
               size: Core.Style.fontS
               color: Config.Theme.textDim
             }

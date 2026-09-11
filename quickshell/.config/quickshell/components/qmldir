@@ -1,5 +1,6 @@
 module components
 
+AnimatedColumn 1.0 AnimatedColumn.qml
 Badge 1.0 Badge.qml
 Button 1.0 Button.qml
 Card 1.0 Card.qml
@@ -9,10 +10,12 @@ Elevation 1.0 Elevation.qml
 EmptyState 1.0 EmptyState.qml
 FormRow 1.0 FormRow.qml
 Icon 1.0 Icon.qml
+InfoList 1.0 InfoList.qml
 NotificationCard 1.0 NotificationCard.qml
 PanelHeader 1.0 PanelHeader.qml
 ProgressBar 1.0 ProgressBar.qml
 ProgressRow 1.0 ProgressRow.qml
+ScanButton 1.0 ScanButton.qml
 ScrollArea 1.0 ScrollArea.qml
 SectionHeader 1.0 SectionHeader.qml
 Slider 1.0 Slider.qml

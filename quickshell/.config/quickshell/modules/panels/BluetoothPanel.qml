@@ -23,8 +23,6 @@ Components.SlidingPanel {
 
   panelId: "bluetooth"
   namespace: "quickshell-bluetooth-panel"
-  scrollable: false
-  fillHeight: false
   contentSpacing: Core.Style.spaceM
 
   headerIcon: Services.Bluetooth.statusIcon
@@ -38,209 +36,148 @@ Components.SlidingPanel {
   onOpened: Services.Bluetooth.panelOpen = true
   onClosed: Services.Bluetooth.panelOpen = false
 
-  Item {
-    Layout.fillWidth: true
-    Layout.fillHeight: true
-    Layout.preferredHeight: bodyColumn.implicitHeight
+  // === Pinned: the toggle, adapter details and the list's heading ===
+  // The device list below scrolls under these with the panel's own scrollbar.
+  pinned: [
+    // Bluetooth Toggle
+    Components.FormRow {
+      Layout.fillWidth: true
+      label: "Bluetooth"
+      hasToggle: true
+      toggleChecked: Services.Bluetooth.enabled
+      onToggled: checked => Services.Bluetooth.setEnabled(checked)
+    },
 
-    ColumnLayout {
-      id: bodyColumn
+    // Adapter Info (collapsible)
+    Components.InfoList {
+      Layout.fillWidth: true
+      visible: Services.Bluetooth.available && Services.Bluetooth.enabled
+      title: "Adapter Info"
+      icon: "info"
 
-      anchors.fill: parent
-      spacing: Core.Style.spaceM
+      rows: [
+        {
+          label: "Adapter",
+          value: Services.Bluetooth.adapter?.name || "Default"
+        },
+        {
+          label: "State",
+          value: Services.Bluetooth.statusText
+        },
+        {
+          label: "Connected",
+          value: Services.Bluetooth.connectedCount.toString()
+        },
+      ]
+    },
 
-      // Bluetooth Toggle
-      Components.FormRow {
+    // List heading with scan button
+    RowLayout {
+      Layout.fillWidth: true
+      spacing: Core.Style.spaceS
+      visible: Services.Bluetooth.enabled
+
+      Components.Text {
+        text: "Devices"
+        weight: Core.Style.weightBold
         Layout.fillWidth: true
-        label: "Bluetooth"
-        hasToggle: true
-        toggleChecked: Services.Bluetooth.enabled
-        onToggled: checked => Services.Bluetooth.setEnabled(checked)
       }
 
-      // Adapter Info (collapsible)
-      AdapterInfoSection {
-        Layout.fillWidth: true
-        visible: Services.Bluetooth.available && Services.Bluetooth.enabled
+      Components.Text {
+        visible: Services.Bluetooth.discovering
+        text: "Scanning..."
+        color: Config.Theme.textDim
+        size: Core.Style.fontS
       }
 
-      // Main Content Area
-      Item {
-        Layout.fillWidth: true
-        Layout.fillHeight: true
-        Layout.preferredHeight: Services.Bluetooth.enabled ? devicesColumn.implicitHeight : Core.Style.controlHeightL * 4
-
-        // Devices List (when enabled)
-        ColumnLayout {
-          id: devicesColumn
-
-          anchors.fill: parent
-          spacing: Core.Style.spaceS
-          visible: Services.Bluetooth.enabled
-
-          // Header with scan button
-          RowLayout {
-            Layout.fillWidth: true
-            spacing: Core.Style.spaceS
-
-            Components.Text {
-              text: "Devices"
-              weight: Core.Style.weightBold
-              Layout.fillWidth: true
-            }
-
-            Components.Text {
-              visible: Services.Bluetooth.discovering
-              text: "Scanning..."
-              color: Config.Theme.textDim
-              size: Core.Style.fontS
-            }
-
-            ScanButton {}
-          }
-
-          // Device List
-          Components.ScrollArea {
-            id: deviceScroll
-
-            Layout.fillWidth: true
-
-            Layout.fillHeight: true
-            Layout.preferredHeight: deviceList.implicitHeight
-            Layout.minimumHeight: 0
-
-            contentWidth: width
-            contentHeight: deviceList.implicitHeight
-            leftMargin: 0
-            rightMargin: 0
-
-            ColumnLayout {
-              id: deviceList
-              width: deviceScroll.width
-              spacing: Core.Style.spaceXS
-
-              // Connected Devices
-              DeviceSection {
-                Layout.fillWidth: true
-                title: "Connected"
-                devices: Services.Bluetooth.connectedDevices
-                visible: Services.Bluetooth.connectedDevices.length > 0
-              }
-
-              // Paired Devices
-              DeviceSection {
-                Layout.fillWidth: true
-                title: "Paired"
-                devices: Services.Bluetooth.pairedDevices
-                visible: Services.Bluetooth.pairedDevices.length > 0
-              }
-
-              // Available Devices
-              DeviceSection {
-                Layout.fillWidth: true
-                title: "Available"
-                devices: Services.Bluetooth.availableDevices
-                visible: Services.Bluetooth.availableDevices.length > 0
-              }
-
-              // Bottom spacer
-              Item {
-                Layout.fillWidth: true
-                Layout.preferredHeight: Core.Style.spaceXL
-              }
-            }
-          }
-
-          // Empty States (shown when no devices)
-          Loader {
-            Layout.fillWidth: true
-            Layout.preferredHeight: Core.Style.controlHeightL * 4
-            active: _totalDevices === 0
-            visible: active
-
-            readonly property int _totalDevices: Services.Bluetooth.connectedDevices.length + Services.Bluetooth.pairedDevices.length + Services.Bluetooth.availableDevices.length
-
-            sourceComponent: Components.EmptyState {
-              anchors.centerIn: parent
-              icon: Services.Bluetooth.discovering ? "refresh" : "bluetooth"
-              message: Services.Bluetooth.discovering ? "Scanning for devices..." : "No devices found"
-              hint: Services.Bluetooth.discovering ? "Put your device in pairing mode" : "Make sure devices are in pairing mode"
-            }
-          }
-        }
-
-        // Bluetooth Disabled State
-        Components.EmptyState {
-          anchors.centerIn: parent
-          visible: !Services.Bluetooth.enabled && Services.Bluetooth.available
-          icon: "bluetooth-off"
-          iconSize: Core.Style.fontXXL * 2
-          message: "Bluetooth is disabled"
-          hint: "Enable Bluetooth to connect devices"
-        }
-
-        // No Adapter State
-        Components.EmptyState {
-          anchors.centerIn: parent
-          visible: !Services.Bluetooth.available
-          icon: "bluetooth-off"
-          iconSize: Core.Style.fontXXL * 2
-          message: "No Bluetooth adapter"
-          hint: "Check if your device has Bluetooth hardware"
-        }
+      Components.ScanButton {
+        scanning: Services.Bluetooth.discovering
+        tooltipText: "Scan for devices"
+        onClicked: Services.Bluetooth.startDiscovery()
       }
     }
+  ]
+
+  readonly property int _totalDevices: Services.Bluetooth.connectedDevices.length + Services.Bluetooth.pairedDevices.length + Services.Bluetooth.availableDevices.length
+
+  // === Device List ===
+  // Sections slide as others appear, grow or empty out - a device that connects
+  // moves from Available to Connected, and everything between glides rather
+  // than jumping.
+  Components.AnimatedColumn {
+    id: deviceList
+
+    Layout.fillWidth: true
+    visible: Services.Bluetooth.enabled && root._totalDevices > 0
+    spacing: Core.Style.spaceXS
+    animated: root.revealed
+
+    // Connected Devices
+    DeviceSection {
+      width: deviceList.width
+      animated: root.revealed
+      title: "Connected"
+      devices: Services.Bluetooth.connectedDevices
+      visible: Services.Bluetooth.connectedDevices.length > 0
+    }
+
+    // Paired Devices
+    DeviceSection {
+      width: deviceList.width
+      animated: root.revealed
+      title: "Paired"
+      devices: Services.Bluetooth.pairedDevices
+      visible: Services.Bluetooth.pairedDevices.length > 0
+    }
+
+    // Available Devices
+    DeviceSection {
+      width: deviceList.width
+      animated: root.revealed
+      title: "Available"
+      devices: Services.Bluetooth.availableDevices
+      visible: Services.Bluetooth.availableDevices.length > 0
+    }
+  }
+
+  // No devices yet
+  Components.EmptyState {
+    Layout.fillWidth: true
+    Layout.topMargin: Core.Style.spaceL
+    visible: Services.Bluetooth.enabled && root._totalDevices === 0
+    icon: Services.Bluetooth.discovering ? "refresh" : "bluetooth"
+    message: Services.Bluetooth.discovering ? "Scanning for devices..." : "No devices found"
+    hint: Services.Bluetooth.discovering ? "Put your device in pairing mode" : "Make sure devices are in pairing mode"
+  }
+
+  // Bluetooth Disabled State
+  Components.EmptyState {
+    Layout.fillWidth: true
+    Layout.topMargin: Core.Style.spaceXL
+    visible: !Services.Bluetooth.enabled && Services.Bluetooth.available
+    icon: "bluetooth-off"
+    iconSize: Core.Style.fontXXL * 2
+    message: "Bluetooth is disabled"
+    hint: "Enable Bluetooth to connect devices"
+  }
+
+  // No Adapter State
+  Components.EmptyState {
+    Layout.fillWidth: true
+    Layout.topMargin: Core.Style.spaceXL
+    visible: !Services.Bluetooth.available
+    icon: "bluetooth-off"
+    iconSize: Core.Style.fontXXL * 2
+    message: "No Bluetooth adapter"
+    hint: "Check if your device has Bluetooth hardware"
   }
 
   // ==========================================================================
   // INLINE COMPONENTS
   // ==========================================================================
 
-  // --- Adapter Info Section ---
-  component AdapterInfoSection: Components.Collapsible {
-    id: adapterInfo
-    title: "Adapter Info"
-    icon: "info"
-    expanded: false
-
-    readonly property var infoRows: [
-      {
-        label: "Adapter",
-        value: Services.Bluetooth.adapter?.name || "Default"
-      },
-      {
-        label: "State",
-        value: Services.Bluetooth.statusText
-      },
-      {
-        label: "Connected",
-        value: Services.Bluetooth.connectedCount.toString()
-      },
-    ]
-
-    Repeater {
-      model: adapterInfo.infoRows
-      Components.FormRow {
-        required property var modelData
-        label: modelData.label
-        valueText: modelData.value
-      }
-    }
-  }
-
-  // --- Scan Button ---
-  component ScanButton: Components.Button {
-    icon: "refresh"
-    iconSize: Core.Style.fontM
-    iconSpinning: Services.Bluetooth.discovering
-    enabled: Services.Bluetooth.enabled && !Services.Bluetooth.discovering
-    opacity: Services.Bluetooth.discovering ? 0.5 : 1.0
-    tooltipText: Services.Bluetooth.discovering ? "Scanning..." : "Scan for devices"
-    onClicked: Services.Bluetooth.startDiscovery()
-  }
-
   // --- Device Section ---
-  component DeviceSection: ColumnLayout {
+  component DeviceSection: Components.AnimatedColumn {
     id: section
 
     property string title: ""
@@ -273,7 +210,7 @@ Components.SlidingPanel {
       delegate: DeviceItem {
         required property string devAddress
 
-        Layout.fillWidth: true
+        width: section.width
         device: Services.Bluetooth.deviceByAddress(devAddress)
       }
     }
