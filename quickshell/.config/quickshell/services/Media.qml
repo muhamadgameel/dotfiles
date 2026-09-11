@@ -250,11 +250,13 @@ Singleton {
   }
 
   // MprisPlayer only refreshes `position` when asked, so poll while something
-  // is playing and a view is interested.
+  // is playing and a view is interested. Reading it is computed locally from the
+  // last known position and the time since, so a short interval costs no D-Bus
+  // round trip - and moves the seek bar smoothly rather than in 1s steps.
   property bool positionWatched: false
 
   Timer {
-    interval: 1000
+    interval: 250
     repeat: true
     running: root.positionWatched && root.isPlaying && root.canSeek
     onTriggered: {

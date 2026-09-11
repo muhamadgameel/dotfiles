@@ -175,7 +175,7 @@ Rectangle {
   // === Content ===
   Row {
     anchors.centerIn: parent
-    spacing: hasIcon && hasText ? spaceBetweenIconAndText : 0
+    spacing: root.hasIcon && root.hasText ? root.spaceBetweenIconAndText : 0
 
     Icon {
       anchors.verticalCenter: parent.verticalCenter

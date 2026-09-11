@@ -474,6 +474,17 @@ Singleton {
 
     stdout: StdioCollector {
       onStreamFinished: {
+        // Nothing at all on stdout means nmcli itself failed - NetworkManager
+        // restarting, the Wi-Fi device not ready yet - and stderr says why.
+        // Replacing the list with that empty result blanked the panel. Keep the
+        // last list instead; a radio that is really off is cleared by the
+        // monitor, not by a scan.
+        if (text.trim() === "") {
+          root.scanning = false;
+          Core.Logger.d("Network", "Scan returned nothing; keeping the previous list");
+          return;
+        }
+
         // SSIDs are arbitrary strings, including Object prototype names.
         const networksMap = Object.create(null);
 

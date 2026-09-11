@@ -15,7 +15,6 @@ Components.SlidingPanel {
   id: root
 
   panelId: "calendar"
-  namespace: "quickshell-calendar-panel"
 
   headerIcon: "calendar"
   headerIconColor: Config.Theme.accent

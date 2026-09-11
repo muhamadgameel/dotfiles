@@ -2,6 +2,7 @@ pragma ComponentBehavior: Bound
 
 import QtQuick
 import QtQuick.Layouts
+import Quickshell
 import Quickshell.Services.Mpris
 
 import "../../components" as Components
@@ -11,21 +12,58 @@ import "../../services" as Services
 
 /**
 * MediaPanel - full transport for the active MPRIS player
+*
+* The now-playing card takes its colour from the album art: ColorQuantizer boils
+* the cover down to a handful of colours, and the most vivid of them tints the
+* card, the seek bar and the play button, cross-fading as tracks change. A cover
+* with no usable colour (near-black, greyscale) falls back to the theme accent.
 */
 Components.SlidingPanel {
   id: root
 
   panelId: "media"
-  namespace: "quickshell-media-panel"
 
   headerIcon: "music"
-  headerIconColor: Services.Media.isPlaying ? Config.Theme.accent : Config.Theme.textDim
+  headerIconColor: Services.Media.isPlaying ? root.tint : Config.Theme.textDim
   headerTitle: "Media"
   headerSubtitle: Services.Media.identity || "Nothing playing"
 
   // Position only refreshes while something is watching it.
   onOpened: Services.Media.positionWatched = true
   onClosed: Services.Media.positionWatched = false
+
+  // === Album-art colour ===
+  ColorQuantizer {
+    id: artColors
+
+    source: Services.Media.trackArtUrl
+    depth: 3
+    rescaleSize: 64
+  }
+
+  // The most vivid quantized colour, not the most common: that is often the
+  // cover's near-black background, which would tint nothing.
+  readonly property color artColor: {
+    let best = Config.Theme.accent;
+    let bestScore = 0;
+    for (const c of artColors.colors) {
+      const score = c.hsvSaturation * c.hsvValue;
+      if (score > bestScore) {
+        best = c;
+        bestScore = score;
+      }
+    }
+    return bestScore > 0.15 ? best : Config.Theme.accent;
+  }
+
+  property color tint: root.artColor
+
+  Behavior on tint {
+    ColorAnimation {
+      duration: Core.Style.duration(Core.Style.animSlow)
+      easing.type: Core.Style.easeStandard
+    }
+  }
 
   Components.EmptyState {
     Layout.fillWidth: true
@@ -35,183 +73,225 @@ Components.SlidingPanel {
     hint: "Start a player and it will appear here"
   }
 
-  // === Album art ===
-  Item {
+  // === Now playing ===
+  Rectangle {
     Layout.fillWidth: true
-    Layout.preferredHeight: width * 0.6
     visible: Services.Media.hasPlayer
+    implicitHeight: heroColumn.implicitHeight + Core.Style.spaceM * 2
 
-    Rectangle {
-      anchors.fill: parent
-      radius: Core.Style.radiusL
-      color: Config.Theme.surface
-      clip: true
+    radius: Core.Style.radiusL
+    border.width: Core.Style.borderThin
+    border.color: Config.Theme.alpha(root.tint, 0.3)
 
-      Image {
-        id: art
+    gradient: Gradient {
+      GradientStop {
+        position: 0.0
+        color: Config.Theme.alpha(root.tint, 0.3)
+      }
 
-        anchors.fill: parent
-        source: Services.Media.trackArtUrl
-        // Album covers can be much larger than the panel; bound decoded size.
-        sourceSize: Qt.size(root.panelWidth, root.panelWidth)
-        fillMode: Image.PreserveAspectCrop
-        asynchronous: true
+      GradientStop {
+        position: 1.0
+        color: Config.Theme.alpha(root.tint, 0.05)
+      }
+    }
 
-        // Fade in rather than cut. `visible` is left alone and opacity carries
-        // the transition, so a new track's art arrives over the old frame
-        // instead of flashing the placeholder between the two.
-        opacity: status === Image.Ready ? 1 : 0
+    ColumnLayout {
+      id: heroColumn
 
-        Behavior on opacity {
-          NumberAnimation {
-            duration: Core.Style.duration(Core.Style.animNormal)
-            easing.type: Core.Style.easeStandard
+      anchors {
+        left: parent.left
+        right: parent.right
+        top: parent.top
+        margins: Core.Style.spaceM
+      }
+      spacing: Core.Style.spaceM
+
+      // --- Album art ---
+      Item {
+        Layout.fillWidth: true
+        // Square, as covers are: the old 0.6 crop cut the top and bottom off.
+        Layout.preferredHeight: width
+
+        Rectangle {
+          anchors.fill: parent
+          radius: Core.Style.radiusM
+          color: Config.Theme.surface
+        }
+
+        // Placeholder while there is no art (or it failed to load)
+        Components.Icon {
+          anchors.centerIn: parent
+          opacity: art.opacity > 0 ? 0 : 1
+          icon: "music"
+          size: Core.Style.fontXXXL
+          color: Config.Theme.overlay
+
+          Behavior on opacity {
+            NumberAnimation {
+              duration: Core.Style.duration(Core.Style.animNormal)
+              easing.type: Core.Style.easeStandard
+            }
+          }
+        }
+
+        Components.RoundedImage {
+          id: art
+
+          anchors.fill: parent
+          radius: Core.Style.radiusM
+          source: Services.Media.trackArtUrl
+          // Album covers can be much larger than the panel; bound decoded size.
+          sourceSize: Qt.size(root.panelWidth, root.panelWidth)
+
+          // A new track's art fades in over the old frame instead of flashing
+          // the placeholder between the two.
+          opacity: status === Image.Ready ? 1 : 0
+
+          Behavior on opacity {
+            NumberAnimation {
+              duration: Core.Style.duration(Core.Style.animNormal)
+              easing.type: Core.Style.easeStandard
+            }
           }
         }
       }
 
-      // Placeholder while there is no art (or it failed to load)
-      Components.Icon {
-        anchors.centerIn: parent
-        opacity: art.opacity > 0 ? 0 : 1
+      // --- Track info ---
+      ColumnLayout {
+        Layout.fillWidth: true
+        spacing: Core.Style.spaceXXS
 
-        Behavior on opacity {
-          NumberAnimation {
-            duration: Core.Style.duration(Core.Style.animNormal)
-            easing.type: Core.Style.easeStandard
+        Components.Text {
+          Layout.fillWidth: true
+          text: Services.Media.trackTitle || "Unknown track"
+          size: Core.Style.fontL
+          weight: Core.Style.weightBold
+          elide: Text.ElideRight
+        }
+
+        Components.Text {
+          Layout.fillWidth: true
+          visible: Services.Media.trackArtist !== ""
+          text: Services.Media.trackArtist
+          size: Core.Style.fontM
+          color: Config.Theme.textDim
+          elide: Text.ElideRight
+        }
+
+        Components.Text {
+          Layout.fillWidth: true
+          visible: Services.Media.trackAlbum !== ""
+          text: Services.Media.trackAlbum
+          size: Core.Style.fontS
+          color: Config.Theme.textMuted
+          elide: Text.ElideRight
+        }
+      }
+
+      // --- Seek bar ---
+      ColumnLayout {
+        Layout.fillWidth: true
+        spacing: Core.Style.spaceXXS
+        visible: Services.Media.lengthSupported
+
+        // Seeks once, on release. Seeking on every step of a drag sent a
+        // SetPosition per pixel, and the position poll dragged the handle back
+        // under the pointer between them.
+        Components.Slider {
+          id: seekBar
+
+          Layout.fillWidth: true
+          enabled: Services.Media.canSeek
+          value: Services.Media.progress
+          liveUpdate: false
+          progressColor: root.tint
+          handleDragColor: root.tint
+          trackHeight: Core.Style.px(6)
+          handleSize: Core.Style.px(12)
+          onValueUpdated: v => Services.Media.seekFraction(v)
+        }
+
+        RowLayout {
+          Layout.fillWidth: true
+
+          // Follows the handle while dragging, so the time you will land on
+          // shows before you let go.
+          Components.Text {
+            text: Core.Utils.formatClock(seekBar.displayValue * Services.Media.length)
+            size: Core.Style.fontXS
+            color: seekBar.dragging ? root.tint : Config.Theme.textMuted
+          }
+
+          Components.Spacer {}
+
+          Components.Text {
+            text: Core.Utils.formatClock(Services.Media.length)
+            size: Core.Style.fontXS
+            color: Config.Theme.textMuted
           }
         }
-        icon: "music"
-        size: Core.Style.fontXXXL
-        color: Config.Theme.overlay
-      }
-    }
-  }
-
-  // === Track info ===
-  ColumnLayout {
-    Layout.fillWidth: true
-    spacing: Core.Style.spaceXXS
-    visible: Services.Media.hasPlayer
-
-    Components.Text {
-      Layout.fillWidth: true
-      text: Services.Media.trackTitle || "Unknown track"
-      size: Core.Style.fontL
-      weight: Core.Style.weightBold
-      elide: Text.ElideRight
-    }
-
-    Components.Text {
-      Layout.fillWidth: true
-      visible: Services.Media.trackArtist !== ""
-      text: Services.Media.trackArtist
-      size: Core.Style.fontM
-      color: Config.Theme.textDim
-      elide: Text.ElideRight
-    }
-
-    Components.Text {
-      Layout.fillWidth: true
-      visible: Services.Media.trackAlbum !== ""
-      text: Services.Media.trackAlbum
-      size: Core.Style.fontS
-      color: Config.Theme.textMuted
-      elide: Text.ElideRight
-    }
-  }
-
-  // === Seek bar ===
-  ColumnLayout {
-    Layout.fillWidth: true
-    spacing: Core.Style.spaceXXS
-    visible: Services.Media.hasPlayer && Services.Media.lengthSupported
-
-    Components.Slider {
-      Layout.fillWidth: true
-      enabled: Services.Media.canSeek
-      value: Services.Media.progress
-      trackHeight: 6
-      handleSize: 12
-      onValueUpdated: v => Services.Media.seekFraction(v)
-    }
-
-    RowLayout {
-      Layout.fillWidth: true
-
-      Components.Text {
-        text: Core.Utils.formatClock(Services.Media.position)
-        size: Core.Style.fontXS
-        color: Config.Theme.textMuted
       }
 
-      Components.Spacer {}
+      // --- Transport ---
+      RowLayout {
+        Layout.fillWidth: true
+        Layout.alignment: Qt.AlignHCenter
+        spacing: Core.Style.spaceM
 
-      Components.Text {
-        text: Core.Utils.formatClock(Services.Media.length)
-        size: Core.Style.fontXS
-        color: Config.Theme.textMuted
+        Components.Button {
+          icon: "shuffle"
+          iconSize: Core.Style.fontM
+          visible: Services.Media.shuffleSupported
+          iconColor: Services.Media.active?.shuffle ? root.tint : Config.Theme.textDim
+          tooltipText: "Shuffle"
+          onClicked: Services.Media.toggleShuffle()
+        }
+
+        Components.Spacer {}
+
+        Components.Button {
+          icon: "skip-previous"
+          iconSize: Core.Style.fontXL
+          enabled: Services.Media.canGoPrevious
+          tooltipText: "Previous"
+          onClicked: Services.Media.previous()
+        }
+
+        Components.Button {
+          variant: "primary"
+          icon: Services.Media.statusIcon
+          iconSize: Core.Style.fontXL
+          padding: Core.Style.spaceM
+          backgroundColor: root.tint
+          hoverColor: Qt.lighter(root.tint, 1.15)
+          tooltipText: Services.Media.isPlaying ? "Pause" : "Play"
+          enabled: Services.Media.isPlaying ? Services.Media.canPause : Services.Media.canPlay
+          onClicked: Services.Media.playPause()
+        }
+
+        Components.Button {
+          icon: "skip-next"
+          iconSize: Core.Style.fontXL
+          enabled: Services.Media.canGoNext
+          tooltipText: "Next"
+          onClicked: Services.Media.next()
+        }
+
+        Components.Spacer {}
+
+        Components.Button {
+          icon: {
+            if (!Services.Media.active)
+              return "repeat";
+            return Services.Media.active.loopState === MprisLoopState.Track ? "repeat-one" : "repeat";
+          }
+          iconSize: Core.Style.fontM
+          visible: Services.Media.loopSupported
+          iconColor: (Services.Media.active?.loopState ?? MprisLoopState.None) !== MprisLoopState.None ? root.tint : Config.Theme.textDim
+          tooltipText: "Repeat"
+          onClicked: Services.Media.cycleLoop()
+        }
       }
-    }
-  }
-
-  // === Transport ===
-  RowLayout {
-    Layout.fillWidth: true
-    Layout.alignment: Qt.AlignHCenter
-    spacing: Core.Style.spaceM
-    visible: Services.Media.hasPlayer
-
-    Components.Button {
-      icon: "shuffle"
-      iconSize: Core.Style.fontM
-      visible: Services.Media.shuffleSupported
-      iconColor: Services.Media.active?.shuffle ? Config.Theme.accent : Config.Theme.textDim
-      tooltipText: "Shuffle"
-      onClicked: Services.Media.toggleShuffle()
-    }
-
-    Components.Spacer {}
-
-    Components.Button {
-      icon: "skip-previous"
-      iconSize: Core.Style.fontXL
-      enabled: Services.Media.canGoPrevious
-      tooltipText: "Previous"
-      onClicked: Services.Media.previous()
-    }
-
-    Components.Button {
-      variant: "primary"
-      icon: Services.Media.statusIcon
-      iconSize: Core.Style.fontXL
-      padding: Core.Style.spaceM
-      tooltipText: Services.Media.isPlaying ? "Pause" : "Play"
-      enabled: Services.Media.isPlaying ? Services.Media.canPause : Services.Media.canPlay
-      onClicked: Services.Media.playPause()
-    }
-
-    Components.Button {
-      icon: "skip-next"
-      iconSize: Core.Style.fontXL
-      enabled: Services.Media.canGoNext
-      tooltipText: "Next"
-      onClicked: Services.Media.next()
-    }
-
-    Components.Spacer {}
-
-    Components.Button {
-      icon: {
-        if (!Services.Media.active)
-          return "repeat";
-        return Services.Media.active.loopState === MprisLoopState.Track ? "repeat-one" : "repeat";
-      }
-      iconSize: Core.Style.fontM
-      visible: Services.Media.loopSupported
-      iconColor: (Services.Media.active?.loopState ?? MprisLoopState.None) !== MprisLoopState.None ? Config.Theme.accent : Config.Theme.textDim
-      tooltipText: "Repeat"
-      onClicked: Services.Media.cycleLoop()
     }
   }
 
@@ -237,7 +317,7 @@ Components.SlidingPanel {
       Layout.fillWidth: true
       value: Services.Media.volume
       maxValue: 1.0
-      progressColor: Services.Media.volumeMuted ? Config.Theme.error : Config.Theme.accent
+      progressColor: Services.Media.volumeMuted ? Config.Theme.error : root.tint
       onValueUpdated: newValue => Services.Media.setVolume(newValue)
     }
   }

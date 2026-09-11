@@ -1,9 +1,9 @@
 import QtQuick
 import QtQuick.Layouts
-
-import "." as Components
 import "../config" as Config
 import "../core" as Core
+
+import "." as Components
 
 /**
 * ProgressRow - Versatile progress display component
@@ -38,7 +38,7 @@ ColumnLayout {
   property real value: 0
   property real maxValue: 1
   property color progressColor: Config.Theme.accent
-  property int progressHeight: 6
+  property int progressHeight: Core.Style.px(6)
 
   // === Value Display ===
   property bool showPercentage: true
@@ -64,7 +64,6 @@ ColumnLayout {
       size: root.iconSize
       color: root.iconColor
       visible: root.hasIcon
-
     }
 
     // Label column with progress (when label is present)
@@ -120,7 +119,6 @@ ColumnLayout {
       size: root.hasValueText ? Core.Style.fontL : Core.Style.fontM
       font.weight: root.hasValueText ? Core.Style.weightBold : Core.Style.weightMedium
       color: root.hasValueText ? root.iconColor : Config.Theme.text
-
     }
   }
 }

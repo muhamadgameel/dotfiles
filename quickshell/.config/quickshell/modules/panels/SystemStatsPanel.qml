@@ -22,7 +22,6 @@ Components.SlidingPanel {
   id: root
 
   panelId: "systemstats"
-  namespace: "quickshell-systemstats-panel"
 
   // Header configuration
   headerIcon: Services.SystemStats.healthIcon
@@ -41,8 +40,8 @@ Components.SlidingPanel {
   Components.ProgressRow {
     Layout.fillWidth: true
     value: Services.SystemStats.cpuUsage / 100
-    progressColor: _statusColor(Services.SystemStats.cpuUsageStatus)
-    progressHeight: 8
+    progressColor: root._statusColor(Services.SystemStats.cpuUsageStatus)
+    progressHeight: Core.Style.px(8)
   }
 
   // Per-core breakdown.
@@ -71,7 +70,7 @@ Components.SlidingPanel {
         labelInfo: Math.round(usage) + "%"
         value: usage / 100
         progressColor: usage > 90 ? Config.Theme.error : usage > 70 ? Config.Theme.warning : Config.Theme.accentAlt
-        progressHeight: 4
+        progressHeight: Core.Style.px(4)
         showPercentage: false
       }
     }
@@ -92,8 +91,8 @@ Components.SlidingPanel {
     label: "RAM"
     labelInfo: Core.Utils.formatBytes(Services.SystemStats.memUsed, 1) + " / " + Core.Utils.formatBytes(Services.SystemStats.memTotal, 1)
     value: Services.SystemStats.memPercent / 100
-    progressColor: _statusColor(Services.SystemStats.memStatus)
-    progressHeight: 8
+    progressColor: root._statusColor(Services.SystemStats.memStatus)
+    progressHeight: Core.Style.px(8)
     showPercentage: false
   }
 
@@ -104,7 +103,7 @@ Components.SlidingPanel {
     labelInfo: Core.Utils.formatBytes(Services.SystemStats.swapUsed, 1) + " / " + Core.Utils.formatBytes(Services.SystemStats.swapTotal, 1)
     value: Services.SystemStats.swapPercent / 100
     progressColor: Services.SystemStats.swapPercent > 50 ? Config.Theme.warning : Config.Theme.accentAlt
-    progressHeight: 6
+    progressHeight: Core.Style.px(6)
     showPercentage: false
   }
 
@@ -124,12 +123,12 @@ Components.SlidingPanel {
     Layout.fillWidth: true
     visible: Services.SystemStats.hasCpuTemp
     icon: "chip"
-    iconColor: _statusColor(Services.SystemStats.cpuTempStatus, Config.Theme.text)
+    iconColor: root._statusColor(Services.SystemStats.cpuTempStatus, Config.Theme.text)
     label: "CPU"
     value: Services.SystemStats.cpuTemp / 100
     valueText: Core.Utils.formatTemp(Services.SystemStats.cpuTemp)
-    progressColor: _statusColor(Services.SystemStats.cpuTempStatus, Config.Theme.success)
-    progressHeight: 6
+    progressColor: root._statusColor(Services.SystemStats.cpuTempStatus, Config.Theme.success)
+    progressHeight: Core.Style.px(6)
   }
 
   // GPU Temperature
@@ -137,12 +136,12 @@ Components.SlidingPanel {
     Layout.fillWidth: true
     visible: Services.SystemStats.hasGpuTemp
     icon: "gpu"
-    iconColor: _statusColor(Services.SystemStats.gpuTempStatus, Config.Theme.text)
+    iconColor: root._statusColor(Services.SystemStats.gpuTempStatus, Config.Theme.text)
     label: "GPU"
     value: Services.SystemStats.gpuTemp / 100
     valueText: Core.Utils.formatTemp(Services.SystemStats.gpuTemp)
-    progressColor: _statusColor(Services.SystemStats.gpuTempStatus, Config.Theme.success)
-    progressHeight: 6
+    progressColor: root._statusColor(Services.SystemStats.gpuTempStatus, Config.Theme.success)
+    progressHeight: Core.Style.px(6)
   }
 
   // No temperature sensors message
@@ -248,8 +247,8 @@ Components.SlidingPanel {
     label: Services.SystemStats.diskMount
     labelInfo: Core.Utils.formatBytes(Services.SystemStats.diskUsed, 1) + " / " + Core.Utils.formatBytes(Services.SystemStats.diskTotal, 1)
     value: Services.SystemStats.diskPercent / 100
-    progressColor: _statusColor(Services.SystemStats.diskStatus)
-    progressHeight: 10
+    progressColor: root._statusColor(Services.SystemStats.diskStatus)
+    progressHeight: Core.Style.px(10)
     showPercentage: false
   }
 
@@ -283,12 +282,12 @@ Components.SlidingPanel {
       spacing: Core.Style.spaceXS
 
       Components.StatusDot {
-        size: 8
-        color: _statusColor(Services.SystemStats.healthStatus, Config.Theme.success)
+        size: Core.Style.px(8)
+        color: root._statusColor(Services.SystemStats.healthStatus, Config.Theme.success)
       }
 
       Components.Text {
-        text: _healthText(Services.SystemStats.healthStatus)
+        text: root._healthText(Services.SystemStats.healthStatus)
         size: Core.Style.fontXS
         color: Config.Theme.textMuted
       }

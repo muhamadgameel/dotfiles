@@ -31,8 +31,8 @@ Rectangle {
   property color trackColor: Config.Theme.surface
   property bool reversed: false
 
-  implicitWidth: 200
-  implicitHeight: 6
+  implicitWidth: Core.Style.px(200)
+  implicitHeight: Core.Style.px(6)
   radius: Core.Style.radiusFull
   color: trackColor
 

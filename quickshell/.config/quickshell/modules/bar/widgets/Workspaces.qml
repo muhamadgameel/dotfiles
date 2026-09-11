@@ -224,17 +224,17 @@ Item {
         Row {
           anchors.horizontalCenter: parent.horizontalCenter
           anchors.bottom: parent.bottom
-          anchors.bottomMargin: 2
-          spacing: 2
+          anchors.bottomMargin: Core.Style.spaceXXS
+          spacing: Core.Style.spaceXXS
           visible: slot.occupied && !slot.isFocused
 
           Repeater {
             model: Math.min(3, slot.workspace?.toplevels?.values?.length ?? 0)
 
             delegate: Rectangle {
-              width: 3
-              height: 3
-              radius: 1.5
+              width: Core.Style.px(3)
+              height: width
+              radius: width / 2
               color: Config.Theme.textMuted
             }
           }

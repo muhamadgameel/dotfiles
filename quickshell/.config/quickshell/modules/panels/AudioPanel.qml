@@ -21,7 +21,6 @@ Components.SlidingPanel {
   id: root
 
   panelId: "audio"
-  namespace: "quickshell-audio-panel"
   scrollable: true
   contentSpacing: Core.Style.spaceM
 

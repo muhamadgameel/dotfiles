@@ -9,26 +9,28 @@ import "../core" as Core
 * A draggable slider with smooth animations and keyboard support.
 * Ideal for volume, brightness, and similar controls.
 *
+* The slider never writes `value`. Bind it to the state it controls and apply
+* valueUpdated there. It used to assign `value` while dragging, which silently
+* broke the caller's binding on the first drag - after that the slider stopped
+* following the state, so dragging the volume slider once meant the volume keys
+* no longer moved it.
+*
+* While dragging, and for a moment after letting go, it shows where the handle
+* is (displayValue) rather than `value`, so the handle does not snap back before
+* the change has made its way through the service and back.
+*
 * Usage:
 *   // Basic slider
 *   Slider {
-*       value: 0.5
-*       onValueUpdated: handleChange(newValue)
+*       value: Services.Audio.volume
+*       onValueUpdated: newValue => Services.Audio.setVolume(newValue)
 *   }
 *
-*   // With min/max and step
+*   // Apply only on release (seeking, where every step is expensive)
 *   Slider {
-*       value: 50
-*       minValue: 0
-*       maxValue: 100
-*       step: 5
-*   }
-*
-*   // Custom colors
-*   Slider {
-*       value: 0.7
-*       progressColor: Theme.success
-*       handleColor: Theme.accent
+*       value: Services.Media.progress
+*       liveUpdate: false
+*       onValueUpdated: newValue => Services.Media.seekFraction(newValue)
 *   }
 */
 Item {
@@ -46,25 +48,55 @@ Item {
   property color handleColor: Config.Theme.text
   property color handleHoverColor: Config.Theme.text
   property color handleDragColor: Config.Theme.accent
-  property int trackHeight: 8
-  property int handleSize: 16
+  property int trackHeight: Core.Style.px(8)
+  property int handleSize: Core.Style.px(16)
   property bool showHandle: true
 
   // === Behavior Properties ===
-  property bool liveUpdate: true  // Emit valueChanged while dragging
+  // Emit valueUpdated while dragging. False emits once, on release.
+  property bool liveUpdate: true
 
   // === State (readonly) ===
   readonly property bool hovered: mouseArea.containsMouse
   readonly property bool dragging: mouseArea.pressed
-  readonly property real normalizedValue: (value - minValue) / (maxValue - minValue)
+
+  // What the slider is showing: the handle's own position while it is being
+  // moved or settling, the bound value otherwise.
+  readonly property real displayValue: root._holding ? root._dragValue : root.value
+  readonly property real normalizedValue: root.maxValue > root.minValue ? Core.Utils.clamp((root.displayValue - root.minValue) / (root.maxValue - root.minValue), 0, 1) : 0
 
   // === Signals ===
   signal valueUpdated(real newValue)
   signal dragStarted
   signal dragEnded
 
+  // === Internal ===
+  property real _dragValue: 0
+
+  // Showing _dragValue. Set as a drag or key press starts, and cleared once the
+  // bound value catches up (or the grace period runs out) - but never mid-drag,
+  // where `value` can move for unrelated reasons, a playing track's position.
+  property bool _holding: false
+
+  onValueChanged: {
+    if (!root.dragging)
+      root._holding = false;
+  }
+
+  Timer {
+    id: holdTimer
+    interval: Core.Style.animSlow * 3
+    onTriggered: root._holding = false
+  }
+
+  function _hold(newValue) {
+    root._dragValue = newValue;
+    root._holding = true;
+    holdTimer.restart();
+  }
+
   // === Dimensions ===
-  implicitWidth: 200
+  implicitWidth: Core.Style.px(200)
   implicitHeight: Math.max(trackHeight, handleSize)
 
   opacity: enabled ? 1.0 : Core.Style.opacityDisabled
@@ -89,10 +121,10 @@ Item {
   Rectangle {
     visible: root.maxValue > 1.0
     anchors.verticalCenter: track.verticalCenter
-    x: track.width * (1.0 / root.maxValue) - 1
-    width: 2
-    height: track.height + 4
-    radius: 1
+    width: Core.Style.px(2)
+    x: track.width * (1.0 / root.maxValue) - width / 2
+    height: track.height + Core.Style.px(4)
+    radius: width / 2
     color: Config.Theme.textMuted
     opacity: 0.5
   }
@@ -159,6 +191,7 @@ Item {
     cursorShape: root.enabled ? Qt.PointingHandCursor : Qt.ArrowCursor
 
     onPressed: mouse => {
+      root._hold(root.value);
       root.dragStarted();
       updateValue(mouse.x);
     }
@@ -170,6 +203,10 @@ Item {
     }
 
     onReleased: {
+      // Restart the grace period from the release, not from the press.
+      holdTimer.restart();
+      if (!root.liveUpdate)
+        root.valueUpdated(root._dragValue);
       root.dragEnded();
     }
 
@@ -184,8 +221,8 @@ Item {
 
       newValue = Core.Utils.clamp(newValue, root.minValue, root.maxValue);
 
-      if (newValue !== root.value) {
-        root.value = newValue;
+      if (newValue !== root._dragValue) {
+        root._dragValue = newValue;
         if (root.liveUpdate) {
           root.valueUpdated(newValue);
         }
@@ -202,17 +239,17 @@ Item {
   function adjustValue(direction) {
     if (!enabled)
       return;
-    let stepSize = step > 0 ? step : (maxValue - minValue) / 20;
-    let newValue = Core.Utils.clamp(value + direction * stepSize, minValue, maxValue);
-    if (newValue !== value) {
-      value = newValue;
-      valueUpdated(newValue);
-    }
+    const stepSize = step > 0 ? step : (maxValue - minValue) / 20;
+    root.setValue(root.displayValue + direction * stepSize);
   }
 
   // === Public API ===
+  // Moves the handle and reports the change; the caller applies it to `value`.
   function setValue(newValue) {
-    value = Core.Utils.clamp(newValue, minValue, maxValue);
-    valueUpdated(value);
+    const clamped = Core.Utils.clamp(newValue, minValue, maxValue);
+    if (clamped === root.displayValue)
+      return;
+    root._hold(clamped);
+    root.valueUpdated(clamped);
   }
 }

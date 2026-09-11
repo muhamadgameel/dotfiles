@@ -28,8 +28,8 @@ Rectangle {
 
   signal toggled(bool checked)
 
-  implicitWidth: 44
-  implicitHeight: 24
+  implicitWidth: Core.Style.px(44)
+  implicitHeight: Core.Style.px(24)
   radius: Core.Style.radiusFull
 
   // Was inert on hover - it read only `checked`, despite being the control you
@@ -60,10 +60,10 @@ Rectangle {
   // Knob
   Rectangle {
     id: knob
-    width: 18
-    height: 18
-    radius: 9
-    x: root.checked ? parent.width - width - 3 : 3
+    width: Core.Style.px(18)
+    height: width
+    radius: width / 2
+    x: root.checked ? parent.width - width - Core.Style.px(3) : Core.Style.px(3)
     anchors.verticalCenter: parent.verticalCenter
 
     color: Config.Theme.text

@@ -40,7 +40,7 @@ Rectangle {
   property bool pulse: false
   property int pulseDuration: Core.Style.animSlow
   property real minOpacity: 0.3
-  property real size: 4
+  property real size: Core.Style.px(4)
 
   // === Dimensions ===
   width: size

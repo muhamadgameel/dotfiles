@@ -1,8 +1,8 @@
 import QtQuick
-
-import "." as Components
 import "../config" as Config
 import "../core" as Core
+
+import "." as Components
 
 /**
 * TooltipBubble - Tooltip content component

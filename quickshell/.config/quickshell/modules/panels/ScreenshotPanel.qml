@@ -17,7 +17,6 @@ Components.SlidingPanel {
   id: root
 
   panelId: "screenshot"
-  namespace: "quickshell-screenshot-panel"
 
   headerIcon: "camera"
   headerIconColor: Config.Theme.accent

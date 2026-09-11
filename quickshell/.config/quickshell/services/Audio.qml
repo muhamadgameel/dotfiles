@@ -257,17 +257,17 @@ Singleton {
     if (!sinkReady || !sink)
       return false;
 
-    const deviceApi = sink.properties?.["device.api"]?.toLowerCase() ?? "";
-    const bluezProfile = sink.properties?.["api.bluez5.profile"]?.toLowerCase() ?? "";
+    const deviceApi = String(sink.properties["device.api"] ?? "").toLowerCase();
+    const bluezProfile = String(sink.properties["api.bluez5.profile"] ?? "").toLowerCase();
 
     // A2DP is a headset profile in practice; bluez speakers report it too, but
     // treating them as headphones only changes the icon.
     if (deviceApi === "bluez5" && bluezProfile.includes("a2dp"))
       return true;
 
-    const desc = sink.description?.toLowerCase() ?? "";
-    const name = sink.name?.toLowerCase() ?? "";
-    const nickname = sink.nickname?.toLowerCase() ?? "";
+    const desc = sink.description.toLowerCase();
+    const name = sink.name.toLowerCase();
+    const nickname = sink.nickname.toLowerCase();
     const haystack = `${desc} ${name} ${nickname}`;
 
     return ["headphone", "headset", "earbuds", "airpods", "buds", "earpods"].some(k => haystack.includes(k));
