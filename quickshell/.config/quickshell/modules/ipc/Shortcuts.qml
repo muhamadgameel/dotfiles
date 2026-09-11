@@ -65,6 +65,13 @@ Scope {
 
   GlobalShortcut {
     appid: "quickshell"
+    name: "panelQuickSettings"
+    description: "Toggle quick settings"
+    onPressed: Services.Panels.toggle("quicksettings", Targets.focusedScreen)
+  }
+
+  GlobalShortcut {
+    appid: "quickshell"
     name: "panelMedia"
     description: "Toggle the media panel"
     onPressed: Services.Panels.toggle("media", Targets.focusedScreen)

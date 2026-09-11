@@ -108,7 +108,8 @@ Singleton {
   }
 
   // === OSD triggers ===
-  readonly property bool _soundPanelOpen: Services.Panels.openPanel === "audio"
+  // Panels that already show the level, where the OSD would only cover them.
+  readonly property bool _soundPanelOpen: ["audio", "quicksettings"].includes(Services.Panels.openPanel)
 
   Connections {
     target: root.sink?.audio ?? null

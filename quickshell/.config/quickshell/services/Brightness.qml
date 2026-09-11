@@ -130,6 +130,10 @@ Singleton {
   }
 
   function _showOSD() {
+    // Quick settings already shows the level, and the OSD would cover it.
+    if (Services.Panels.openPanel === "quicksettings")
+      return;
+
     Services.OSD.show("progressRow", {
       icon: getIcon(brightness),
       value: brightness,
