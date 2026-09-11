@@ -32,15 +32,44 @@ Components.SlidingPanel {
   headerSubtitle: Services.Audio.deviceName(Services.Audio.sink)
 
   // === OUTPUT SECTION ===
-  OutputSection {
+  VolumeSection {
     Layout.fillWidth: true
+
+    title: "Output"
+    icon: "volume-high"
+    mutedIcon: "volume-mute"
+    levelIcon: Services.Audio.getVolumeIcon()
+
+    node: Services.Audio.sink
+    volume: Services.Audio.volume
+    muted: Services.Audio.muted
+    maxValue: Services.Audio.maxVolume
+    devices: Services.Audio.sinkDevices
+
+    onVolumeRequested: value => Services.Audio.setVolume(value)
+    onMuteToggled: Services.Audio.toggleMute()
+    onDeviceSelected: node => Services.Audio.setDefaultSink(node)
   }
 
   Components.Divider {}
 
-  // === INPUT SECTION (Collapsible) ===
-  InputSection {
+  // === INPUT SECTION ===
+  VolumeSection {
     Layout.fillWidth: true
+
+    title: "Input"
+    icon: "microphone"
+    mutedIcon: "microphone-off"
+    levelIcon: Services.Audio.getMicIcon()
+
+    node: Services.Audio.source
+    volume: Services.Audio.micVolume
+    muted: Services.Audio.micMuted
+    devices: Services.Audio.sourceDevices
+
+    onVolumeRequested: value => Services.Audio.setMicVolume(value)
+    onMuteToggled: Services.Audio.toggleMicMute()
+    onDeviceSelected: node => Services.Audio.setDefaultSource(node)
   }
 
   Components.Divider {}
@@ -102,13 +131,34 @@ Components.SlidingPanel {
   // INLINE COMPONENTS
   // ==========================================================================
 
-  // --- Output Section ---
-  component OutputSection: ColumnLayout {
+  // --- Volume Section ---
+  // Output and input are the same controls bound to different nodes.
+  component VolumeSection: ColumnLayout {
+    id: section
+
+    property string title: ""
+    property string icon: ""        // section header, and the unmuted button
+    property string mutedIcon: ""
+    property string levelIcon: ""   // follows the level, beside the device name
+
+    property var node: null
+    property real volume: 0
+    property bool muted: false
+    property real maxValue: 1.0
+    property var devices: []
+
+    signal volumeRequested(real value)
+    signal muteToggled
+    signal deviceSelected(var node)
+
+    // Past unity gain is where clipping starts, so it is worth flagging.
+    readonly property bool _boosted: section.volume > 1.0
+
     spacing: Core.Style.spaceS
 
     Components.SectionHeader {
-      title: "Output"
-      icon: "volume-high"
+      title: section.title
+      icon: section.icon
     }
 
     // Controls
@@ -117,13 +167,13 @@ Components.SlidingPanel {
       spacing: Core.Style.spaceS
 
       Components.Icon {
-        icon: Services.Audio.getVolumeIcon()
-        size: Core.Style.fontXL
-        color: Services.Audio.muted ? Config.Theme.error : Config.Theme.accent
+        icon: section.levelIcon
+        size: Core.Style.fontL
+        color: section.muted ? Config.Theme.error : Config.Theme.accent
       }
 
       Components.Text {
-        text: Services.Audio.deviceName(Services.Audio.sink)
+        text: Services.Audio.deviceName(section.node)
         size: Core.Style.fontS
         color: Config.Theme.textDim
         Layout.fillWidth: true
@@ -131,99 +181,37 @@ Components.SlidingPanel {
 
       // Volume percentage
       Components.Text {
-        text: Math.round(Services.Audio.volume * 100) + "%"
+        text: Math.round(section.volume * 100) + "%"
         size: Core.Style.fontM
         weight: Core.Style.weightBold
-        color: Services.Audio.muted ? Config.Theme.textMuted : Services.Audio.volume > 1.0 ? Config.Theme.warning : Config.Theme.text
+        color: section.muted ? Config.Theme.textMuted : section._boosted ? Config.Theme.warning : Config.Theme.text
       }
 
       // Mute button
       Components.Button {
-        icon: Services.Audio.muted ? "volume-mute" : "volume-high"
-        iconColor: Services.Audio.muted ? Config.Theme.error : Config.Theme.text
-        tooltipText: Services.Audio.muted ? "Unmute" : "Mute"
-        onClicked: Services.Audio.toggleMute()
+        icon: section.muted ? section.mutedIcon : section.icon
+        iconColor: section.muted ? Config.Theme.error : Config.Theme.text
+        tooltipText: section.muted ? "Unmute" : "Mute"
+        onClicked: section.muteToggled()
       }
     }
 
     // Volume Slider
     Components.Slider {
       Layout.fillWidth: true
-      value: Services.Audio.volume
-      maxValue: 1.5
-      onValueUpdated: newValue => Services.Audio.setVolume(newValue)
-      progressColor: Services.Audio.muted ? Config.Theme.error : (Services.Audio.volume > 1.0 ? Config.Theme.warning : Config.Theme.accent)
+      value: section.volume
+      maxValue: section.maxValue
+      onValueUpdated: newValue => section.volumeRequested(newValue)
+      progressColor: section.muted ? Config.Theme.error : section._boosted ? Config.Theme.warning : Config.Theme.accent
     }
 
     // Device selector (collapsible)
     DeviceSelector {
       Layout.fillWidth: true
-      title: "Output Devices"
-      devices: Services.Audio.sinkDevices
-      currentDevice: Services.Audio.sink
-      onDeviceSelected: node => Services.Audio.setDefaultSink(node)
-    }
-  }
-
-  // --- Input Section ---
-  component InputSection: ColumnLayout {
-    spacing: Core.Style.spaceS
-
-    Components.SectionHeader {
-      title: "Input"
-      icon: "microphone"
-    }
-
-    // Controls
-    RowLayout {
-      Layout.fillWidth: true
-      spacing: Core.Style.spaceS
-
-      Components.Icon {
-        icon: Services.Audio.getMicIcon()
-        size: Core.Style.fontL
-        color: Services.Audio.micMuted ? Config.Theme.error : Config.Theme.accent
-      }
-
-      Components.Text {
-        text: Services.Audio.deviceName(Services.Audio.source)
-        size: Core.Style.fontS
-        color: Config.Theme.textDim
-        Layout.fillWidth: true
-      }
-
-      // Volume percentage
-      Components.Text {
-        text: Math.round(Services.Audio.micVolume * 100) + "%"
-        size: Core.Style.fontM
-        weight: Core.Style.weightBold
-        color: Services.Audio.micMuted ? Config.Theme.textMuted : Config.Theme.text
-      }
-
-      // Mute button
-      Components.Button {
-        icon: Services.Audio.micMuted ? "microphone-off" : "microphone"
-        iconColor: Services.Audio.micMuted ? Config.Theme.error : Config.Theme.text
-        tooltipText: Services.Audio.micMuted ? "Unmute" : "Mute"
-        onClicked: Services.Audio.toggleMicMute()
-      }
-    }
-
-    // Volume Slider
-    Components.Slider {
-      Layout.fillWidth: true
-      value: Services.Audio.micVolume
-      onValueUpdated: newValue => Services.Audio.setMicVolume(newValue)
-      progressColor: Services.Audio.micMuted ? Config.Theme.error : Config.Theme.accent
-    }
-
-    // Device selector
-    DeviceSelector {
-      Layout.fillWidth: true
-      title: "Input Devices"
-      devices: Services.Audio.sourceDevices
-      currentDevice: Services.Audio.source
-      onDeviceSelected: node => Services.Audio.setDefaultSource(node)
+      title: section.title + " Devices"
+      devices: section.devices
+      currentDevice: section.node
+      onDeviceSelected: node => section.deviceSelected(node)
     }
   }
 
@@ -267,7 +255,7 @@ Components.SlidingPanel {
           spacing: Core.Style.spaceS
 
           Components.Icon {
-            icon: deviceSelectorRoot._getDeviceIcon(deviceCard.modelData)
+            icon: Services.Audio.deviceIcon(deviceCard.modelData)
             size: Core.Style.fontL
             color: deviceCard.isActive ? Config.Theme.accent : Config.Theme.text
           }
@@ -303,35 +291,6 @@ Components.SlidingPanel {
         }
       }
     }
-
-    function _getDeviceIcon(node) {
-      if (!node)
-        return "speaker";
-
-      const desc = (node.description || "").toLowerCase();
-      const name = (node.name || "").toLowerCase();
-      const deviceApi = node.properties["device.api"] || "";
-
-      // Bluetooth
-      if (deviceApi === "bluez5")
-        return "bluetooth-connected";
-
-      // Headphones
-      if (desc.includes("headphone") || desc.includes("headset") || name.includes("headphone") || name.includes("headset")) {
-        return "headphones";
-      }
-
-      // HDMI/Display
-      if (desc.includes("hdmi") || name.includes("hdmi"))
-        return "monitor";
-
-      // USB
-      if (desc.includes("usb") || name.includes("usb"))
-        return "usb";
-
-      // Default
-      return node.isSource ? "microphone" : "speaker";
-    }
   }
 
   // --- Stream Item (per-application control) ---
@@ -362,36 +321,7 @@ Components.SlidingPanel {
       return appName || mediaName || node.nickname || node.description || "Unknown";
     }
 
-    readonly property string streamIcon: {
-      if (!node)
-        return "music";
-
-      const props = node.properties;
-      const appName = (props ? props["application.name"] : "") || "";
-      const mediaClass = (props ? props["media.class"] : "") || "";
-      const appNameLower = appName.toLowerCase();
-      const mediaClassLower = mediaClass.toLowerCase();
-
-      // Common applications
-      if (appNameLower.includes("firefox") || appNameLower.includes("chrome") || appNameLower.includes("chromium") || appNameLower.includes("brave"))
-        return "browser";
-      if (appNameLower.includes("spotify") || appNameLower.includes("music"))
-        return "music";
-      if (appNameLower.includes("discord") || appNameLower.includes("telegram") || appNameLower.includes("slack"))
-        return "message";
-      if (appNameLower.includes("obs") || appNameLower.includes("video"))
-        return "video";
-      if (appNameLower.includes("game") || appNameLower.includes("steam"))
-        return "apps";
-
-      // By media class
-      if (mediaClassLower.includes("video"))
-        return "video";
-      if (mediaClassLower.includes("voice") || mediaClassLower.includes("phone"))
-        return "phone";
-
-      return isOutput ? "volume" : "microphone";
-    }
+    readonly property string streamIcon: Services.Audio.streamIcon(node)
 
     ColumnLayout {
       id: streamContent

@@ -201,6 +201,55 @@ Singleton {
     return (off || vol < 0.01) ? "microphone-off" : "microphone";
   }
 
+  // Best guess at what kind of hardware a sink or source node is.
+  function deviceIcon(node) {
+    if (!node)
+      return "speaker";
+
+    const desc = (node.description || "").toLowerCase();
+    const name = (node.name || "").toLowerCase();
+    const deviceApi = node.properties?.["device.api"] || "";
+    const has = k => desc.includes(k) || name.includes(k);
+
+    if (deviceApi === "bluez5")
+      return "bluetooth-connected";
+    if (has("headphone") || has("headset"))
+      return "headphones";
+    if (has("hdmi"))
+      return "monitor";
+    if (has("usb"))
+      return "usb";
+    return node.isSource ? "microphone" : "speaker";
+  }
+
+  // Best guess at what kind of application a playback or recording stream is.
+  function streamIcon(node) {
+    if (!node)
+      return "music";
+
+    const app = (node.properties?.["application.name"] || "").toLowerCase();
+    const mediaClass = (node.properties?.["media.class"] || "").toLowerCase();
+    const appIs = keys => keys.some(k => app.includes(k));
+
+    if (appIs(["firefox", "chrome", "chromium", "brave"]))
+      return "browser";
+    if (appIs(["spotify", "music"]))
+      return "music";
+    if (appIs(["discord", "telegram", "slack"]))
+      return "message";
+    if (appIs(["obs", "video"]))
+      return "video";
+    if (appIs(["game", "steam"]))
+      return "apps";
+
+    if (mediaClass.includes("video"))
+      return "video";
+    if (mediaClass.includes("voice") || mediaClass.includes("phone"))
+      return "phone";
+
+    return node.isSink ? "volume" : "microphone";
+  }
+
   // === Device detection ===
 
   readonly property bool isHeadphones: {

@@ -33,8 +33,9 @@ Singleton {
   // The screen the open panel belongs to.
   property var targetScreen: null
 
-  // Panel id whose window should still exist. Lags openPanel by the length of
-  // the close animation, so the panel is not torn down mid-slide.
+  // Panel id whose window should still exist. Lags openPanel until the panel
+  // reports that its close animation has finished (release()), so it is not
+  // torn down mid-slide.
   property string retainedPanel: ""
 
   readonly property bool anyOpen: openPanel !== ""
@@ -77,6 +78,17 @@ Singleton {
     openPanel = "";
   }
 
+  /**
+  * Called by a panel once its window has actually hidden, so it can be torn
+  * down. Ignored if that panel has been reopened, or another one has taken over.
+  */
+  function release(id) {
+    if (retainedPanel === id && openPanel !== id) {
+      retainTimer.stop();
+      retainedPanel = "";
+    }
+  }
+
   function toggle(id, screen) {
     // Re-triggering the open panel from the same screen closes it; from a
     // different screen it moves there instead.
@@ -96,11 +108,13 @@ Singleton {
     }
   }
 
-  // Holds the window alive until the slide-out has finished. The margin covers
-  // the frame or two between the animation ending and the loader reacting.
+  // Fallback only: normally the panel calls release() the moment its window
+  // hides. This covers a panel that can never report back - its screen was
+  // unplugged mid-close, say - so retainedPanel cannot stick, and Screenshot
+  // (which waits on it) cannot hang. Generous, since it is never the fast path.
   Timer {
     id: retainTimer
-    interval: Core.Style.animNormal + 80
+    interval: Core.Style.animSlow * 4
     repeat: false
     onTriggered: root.retainedPanel = ""
   }

@@ -16,8 +16,6 @@ Components.SlidingPanel {
 
   panelId: "network"
   namespace: "quickshell-network-panel"
-  scrollable: false
-  fillHeight: false
   contentSpacing: Core.Style.spaceM
 
   // Header configuration
@@ -33,38 +31,77 @@ Components.SlidingPanel {
   }
   onClosed: Services.Network.panelOpen = false
 
-  // WiFi Toggle
-  Components.FormRow {
-    Layout.fillWidth: true
-    label: "Wi-Fi"
-    hasToggle: true
-    toggleChecked: Services.Network.wifiEnabled
-    onToggled: checked => Services.Network.setWifiEnabled(checked)
-  }
+  // === Pinned: the toggle, connection details and the list's heading ===
+  // The network list below scrolls under these with the panel's own scrollbar.
+  pinned: [
+    // WiFi Toggle
+    Components.FormRow {
+      Layout.fillWidth: true
+      label: "Wi-Fi"
+      hasToggle: true
+      toggleChecked: Services.Network.wifiEnabled
+      onToggled: checked => Services.Network.setWifiEnabled(checked)
+    },
 
-  // Error Message
-  Components.StatusBanner {
-    Layout.fillWidth: true
-    visible: Services.Network.lastError !== ""
-    message: Services.Network.lastError
-  }
+    // Error Message
+    Components.StatusBanner {
+      Layout.fillWidth: true
+      visible: Services.Network.lastError !== ""
+      message: Services.Network.lastError
+    },
 
-  // Connection Info (collapsible)
-  ConnectionInfoSection {
-    Layout.fillWidth: true
-    visible: Services.Network.isConnected
-  }
+    // Connection Info (collapsible)
+    Components.InfoList {
+      Layout.fillWidth: true
+      visible: Services.Network.isConnected
+      title: "Connection Info"
+      icon: "chart"
 
-  // WiFi Content (networks list or disabled state)
-  ColumnLayout {
-    Layout.fillWidth: true
-    spacing: Core.Style.spaceS
-    visible: Services.Network.wifiEnabled
+      rows: {
+        const rows = [
+          {
+            label: "Type",
+            value: Services.Network.connectionTypeName
+          },
+          {
+            label: "Interface",
+            value: Services.Network.activeInterface || "--"
+          },
+          {
+            label: "IP Address",
+            value: Services.Network.activeIP ? Services.Network.activeIP.split("/")[0] : "--"
+          },
+          {
+            label: "Gateway",
+            value: Services.Network.activeGateway || "--"
+          },
+          {
+            label: "DNS",
+            value: Services.Network.activeDNS || "--"
+          },
+          {
+            label: "Internet",
+            value: Services.Network.connectivityStatusText
+          },
+        ];
+        if (Services.Network.wifiConnected) {
+          rows.push({
+            label: "Signal",
+            value: Services.Network.wifiSignal + "%"
+          }, {
+            label: "Security",
+            value: Services.Network.wifiSecurity || "--"
+          });
+        }
+        return rows;
+      }
+    },
 
-    // Header with scan button
+    // List heading with scan button
     RowLayout {
       Layout.fillWidth: true
       spacing: Core.Style.spaceS
+      visible: Services.Network.wifiEnabled
 
       Components.Text {
         text: "Available Networks"
@@ -78,51 +115,42 @@ Components.SlidingPanel {
         size: Core.Style.fontS
       }
 
-      ScanButton {}
+      Components.ScanButton {
+        scanning: Services.Network.scanning
+        tooltipText: "Scan for networks"
+        onClicked: Services.Network.scan()
+      }
+    }
+  ]
+
+  // === Network List ===
+  // Rows glide when a scan re-sorts them by signal, when one appears or drops
+  // out, and when the password prompt opens under one.
+  Components.AnimatedColumn {
+    id: networkList
+
+    Layout.fillWidth: true
+    visible: Services.Network.wifiEnabled
+    spacing: Core.Style.spaceXS
+    animated: root.revealed
+
+    Repeater {
+      model: networkRows
+      delegate: NetworkItem {
+        required property string netSsid
+
+        width: networkList.width
+        network: Services.Network.networks[netSsid] ?? ({})
+        onConnectRequested: ssid => Services.Network.connect(ssid)
+      }
     }
 
-    // Network List
-    Components.ScrollArea {
-      id: networkScroll
-
-      Layout.fillWidth: true
-      Layout.fillHeight: true
-      Layout.preferredHeight: networkList.implicitHeight
-      Layout.minimumHeight: 0
-
-      contentWidth: width
-      contentHeight: networkList.implicitHeight
-      leftMargin: 0
-      rightMargin: 0
-
-      ColumnLayout {
-        id: networkList
-        width: networkScroll.width
-        spacing: Core.Style.spaceXS
-
-        Repeater {
-          model: networkRows
-          delegate: NetworkItem {
-            required property string netSsid
-
-            Layout.fillWidth: true
-            network: Services.Network.networks[netSsid] ?? ({})
-            onConnectRequested: ssid => Services.Network.connect(ssid)
-          }
-        }
-
-        Components.Spacer {
-          size: 32
-        }
-
-        // Empty state
-        Components.EmptyState {
-          Layout.fillWidth: true
-          visible: Object.keys(Services.Network.networks).length === 0 && !Services.Network.scanning
-          icon: "wifi-off"
-          message: "No networks found"
-        }
-      }
+    // Empty state
+    Components.EmptyState {
+      width: networkList.width
+      visible: Object.keys(Services.Network.networks).length === 0 && !Services.Network.scanning
+      icon: "wifi-off"
+      message: "No networks found"
     }
   }
 
@@ -152,81 +180,6 @@ Components.SlidingPanel {
   // ==========================================================================
   // INLINE COMPONENTS
   // ==========================================================================
-
-  // --- Connection Info Section ---
-  component ConnectionInfoSection: Components.Collapsible {
-    id: connInfoRoot
-    title: "Connection Info"
-    icon: "chart"
-    expanded: false
-
-    readonly property var infoRows: [
-      {
-        label: "Type",
-        value: Services.Network.connectionTypeName
-      },
-      {
-        label: "Interface",
-        value: Services.Network.activeInterface || "--"
-      },
-      {
-        label: "IP Address",
-        value: Services.Network.activeIP ? Services.Network.activeIP.split("/")[0] : "--"
-      },
-      {
-        label: "Gateway",
-        value: Services.Network.activeGateway || "--"
-      },
-      {
-        label: "DNS",
-        value: Services.Network.activeDNS || "--"
-      },
-      {
-        label: "Internet",
-        value: Services.Network.connectivityStatusText
-      },
-    ]
-
-    readonly property var wifiRows: [
-      {
-        label: "Signal",
-        value: Services.Network.wifiSignal + "%"
-      },
-      {
-        label: "Security",
-        value: Services.Network.wifiSecurity || "--"
-      },
-    ]
-
-    Repeater {
-      model: connInfoRoot.infoRows
-      Components.FormRow {
-        required property var modelData
-        label: modelData.label
-        valueText: modelData.value
-      }
-    }
-
-    Repeater {
-      model: Services.Network.wifiConnected ? connInfoRoot.wifiRows : []
-      Components.FormRow {
-        required property var modelData
-        label: modelData.label
-        valueText: modelData.value
-      }
-    }
-  }
-
-  // --- Scan Button ---
-  component ScanButton: Components.Button {
-    icon: "refresh"
-    iconSize: Core.Style.fontM
-    iconSpinning: Services.Network.scanning
-    enabled: !Services.Network.scanning
-    opacity: Services.Network.scanning ? 0.5 : 1.0
-    tooltipText: "Scan for networks"
-    onClicked: Services.Network.scan()
-  }
 
   // --- Network Item ---
   component NetworkItem: Components.Card {

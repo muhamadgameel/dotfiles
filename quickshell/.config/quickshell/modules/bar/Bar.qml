@@ -26,16 +26,9 @@ Rectangle {
   // The screen this bar is on, so per-monitor widgets can filter.
   property var screen: null
 
-  // Signals for external communication
-  signal audioClicked
-  signal notificationClicked
-  signal networkClicked
-  signal bluetoothClicked
-  signal systemStatsClicked
-  signal mediaClicked
-  signal calendarClicked
-  signal powerClicked
-  signal screenshotClicked
+  // A widget asked for its panel. The id is one of Services.Panels.ids; the bar
+  // only names it, and BarWindow does the routing.
+  signal panelRequested(string panelId)
 
   color: Config.Theme.barBg
 
@@ -48,7 +41,7 @@ Rectangle {
     anchors.centerIn: parent
     visible: Config.Config.barShowClock
 
-    onCalendarRequested: root.calendarClicked()
+    onCalendarRequested: root.panelRequested("calendar")
   }
 
   // ===================================================================
@@ -99,7 +92,7 @@ Rectangle {
 
     Widgets.Media {
       visible: Config.Config.barShowMedia && Services.Media.hasPlayer
-      onPanelRequested: root.mediaClicked()
+      onPanelRequested: root.panelRequested("media")
     }
 
     Widgets.Tray {
@@ -120,22 +113,22 @@ Rectangle {
 
     Widgets.Network {
       visible: Config.Config.barShowNetwork
-      onPanelRequested: root.networkClicked()
+      onPanelRequested: root.panelRequested("network")
     }
 
     Widgets.Bluetooth {
       visible: Config.Config.barShowBluetooth
-      onPanelRequested: root.bluetoothClicked()
+      onPanelRequested: root.panelRequested("bluetooth")
     }
 
     Widgets.Volume {
       visible: Config.Config.barShowVolume
-      onPanelRequested: root.audioClicked()
+      onPanelRequested: root.panelRequested("audio")
     }
 
     Widgets.Microphone {
       visible: Config.Config.barShowMicrophone
-      onPanelRequested: root.audioClicked()
+      onPanelRequested: root.panelRequested("audio")
     }
 
     Widgets.Brightness {
@@ -144,7 +137,7 @@ Rectangle {
 
     Widgets.SystemStats {
       visible: Config.Config.barShowSystemStats
-      onPanelRequested: root.systemStatsClicked()
+      onPanelRequested: root.panelRequested("systemstats")
     }
 
     Widgets.Battery {
@@ -155,7 +148,7 @@ Rectangle {
 
     Widgets.NotificationBell {
       visible: Config.Config.barShowNotification
-      onPanelRequested: root.notificationClicked()
+      onPanelRequested: root.panelRequested("notifications")
     }
 
     Components.Divider {
@@ -165,8 +158,8 @@ Rectangle {
     }
 
     Widgets.QuickActions {
-      onScreenshotRequested: root.screenshotClicked()
-      onPowerRequested: root.powerClicked()
+      onScreenshotRequested: root.panelRequested("screenshot")
+      onPowerRequested: root.panelRequested("power")
     }
   }
 }

@@ -64,15 +64,7 @@ Variants {
 
       screen: barWindow.modelData
 
-      onAudioClicked: Services.Panels.toggle("audio", barWindow.modelData)
-      onNotificationClicked: Services.Panels.toggle("notifications", barWindow.modelData)
-      onNetworkClicked: Services.Panels.toggle("network", barWindow.modelData)
-      onBluetoothClicked: Services.Panels.toggle("bluetooth", barWindow.modelData)
-      onSystemStatsClicked: Services.Panels.toggle("systemstats", barWindow.modelData)
-      onMediaClicked: Services.Panels.toggle("media", barWindow.modelData)
-      onCalendarClicked: Services.Panels.toggle("calendar", barWindow.modelData)
-      onPowerClicked: Services.Panels.toggle("power", barWindow.modelData)
-      onScreenshotClicked: Services.Panels.toggle("screenshot", barWindow.modelData)
+      onPanelRequested: panelId => Services.Panels.toggle(panelId, barWindow.modelData)
     }
 
     // === Panels (built on first open, torn down after the close animation) ===

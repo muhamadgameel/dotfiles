@@ -60,6 +60,26 @@ Item {
   // === Content ===
   default property alias content: contentColumn.data
 
+  // Content that stays put above the scrolling body - a toggle, a toolbar, a
+  // list's own heading. Assign as a list:
+  //
+  //   pinned: [
+  //     Components.FormRow { ... },
+  //     RowLayout { ... }
+  //   ]
+  //
+  // With it, a panel whose list should scroll under a fixed top no longer needs
+  // `scrollable: false` and a ScrollArea of its own: the body scrolls, with the
+  // panel's scrollbar, and a hairline shows under the pinned part while it does.
+  property alias pinned: pinnedColumn.data
+  readonly property bool hasPinned: pinnedColumn.children.length > 0
+
+  // Gap above the body: the usual padding, or - under a pinned area - half the
+  // content spacing, with the other half above the scroll hairline. Together
+  // they make the same gap as between any two rows.
+  readonly property int _pinnedGap: Math.round(root.contentSpacing / 2)
+  readonly property int _bodyTopPadding: root.hasPinned ? root._pinnedGap : Core.Style.panelPadding
+
   // === Signals ===
   signal opened
   signal closed
@@ -163,6 +183,16 @@ Item {
     screen: root.screen
     visible: root.isOpen || root.revealed || slideAnim.running
     color: Config.Theme.transparent
+
+    // Hidden means the slide-out is over, so the loader may tear this down.
+    // Deferred a tick: releasing destroys this object, which must not happen
+    // from inside its own signal handler.
+    onVisibleChanged: {
+      if (!visible) {
+        const id = root.panelId;
+        Qt.callLater(() => Services.Panels.release(id));
+      }
+    }
 
     implicitWidth: root.panelWidth + (root.surfaceInset - Core.Style.spaceS) * 2
 
@@ -311,8 +341,38 @@ Item {
           visible: root.hasHeader
         }
 
+        // === Optional Pinned Area ===
+        ColumnLayout {
+          id: pinnedColumn
+
+          Layout.fillWidth: true
+          Layout.leftMargin: Core.Style.panelPadding
+          Layout.rightMargin: Core.Style.panelPadding
+          Layout.topMargin: Core.Style.panelPadding
+          visible: root.hasPinned
+          spacing: root.contentSpacing
+        }
+
+        // Only while the body is scrolled beneath the pinned area, so it reads as
+        // "more above" rather than as a divider that is always there.
+        Rectangle {
+          Layout.fillWidth: true
+          Layout.topMargin: root._pinnedGap
+          Layout.preferredHeight: Core.Style.borderThin
+          visible: root.hasPinned
+          color: Config.Theme.surfaceHover
+          opacity: scrollArea.contentY > 0 ? 1 : 0
+
+          Behavior on opacity {
+            NumberAnimation {
+              duration: Core.Style.duration(Core.Style.animFast)
+              easing.type: Core.Style.easeStandard
+            }
+          }
+        }
+
         // === Content Area ===
-        Flickable {
+        Components.ScrollArea {
           id: scrollArea
 
           Layout.fillWidth: true
@@ -321,40 +381,28 @@ Item {
           // What the content would like to be. -1 falls back to implicitHeight
           // (0), which is what a fill-height panel wants; otherwise this is the
           // number that ends up driving the whole window's height.
-          Layout.preferredHeight: root.fillHeight ? -1 : contentColumn.implicitHeight + Core.Style.panelPadding * 2
+          Layout.preferredHeight: root.fillHeight ? -1 : contentColumn.implicitHeight + root._bodyTopPadding + Core.Style.panelPadding
 
           // So it can still be squeezed once the content exceeds the cap.
           Layout.minimumHeight: 0
 
-          clip: true
+          // The column places itself inside the padding, so no Flickable margins.
+          leftMargin: 0
+          rightMargin: 0
+
           interactive: root.scrollable
-          boundsBehavior: Flickable.StopAtBounds
+          showScrollbar: root.scrollable
           contentWidth: width
-          contentHeight: root.scrollable ? contentColumn.implicitHeight + Core.Style.panelPadding * 2 : height
+          contentHeight: root.scrollable ? contentColumn.implicitHeight + root._bodyTopPadding + Core.Style.panelPadding : height
 
           ColumnLayout {
             id: contentColumn
 
             x: Core.Style.panelPadding
-            y: Core.Style.panelPadding
+            y: root._bodyTopPadding
             width: scrollArea.width - Core.Style.panelPadding * 2
-            height: root.scrollable ? implicitHeight : scrollArea.height - Core.Style.panelPadding * 2
+            height: root.scrollable ? implicitHeight : scrollArea.height - root._bodyTopPadding - Core.Style.panelPadding
             spacing: root.contentSpacing
-          }
-
-          // Scrollbar
-          Rectangle {
-            visible: root.scrollable && scrollArea.contentHeight > scrollArea.height
-            anchors.right: parent.right
-            anchors.rightMargin: Core.Style.spaceXXS
-            width: 3
-            radius: 1.5
-            color: Config.Theme.alpha(Config.Theme.accent, 0.8)
-
-            readonly property real viewRatio: scrollArea.height / scrollArea.contentHeight
-
-            height: Math.max(24, scrollArea.height * viewRatio)
-            y: (scrollArea.height - height) * (scrollArea.contentHeight > scrollArea.height ? scrollArea.contentY / (scrollArea.contentHeight - scrollArea.height) : 0)
           }
         }
       }

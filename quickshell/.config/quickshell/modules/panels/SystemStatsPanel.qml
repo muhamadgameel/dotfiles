@@ -22,7 +22,7 @@ Components.SlidingPanel {
   id: root
 
   panelId: "systemstats"
-  namespace: "quickshell-systemstats"
+  namespace: "quickshell-systemstats-panel"
 
   // Header configuration
   headerIcon: Services.SystemStats.healthIcon
@@ -32,10 +32,8 @@ Components.SlidingPanel {
   // CPU SECTION
   // ═══════════════════════════════════════════════════════════════════
 
-  // size: Core.Style.spaceXL
-  Components.Spacer {}
-
   Components.SectionHeader {
+    Layout.topMargin: Core.Style.spaceL
     icon: "cpu"
     title: "CPU"
   }
