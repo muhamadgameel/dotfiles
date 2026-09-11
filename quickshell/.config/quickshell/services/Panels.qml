@@ -25,7 +25,7 @@ Singleton {
 
   // Known panel ids. Kept here so IPC can validate a requested name and report
   // what is available rather than silently doing nothing.
-  readonly property var ids: ["audio", "network", "bluetooth", "systemstats", "notifications", "media", "calendar", "power", "screenshot"]
+  readonly property var ids: ["audio", "network", "bluetooth", "systemstats", "notifications", "media", "calendar", "power", "screenshot", "quicksettings"]
 
   // Currently open panel id, or "" when none is open.
   property string openPanel: ""

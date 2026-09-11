@@ -140,5 +140,13 @@ Variants {
         parentWindow: barWindow
       }
     }
+
+    LazyLoader {
+      active: Services.Panels.isLoaded("quicksettings", barWindow.modelData)
+
+      component: Panels.QuickSettingsPanel {
+        parentWindow: barWindow
+      }
+    }
   }
 }

@@ -7,5 +7,6 @@ MediaPanel 1.0 MediaPanel.qml
 NetworkPanel 1.0 NetworkPanel.qml
 NotificationCenter 1.0 NotificationCenter.qml
 PowerPanel 1.0 PowerPanel.qml
+QuickSettingsPanel 1.0 QuickSettingsPanel.qml
 ScreenshotPanel 1.0 ScreenshotPanel.qml
 SystemStatsPanel 1.0 SystemStatsPanel.qml

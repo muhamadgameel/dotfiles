@@ -15,10 +15,18 @@ import "../../../core" as Core
 RowLayout {
   id: root
 
+  signal quickSettingsRequested
   signal screenshotRequested
   signal powerRequested
 
   spacing: Core.Style.spaceXS
+
+  Components.Button {
+    icon: "dashboard"
+    iconSize: Core.Style.fontL
+    tooltipText: "Quick settings"
+    onClicked: root.quickSettingsRequested()
+  }
 
   Components.Button {
     icon: "camera"

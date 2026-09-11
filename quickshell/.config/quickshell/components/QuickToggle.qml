@@ -1,0 +1,116 @@
+import QtQuick
+import QtQuick.Layouts
+import "../config" as Config
+import "../core" as Core
+
+import "." as Components
+
+/**
+* QuickToggle - a quick-settings tile
+*
+* Tap the tile to toggle the setting; tap the chevron (or right-click) to open
+* the full panel for it. Filled with the accent while on, so the state reads at
+* a glance across a grid of them.
+*
+* Usage:
+*   QuickToggle {
+*       icon: "wifi"
+*       label: "Wi-Fi"
+*       subtitle: "Home network"
+*       active: Services.Network.wifiEnabled
+*       hasDetails: true
+*       onToggled: Services.Network.setWifiEnabled(!active)
+*       onDetailsRequested: Services.Panels.open("network", screen)
+*   }
+*/
+Components.Card {
+  id: root
+
+  property string icon: ""
+  property string label: ""
+  property string subtitle: ""
+  property bool active: false
+
+  // Waiting on the change to land (a systemctl call, say): shows a spinner and
+  // refuses further taps until it does.
+  property bool busy: false
+
+  // Show the chevron that opens the full panel for this setting.
+  property bool hasDetails: false
+
+  signal toggled
+  signal detailsRequested
+
+  // Foreground on the accent fill when on, on the surface when off.
+  readonly property color _fg: root.active ? Config.Theme.bg : Config.Theme.text
+  readonly property color _fgDim: root.active ? Config.Theme.alpha(Config.Theme.bg, 0.72) : Config.Theme.textDim
+
+  implicitHeight: Core.Style.controlHeightL + Core.Style.spaceS
+  radius: Core.Style.radiusM
+
+  interactive: !root.busy
+  opacity: root.enabled ? 1 : Core.Style.opacityDisabled
+
+  backgroundColor: root.active ? Config.Theme.accent : Config.Theme.alpha(Config.Theme.surface, 0.5)
+  hoverColor: root.active ? Config.Theme.lighten(Config.Theme.accent, 0.08) : Config.Theme.surface
+  activeColor: root.active ? Config.Theme.lighten(Config.Theme.accent, 0.16) : Config.Theme.surfaceActive
+
+  onClicked: button => {
+    if (button === Qt.RightButton && root.hasDetails)
+      root.detailsRequested();
+    else if (button === Qt.LeftButton)
+      root.toggled();
+  }
+
+  RowLayout {
+    anchors.fill: parent
+    anchors.leftMargin: Core.Style.spaceM
+    anchors.rightMargin: root.hasDetails ? Core.Style.spaceXS : Core.Style.spaceM
+    spacing: Core.Style.spaceS
+
+    Components.Icon {
+      icon: root.icon
+      size: Core.Style.fontXL
+      color: root._fg
+    }
+
+    ColumnLayout {
+      Layout.fillWidth: true
+      spacing: 0
+
+      Components.Text {
+        Layout.fillWidth: true
+        text: root.label
+        weight: Core.Style.weightBold
+        color: root._fg
+        elide: Text.ElideRight
+      }
+
+      Components.Text {
+        Layout.fillWidth: true
+        visible: root.subtitle !== ""
+        text: root.subtitle
+        size: Core.Style.fontXS
+        color: root._fgDim
+        elide: Text.ElideRight
+      }
+    }
+
+    Components.Spinner {
+      visible: root.busy
+      running: root.busy
+      size: Core.Style.fontM
+      color: root._fg
+    }
+
+    Components.Button {
+      visible: root.hasDetails
+      icon: "chevron-right"
+      iconSize: Core.Style.fontM
+      iconColor: root._fg
+      hoverColor: Config.Theme.alpha(root._fg, 0.14)
+      tooltipText: "More settings"
+      onClicked: root.detailsRequested()
+    }
+  }
+}
