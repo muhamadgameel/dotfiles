@@ -22,16 +22,34 @@ import "../core" as Core
 Rectangle {
   id: root
 
+  activeFocusOnTab: root.enabled
+
   property bool checked: false
 
   signal toggled(bool checked)
 
   implicitWidth: 44
   implicitHeight: 24
-  radius: height / 2
+  radius: Core.Style.radiusFull
 
-  color: checked ? Config.Theme.accent : Config.Theme.surfaceHover
-  opacity: enabled ? 1.0 : 0.5
+  // Was inert on hover - it read only `checked`, despite being the control you
+  // reach for most in a FormRow.
+  color: {
+    const base = checked ? Config.Theme.accent : Config.Theme.surfaceHover;
+    if (mouse.pressed)
+      return Config.Theme.stateLayer(base, Core.Style.opacityPressed);
+    if (mouse.containsMouse)
+      return Config.Theme.stateLayer(base, Core.Style.opacityHover);
+    return base;
+  }
+
+  opacity: enabled ? 1.0 : Core.Style.opacityDisabled
+
+  Behavior on opacity {
+    NumberAnimation {
+      duration: Core.Style.duration(Core.Style.animFast)
+    }
+  }
 
   Behavior on color {
     ColorAnimation {
@@ -58,8 +76,26 @@ Rectangle {
     }
   }
 
-  MouseArea {
+  // Keyboard focus was invisible everywhere except TextField, which made the
+  // shell effectively unusable without a pointer. Drawn outside the control so
+  // it never eats into the content box.
+  Rectangle {
     anchors.fill: parent
+    anchors.margins: -Core.Style.focusRingOffset
+    z: -1
+
+    visible: root.activeFocus
+    color: Config.Theme.transparent
+    radius: parent.radius + Core.Style.focusRingOffset
+    border.color: Config.Theme.focusRing
+    border.width: Core.Style.focusRingWidth
+  }
+
+  MouseArea {
+    id: mouse
+
+    anchors.fill: parent
+    hoverEnabled: root.enabled
     enabled: root.enabled
     cursorShape: enabled ? Qt.PointingHandCursor : Qt.ArrowCursor
 

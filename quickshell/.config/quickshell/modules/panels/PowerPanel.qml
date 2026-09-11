@@ -63,7 +63,7 @@ Components.SlidingPanel {
       readonly property bool armed: root.pendingAction === modelData.id
 
       Layout.fillWidth: true
-      implicitHeight: 56
+      implicitHeight: Core.Style.controlHeightL
       interactive: true
 
       backgroundColor: armed ? Config.Theme.alpha(Config.Theme.error, 0.2) : Config.Theme.transparent

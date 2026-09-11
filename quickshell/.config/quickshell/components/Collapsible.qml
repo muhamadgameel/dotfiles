@@ -31,7 +31,7 @@ ColumnLayout {
   // Header
   Components.Card {
     Layout.fillWidth: true
-    implicitHeight: 36
+    implicitHeight: Core.Style.controlHeightS
     interactive: true
 
     onClicked: root.expanded = !root.expanded
@@ -79,6 +79,18 @@ ColumnLayout {
     Layout.preferredHeight: root.expanded ? contentColumn.implicitHeight : 0
 
     clip: true
+
+    // The height already animated, but the content just clipped into view
+    // behind it. Fading slightly behind the height gives the reveal an edge to
+    // follow rather than a hard wipe.
+    opacity: root.expanded ? 1 : 0
+
+    Behavior on opacity {
+      NumberAnimation {
+        duration: Core.Style.duration(Core.Style.animFast)
+        easing.type: Core.Style.easeStandard
+      }
+    }
     // Skipped entirely when collapsed, so it costs nothing and takes no input.
     visible: Layout.preferredHeight > 0
 

@@ -46,6 +46,8 @@ import "../services" as Services
 Rectangle {
   id: root
 
+  activeFocusOnTab: root.enabled
+
   // === Variant ===
   property string variant: "default"  // "default", "primary", "secondary", "danger", "ghost"
 
@@ -151,7 +153,13 @@ Rectangle {
   implicitHeight: root.iconSize + padding * 2
   radius: Core.Style.radiusS
 
-  opacity: enabled ? 1.0 : 0.5
+  opacity: enabled ? 1.0 : Core.Style.opacityDisabled
+
+  Behavior on opacity {
+    NumberAnimation {
+      duration: Core.Style.duration(Core.Style.animFast)
+    }
+  }
 
   // Use hoverColor's RGB with 0 alpha when transparent to prevent black flash during animation
   readonly property color _effectiveBackground: _backgroundColor == Config.Theme.transparent ? Qt.rgba(_hoverColor.r, _hoverColor.g, _hoverColor.b, 0) : _backgroundColor
@@ -187,6 +195,21 @@ Rectangle {
       font.weight: Core.Style.weightMedium
       color: root._textColor
     }
+  }
+
+  // Keyboard focus was invisible everywhere except TextField, which made the
+  // shell effectively unusable without a pointer. Drawn outside the control so
+  // it never eats into the content box.
+  Rectangle {
+    anchors.fill: parent
+    anchors.margins: -Core.Style.focusRingOffset
+    z: -1
+
+    visible: root.activeFocus
+    color: Config.Theme.transparent
+    radius: parent.radius + Core.Style.focusRingOffset
+    border.color: Config.Theme.focusRing
+    border.width: Core.Style.focusRingWidth
   }
 
   // === Mouse Handling ===

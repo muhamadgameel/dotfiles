@@ -55,6 +55,23 @@ Singleton {
     return devices.values.filter(d => d?.batteryAvailable && d.battery > 0);
   }
 
+  /**
+  * The live device object for an address, or null.
+  *
+  * The panel lists devices by address rather than by object, so its rows survive
+  * the service rebuilding these filtered arrays on every discovery update. This
+  * is how a row gets back to the thing it is showing.
+  */
+  function deviceByAddress(address) {
+    if (!devices || address === "")
+      return null;
+    for (const d of devices.values) {
+      if (d?.address === address)
+        return d;
+    }
+    return null;
+  }
+
   // === Computed Properties ===
   readonly property int connectedCount: connectedDevices.length
   readonly property bool hasConnectedDevices: connectedCount > 0

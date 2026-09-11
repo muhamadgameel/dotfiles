@@ -45,7 +45,7 @@ Rectangle {
   // === Dimensions ===
   width: size
   height: size
-  radius: size / 2
+  radius: Core.Style.radiusFull
 
   // === Appearance ===
   color: Config.Theme.accent

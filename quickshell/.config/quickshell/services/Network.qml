@@ -75,7 +75,9 @@ Singleton {
   readonly property var sortedNetworks: Object.values(networks).sort((a, b) => {
     if (a.connected !== b.connected)
       return b.connected - a.connected;
-    return b.signal - a.signal;
+    if (a.signal !== b.signal)
+      return (b.signal ?? 0) - (a.signal ?? 0);
+    return (a.ssid ?? "").localeCompare(b.ssid ?? "");
   })
 
   readonly property string connectivityStatusText: ({

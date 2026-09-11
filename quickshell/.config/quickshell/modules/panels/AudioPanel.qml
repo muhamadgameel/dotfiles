@@ -67,7 +67,8 @@ Components.SlidingPanel {
   }
   ColumnLayout {
     id: streamList
-    width: parent.width
+
+    Layout.fillWidth: true
     spacing: Core.Style.spaceXS
 
     // Playback Streams
@@ -106,10 +107,9 @@ Components.SlidingPanel {
   component OutputSection: ColumnLayout {
     spacing: Core.Style.spaceS
 
-    Components.Text {
-      text: "Output"
-      weight: Core.Style.weightBold
-      size: Core.Style.fontL
+    Components.SectionHeader {
+      title: "Output"
+      icon: "volume-high"
     }
 
     // Controls
@@ -170,10 +170,9 @@ Components.SlidingPanel {
   component InputSection: ColumnLayout {
     spacing: Core.Style.spaceS
 
-    Components.Text {
-      text: "Input"
-      weight: Core.Style.weightBold
-      size: Core.Style.fontL
+    Components.SectionHeader {
+      title: "Input"
+      icon: "microphone"
     }
 
     // Controls
@@ -249,7 +248,7 @@ Components.SlidingPanel {
         required property var modelData
 
         Layout.fillWidth: true
-        implicitHeight: 44
+        implicitHeight: Core.Style.controlHeightM
 
         readonly property bool isActive: deviceSelectorRoot.currentDevice?.id === modelData.id
 
@@ -346,7 +345,7 @@ Components.SlidingPanel {
     // Alias for clarity and to ensure we're using the required property
     readonly property var node: modelData
 
-    implicitHeight: 64
+    implicitHeight: streamContent.implicitHeight + Core.Style.spaceS * 2
     hoverEnabled: true
 
     // Direct property access for better reactivity
@@ -396,6 +395,8 @@ Components.SlidingPanel {
     }
 
     ColumnLayout {
+      id: streamContent
+
       anchors.fill: parent
       anchors.margins: Core.Style.spaceS
       spacing: Core.Style.spaceXS

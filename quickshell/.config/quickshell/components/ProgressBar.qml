@@ -33,7 +33,7 @@ Rectangle {
 
   implicitWidth: 200
   implicitHeight: 6
-  radius: height / 2
+  radius: Core.Style.radiusFull
   color: trackColor
 
   Rectangle {
@@ -46,6 +46,13 @@ Rectangle {
     width: parent.width * Math.min(1.0, root.value / root.maxValue)
     radius: parent.radius
     color: root.progressColor
+
+    Behavior on color {
+      ColorAnimation {
+        duration: Core.Style.duration(Core.Style.animNormal)
+        easing.type: Core.Style.easeStandard
+      }
+    }
 
     Behavior on width {
       NumberAnimation {
