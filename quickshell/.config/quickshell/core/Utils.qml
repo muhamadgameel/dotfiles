@@ -121,6 +121,53 @@ Singleton {
   * Parse, or return the fallback. Command output is the usual caller, and a
   * process that failed hands back an empty string or a diagnostic.
   */
+  /**
+  * Bring a ListModel into step with a list of stable keys, in place.
+  *
+  * A Repeater given a plain JS array has no identity to diff against, so any
+  * change to the array's contents tears down and rebuilds every delegate. For a
+  * list a service rebuilds on each poll that means the whole view is destroyed
+  * and recreated several times a second - measured at ~32 rebuilds/second in the
+  * Bluetooth panel while merely scanning. It shows as flicker, and in a
+  * content-sized panel the window resizes with every rebuild.
+  *
+  * Keyed instead, a delegate is only created or destroyed when the thing it
+  * stands for actually arrives or goes. Reorders are done with move() rather than
+  * remove+insert, so a list that re-sorts (Wi-Fi networks by signal) keeps its
+  * delegates too.
+  *
+  * @param model - ListModel to update
+  * @param keys - keys that should be present, in the order they should appear
+  * @param role - role name the key lives under
+  */
+  function syncKeyedModel(model, keys, role) {
+    for (let i = model.count - 1; i >= 0; i--) {
+      if (keys.indexOf(model.get(i)[role]) === -1)
+        model.remove(i);
+    }
+
+    for (let k = 0; k < keys.length; k++) {
+      if (k < model.count && model.get(k)[role] === keys[k])
+        continue;
+
+      let at = -1;
+      for (let i = k; i < model.count; i++) {
+        if (model.get(i)[role] === keys[k]) {
+          at = i;
+          break;
+        }
+      }
+
+      if (at === -1) {
+        const row = {};
+        row[role] = keys[k];
+        model.insert(Math.min(k, model.count), row);
+      } else if (at !== k) {
+        model.move(at, k, 1);
+      }
+    }
+  }
+
   function parseJson(jsonString, fallback) {
     try {
       return jsonString ? JSON.parse(jsonString) : (fallback !== undefined ? fallback : []);

@@ -54,13 +54,31 @@ Components.SlidingPanel {
         source: Services.Media.trackArtUrl
         fillMode: Image.PreserveAspectCrop
         asynchronous: true
-        visible: status === Image.Ready
+
+        // Fade in rather than cut. `visible` is left alone and opacity carries
+        // the transition, so a new track's art arrives over the old frame
+        // instead of flashing the placeholder between the two.
+        opacity: status === Image.Ready ? 1 : 0
+
+        Behavior on opacity {
+          NumberAnimation {
+            duration: Core.Style.duration(Core.Style.animNormal)
+            easing.type: Core.Style.easeStandard
+          }
+        }
       }
 
       // Placeholder while there is no art (or it failed to load)
       Components.Icon {
         anchors.centerIn: parent
-        visible: !art.visible
+        opacity: art.opacity > 0 ? 0 : 1
+
+        Behavior on opacity {
+          NumberAnimation {
+            duration: Core.Style.duration(Core.Style.animNormal)
+            easing.type: Core.Style.easeStandard
+          }
+        }
         icon: "music"
         size: Core.Style.fontXXXL
         color: Config.Theme.overlay
@@ -240,7 +258,7 @@ Components.SlidingPanel {
         readonly property bool isActive: Services.Media.active?.uniqueId === modelData.uniqueId
 
         Layout.fillWidth: true
-        implicitHeight: 44
+        implicitHeight: Core.Style.controlHeightM
         interactive: true
 
         backgroundColor: isActive ? Config.Theme.alpha(Config.Theme.accent, 0.15) : Config.Theme.transparent

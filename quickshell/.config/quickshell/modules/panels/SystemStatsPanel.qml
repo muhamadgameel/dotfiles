@@ -35,11 +35,9 @@ Components.SlidingPanel {
   // size: Core.Style.spaceXL
   Components.Spacer {}
 
-  Components.Text {
+  Components.SectionHeader {
     icon: "cpu"
-    text: "CPU"
-    size: Core.Style.fontXL
-    weight: Core.Style.weightBold
+    title: "CPU"
   }
 
   Components.ProgressRow {
@@ -85,12 +83,10 @@ Components.SlidingPanel {
   // MEMORY SECTION
   // ═══════════════════════════════════════════════════════════════════
 
-  Components.Text {
+  Components.SectionHeader {
     Layout.topMargin: Core.Style.spaceXL
     icon: "memory"
-    text: "Memory"
-    size: Core.Style.fontXL
-    weight: Core.Style.weightBold
+    title: "Memory"
   }
 
   Components.ProgressRow {
@@ -118,13 +114,11 @@ Components.SlidingPanel {
   // TEMPERATURE SECTION
   // ═══════════════════════════════════════════════════════════════════
 
-  Components.Text {
+  Components.SectionHeader {
     Layout.topMargin: Core.Style.spaceXL
     visible: Services.SystemStats.hasCpuTemp || Services.SystemStats.hasGpuTemp
     icon: "thermometer"
-    text: "Temperatures"
-    size: Core.Style.fontXL
-    weight: Core.Style.weightBold
+    title: "Temperatures"
   }
 
   // CPU Temperature
@@ -167,12 +161,10 @@ Components.SlidingPanel {
   // NETWORK SECTION
   // ═══════════════════════════════════════════════════════════════════
 
-  Components.Text {
+  Components.SectionHeader {
     Layout.topMargin: Core.Style.spaceXL
     icon: "network"
-    text: "Network"
-    size: Core.Style.fontXL
-    weight: Core.Style.weightBold
+    title: "Network"
   }
 
   GridLayout {
@@ -247,12 +239,10 @@ Components.SlidingPanel {
   // DISK SECTION
   // ═══════════════════════════════════════════════════════════════════
 
-  Components.Text {
+  Components.SectionHeader {
     Layout.topMargin: Core.Style.spaceXL
     icon: "disk"
-    text: "Storage"
-    size: Core.Style.fontXL
-    weight: Core.Style.weightBold
+    title: "Storage"
   }
 
   Components.ProgressRow {

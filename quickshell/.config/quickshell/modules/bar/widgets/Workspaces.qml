@@ -80,6 +80,42 @@ Item {
     return ids;
   }
 
+  // === Slot model ===
+  // Syncing a ListModel in place keeps the untouched slots alive, so only the
+  // workspace that genuinely appeared animates.
+  ListModel {
+    id: slotModel
+  }
+
+  // Removal is immediate, deliberately. Holding a departed slot back for a
+  // fade-out animation meant it kept its full width - opacity and scale are
+  // transforms, not layout - so switching quickly through empty workspaces piled
+  // up invisible slots and shoved the rest of the bar sideways
+  function _syncSlots() {
+    const ids = root.visibleIds;
+
+    for (let i = slotModel.count - 1; i >= 0; i--) {
+      if (!ids.includes(slotModel.get(i).wsId))
+        slotModel.remove(i);
+    }
+
+    // What is left is a subsequence of ids in the same ascending order, so one
+    // forward pass drops the new ones into the right places.
+    for (let k = 0; k < ids.length; k++) {
+      if (k >= slotModel.count)
+        slotModel.append({
+          wsId: ids[k]
+        });
+      else if (slotModel.get(k).wsId !== ids[k])
+        slotModel.insert(k, {
+          wsId: ids[k]
+        });
+    }
+  }
+
+  onVisibleIdsChanged: root._syncSlots()
+  Component.onCompleted: root._syncSlots()
+
   // Dispatch dialect (Lua vs classic string) is handled in Ipc.Targets, so the
   // bar and `qs ipc call workspace focus` go through exactly one code path.
   function _focusWorkspace(id) {
@@ -90,21 +126,40 @@ Item {
     Ipc.Targets.moveToWorkspace(id);
   }
 
+  // The row's width changes when a slot appears or goes; without this every
+  // widget to the right of it jumps sideways in one frame.
+  Behavior on implicitWidth {
+    NumberAnimation {
+      duration: Core.Style.duration(Core.Style.animFast)
+      easing.type: Core.Style.easeStandard
+    }
+  }
+
   Row {
     id: slots
 
     anchors.verticalCenter: parent.verticalCenter
     spacing: Core.Style.spaceS
 
+    // Slots that shift because a neighbour arrived or left slide across instead
+    // of teleporting to their new position.
+    move: Transition {
+      NumberAnimation {
+        property: "x"
+        duration: Core.Style.duration(Core.Style.animFast)
+        easing.type: Core.Style.easeStandard
+      }
+    }
+
     Repeater {
-      model: root.visibleIds
+      model: slotModel
 
       delegate: Components.Card {
         id: slot
 
-        required property int modelData
+        required property int wsId
 
-        readonly property int workspaceId: modelData
+        readonly property int workspaceId: wsId
         readonly property var workspace: root.localWorkspaces[workspaceId] ?? null
         readonly property bool occupied: (workspace?.toplevels?.values?.length ?? 0) > 0
         readonly property bool isFocused: root.focusedId === workspaceId
@@ -114,6 +169,36 @@ Item {
         height: Core.Style.widgetSize
 
         interactive: true
+
+        // Slots appear constantly - a workspace lives exactly as long as it has
+        // windows or focus. Card already cross-fades its background; this is the
+        // arrival.
+        //
+        // Set imperatively rather than bound, because a Repeater delegate is
+        // created at its final size: there is nothing to animate from unless the
+        // first frame is put there by hand.
+        opacity: 0
+        scale: Core.Style.popHiddenScale
+
+        Component.onCompleted: {
+          slot.opacity = 1;
+          slot.scale = 1;
+        }
+
+        Behavior on opacity {
+          NumberAnimation {
+            duration: Core.Style.duration(Core.Style.animFast)
+            easing.type: Core.Style.easeStandard
+          }
+        }
+
+        Behavior on scale {
+          NumberAnimation {
+            duration: Core.Style.duration(Core.Style.animFast)
+            easing.type: Core.Style.easeEnter
+            easing.overshoot: Core.Style.enterOvershoot
+          }
+        }
 
         backgroundColor: {
           if (isFocused)
@@ -143,6 +228,17 @@ Item {
             return slot.occupied ? Config.Theme.text : Config.Theme.textMuted;
           }
           weight: slot.isFocused ? Core.Style.weightBold : Core.Style.weightMedium
+
+          // The colour cross-fades via Text's own Behavior; the size shift is
+          // what sells the focus change on a slot this small.
+          scale: slot.isFocused ? 1.08 : 1.0
+
+          Behavior on scale {
+            NumberAnimation {
+              duration: Core.Style.duration(Core.Style.animFast)
+              easing.type: Core.Style.easeStandard
+            }
+          }
         }
 
         // Window-count dot: one per window, capped so it stays legible.

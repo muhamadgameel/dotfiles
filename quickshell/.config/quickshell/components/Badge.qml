@@ -81,14 +81,22 @@ Rectangle {
   }
 
   // === Appearance ===
-  radius: implicitHeight / 2
+  radius: Core.Style.radiusFull
   color: backgroundColor
   border.color: borderColor
   border.width: borderWidth
 
-  Behavior on width {
+  Behavior on implicitWidth {
     NumberAnimation {
       duration: Core.Style.duration(Core.Style.animFast)
+      easing.type: Core.Style.easeStandard
+    }
+  }
+
+  Behavior on implicitHeight {
+    NumberAnimation {
+      duration: Core.Style.duration(Core.Style.animFast)
+      easing.type: Core.Style.easeStandard
     }
   }
 

@@ -37,12 +37,29 @@ Rectangle {
   // === Content ===
   default property alias content: contentItem.data
 
+  // === Variant ===
+  //
+  // Most Cards defaulted to a transparent background, which meant a Card was
+  // invisible until hovered - list rows read as loose text on a flat plane, and
+  // a Collapsible header looked identical to a plain heading. `filled` gives a
+  // container you can actually see; the other two are opt-in for the cases that
+  // genuinely want no surface of their own.
+  //
+  //   filled    a visible surface, the default
+  //   outlined  hairline border, transparent fill
+  //   ghost     invisible until hovered (the old behaviour)
+  property string variant: "filled"
+
+  readonly property bool _filled: variant === "filled"
+  readonly property bool _outlined: variant === "outlined"
+
   // === Styling Properties ===
-  property color backgroundColor: Config.Theme.transparent
-  property color hoverColor: Config.Theme.surface
+  // Each defaults from the variant but stays overridable per instance.
+  property color backgroundColor: root._filled ? Config.Theme.alpha(Config.Theme.surface, 0.5) : Config.Theme.transparent
+  property color hoverColor: root._filled ? Config.Theme.surface : Config.Theme.stateLayer(Config.Theme.surface, Core.Style.opacityHover)
   property color activeColor: Config.Theme.surfaceActive
-  property color borderColor: Config.Theme.transparent
-  property int borderWidth: 0
+  property color borderColor: root._outlined ? Config.Theme.surfaceHover : Config.Theme.transparent
+  property int borderWidth: root._outlined ? Core.Style.borderThin : 0
   property int padding: 0
 
   // === Behavior Properties ===
@@ -62,9 +79,7 @@ Rectangle {
   // === Appearance ===
   radius: Core.Style.radiusS
 
-  // Use hoverColor's RGB with 0 alpha when transparent to prevent black flash during animation
-  // (ColorAnimation interpolates RGB through black when going from transparent to opaque)
-  readonly property color _effectiveBackground: backgroundColor == Config.Theme.transparent ? Qt.rgba(hoverColor.r, hoverColor.g, hoverColor.b, 0) : backgroundColor
+  readonly property color _effectiveBackground: backgroundColor == Config.Theme.transparent ? Config.Theme.transparentOf(hoverColor) : backgroundColor
 
   color: {
     if (!hoverEnabled)

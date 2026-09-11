@@ -109,7 +109,13 @@ Variants {
             property var notificationData: model
             property alias animator: slideAnimator
 
-            readonly property int animationDelay: index * Core.Style.slideStagger
+            // Only the first maxVisible have room on screen; the rest are queued
+            // and counted by the pill at the bottom of the stack. A ColumnLayout
+            // skips invisible children entirely, so a queued card contributes no
+            // height and no spacing.
+            readonly property bool onScreen: card.index < Services.Notification.maxVisible
+
+            visible: card.onScreen
 
             Layout.preferredWidth: notifWindow.notifWidth + (notifWindow.shadowRoom - Core.Style.spaceXS) * 2
             Layout.preferredHeight: cardContent.implicitHeight + notifWindow.shadowRoom * 2
@@ -119,13 +125,47 @@ Variants {
             Core.SlideAnimator {
               id: slideAnimator
               target: card
-              entryDelay: card.animationDelay
-              slideFromTop: true
+
+              // In from the right, and back out to the right. The window ends a
+              // hair short of the screen edge, so the travel is clipped there -
+              // which is the point: the card reads as arriving from off-screen
+              // rather than sliding around inside the stack.
+              slideFrom: "right"
+
               onHideFinished: Services.Notification.dismiss(card.notificationId)
             }
 
-            Component.onCompleted: slideAnimator.show()
-            onNotificationIdChanged: slideAnimator.show()
+            // Entry is driven by having room, not just by being constructed: a
+            // queued card has to animate in when one above it goes away. The
+            // stagger applies only to a batch built in one go - a promoted card
+            // slides straight in behind the one that just left.
+            property bool _entered: false
+
+            function _enter(delay) {
+              if (!card.onScreen || card._entered)
+                return;
+              card._entered = true;
+              slideAnimator.entryDelay = delay;
+              slideAnimator.show();
+            }
+
+            onOnScreenChanged: {
+              if (card.onScreen) {
+                card._enter(0);
+              } else {
+                // Pushed back into the queue by newer arrivals. Park it in the
+                // hidden state so a later promotion has something to animate from.
+                card._entered = false;
+                slideAnimator.setHidden();
+              }
+            }
+
+            Component.onCompleted: card._enter(card.index * Core.Style.slideStagger)
+
+            onNotificationIdChanged: {
+              card._entered = false;
+              card._enter(0);
+            }
 
             // === Notification Card ===
             // Inside the animated card Item, so SlideAnimator carries it.
@@ -166,6 +206,65 @@ Variants {
               onActionClicked: actionId => {
                 Services.Notification.invokeAction(card.notificationId, actionId);
               }
+            }
+          }
+        }
+
+        // === Overflow counter ===
+        // Without this the queued notifications just look like they never
+        // arrived: the stack silently caps at five and the sixth appears to have
+        // pushed the oldest into nothing.
+        Components.Card {
+          id: overflowPill
+
+          readonly property int count: Services.Notification.hiddenCount
+
+          visible: overflowPill.count > 0
+
+          Layout.alignment: Qt.AlignHCenter
+          Layout.preferredWidth: overflowRow.implicitWidth + Core.Style.spaceL * 2
+          Layout.preferredHeight: Core.Style.controlHeightS
+
+          radius: Core.Style.radiusFull
+          interactive: true
+          onClicked: Services.Panels.open("notifications", notifWindow.screen)
+
+          // Grows from the middle as it appears, so it reads as part of the
+          // stack settling rather than as a row that blinked into existence.
+          opacity: overflowPill.visible ? 1 : 0
+          scale: overflowPill.visible ? 1 : Core.Style.popHiddenScale
+
+          Behavior on opacity {
+            NumberAnimation {
+              duration: Core.Style.duration(Core.Style.animNormal)
+              easing.type: Core.Style.easeStandard
+            }
+          }
+
+          Behavior on scale {
+            NumberAnimation {
+              duration: Core.Style.duration(Core.Style.animNormal)
+              easing.type: Core.Style.easeEnter
+              easing.overshoot: Core.Style.enterOvershoot
+            }
+          }
+
+          RowLayout {
+            id: overflowRow
+
+            anchors.centerIn: parent
+            spacing: Core.Style.spaceXS
+
+            Components.Icon {
+              icon: "bell"
+              size: Core.Style.fontM
+              color: Config.Theme.textDim
+            }
+
+            Components.Text {
+              text: overflowPill.count === 1 ? "1 more notification" : `${overflowPill.count} more notifications`
+              size: Core.Style.fontS
+              color: Config.Theme.textDim
             }
           }
         }

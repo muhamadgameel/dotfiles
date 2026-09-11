@@ -15,7 +15,11 @@ Singleton {
   id: root
 
   // === Configuration ===
+  // How many popups are on screen at once.
   property int maxVisible: 5
+
+  property int maxActive: 20
+
   readonly property int maxHistory: Config.Config.notificationHistoryLimit
 
   // Duration per urgency level: [low, normal, critical]
@@ -24,6 +28,10 @@ Singleton {
   // === State ===
   readonly property bool doNotDisturb: Config.Config.doNotDisturb
   property int unreadCount: 0
+
+  // Active notifications with no room on screen. Derived, so the popup stack's
+  // counter can never drift out of step with what is actually queued.
+  readonly property int hiddenCount: Math.max(0, activeList.count - maxVisible)
 
   // === Models ===
   property ListModel activeList: ListModel {}
@@ -243,8 +251,9 @@ Singleton {
 
     activeList.insert(0, data);
 
-    // Enforce max visible - dismiss oldest notifications
-    while (activeList.count > maxVisible) {
+    // Only the backstop is enforced here. Everything between maxVisible and
+    // maxActive stays in the model and is counted by hiddenCount.
+    while (activeList.count > maxActive) {
       const last = activeList.get(activeList.count - 1);
       dismiss(last.id);  // closed signal handles _remove() and cleanup
     }
@@ -302,7 +311,7 @@ Singleton {
       try {
         entry.notification.closed.disconnect(entry.onClosed);
       } catch (e) {
-      // Notification already gone - nothing left to disconnect from.
+        // Notification already gone - nothing left to disconnect from.
       }
     }
 

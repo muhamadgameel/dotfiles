@@ -27,7 +27,11 @@ Item {
 
   // Slide
   property real slideDistance: Core.Style.slideDistance
-  property bool slideFromTop: true  // false = slide from bottom
+
+  // Which edge the item travels in from on show, and back out towards on hide:
+  // "top" | "bottom" | "left" | "right". Hide is always the reverse of show, so
+  // a card that enters from the right leaves to the right.
+  property string slideFrom: "top"
 
   // Duration
   property int showDuration: Core.Style.duration(Core.Style.slideShowDuration)
@@ -60,10 +64,24 @@ Item {
   readonly property bool isVisible: target ? target.opacity > 0 : false
 
   // === Internal ===
-  property real _hiddenOffset: slideFromTop ? -slideDistance : slideDistance
+  readonly property bool _horizontal: root.slideFrom === "left" || root.slideFrom === "right"
 
+  // Negative for the edges the item comes from above/before, positive otherwise.
+  readonly property real _hiddenOffset: (root.slideFrom === "top" || root.slideFrom === "left") ? -root.slideDistance : root.slideDistance
+
+  // The unused axis keeps its binding at 0 forever; the active one has its
+  // binding broken by the first _setOffset() write, which is what the animations
+  // then drive.
   property Translate _slideTransform: Translate {
-    y: root._hiddenOffset
+    x: root._horizontal ? root._hiddenOffset : 0
+    y: root._horizontal ? 0 : root._hiddenOffset
+  }
+
+  function _setOffset(value) {
+    if (root._horizontal)
+      root._slideTransform.x = value;
+    else
+      root._slideTransform.y = value;
   }
 
   Component.onCompleted: {
@@ -103,7 +121,7 @@ Item {
     hideAnim.stop();
     target.opacity = hiddenOpacity;
     target.scale = hiddenScale;
-    _slideTransform.y = _hiddenOffset;
+    root._setOffset(root._hiddenOffset);
   }
 
   function setVisible() {
@@ -114,7 +132,7 @@ Item {
     hideAnim.stop();
     target.opacity = visibleOpacity;
     target.scale = visibleScale;
-    _slideTransform.y = 0;
+    root._setOffset(0);
   }
 
   // === Internal ===
@@ -122,7 +140,7 @@ Item {
     // Reset to hidden state before animating
     target.opacity = hiddenOpacity;
     target.scale = hiddenScale;
-    _slideTransform.y = _hiddenOffset;
+    root._setOffset(root._hiddenOffset);
     showAnim.start();
   }
 
@@ -159,7 +177,7 @@ Item {
 
     PropertyAnimation {
       target: root._slideTransform
-      property: "y"
+      property: root._horizontal ? "x" : "y"
       from: root._hiddenOffset
       to: 0
       duration: root.showDuration
@@ -190,7 +208,7 @@ Item {
 
     PropertyAnimation {
       target: root._slideTransform
-      property: "y"
+      property: root._horizontal ? "x" : "y"
       to: root._hiddenOffset
       duration: root.hideDuration
       easing.type: root.hideEasing

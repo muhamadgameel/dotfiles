@@ -67,7 +67,13 @@ Item {
   implicitWidth: 200
   implicitHeight: Math.max(trackHeight, handleSize)
 
-  opacity: enabled ? 1.0 : 0.5
+  opacity: enabled ? 1.0 : Core.Style.opacityDisabled
+
+  Behavior on opacity {
+    NumberAnimation {
+      duration: Core.Style.duration(Core.Style.animFast)
+    }
+  }
 
   // === Track Background ===
   Rectangle {
@@ -75,7 +81,7 @@ Item {
     anchors.centerIn: parent
     width: parent.width
     height: root.trackHeight
-    radius: height / 2
+    radius: Core.Style.radiusFull
     color: root.trackColor
   }
 
@@ -116,9 +122,17 @@ Item {
     visible: root.showHandle
     x: (track.width - width) * root.normalizedValue
     anchors.verticalCenter: track.verticalCenter
+
+    Behavior on x {
+      enabled: !root.dragging
+      NumberAnimation {
+        duration: Core.Style.duration(Core.Style.animFast)
+        easing.type: Core.Style.easeStandard
+      }
+    }
     width: root.handleSize
     height: root.handleSize
-    radius: width / 2
+    radius: Core.Style.radiusFull
     color: root.dragging ? root.handleDragColor : (root.hovered ? root.handleHoverColor : root.handleColor)
     scale: root.dragging ? 1.1 : (root.hovered ? 1.05 : 1.0)
 

@@ -111,7 +111,7 @@ Components.SlidingPanel {
       required property var modelData
 
       Layout.fillWidth: true
-      implicitHeight: 56
+      implicitHeight: Core.Style.controlHeightL
       interactive: true
       hoverColor: Config.Theme.surfaceHover
 

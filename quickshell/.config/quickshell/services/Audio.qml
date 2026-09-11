@@ -108,6 +108,7 @@ Singleton {
   }
 
   // === OSD triggers ===
+  readonly property bool _soundPanelOpen: Services.Panels.openPanel === "audio"
 
   Connections {
     target: root.sink?.audio ?? null
@@ -140,6 +141,9 @@ Singleton {
   * Reads sink.audio directly instead of root.volume
   */
   function _showVolumeOSD() {
+    if (root._soundPanelOpen)
+      return;
+
     const audio = root.sink?.audio ?? null;
     const value = audio?.volume ?? root.volume;
     const isMuted = audio?.muted ?? root.muted;
@@ -156,6 +160,9 @@ Singleton {
 
   // Same reasoning as _showVolumeOSD().
   function _showMicOSD() {
+    if (root._soundPanelOpen)
+      return;
+
     const audio = root.source?.audio ?? null;
     const value = audio?.volume ?? root.micVolume;
     const isMuted = audio?.muted ?? root.micMuted;

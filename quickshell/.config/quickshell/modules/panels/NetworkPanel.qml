@@ -57,7 +57,7 @@ Components.SlidingPanel {
 
   // WiFi Content (networks list or disabled state)
   ColumnLayout {
-Layout.fillWidth: true
+    Layout.fillWidth: true
     spacing: Core.Style.spaceS
     visible: Services.Network.wifiEnabled
 
@@ -98,12 +98,12 @@ Layout.fillWidth: true
         spacing: Core.Style.spaceXS
 
         Repeater {
-          model: Services.Network.sortedNetworks
+          model: networkRows
           delegate: NetworkItem {
-            required property var modelData
+            required property string netSsid
 
             Layout.fillWidth: true
-            network: modelData
+            network: Services.Network.networks[netSsid] ?? ({})
             onConnectRequested: ssid => Services.Network.connect(ssid)
           }
         }
@@ -132,6 +132,19 @@ Layout.fillWidth: true
     message: "Wi-Fi is disabled"
     hint: "Enable Wi-Fi to see available networks"
   }
+
+  // Rows are keyed by SSID rather than driven straight off sortedNetworks, which
+  // is a fresh array of fresh objects on every nmcli poll. A Repeater on that
+  // rebuilt every delegate each poll; keyed, a row only comes or goes with its
+  // network, and a re-sort moves rows instead of recreating them.
+  readonly property var networkKeys: Services.Network.sortedNetworks.map(n => n?.ssid ?? "").filter(s => s !== "")
+
+  ListModel {
+    id: networkRows
+  }
+
+  onNetworkKeysChanged: Core.Utils.syncKeyedModel(networkRows, root.networkKeys, "netSsid")
+  Component.onCompleted: Core.Utils.syncKeyedModel(networkRows, root.networkKeys, "netSsid")
 
   // ==========================================================================
   // INLINE COMPONENTS
@@ -220,11 +233,11 @@ Layout.fillWidth: true
     signal connectRequested(string ssid)
 
     // Destructure network properties
-    readonly property string ssid: network.ssid ?? ""
-    readonly property int signalStrength: network.signal ?? 0
-    readonly property bool secured: network.secured ?? false
-    readonly property bool connected: network.connected ?? false
-    readonly property string security: network.security ?? ""
+    readonly property string ssid: network?.ssid ?? ""
+    readonly property int signalStrength: network?.signal ?? 0
+    readonly property bool secured: network?.secured ?? false
+    readonly property bool connected: network?.connected ?? false
+    readonly property string security: network?.security ?? ""
 
     // Busy states
     readonly property bool isConnecting: Services.Network.connectingTo === ssid
@@ -261,68 +274,68 @@ Layout.fillWidth: true
         Layout.rightMargin: Core.Style.spaceS
         spacing: Core.Style.spaceM
 
-      // Signal icon
-      Components.Icon {
-        icon: Services.Network.getSignalIcon(netItem.signalStrength)
-        size: Core.Style.fontL
-        color: netItem.connected ? Config.Theme.accent : Config.Theme.text
-      }
+        // Signal icon
+        Components.Icon {
+          icon: Services.Network.getSignalIcon(netItem.signalStrength)
+          size: Core.Style.fontL
+          color: netItem.connected ? Config.Theme.accent : Config.Theme.text
+        }
 
-      // Network info
-      ColumnLayout {
-        Layout.fillWidth: true
-        spacing: 0
+        // Network info
+        ColumnLayout {
+          Layout.fillWidth: true
+          spacing: 0
 
-        RowLayout {
-          spacing: Core.Style.spaceXS
+          RowLayout {
+            spacing: Core.Style.spaceXS
 
-          Components.Text {
-            text: netItem.ssid
-            color: netItem.connected ? Config.Theme.accent : Config.Theme.text
-            weight: netItem.connected ? Core.Style.weightBold : Core.Style.weightNormal
-            Layout.fillWidth: true
+            Components.Text {
+              text: netItem.ssid
+              color: netItem.connected ? Config.Theme.accent : Config.Theme.text
+              weight: netItem.connected ? Core.Style.weightBold : Core.Style.weightNormal
+              Layout.fillWidth: true
+            }
+
+            // Connected badge
+            Components.Badge {
+              visible: netItem.connected
+              text: "Connected"
+            }
           }
 
-          // Connected badge
-          Components.Badge {
-            visible: netItem.connected
-            text: "Connected"
+          RowLayout {
+            spacing: Core.Style.spaceXS
+
+            Components.Text {
+              text: netItem.signalStrength + "%"
+              size: Core.Style.fontS
+              color: Config.Theme.textDim
+            }
+
+            Components.Icon {
+              visible: netItem.secured
+              icon: "lock"
+              size: Core.Style.fontS
+              color: Config.Theme.textDim
+            }
+
+            Components.Text {
+              visible: netItem.security && netItem.security !== "--"
+              text: netItem.security
+              size: Core.Style.fontXS
+              color: Config.Theme.textMuted
+            }
           }
         }
 
-        RowLayout {
-          spacing: Core.Style.spaceXS
-
-          Components.Text {
-            text: netItem.signalStrength + "%"
-            size: Core.Style.fontS
-            color: Config.Theme.textDim
-          }
-
-          Components.Icon {
-            visible: netItem.secured
-            icon: "lock"
-            size: Core.Style.fontS
-            color: Config.Theme.textDim
-          }
-
-          Components.Text {
-            visible: netItem.security && netItem.security !== "--"
-            text: netItem.security
-            size: Core.Style.fontXS
-            color: Config.Theme.textMuted
-          }
+        // Loading spinner
+        Components.Spinner {
+          running: netItem.isBusy
+          size: Core.Style.fontM
+          color: Config.Theme.accent
         }
-      }
 
-      // Loading spinner
-      Components.Spinner {
-        running: netItem.isBusy
-        size: Core.Style.fontM
-        color: Config.Theme.accent
-      }
-
-      // Action buttons
+        // Action buttons
         RowLayout {
           spacing: Core.Style.spaceXS
           visible: !netItem.isBusy && (netItem.connected || netItem.hovered)

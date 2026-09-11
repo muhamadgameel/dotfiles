@@ -230,7 +230,7 @@ Item {
 
       border {
         color: Config.Theme.surfaceHover
-        width: 1
+        width: Core.Style.borderThin
       }
 
       focus: root.isOpen

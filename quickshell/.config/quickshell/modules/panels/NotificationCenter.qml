@@ -104,17 +104,78 @@ Components.SlidingPanel {
       width: historyScroll.width
       spacing: Core.Style.spaceS
 
+      // A notification arriving while the centre is open enters the same way as
+      // its popup does - in from the right - so the two read as the same object
+      // in two places rather than two unrelated lists.
+      //
+      // Newest is inserted at the top, so `move` is what carries everything else
+      // down to make room, and back up again when one is dismissed. Without it
+      // the rest of the list jumps.
+      add: Transition {
+        NumberAnimation {
+          property: "x"
+          from: historyColumn.width
+          duration: Core.Style.duration(Core.Style.slideShowDuration)
+          easing.type: Core.Style.easeStandard
+        }
+
+        NumberAnimation {
+          property: "opacity"
+          from: 0
+          to: 1
+          duration: Core.Style.duration(Core.Style.slideShowDuration)
+          easing.type: Core.Style.easeStandard
+        }
+      }
+
+      move: Transition {
+        NumberAnimation {
+          property: "y"
+          duration: Core.Style.duration(Core.Style.animNormal)
+          easing.type: Core.Style.easeStandard
+        }
+      }
+
       Repeater {
         model: Services.Notification.historyList
 
         delegate: Components.NotificationCard {
+          id: historyCard
+
           required property var model
 
           width: historyColumn.width
           compact: true
           showProgress: false
           notificationData: model
-          onCloseClicked: Services.Notification.removeFromHistory(model.id)
+
+          // A Repeater destroys its delegate the instant the model row goes, so
+          // there is nothing left to animate afterwards. Slide it out first and
+          // remove the row when that finishes - the same hide-then-dismiss order
+          // the popup stack uses.
+          onCloseClicked: exitAnim.start()
+
+          ParallelAnimation {
+            id: exitAnim
+
+            onFinished: Services.Notification.removeFromHistory(historyCard.model.id)
+
+            NumberAnimation {
+              target: historyCard
+              property: "x"
+              to: historyColumn.width
+              duration: Core.Style.duration(Core.Style.slideHideDuration)
+              easing.type: Core.Style.easeExit
+            }
+
+            NumberAnimation {
+              target: historyCard
+              property: "opacity"
+              to: 0
+              duration: Core.Style.duration(Core.Style.slideHideDuration)
+              easing.type: Core.Style.easeExit
+            }
+          }
         }
       }
     }

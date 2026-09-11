@@ -71,7 +71,7 @@ Flickable {
     anchors.margins: Core.Style.spaceXXS
 
     width: root.scrollbarWidth
-    radius: width / 2
+    radius: Core.Style.radiusFull
     color: Config.Theme.transparent
 
     anchors.rightMargin: root.scrollbarWidth + Core.Style.spaceXXS
@@ -79,7 +79,7 @@ Flickable {
     Rectangle {
       id: verticalHandle
       width: parent.width
-      radius: width / 2
+      radius: Core.Style.radiusFull
       color: root.scrollbarColor
 
       // Calculate handle position and size
@@ -110,7 +110,7 @@ Flickable {
     anchors.margins: Core.Style.spaceXXS
 
     height: root.scrollbarWidth
-    radius: height / 2
+    radius: Core.Style.radiusFull
     color: Config.Theme.transparent
 
     anchors.bottomMargin: root.scrollbarWidth + Core.Style.spaceXXS
@@ -118,7 +118,7 @@ Flickable {
     Rectangle {
       id: horizontalHandle
       height: parent.height
-      radius: height / 2
+      radius: Core.Style.radiusFull
       color: root.scrollbarColor
 
       // Calculate handle position and size

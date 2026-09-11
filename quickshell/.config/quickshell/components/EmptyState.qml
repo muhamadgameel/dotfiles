@@ -20,6 +20,26 @@ import "../core" as Core
 Item {
   id: root
 
+  // Every call site toggles this against the list it stands in for, and all of
+  // them used to hard-swap. Fading and settling from slightly small reads as the
+  // state changing rather than the panel redrawing. Covers eight sites at once.
+  opacity: visible ? 1 : 0
+  scale: visible ? 1 : 0.96
+
+  Behavior on opacity {
+    NumberAnimation {
+      duration: Core.Style.duration(Core.Style.animNormal)
+      easing.type: Core.Style.easeStandard
+    }
+  }
+
+  Behavior on scale {
+    NumberAnimation {
+      duration: Core.Style.duration(Core.Style.animNormal)
+      easing.type: Core.Style.easeStandard
+    }
+  }
+
   property string icon: "info"
   property int iconSize: Core.Style.fontXXXL
   property string message: ""

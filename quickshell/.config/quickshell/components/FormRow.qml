@@ -32,7 +32,7 @@ Components.Card {
   signal toggled(bool checked)
 
   Layout.fillWidth: true
-  implicitHeight: 40
+  implicitHeight: Core.Style.controlHeightM
 
   RowLayout {
     anchors.fill: parent
