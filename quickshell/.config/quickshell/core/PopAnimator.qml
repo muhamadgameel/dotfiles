@@ -51,10 +51,16 @@ Item {
   readonly property bool isAnimating: showAnim.running || hideAnim.running
   readonly property bool isVisible: target ? target.opacity > 0 : false
 
+  // Some callers rely on show() to prepare the first entrance. Only do that
+  // once: later shows may be reversing a hide and must keep the current frame.
+  property bool _initialized: false
+
   // === Public Methods ===
   function show() {
     if (!target)
       return;
+    if (!_initialized)
+      setHidden();
     hideAnim.stop();
     showStarted();
     showAnim.start();
@@ -63,6 +69,7 @@ Item {
   function hide() {
     if (!target)
       return;
+    _initialized = true;
     showAnim.stop();
     hideStarted();
     hideAnim.start();
@@ -71,6 +78,7 @@ Item {
   function setHidden() {
     if (!target)
       return;
+    _initialized = true;
     showAnim.stop();
     hideAnim.stop();
     target.opacity = hiddenOpacity;
@@ -80,6 +88,7 @@ Item {
   function setVisible() {
     if (!target)
       return;
+    _initialized = true;
     showAnim.stop();
     hideAnim.stop();
     target.opacity = visibleOpacity;
@@ -94,7 +103,6 @@ Item {
     PropertyAnimation {
       target: root.target
       property: "opacity"
-      from: root.hiddenOpacity
       to: root.visibleOpacity
       duration: root.showDuration
       easing.type: Core.Style.easeStandard
@@ -103,7 +111,6 @@ Item {
     PropertyAnimation {
       target: root.target
       property: "scale"
-      from: root.hiddenScale
       to: root.visibleScale
       duration: root.showDuration
       easing.type: root.showEasing

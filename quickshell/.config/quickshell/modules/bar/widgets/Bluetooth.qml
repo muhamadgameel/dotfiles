@@ -19,14 +19,14 @@ Components.Button {
 
   icon: Services.Bluetooth.statusIcon
   iconSize: Core.Style.fontL
-  iconColor: _iconColor
+  iconColor: root.statusColor
 
   text: _displayText
-  textColor: _iconColor
+  textColor: root.statusColor
 
   tooltipText: _tooltip
 
-  readonly property color _iconColor: {
+  readonly property color statusColor: {
     if (!Services.Bluetooth.available || Services.Bluetooth.blocked || !Services.Bluetooth.enabled)
       return Config.Theme.textMuted;
     if (Services.Bluetooth.hasConnectedDevices)

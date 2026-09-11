@@ -2,7 +2,6 @@ pragma ComponentBehavior: Bound
 
 import QtQuick
 import QtQuick.Layouts
-import Quickshell.Services.Pipewire
 
 import "../../components" as Components
 import "../../config" as Config
@@ -268,7 +267,7 @@ Components.SlidingPanel {
           spacing: Core.Style.spaceS
 
           Components.Icon {
-            icon: _getDeviceIcon(modelData)
+            icon: deviceSelectorRoot._getDeviceIcon(deviceCard.modelData)
             size: Core.Style.fontL
             color: deviceCard.isActive ? Config.Theme.accent : Config.Theme.text
           }
@@ -278,7 +277,7 @@ Components.SlidingPanel {
             spacing: 0
 
             Components.Text {
-              text: Services.Audio.deviceName(modelData)
+              text: Services.Audio.deviceName(deviceCard.modelData)
               color: deviceCard.isActive ? Config.Theme.accent : Config.Theme.text
               weight: deviceCard.isActive ? Core.Style.weightBold : Core.Style.weightNormal
               elide: Text.ElideRight
@@ -286,8 +285,8 @@ Components.SlidingPanel {
             }
 
             Components.Text {
-              visible: modelData.description && modelData.description !== modelData.nickname
-              text: modelData.name || ""
+              visible: deviceCard.modelData.description && deviceCard.modelData.description !== deviceCard.modelData.nickname
+              text: deviceCard.modelData.name || ""
               size: Core.Style.fontXS
               color: Config.Theme.textMuted
               elide: Text.ElideRight

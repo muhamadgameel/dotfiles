@@ -98,16 +98,20 @@ Item {
   readonly property int surfaceInset: Math.max(Core.Style.spaceS, Core.Style.elevationRoom(root.elevation))
   property int elevation: 2
 
-  // A layer surface committed at height 0 before the layouts have polished is a
-  // protocol hazard, so the height has a floor.
-  readonly property int minWindowHeight: Core.Style.barHeight * 2
-  readonly property int maxWindowHeight: Math.max(root.minWindowHeight, (root.screen?.height ?? 0) - root.topOffset - Core.Style.spaceM)
+  // The window is a fixed full-height column and never resizes; only the visible
+  // surface inside it changes height. Sizing the window to the content resized
+  // the layer surface on every content change - a compositor round trip that
+  // flashed for a frame, and ran every frame while a Collapsible animated.
+  readonly property int minSurfaceHeight: Core.Style.controlHeightL
+
+  // The window's real height once configured; the screen estimate covers the
+  // frames before that.
+  readonly property int availableHeight: (panelWindow.height > 0 ? panelWindow.height : (root.screen?.height ?? 0) - root.topOffset - Core.Style.spaceM) - root.surfaceInset * 2
+  readonly property int maxSurfaceHeight: Math.max(root.minSurfaceHeight, root.availableHeight)
 
   property int frameHeight: 0
 
-  readonly property int naturalWindowHeight: root.frameHeight + root.surfaceInset * 2
-
-  readonly property int surfaceHeight: root.fillHeight ? root.maxWindowHeight : Core.Utils.clamp(root.naturalWindowHeight, root.minWindowHeight, root.maxWindowHeight)
+  readonly property int surfaceHeight: root.fillHeight ? root.maxSurfaceHeight : Core.Utils.clamp(root.frameHeight, root.minSurfaceHeight, root.maxSurfaceHeight)
 
   // Content that reports no height is almost always a Layout.fillHeight child
   // inside a content-sized panel. It fails silently - the panel just collapses -
@@ -161,16 +165,35 @@ Item {
     color: Config.Theme.transparent
 
     implicitWidth: root.panelWidth + (root.surfaceInset - Core.Style.spaceS) * 2
-    implicitHeight: root.surfaceHeight
 
+    // Top and bottom both anchored: the compositor sets the height once.
     anchors {
       top: true
       right: true
+      bottom: true
     }
 
     margins {
       top: root.topOffset
+      bottom: Core.Style.spaceM
       right: 0
+    }
+
+    // Input only lands on the visible surface; the transparent rest of the
+    // column passes clicks through to whatever is underneath, which also clears
+    // the focus grab and closes the panel.
+    mask: Region {
+      item: hitArea
+    }
+
+    // Outside the slider on purpose, so the mask never has to follow the slide.
+    Item {
+      id: hitArea
+
+      x: root.surfaceInset
+      y: root.surfaceInset
+      width: contentRect.width
+      height: contentRect.height
     }
 
     WlrLayershell.namespace: root.namespace
@@ -214,16 +237,31 @@ Item {
     Rectangle {
       id: contentRect
 
-      // Top-anchored with an explicit height rather than anchors.fill, so the
-      // visible surface and the window can be sized separately - the window
-      // carries extra transparent room for the shadow.
+      // Top-anchored with an explicit height rather than anchors.fill: the
+      // window is a fixed column, and this is the part of it that is drawn.
       anchors {
         left: parent.left
         right: parent.right
         top: parent.top
         margins: root.surfaceInset
       }
-      height: root.surfaceHeight - root.surfaceInset * 2
+      height: root.surfaceHeight
+
+      // The edge glides to the new height while the content underneath is
+      // already laid out at it. Off until the slide-in has finished, so the
+      // panel arrives at its size instead of growing on the way in.
+      Behavior on height {
+        enabled: root.revealed && !slideAnim.running
+
+        NumberAnimation {
+          duration: Core.Style.duration(Core.Style.animNormal)
+          easing.type: Core.Style.easeStandard
+        }
+      }
+
+      // The content is laid out at the target height, so while the edge is
+      // still catching up it has to be cut off here.
+      clip: true
 
       radius: Core.Style.radiusL
       color: Config.Theme.panelBg
@@ -245,7 +283,14 @@ Item {
       ColumnLayout {
         id: frameColumn
 
-        anchors.fill: parent
+        // Laid out at the target height, not the animated one, so an animating
+        // edge does not re-run the layout on every frame.
+        anchors {
+          left: parent.left
+          right: parent.right
+          top: parent.top
+        }
+        height: root.surfaceHeight
         spacing: 0
 
         onImplicitHeightChanged: root.frameHeight = implicitHeight

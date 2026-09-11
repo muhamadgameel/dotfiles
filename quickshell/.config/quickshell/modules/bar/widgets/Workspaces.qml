@@ -1,7 +1,6 @@
 pragma ComponentBehavior: Bound
 
 import QtQuick
-import Quickshell
 import Quickshell.Hyprland
 
 import "../../../components" as Components
@@ -12,7 +11,7 @@ import "../../ipc" as Ipc
 /**
 * Workspaces - Hyprland workspace switcher
 *
-* Shows only the workspaces that exist on this monitor, plus the focused one -
+* Shows only the workspaces that exist on this monitor -
 * Hyprland keeps a workspace alive exactly while it has windows or focus, so
 * this is "the workspaces you are actually using".
 *
@@ -62,19 +61,17 @@ Item {
     const ids = [];
 
     if (root.showEmpty) {
-      let highest = Config.Config.workspaceCount;
-      for (const key in root.localWorkspaces)
-        highest = Math.max(highest, parseInt(key, 10));
-      for (let id = 1; id <= highest; id++)
+      for (let id = 1; id <= Config.Config.workspaceCount; id++)
         ids.push(id);
-      return ids;
     }
 
-    for (const key in root.localWorkspaces)
-      ids.push(parseInt(key, 10));
-
-    if (root.focusedId > 0 && !ids.includes(root.focusedId))
-      ids.push(root.focusedId);
+    // Keep occupied high-numbered workspaces without allocating every empty
+    // slot between workspaceCount and that id (e.g. workspace 100).
+    for (const key in root.localWorkspaces) {
+      const id = parseInt(key, 10);
+      if (!ids.includes(id))
+        ids.push(id);
+    }
 
     ids.sort((a, b) => a - b);
     return ids;
@@ -92,25 +89,7 @@ Item {
   // transforms, not layout - so switching quickly through empty workspaces piled
   // up invisible slots and shoved the rest of the bar sideways
   function _syncSlots() {
-    const ids = root.visibleIds;
-
-    for (let i = slotModel.count - 1; i >= 0; i--) {
-      if (!ids.includes(slotModel.get(i).wsId))
-        slotModel.remove(i);
-    }
-
-    // What is left is a subsequence of ids in the same ascending order, so one
-    // forward pass drops the new ones into the right places.
-    for (let k = 0; k < ids.length; k++) {
-      if (k >= slotModel.count)
-        slotModel.append({
-          wsId: ids[k]
-        });
-      else if (slotModel.get(k).wsId !== ids[k])
-        slotModel.insert(k, {
-          wsId: ids[k]
-        });
-    }
+    Core.Utils.syncKeyedModel(slotModel, root.visibleIds, "wsId");
   }
 
   onVisibleIdsChanged: root._syncSlots()

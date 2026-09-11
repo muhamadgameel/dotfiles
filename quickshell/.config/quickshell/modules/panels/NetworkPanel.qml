@@ -82,19 +82,22 @@ Components.SlidingPanel {
     }
 
     // Network List
-    Flickable {
+    Components.ScrollArea {
+      id: networkScroll
+
       Layout.fillWidth: true
       Layout.fillHeight: true
       Layout.preferredHeight: networkList.implicitHeight
       Layout.minimumHeight: 0
 
-      contentHeight: networkList.height
-      clip: true
-      boundsBehavior: Flickable.StopAtBounds
+      contentWidth: width
+      contentHeight: networkList.implicitHeight
+      leftMargin: 0
+      rightMargin: 0
 
       ColumnLayout {
         id: networkList
-        width: parent.width
+        width: networkScroll.width
         spacing: Core.Style.spaceXS
 
         Repeater {
@@ -287,6 +290,7 @@ Components.SlidingPanel {
           spacing: 0
 
           RowLayout {
+            Layout.fillWidth: true
             spacing: Core.Style.spaceXS
 
             Components.Text {
@@ -304,6 +308,7 @@ Components.SlidingPanel {
           }
 
           RowLayout {
+            Layout.fillWidth: true
             spacing: Core.Style.spaceXS
 
             Components.Text {
@@ -320,6 +325,7 @@ Components.SlidingPanel {
             }
 
             Components.Text {
+              Layout.fillWidth: true
               visible: netItem.security && netItem.security !== "--"
               text: netItem.security
               size: Core.Style.fontXS
@@ -396,10 +402,10 @@ Components.SlidingPanel {
         }
 
         onVisibleChanged: {
-          if (visible) {
-            passwordField.clear();
+          passwordField.clear();
+          showPassword.revealed = false;
+          if (visible)
             passwordField.forceActiveFocus();
-          }
         }
 
         Components.Text {

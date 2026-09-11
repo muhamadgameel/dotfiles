@@ -25,6 +25,9 @@ Item {
   visible: Services.Media.hasPlayer
   implicitWidth: visible ? row.implicitWidth + Core.Style.spaceS * 2 : 0
   implicitHeight: Core.Style.widgetSize
+  Layout.fillWidth: true
+  Layout.minimumWidth: Core.Style.fontM + Core.Style.spaceS * 3
+  Layout.maximumWidth: implicitWidth
 
   Rectangle {
     anchors.fill: parent
@@ -41,7 +44,11 @@ Item {
   RowLayout {
     id: row
 
-    anchors.centerIn: parent
+    anchors.left: parent.left
+    anchors.right: parent.right
+    anchors.leftMargin: Core.Style.spaceS
+    anchors.rightMargin: Core.Style.spaceS
+    anchors.verticalCenter: parent.verticalCenter
     spacing: Core.Style.spaceS
 
     Components.Icon {
@@ -51,6 +58,7 @@ Item {
     }
 
     Components.Text {
+      Layout.fillWidth: true
       Layout.maximumWidth: root.maxTextWidth
       text: Services.Media.summary
       size: Core.Style.fontS

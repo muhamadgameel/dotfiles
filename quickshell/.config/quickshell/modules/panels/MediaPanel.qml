@@ -52,6 +52,8 @@ Components.SlidingPanel {
 
         anchors.fill: parent
         source: Services.Media.trackArtUrl
+        // Album covers can be much larger than the panel; bound decoded size.
+        sourceSize: Qt.size(root.panelWidth, root.panelWidth)
         fillMode: Image.PreserveAspectCrop
         asynchronous: true
 
@@ -185,6 +187,7 @@ Components.SlidingPanel {
       iconSize: Core.Style.fontXL
       padding: Core.Style.spaceM
       tooltipText: Services.Media.isPlaying ? "Pause" : "Play"
+      enabled: Services.Media.isPlaying ? Services.Media.canPause : Services.Media.canPlay
       onClicked: Services.Media.playPause()
     }
 

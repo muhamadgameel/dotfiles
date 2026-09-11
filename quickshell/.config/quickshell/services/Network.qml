@@ -14,7 +14,7 @@ Singleton {
   id: root
 
   // === Public State ===
-  property var networks: ({})
+  property var networks: Object.create(null)
   property bool scanning: false
   property string connectingTo: ""
   property string disconnectingFrom: ""
@@ -246,7 +246,7 @@ Singleton {
 
   function _updateNetworkConnection(ssid, connected) {
     // Update networks list immediately without waiting for scan
-    const updated = Object.assign({}, networks);
+    const updated = Object.assign(Object.create(null), root.networks);
     for (const key in updated) {
       if (key === ssid) {
         updated[key] = Object.assign({}, updated[key], {
@@ -259,7 +259,7 @@ Singleton {
         });
       }
     }
-    networks = updated;
+    root.networks = updated;
   }
 
   // === Timers ===
@@ -319,7 +319,7 @@ Singleton {
           root.wifiSSID = "";
           root.wifiSignal = 0;
           root.wifiSecurity = "";
-          root.networks = ({});
+          root.networks = Object.create(null);
         }
       }
     }
@@ -474,7 +474,8 @@ Singleton {
 
     stdout: StdioCollector {
       onStreamFinished: {
-        const networksMap = {};
+        // SSIDs are arbitrary strings, including Object prototype names.
+        const networksMap = Object.create(null);
 
         for (const line of text.split("\n")) {
           const parts = root._parseNmcliLine(line, 4);
@@ -493,13 +494,15 @@ Singleton {
             root.wifiSecurity = security;
           }
 
-          // Keep highest signal entry for each SSID
-          if (!networksMap[ssid] || signal > networksMap[ssid].signal) {
+          // Keep the strongest AP, but retain association with any AP of the
+          // same SSID regardless of the order nmcli returned them in.
+          const previous = networksMap[ssid];
+          if (!previous || signal > previous.signal) {
             networksMap[ssid] = {
               ssid,
               security: security || "--",
               signal,
-              connected,
+              connected: connected || (previous?.connected ?? false),
               secured: !!(security && security !== "--" && security.trim())
             };
           } else if (connected) {

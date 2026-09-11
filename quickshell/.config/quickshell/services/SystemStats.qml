@@ -63,8 +63,8 @@ Singleton {
   property real cpuTemp: 0
   property real cpuUsage: 0
   property var cpuCores: []      // Per-core usage, indexed by real core id
-  property int cpuCoreCount: 0   // Stable count so views can bind without
-                                 // rebuilding their delegates every poll
+  // Stable count so views can bind without rebuilding delegates every poll.
+  property int cpuCoreCount: 0
 
   // === GPU ===
   property real gpuTemp: 0
@@ -475,9 +475,6 @@ done'
       const lines = text().split("\n");
       const current = {};
 
-      let totalRx = 0;
-      let totalTx = 0;
-
       for (let i = 2; i < lines.length; i++) {
         const line = lines[i].trim();
         if (!line)
@@ -499,14 +496,12 @@ done'
           rx: rx,
           tx: tx
         };
-        totalRx += rx;
-        totalTx += tx;
       }
 
       const dt = now - root._prevNetTime;
       if (root._prevNetTime > 0 && dt > 0) {
-        let prevRx = 0;
-        let prevTx = 0;
+        let deltaRx = 0;
+        let deltaTx = 0;
         let busiestIface = "";
         let busiestDelta = 0;
 
@@ -515,22 +510,25 @@ done'
           if (!prev)
             continue;  // Appeared this tick - no delta to take yet
 
-          prevRx += prev.rx;
-          prevTx += prev.tx;
+          // Sum only matched samples. A new interface's lifetime counters are
+          // not traffic from this interval, and a reset must not cancel traffic
+          // on another interface.
+          const rx = Math.max(0, current[iface].rx - prev.rx);
+          const tx = Math.max(0, current[iface].tx - prev.tx);
+          deltaRx += rx;
+          deltaTx += tx;
 
           // The active interface is the one moving bytes right now, not merely
           // the first one with a non-zero lifetime counter.
-          const delta = (current[iface].rx - prev.rx) + (current[iface].tx - prev.tx);
+          const delta = rx + tx;
           if (delta > busiestDelta) {
             busiestDelta = delta;
             busiestIface = iface;
           }
         }
 
-        // Counters vanish with their interface; clamp instead of reporting the
-        // resulting negative as a spike.
-        root.netDownSpeed = Math.max(0, Math.round((totalRx - prevRx) / dt));
-        root.netUpSpeed = Math.max(0, Math.round((totalTx - prevTx) / dt));
+        root.netDownSpeed = Math.round(deltaRx / dt);
+        root.netUpSpeed = Math.round(deltaTx / dt);
 
         if (busiestIface !== "")
           root.netInterface = busiestIface;

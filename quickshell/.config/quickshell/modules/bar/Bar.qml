@@ -4,6 +4,7 @@ import QtQuick.Layouts
 import "../../components" as Components
 import "../../config" as Config
 import "../../core" as Core
+import "../../services" as Services
 import "widgets" as Widgets
 
 /**
@@ -57,7 +58,7 @@ Rectangle {
     anchors.left: parent.left
     anchors.leftMargin: Core.Style.spaceM
     // Bounded by the clock, so the window title elides instead of running underneath it.
-    anchors.right: clock.visible ? clock.left : parent.right
+    anchors.right: clock.visible ? clock.left : parent.horizontalCenter
     anchors.rightMargin: Core.Style.spaceM
     anchors.verticalCenter: parent.verticalCenter
 
@@ -85,7 +86,7 @@ Rectangle {
   // RIGHT
   // ===================================================================
   RowLayout {
-    anchors.left: clock.visible ? clock.right : parent.left
+    anchors.left: clock.visible ? clock.right : parent.horizontalCenter
     anchors.leftMargin: Core.Style.spaceM
     anchors.right: parent.right
     anchors.rightMargin: Core.Style.spaceM
@@ -97,12 +98,14 @@ Rectangle {
     Components.Spacer {}
 
     Widgets.Media {
-      visible: Config.Config.barShowMedia
+      visible: Config.Config.barShowMedia && Services.Media.hasPlayer
       onPanelRequested: root.mediaClicked()
     }
 
     Widgets.Tray {
-      visible: Config.Config.barShowTray
+      id: tray
+
+      visible: Config.Config.barShowTray && tray.shownItems.length > 0
     }
 
     Components.Divider {
@@ -136,7 +139,7 @@ Rectangle {
     }
 
     Widgets.Brightness {
-      visible: Config.Config.barShowBrightness
+      visible: Config.Config.barShowBrightness && Services.Brightness.ready
     }
 
     Widgets.SystemStats {
@@ -145,7 +148,9 @@ Rectangle {
     }
 
     Widgets.Battery {
-      visible: Config.Config.barShowBattery
+      id: battery
+
+      visible: Config.Config.barShowBattery && battery.hasBattery
     }
 
     Widgets.NotificationBell {
