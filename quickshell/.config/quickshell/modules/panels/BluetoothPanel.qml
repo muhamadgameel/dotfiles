@@ -100,20 +100,23 @@ Components.SlidingPanel {
           }
 
           // Device List
-          Flickable {
+          Components.ScrollArea {
+            id: deviceScroll
+
             Layout.fillWidth: true
 
             Layout.fillHeight: true
             Layout.preferredHeight: deviceList.implicitHeight
             Layout.minimumHeight: 0
 
+            contentWidth: width
             contentHeight: deviceList.implicitHeight
-            clip: true
-            boundsBehavior: Flickable.StopAtBounds
+            leftMargin: 0
+            rightMargin: 0
 
             ColumnLayout {
               id: deviceList
-              width: parent.width
+              width: deviceScroll.width
               spacing: Core.Style.spaceXS
 
               // Connected Devices

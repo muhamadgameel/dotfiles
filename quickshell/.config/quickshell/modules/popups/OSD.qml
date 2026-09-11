@@ -67,6 +67,10 @@ Variants {
         if (!content.visible) {
           content.visible = true;
           animator.show();
+        } else {
+          // A fresh update must cancel a fade-out before it unloads the window.
+          // Do not replay the entry animation for every volume/brightness step.
+          animator.setVisible();
         }
         hideTimer.restart();
       }

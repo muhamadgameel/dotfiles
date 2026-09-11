@@ -30,7 +30,7 @@ Variants {
       // top-right corner, so popups drew straight over the panel's list.
       visible: Services.Notification.activeList.count > 0 && Services.Panels.openPanel !== "notifications"
 
-      screen: modelData
+      screen: root.modelData
       namespace: "quickshell-notifications"
       location: "top_right"
 
@@ -44,37 +44,6 @@ Variants {
       implicitWidth: notifWidth + (shadowRoom - Core.Style.spaceXS) * 2
       implicitHeight: notificationStack.implicitHeight + Core.Style.spaceL
 
-      property var animateConnection: null
-
-      Component.onCompleted: {
-        animateConnection = function (notificationId) {
-          var delegate = findDelegate(notificationId);
-          if (delegate?.animator) {
-            delegate.animator.hide();
-          }
-        };
-        Services.Notification.animateAndRemove.connect(animateConnection);
-      }
-
-      Component.onDestruction: {
-        if (animateConnection) {
-          Services.Notification.animateAndRemove.disconnect(animateConnection);
-          animateConnection = null;
-        }
-      }
-
-      function findDelegate(notificationId) {
-        if (!notificationRepeater)
-          return null;
-        for (var i = 0; i < notificationRepeater.count; i++) {
-          var item = notificationRepeater.itemAt(i);
-          if (item?.notificationId === notificationId) {
-            return item;
-          }
-        }
-        return null;
-      }
-
       ColumnLayout {
         id: notificationStack
 
@@ -86,17 +55,7 @@ Variants {
         spacing: Core.Style.spaceS
         width: notifWindow.notifWidth + (notifWindow.shadowRoom - Core.Style.spaceXS) * 2
 
-        Behavior on implicitHeight {
-          SpringAnimation {
-            spring: 2.0
-            damping: 0.4
-            epsilon: 0.01
-            mass: 0.8
-          }
-        }
-
         Repeater {
-          id: notificationRepeater
           model: Services.Notification.activeList
 
           delegate: Item {
@@ -107,7 +66,6 @@ Variants {
 
             property string notificationId: model.id
             property var notificationData: model
-            property alias animator: slideAnimator
 
             // Only the first maxVisible have room on screen; the rest are queued
             // and counted by the pill at the bottom of the stack. A ColumnLayout
@@ -120,6 +78,15 @@ Variants {
             Layout.preferredWidth: notifWindow.notifWidth + (notifWindow.shadowRoom - Core.Style.spaceXS) * 2
             Layout.preferredHeight: cardContent.implicitHeight + notifWindow.shadowRoom * 2
             Layout.maximumHeight: Layout.preferredHeight
+
+            Connections {
+              target: Services.Notification
+
+              function onAnimateAndRemove(notificationId) {
+                if (notificationId === card.notificationId)
+                  slideAnimator.hide();
+              }
+            }
 
             // === Slide Animator ===
             Core.SlideAnimator {
@@ -182,7 +149,7 @@ Variants {
 
               notificationData: card.notificationData
               showProgress: true
-              progressValue: model.progress
+              progressValue: card.model.progress
 
               onHoverChanged: {
                 if (hovered) {

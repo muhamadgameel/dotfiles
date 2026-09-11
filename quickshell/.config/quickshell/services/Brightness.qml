@@ -50,12 +50,7 @@ Singleton {
     id: debounceTimer
     interval: 50
     repeat: false
-    onTriggered: {
-      if (!isNaN(root._queuedBrightness)) {
-        root._applyBrightness(root._queuedBrightness);
-        root._queuedBrightness = NaN;
-      }
-    }
+    onTriggered: root._flushBrightness()
   }
 
   // === Public API ===
@@ -79,18 +74,18 @@ Singleton {
   * Increase brightness by step
   */
   function increase() {
-    if (!ready)
+    if (!root.ready)
       return;
-    set(brightness + stepSize);
+    set((isNaN(root._queuedBrightness) ? root.brightness : root._queuedBrightness) + root.stepSize);
   }
 
   /**
   * Decrease brightness by step
   */
   function decrease() {
-    if (!ready)
+    if (!root.ready)
       return;
-    set(brightness - stepSize);
+    set((isNaN(root._queuedBrightness) ? root.brightness : root._queuedBrightness) - root.stepSize);
   }
 
   /**
@@ -98,9 +93,9 @@ Singleton {
   * @param value - Brightness value (0.0 - 1.0)
   */
   function set(value) {
-    if (!ready)
+    if (!root.ready || !isFinite(value))
       return;
-    root._queuedBrightness = Core.Utils.clamp(value, minBrightness, 1.0);
+    root._queuedBrightness = Core.Utils.clamp(value, root.minBrightness, 1.0);
     debounceTimer.restart();
   }
 
@@ -114,13 +109,23 @@ Singleton {
 
   // === Private Functions ===
 
+  function _flushBrightness() {
+    // Process.running = true does not launch a second command while one is
+    // active. Keep the latest target queued until that write finishes.
+    if (_setProc.running || isNaN(root._queuedBrightness))
+      return;
+    const value = root._queuedBrightness;
+    root._queuedBrightness = NaN;
+    root._applyBrightness(value);
+  }
+
   function _applyBrightness(value) {
     root._lastSelfWrite = Date.now();
     root.brightness = value;
     root.currentBrightness = Math.round(value * root.maxBrightness);
     root._showOSD();
 
-    _setProc.command = ["brightnessctl", "-c", "backlight", "-q", "s", Math.round(value * 100) + "%"];
+    _setProc.command = ["brightnessctl", "-c", "backlight", "-d", root.device, "-q", "s", Math.round(value * 100) + "%"];
     _setProc.running = true;
   }
 
@@ -136,7 +141,7 @@ Singleton {
 
   // Read the value the watcher already holds - no process spawn.
   function _refreshFromWatcher() {
-    if (!ready || maxBrightness <= 0)
+    if (!root.ready || root.maxBrightness <= 0 || _setProc.running || !isNaN(root._queuedBrightness))
       return;
 
     // Our own write, echoed back by inotify.
@@ -147,13 +152,12 @@ Singleton {
     if (isNaN(raw))
       return;
 
-    const value = raw / maxBrightness;
-    if (Math.abs(value - root.brightness) < 0.005)
-      return;
-
+    const value = raw / root.maxBrightness;
+    const changed = Math.abs(value - root.brightness) >= 0.005;
     root.currentBrightness = raw;
     root.brightness = value;
-    root._showOSD();
+    if (changed)
+      root._showOSD();
   }
 
   // === Processes ===
@@ -162,6 +166,20 @@ Singleton {
   Process {
     id: _setProc
     running: false
+
+    onRunningChanged: {
+      if (running)
+        return;
+      if (!isNaN(root._queuedBrightness)) {
+        if (!debounceTimer.running)
+          debounceTimer.restart();
+      } else {
+        // Reconcile rounded values and failed writes with the actual device,
+        // even when its inotify event arrived during our self-write grace.
+        root._lastSelfWrite = 0;
+        brightnessWatcher.reload();
+      }
+    }
 
     stderr: StdioCollector {
       onStreamFinished: {

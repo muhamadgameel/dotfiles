@@ -28,7 +28,16 @@ Components.SlidingPanel {
   // Always reopen on today rather than wherever the user browsed to last.
   onOpened: root.monthOffset = 0
 
-  readonly property date today: new Date()
+  property date today: new Date()
+
+  // Reuse the shared clock's day change instead of adding a polling timer.
+  Connections {
+    target: Services.Time
+
+    function onDateLongChanged() {
+      root.today = new Date();
+    }
+  }
 
   readonly property date viewMonth: {
     const d = new Date(today.getFullYear(), today.getMonth() + monthOffset, 1);
@@ -94,6 +103,7 @@ Components.SlidingPanel {
   GridLayout {
     Layout.fillWidth: true
     columns: 7
+    uniformCellWidths: true
     columnSpacing: 0
     rowSpacing: Core.Style.spaceXS
 
@@ -117,6 +127,7 @@ Components.SlidingPanel {
   GridLayout {
     Layout.fillWidth: true
     columns: 7
+    uniformCellWidths: true
     columnSpacing: 0
     rowSpacing: Core.Style.spaceXXS
 
@@ -126,7 +137,7 @@ Components.SlidingPanel {
 
       delegate: Item {
         Layout.fillWidth: true
-        Layout.preferredHeight: 32
+        Layout.preferredHeight: Core.Style.controlHeightS
       }
     }
 
@@ -142,7 +153,7 @@ Components.SlidingPanel {
         readonly property bool today: root.isToday(day)
 
         Layout.fillWidth: true
-        Layout.preferredHeight: 32
+        Layout.preferredHeight: Core.Style.controlHeightS
 
         radius: Core.Style.radiusS
         color: today ? Config.Theme.accent : Config.Theme.transparent

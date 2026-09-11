@@ -64,6 +64,8 @@ Item {
   readonly property bool isVisible: target ? target.opacity > 0 : false
 
   // === Internal ===
+  // Fresh callers need a hidden starting frame, but reversals must retain it.
+  property bool _initialized: false
   readonly property bool _horizontal: root.slideFrom === "left" || root.slideFrom === "right"
 
   // Negative for the edges the item comes from above/before, positive otherwise.
@@ -94,19 +96,25 @@ Item {
   function show() {
     if (!target)
       return;
+    if (!_initialized)
+      setHidden();
+    const reversing = hideAnim.running;
     hideAnim.stop();
     showStarted();
 
-    if (entryDelay > 0) {
+    // Stagger hidden entrances only; never pause an in-flight reversal.
+    if (delayTimer.interval > 0 && !reversing && !showAnim.running && target.opacity === hiddenOpacity) {
       delayTimer.start();
     } else {
-      _startShowAnim();
+      delayTimer.stop();
+      showAnim.start();
     }
   }
 
   function hide() {
     if (!target)
       return;
+    _initialized = true;
     delayTimer.stop();
     showAnim.stop();
     hideStarted();
@@ -116,6 +124,7 @@ Item {
   function setHidden() {
     if (!target)
       return;
+    _initialized = true;
     delayTimer.stop();
     showAnim.stop();
     hideAnim.stop();
@@ -127,6 +136,7 @@ Item {
   function setVisible() {
     if (!target)
       return;
+    _initialized = true;
     delayTimer.stop();
     showAnim.stop();
     hideAnim.stop();
@@ -135,20 +145,11 @@ Item {
     root._setOffset(0);
   }
 
-  // === Internal ===
-  function _startShowAnim() {
-    // Reset to hidden state before animating
-    target.opacity = hiddenOpacity;
-    target.scale = hiddenScale;
-    root._setOffset(root._hiddenOffset);
-    showAnim.start();
-  }
-
   Timer {
     id: delayTimer
-    interval: root.entryDelay
+    interval: Core.Style.duration(root.entryDelay)
     repeat: false
-    onTriggered: root._startShowAnim()
+    onTriggered: showAnim.start()
   }
 
   // === Animations ===
@@ -159,7 +160,6 @@ Item {
     PropertyAnimation {
       target: root.target
       property: "opacity"
-      from: root.hiddenOpacity
       to: root.visibleOpacity
       duration: root.showDuration
       easing.type: Core.Style.easeStandard
@@ -168,7 +168,6 @@ Item {
     PropertyAnimation {
       target: root.target
       property: "scale"
-      from: root.hiddenScale
       to: root.visibleScale
       duration: root.showDuration
       easing.type: root.showEasing
@@ -178,7 +177,6 @@ Item {
     PropertyAnimation {
       target: root._slideTransform
       property: root._horizontal ? "x" : "y"
-      from: root._hiddenOffset
       to: 0
       duration: root.showDuration
       easing.type: root.showEasing

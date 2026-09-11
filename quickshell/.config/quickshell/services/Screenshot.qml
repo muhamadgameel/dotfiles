@@ -279,6 +279,6 @@ Singleton {
   function copyLast() {
     if (lastPath === "")
       return;
-    Quickshell.execDetached(["sh", "-c", `wl-copy --type image/png < '${lastPath}'`]);
+    Quickshell.execDetached(["sh", "-c", 'wl-copy --type image/png < "$1"', "quickshell-copy", lastPath]);
   }
 }
