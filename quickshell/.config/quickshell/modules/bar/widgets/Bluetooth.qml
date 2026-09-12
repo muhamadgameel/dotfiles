@@ -88,6 +88,7 @@ Components.Button {
     anchors.bottomMargin: Core.Style.spaceXXS
     visible: Services.Bluetooth.discovering
     pulse: true
+    pulseLoops: Animation.Infinite
     color: Config.Theme.accentAlt
   }
 }

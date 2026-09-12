@@ -28,6 +28,8 @@ Singleton {
   // === Bar Configuration ===
   readonly property string barPosition: Settings.get("barPosition", "top")
   readonly property bool barShowClock: Settings.get("barShowClock", true)
+
+  readonly property bool barClockShowSeconds: Settings.get("barClockShowSeconds", false)
   readonly property bool barShowVolume: Settings.get("barShowVolume", true)
   readonly property bool barShowMicrophone: Settings.get("barShowMicrophone", true)
   readonly property bool barShowBrightness: Settings.get("barShowBrightness", true)

@@ -63,8 +63,9 @@ Components.Button {
     anchors.bottom: parent.bottom
     anchors.horizontalCenter: parent.horizontalCenter
     anchors.bottomMargin: Core.Style.spaceXXS
-    visible: Services.Network.connecting || Services.Network.scanning
+    visible: Services.Network.connecting
     pulse: true
+    pulseLoops: Animation.Infinite
     color: Config.Theme.accent
   }
 }

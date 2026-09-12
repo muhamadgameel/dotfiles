@@ -4,34 +4,25 @@ import "../config" as Config
 import "../core" as Core
 
 /**
-* WarningOverlay - Animated warning/critical pulse overlay
+* WarningOverlay - pulse that flags a widget entering a warning/critical state
 *
-* A translucent pulsing overlay for indicating warning or critical states.
-* Extracted from Battery.qml and SystemStats.qml for reuse.
+* A translucent tint that pulses `pulseLoops` times when `active` turns on,
+* then fades out and stays out. The widget's own icon and text colour carry the
+* state from there; this only draws the eye to the moment it changed.
+*
+* It used to pulse forever. The states it marks are steady - a laptop CPU that
+* idles above the temperature threshold is "warning" all day - and any running
+* animation keeps the window rendering at the display refresh rate. That made
+* it a permanent 240 Hz render loop, and most of the shell's idle CPU.
 *
 * Usage:
-*   // Warning state
 *   Item {
 *       // Your content...
 *
 *       WarningOverlay {
 *           active: isWarning
-*           severity: "warning"
+*           severity: "warning"   // or "critical"
 *       }
-*   }
-*
-*   // Critical state with custom color
-*   WarningOverlay {
-*       active: isCritical
-*       severity: "critical"
-*       color: Theme.error
-*   }
-*
-*   // Custom animation
-*   WarningOverlay {
-*       active: showWarning
-*       maxOpacity: 0.3
-*       duration: 600
 *   }
 */
 Rectangle {
@@ -42,6 +33,9 @@ Rectangle {
   property string severity: "warning"  // "warning" or "critical"
   property real maxOpacity: 0.2
   property int duration: Core.Style.animSlow * 2
+  property int pulseLoops: 3
+
+  readonly property bool shouldPulse: root.active && root.visible && Core.Style.motionEnabled
 
   // === Appearance ===
   anchors.fill: parent
@@ -57,27 +51,42 @@ Rectangle {
   opacity: 0
 
   // === Pulse Animation ===
-  SequentialAnimation on opacity {
-    running: root.active && root.visible && Core.Style.motionEnabled
-    loops: Animation.Infinite
+  // Started explicitly rather than through `running:`, which would not restart
+  // a finite animation that has already run out its loops. See StatusDot.qml.
+  SequentialAnimation {
+    id: pulseAnim
+
+    loops: root.pulseLoops
 
     NumberAnimation {
+      target: root
+      property: "opacity"
       to: root.maxOpacity
       duration: root.duration
       easing.type: Easing.InOutQuad
     }
 
+    // Ends at 0, so a finished pulse leaves nothing drawn.
     NumberAnimation {
+      target: root
+      property: "opacity"
       to: 0
       duration: root.duration
       easing.type: Easing.InOutQuad
     }
   }
 
-  // Reset opacity when deactivated
-  onActiveChanged: {
-    if (!active) {
+  onShouldPulseChanged: {
+    if (shouldPulse) {
+      pulseAnim.restart();
+    } else {
+      pulseAnim.stop();
       opacity = 0;
     }
+  }
+
+  Component.onCompleted: {
+    if (shouldPulse)
+      pulseAnim.start();
   }
 }

@@ -110,8 +110,11 @@ Item {
     color: Config.Theme.text
     anchors.centerIn: parent
 
+    // Gated on visibility like the other looping animations: a running
+    // animation keeps its window rendering at the refresh rate even when the
+    // thing it moves is hidden.
     RotationAnimation on rotation {
-      running: root.spinning && Core.Style.motionEnabled
+      running: root.spinning && iconText.visible && Core.Style.motionEnabled
       from: 0
       to: 360
       duration: root.spinDuration

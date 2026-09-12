@@ -11,7 +11,7 @@ import "../core" as Core
 *
 * Provides real-time monitoring of:
 * - CPU temperature (Intel coretemp package, AMD k10temp/zenpower Tctl)
-* - GPU temperature (AMD via hwmon, NVIDIA via nvidia-smi)
+* - GPU temperature (AMD via hwmon, NVIDIA via one looping nvidia-smi)
 * - CPU usage (overall and per-core)
 * - Memory usage (RAM + Swap)
 * - Network speeds (download/upload)
@@ -40,8 +40,9 @@ Singleton {
 
   readonly property int pollingInterval: 2000
 
-  // nvidia-smi costs a process spawn of ~100-300ms, so it runs far less often
-  // than the sysfs reads rather than on every tick.
+  // How often the NVIDIA temperature is sampled. One long-running nvidia-smi
+  // prints at this interval (see _nvidiaProcess), so it costs no spawn per
+  // sample - the interval only bounds how fresh the reading is.
   readonly property int nvidiaPollingInterval: 10000
   readonly property int diskPollingInterval: 60000
 
@@ -54,6 +55,16 @@ Singleton {
   readonly property real memCritical: 90
   readonly property real diskWarning: 85
   readonly property real diskCritical: 95
+
+  // How far a reading must fall back below a threshold before its status may
+  // drop, in the reading's own units (degrees, or percentage points).
+  //
+  // Without it a sensor sitting near a threshold flipped the status on nearly
+  // every poll. This laptop's CPU idles at 70-72 C against a 70 C warning, so the
+  // bar icon flickered orange-white every few seconds - and each flip back into
+  // "warning" restarted the widget's pulse animation, which kept the window
+  // rendering at the display refresh rate almost continuously.
+  readonly property real hysteresis: 5
 
   // ═══════════════════════════════════════════════════════════════════════════
   // PUBLIC METRICS
@@ -99,11 +110,21 @@ Singleton {
   readonly property bool hasNetworkData: netDownSpeed > 0 || netUpSpeed > 0
 
   // Status levels: "normal", "warning", "critical"
-  readonly property string cpuTempStatus: statusLevel(cpuTemp, tempWarning, tempCritical)
-  readonly property string gpuTempStatus: statusLevel(gpuTemp, tempWarning, tempCritical)
-  readonly property string cpuUsageStatus: statusLevel(cpuUsage, usageWarning, usageCritical)
-  readonly property string memStatus: statusLevel(memPercent, memWarning, memCritical)
-  readonly property string diskStatus: statusLevel(diskPercent, diskWarning, diskCritical)
+  //
+  // Updated from each new reading rather than bound to statusLevel(), because
+  // hysteresis needs the previous status - and a binding cannot read its own
+  // last value. Read-only by convention; only the handlers below write them.
+  property string cpuTempStatus: "normal"
+  property string gpuTempStatus: "normal"
+  property string cpuUsageStatus: "normal"
+  property string memStatus: "normal"
+  property string diskStatus: "normal"
+
+  onCpuTempChanged: cpuTempStatus = statusLevel(cpuTemp, tempWarning, tempCritical, cpuTempStatus)
+  onGpuTempChanged: gpuTempStatus = statusLevel(gpuTemp, tempWarning, tempCritical, gpuTempStatus)
+  onCpuUsageChanged: cpuUsageStatus = statusLevel(cpuUsage, usageWarning, usageCritical, cpuUsageStatus)
+  onMemPercentChanged: memStatus = statusLevel(memPercent, memWarning, memCritical, memStatus)
+  onDiskPercentChanged: diskStatus = statusLevel(diskPercent, diskWarning, diskCritical, diskStatus)
 
   // Overall health status
   readonly property string healthStatus: {
@@ -141,11 +162,15 @@ Singleton {
   property var _prevNetStats: ({})
   property real _prevNetTime: 0
 
+  readonly property var _whitespace: /\s+/
+  readonly property var _meminfoLine: /^(\w+):\s+(\d+)/
+
   // Interfaces excluded from the totals.
   //
   // Bridges and container/VM taps carry a copy of traffic already counted on
   // the physical interface, and a VPN tunnel carries a re-encapsulated copy of
   // the same bytes - including either double-counts throughput.
+
   readonly property var _ignoredIfacePrefixes: ["lo", "veth", "docker", "br-", "virbr", "vnet", "tun", "tap", "wg", "tailscale", "podman", "cni", "flannel", "kube", "ifb", "dummy", "bond", "sit", "gre", "waydroid"]
 
   // ═══════════════════════════════════════════════════════════════════════════
@@ -153,13 +178,22 @@ Singleton {
   // ═══════════════════════════════════════════════════════════════════════════
 
   /**
-  * Determine status level based on value and thresholds
+  * Status level for a reading, with hysteresis.
+  *
+  * A reading climbs into a level by reaching its threshold, but only leaves it
+  * once it has fallen `hysteresis` below that threshold - so a value wobbling
+  * across the line holds steady instead of flickering between two levels.
+  *
+  * @param previous - this reading's status last time; omit for plain thresholds
   * @returns "normal", "warning", or "critical"
   */
-  function statusLevel(value, warningThreshold, criticalThreshold) {
-    if (value >= criticalThreshold)
+  function statusLevel(value, warningThreshold, criticalThreshold, previous) {
+    const wasCritical = previous === "critical";
+    const wasWarning = wasCritical || previous === "warning";
+
+    if (value >= criticalThreshold || (wasCritical && value >= criticalThreshold - root.hysteresis))
       return "critical";
-    if (value >= warningThreshold)
+    if (value >= warningThreshold || (wasWarning && value >= warningThreshold - root.hysteresis))
       return "warning";
     return "normal";
   }
@@ -178,7 +212,7 @@ Singleton {
     stdout: StdioCollector {
       onStreamFinished: {
         for (const line of text.split("\n")) {
-          const parts = line.trim().split(/\s+/);
+          const parts = line.trim().split(root._whitespace);
           if (parts.length < 3)
             continue;
 
@@ -253,14 +287,6 @@ done'
     }
   }
 
-  // NVIDIA needs a process spawn, so it polls on its own slower cadence.
-  Timer {
-    interval: root.nvidiaPollingInterval
-    repeat: true
-    running: root._gpuType === "nvidia"
-    onTriggered: _nvidiaProcess.running = true
-  }
-
   // Disk usage barely moves; once a minute is plenty.
   Timer {
     interval: root.diskPollingInterval
@@ -298,14 +324,26 @@ done'
     }
   }
 
+  // One long-running nvidia-smi in loop mode (`-l`), printing a reading every
+  // nvidiaPollingInterval, instead of a fresh process every tick.
+  //
+  // Nearly all of nvidia-smi's cost is start-up - loading NVML and opening the
+  // driver - not the query. Measured over a minute at a 10 s cadence: six
+  // respawns took ~100 ms of CPU, the single looping process too little to
+  // register. That was essentially all of the shell's child-process CPU. Same
+  // shape as Network's long-running `nmcli monitor`.
+  //
+  // Started once by sensor detection as a probe. On a machine without an
+  // NVIDIA GPU it exits straight away and stays down.
   Process {
     id: _nvidiaProcess
-    command: ["nvidia-smi", "--query-gpu=temperature.gpu", "--format=csv,noheader,nounits"]
+    command: ["nvidia-smi", "--query-gpu=temperature.gpu", "--format=csv,noheader,nounits", "-l", String(root.nvidiaPollingInterval / 1000)]
     running: false
 
-    stdout: StdioCollector {
-      onStreamFinished: {
-        const temp = parseInt(text.trim(), 10);
+    stdout: SplitParser {
+      splitMarker: "\n"
+      onRead: data => {
+        const temp = parseInt(data.trim(), 10);
         if (isNaN(temp) || temp <= 0)
           return;
 
@@ -323,6 +361,21 @@ done'
           Core.Logger.d("SystemStats", "No NVIDIA GPU detected");
       }
     }
+
+    // Restart a loop that was working and died (driver reload, nvidia-smi
+    // killed). The fixed delay means a persistent failure retries at the old
+    // polling rate rather than spinning.
+    onExited: {
+      if (root._gpuType === "nvidia")
+        _nvidiaRestart.restart();
+    }
+  }
+
+  Timer {
+    id: _nvidiaRestart
+    interval: root.nvidiaPollingInterval
+    repeat: false
+    onTriggered: _nvidiaProcess.running = true
   }
 
   // ═══════════════════════════════════════════════════════════════════════════
@@ -359,7 +412,7 @@ done'
         if (!line.startsWith("cpu"))
           continue;
 
-        const parts = line.split(/\s+/);
+        const parts = line.split(root._whitespace);
         const name = parts[0];
 
         const stats = {
@@ -428,7 +481,7 @@ done'
       const values = {};
 
       for (const line of text().split("\n")) {
-        const match = line.match(/^(\w+):\s+(\d+)/);
+        const match = line.match(root._meminfoLine);
         if (match)
           values[match[1]] = parseInt(match[2], 10) * 1024;  // kB -> bytes
       }
@@ -488,7 +541,7 @@ done'
         if (root._isIgnoredInterface(iface))
           continue;
 
-        const stats = line.substring(colonIdx + 1).trim().split(/\s+/);
+        const stats = line.substring(colonIdx + 1).trim().split(root._whitespace);
         const rx = parseInt(stats[0], 10) || 0;
         const tx = parseInt(stats[8], 10) || 0;
 
@@ -555,7 +608,7 @@ done'
         if (lines.length < 2)
           return;
 
-        const parts = lines[1].trim().split(/\s+/);
+        const parts = lines[1].trim().split(root._whitespace);
         if (parts.length < 3)
           return;
 

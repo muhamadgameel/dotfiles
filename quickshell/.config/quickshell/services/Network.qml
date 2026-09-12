@@ -241,7 +241,6 @@ Singleton {
 
   function _triggerRefresh() {
     _refreshDebounce.restart();
-    _connectivityCheckProcess.running = true;
   }
 
   function _updateNetworkConnection(ssid, connected) {
@@ -263,10 +262,17 @@ Singleton {
   }
 
   // === Timers ===
+  // Collapses a burst of monitor events into one refresh. A single connection
+  // change prints several lines ("using connection", "connecting", "connected"),
+  // and the connectivity check used to fire on every one of them outside this
+  // debounce - each a real HTTP request to NetworkManager's check endpoint.
   Timer {
     id: _refreshDebounce
     interval: 100
-    onTriggered: _connectionStatusProcess.running = true
+    onTriggered: {
+      _connectionStatusProcess.running = true;
+      _connectivityCheckProcess.running = true;
+    }
   }
 
   // Brisk active scans while the panel is open, slow passive cache reads
