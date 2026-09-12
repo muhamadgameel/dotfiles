@@ -58,7 +58,7 @@ Rectangle {
 
   implicitHeight: visible ? content.height + Core.Style.spaceS * 2 : 0
   radius: Core.Style.radiusS
-  color: Core.Theme.alpha(_statusColor, 0.2)
+  color: Core.Theme.alpha(_statusColor, Core.Style.opacityTintStrong)
 
   RowLayout {
     id: content

@@ -89,6 +89,22 @@ Singleton {
   readonly property color panelBg: alpha(bg, Config.Config.surfaceOpacity)
   readonly property color barBg: alpha(bg, Config.Config.barOpacity)
 
+  // A card or tile at rest, half-lifted off the panel behind it. Card and
+  // QuickToggle both used to spell this out as alpha(surface, 0.5).
+  readonly property color cardBg: alpha(surface, 0.5)
+
+  // === Accent States ===
+  // Hover and press on an accent fill: primary buttons and switched-on quick
+  // toggles, which used to lighten by 0.10 and 0.08 for the same interaction.
+  //
+  // Deliberately not stateLayer(). That mixes a fixed share of white in, which
+  // is a big step on a dark surface but a tiny one on a light accent: measured on
+  // this palette, card hover raises luminance x1.29, stateLayer(accent, 0.08)
+  // only x1.08 - hover you can barely see. Lightening by 10% gives x1.21, which
+  // reads as the same strength as the card.
+  readonly property color accentHover: Qt.lighter(accent, 1.10)
+  readonly property color accentPressed: Qt.lighter(accent, 1.16)
+
   // === Focus ===
   readonly property color focusRing: accent
 
@@ -97,16 +113,6 @@ Singleton {
   // Create a color with alpha transparency
   function alpha(baseColor, a) {
     return Qt.rgba(baseColor.r, baseColor.g, baseColor.b, a);
-  }
-
-  // Lighten a color
-  function lighten(baseColor, amount) {
-    return Qt.lighter(baseColor, 1 + amount);
-  }
-
-  // Darken a color
-  function darken(baseColor, amount) {
-    return Qt.darker(baseColor, 1 + amount);
   }
 
   /**

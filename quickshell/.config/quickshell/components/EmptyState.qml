@@ -40,7 +40,7 @@ Item {
   }
 
   property string icon: "info"
-  property int iconSize: Core.Style.fontXXXL
+  property int iconSize: Core.Style.emptyIconSize
   property string message: ""
   property string hint: ""
 

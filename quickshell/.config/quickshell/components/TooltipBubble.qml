@@ -31,7 +31,7 @@ Rectangle {
   property color backgroundColor: Core.Theme.surface
   property color textColor: Core.Theme.text
   property color borderColor: Core.Theme.surfaceHover
-  property int borderWidth: 1
+  property int borderWidth: Core.Style.borderThin
   property real fontSize: Core.Style.fontS
   property real paddingH: Core.Style.spaceM
   property real paddingV: Core.Style.spaceS

@@ -37,7 +37,7 @@ ColumnLayout {
   property real value: 0
   property real maxValue: 1
   property color progressColor: Core.Theme.accent
-  property int progressHeight: Core.Style.px(6)
+  property int progressHeight: Core.Style.progressHeightM
 
   // === Value Display ===
   property bool showPercentage: true

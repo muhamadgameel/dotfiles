@@ -95,8 +95,8 @@ Components.Card {
       Components.Icon {
         Layout.alignment: Qt.AlignTop
         icon: root.image || "bell"
-        size: root.compact ? 32 : 40
-        padding: root.compact ? 4 : 8
+        size: Core.Style.px(root.compact ? 32 : 40)
+        padding: Core.Style.px(root.compact ? 4 : 8)
         radius: Core.Style.radiusM
         backgroundColor: root.compact ? Core.Theme.bgAlt : Core.Theme.surface
         color: Core.Theme.text

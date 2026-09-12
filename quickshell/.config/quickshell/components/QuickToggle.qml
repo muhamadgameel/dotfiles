@@ -50,9 +50,10 @@ Components.Card {
   interactive: !root.busy
   opacity: root.enabled ? 1 : Core.Style.opacityDisabled
 
-  backgroundColor: root.active ? Core.Theme.accent : Core.Theme.alpha(Core.Theme.surface, 0.5)
-  hoverColor: root.active ? Core.Theme.lighten(Core.Theme.accent, 0.08) : Core.Theme.surface
-  activeColor: root.active ? Core.Theme.lighten(Core.Theme.accent, 0.16) : Core.Theme.surfaceActive
+  backgroundColor: root.active ? Core.Theme.accent : Core.Theme.cardBg
+  // On the accent fill, the same hover and press as a primary button.
+  hoverColor: root.active ? Core.Theme.accentHover : Core.Theme.surface
+  activeColor: root.active ? Core.Theme.accentPressed : Core.Theme.surfaceActive
 
   onClicked: button => {
     if (button === Qt.RightButton && root.hasDetails)

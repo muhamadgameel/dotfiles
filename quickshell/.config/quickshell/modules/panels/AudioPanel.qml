@@ -237,9 +237,9 @@ Components.SlidingPanel {
 
         readonly property bool isActive: deviceSelectorRoot.currentDevice?.id === modelData.id
 
-        backgroundColor: isActive ? Core.Theme.alpha(Core.Theme.accent, 0.15) : Core.Theme.transparent
+        backgroundColor: isActive ? Core.Theme.alpha(Core.Theme.accent, Core.Style.opacityTint) : Core.Theme.transparent
         borderColor: isActive ? Core.Theme.accent : Core.Theme.transparent
-        borderWidth: isActive ? 1 : 0
+        borderWidth: isActive ? Core.Style.borderThin : 0
 
         interactive: !isActive
         hoverEnabled: !isActive

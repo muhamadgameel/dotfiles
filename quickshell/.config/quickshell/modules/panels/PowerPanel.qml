@@ -64,10 +64,10 @@ Components.SlidingPanel {
       implicitHeight: Core.Style.controlHeightL
       interactive: true
 
-      backgroundColor: armed ? Core.Theme.alpha(Core.Theme.error, 0.2) : Core.Theme.transparent
-      hoverColor: modelData.destructive ? Core.Theme.alpha(Core.Theme.error, 0.15) : Core.Theme.surfaceHover
+      backgroundColor: armed ? Core.Theme.alpha(Core.Theme.error, Core.Style.opacityTintStrong) : Core.Theme.transparent
+      hoverColor: modelData.destructive ? Core.Theme.alpha(Core.Theme.error, Core.Style.opacityTint) : Core.Theme.surfaceHover
       borderColor: armed ? Core.Theme.error : Core.Theme.transparent
-      borderWidth: armed ? 1 : 0
+      borderWidth: armed ? Core.Style.borderThin : 0
 
       onClicked: root.trigger(actionCard.modelData)
 

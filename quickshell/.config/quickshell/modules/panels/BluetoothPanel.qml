@@ -154,7 +154,7 @@ Components.SlidingPanel {
     Layout.topMargin: Core.Style.spaceXL
     visible: !Services.Bluetooth.enabled && Services.Bluetooth.available
     icon: "bluetooth-off"
-    iconSize: Core.Style.fontXXL * 2
+    iconSize: Core.Style.emptyIconSizeLarge
     message: "Bluetooth is disabled"
     hint: "Enable Bluetooth to connect devices"
   }
@@ -165,7 +165,7 @@ Components.SlidingPanel {
     Layout.topMargin: Core.Style.spaceXL
     visible: !Services.Bluetooth.available
     icon: "bluetooth-off"
-    iconSize: Core.Style.fontXXL * 2
+    iconSize: Core.Style.emptyIconSizeLarge
     message: "No Bluetooth adapter"
     hint: "Check if your device has Bluetooth hardware"
   }

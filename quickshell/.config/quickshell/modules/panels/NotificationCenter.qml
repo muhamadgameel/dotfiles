@@ -16,7 +16,7 @@ Components.SlidingPanel {
   id: root
 
   panelId: "notifications"
-  panelWidth: Math.round(420 * Core.Style.uiScale)
+  panelWidth: Core.Style.panelWidthWide
 
   headerIcon: Services.Notification.doNotDisturb ? "bell-off" : "bell"
   headerIconColor: Services.Notification.doNotDisturb ? Core.Theme.warning : Core.Theme.accent
@@ -67,7 +67,7 @@ Components.SlidingPanel {
     Layout.preferredHeight: Core.Style.controlHeightL * 4
     visible: Services.Notification.historyList.count === 0
     icon: "bell-off"
-    iconSize: Core.Style.fontXXXL * 2
+    iconSize: Core.Style.emptyIconSizeLarge
     message: "No notifications"
     hint: "Your notifications will appear here"
   }

@@ -71,7 +71,7 @@ Rectangle {
       property: "opacity"
       to: root.minOpacity
       duration: root.pulseDuration
-      easing.type: Easing.InOutQuad
+      easing.type: Core.Style.easePulse
     }
 
     // Ends at full opacity, so a finished pulse leaves a solid dot.
@@ -80,7 +80,7 @@ Rectangle {
       property: "opacity"
       to: 1.0
       duration: root.pulseDuration
-      easing.type: Easing.InOutQuad
+      easing.type: Core.Style.easePulse
     }
   }
 

@@ -39,8 +39,8 @@ Components.SlidingPanel {
   Components.ProgressRow {
     Layout.fillWidth: true
     value: Services.SystemStats.cpuUsage / 100
-    progressColor: root._statusColor(Services.SystemStats.cpuUsageStatus)
-    progressHeight: Core.Style.px(8)
+    progressColor: Core.Theme.statusColor(Services.SystemStats.cpuUsageStatus)
+    progressHeight: Core.Style.progressHeightL
   }
 
   // Per-core breakdown.
@@ -69,7 +69,7 @@ Components.SlidingPanel {
         labelInfo: Math.round(usage) + "%"
         value: usage / 100
         progressColor: usage > 90 ? Core.Theme.error : usage > 70 ? Core.Theme.warning : Core.Theme.accentAlt
-        progressHeight: Core.Style.px(4)
+        progressHeight: Core.Style.progressHeightS
         showPercentage: false
       }
     }
@@ -90,8 +90,8 @@ Components.SlidingPanel {
     label: "RAM"
     labelInfo: Core.Utils.formatBytes(Services.SystemStats.memUsed, 1) + " / " + Core.Utils.formatBytes(Services.SystemStats.memTotal, 1)
     value: Services.SystemStats.memPercent / 100
-    progressColor: root._statusColor(Services.SystemStats.memStatus)
-    progressHeight: Core.Style.px(8)
+    progressColor: Core.Theme.statusColor(Services.SystemStats.memStatus)
+    progressHeight: Core.Style.progressHeightL
     showPercentage: false
   }
 
@@ -102,7 +102,7 @@ Components.SlidingPanel {
     labelInfo: Core.Utils.formatBytes(Services.SystemStats.swapUsed, 1) + " / " + Core.Utils.formatBytes(Services.SystemStats.swapTotal, 1)
     value: Services.SystemStats.swapPercent / 100
     progressColor: Services.SystemStats.swapPercent > 50 ? Core.Theme.warning : Core.Theme.accentAlt
-    progressHeight: Core.Style.px(6)
+    progressHeight: Core.Style.progressHeightM
     showPercentage: false
   }
 
@@ -122,12 +122,12 @@ Components.SlidingPanel {
     Layout.fillWidth: true
     visible: Services.SystemStats.hasCpuTemp
     icon: "chip"
-    iconColor: root._statusColor(Services.SystemStats.cpuTempStatus, Core.Theme.text)
+    iconColor: Core.Theme.statusColor(Services.SystemStats.cpuTempStatus, Core.Theme.text)
     label: "CPU"
     value: Services.SystemStats.cpuTemp / 100
     valueText: Core.Utils.formatTemp(Services.SystemStats.cpuTemp)
-    progressColor: root._statusColor(Services.SystemStats.cpuTempStatus, Core.Theme.success)
-    progressHeight: Core.Style.px(6)
+    progressColor: Core.Theme.statusColor(Services.SystemStats.cpuTempStatus, Core.Theme.success)
+    progressHeight: Core.Style.progressHeightM
   }
 
   // GPU Temperature
@@ -135,12 +135,12 @@ Components.SlidingPanel {
     Layout.fillWidth: true
     visible: Services.SystemStats.hasGpuTemp
     icon: "gpu"
-    iconColor: root._statusColor(Services.SystemStats.gpuTempStatus, Core.Theme.text)
+    iconColor: Core.Theme.statusColor(Services.SystemStats.gpuTempStatus, Core.Theme.text)
     label: "GPU"
     value: Services.SystemStats.gpuTemp / 100
     valueText: Core.Utils.formatTemp(Services.SystemStats.gpuTemp)
-    progressColor: root._statusColor(Services.SystemStats.gpuTempStatus, Core.Theme.success)
-    progressHeight: Core.Style.px(6)
+    progressColor: Core.Theme.statusColor(Services.SystemStats.gpuTempStatus, Core.Theme.success)
+    progressHeight: Core.Style.progressHeightM
   }
 
   // No temperature sensors message
@@ -246,8 +246,8 @@ Components.SlidingPanel {
     label: Services.SystemStats.diskMount
     labelInfo: Core.Utils.formatBytes(Services.SystemStats.diskUsed, 1) + " / " + Core.Utils.formatBytes(Services.SystemStats.diskTotal, 1)
     value: Services.SystemStats.diskPercent / 100
-    progressColor: root._statusColor(Services.SystemStats.diskStatus)
-    progressHeight: Core.Style.px(10)
+    progressColor: Core.Theme.statusColor(Services.SystemStats.diskStatus)
+    progressHeight: Core.Style.progressHeightL
     showPercentage: false
   }
 
@@ -282,7 +282,7 @@ Components.SlidingPanel {
 
       Components.StatusDot {
         size: Core.Style.px(8)
-        color: root._statusColor(Services.SystemStats.healthStatus, Core.Theme.success)
+        color: Core.Theme.statusColor(Services.SystemStats.healthStatus, Core.Theme.success)
       }
 
       Components.Text {
@@ -300,14 +300,6 @@ Components.SlidingPanel {
   // ═══════════════════════════════════════════════════════════════════
   // HELPER FUNCTIONS
   // ═══════════════════════════════════════════════════════════════════
-
-  function _statusColor(status, normalColor) {
-    if (status === "critical")
-      return Core.Theme.error;
-    if (status === "warning")
-      return Core.Theme.warning;
-    return normalColor !== undefined ? normalColor : Core.Theme.accent;
-  }
 
   function _healthText(status) {
     if (status === "critical")

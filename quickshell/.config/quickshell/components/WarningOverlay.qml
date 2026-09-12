@@ -62,7 +62,7 @@ Rectangle {
       property: "opacity"
       to: root.maxOpacity
       duration: root.duration
-      easing.type: Easing.InOutQuad
+      easing.type: Core.Style.easePulse
     }
 
     // Ends at 0, so a finished pulse leaves nothing drawn.
@@ -71,7 +71,7 @@ Rectangle {
       property: "opacity"
       to: 0
       duration: root.duration
-      easing.type: Easing.InOutQuad
+      easing.type: Core.Style.easePulse
     }
   }
 

@@ -54,7 +54,7 @@ Rectangle {
 
   // === Styling Properties ===
   // Each defaults from the variant but stays overridable per instance.
-  property color backgroundColor: root._filled ? Core.Theme.alpha(Core.Theme.surface, 0.5) : Core.Theme.transparent
+  property color backgroundColor: root._filled ? Core.Theme.cardBg : Core.Theme.transparent
   property color hoverColor: root._filled ? Core.Theme.surface : Core.Theme.stateLayer(Core.Theme.surface, Core.Style.opacityHover)
   property color activeColor: Core.Theme.surfaceActive
   property color borderColor: root._outlined ? Core.Theme.surfaceHover : Core.Theme.transparent
@@ -78,7 +78,7 @@ Rectangle {
   // === Appearance ===
   radius: Core.Style.radiusS
 
-  readonly property color _effectiveBackground: backgroundColor == Core.Theme.transparent ? Core.Theme.transparentOf(hoverColor) : backgroundColor
+  readonly property color _effectiveBackground: Qt.colorEqual(backgroundColor, Core.Theme.transparent) ? Core.Theme.transparentOf(hoverColor) : backgroundColor
 
   color: {
     if (!hoverEnabled)

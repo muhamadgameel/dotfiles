@@ -43,7 +43,7 @@ Rectangle {
   property color placeholderColor: Core.Theme.textMuted
   property real fontSize: Core.Style.fontM
   property int borderRadius: Core.Style.radiusS
-  property int borderWidth: 1
+  property int borderWidth: Core.Style.borderThin
 
   // === Layout Properties ===
   Layout.fillWidth: true
@@ -77,6 +77,8 @@ Rectangle {
     color: root.textColor
     echoMode: root.echoMode
     inputMethodHints: root.inputMethodHints
+    // Set explicitly: QtQuick's input falls back to the system sans otherwise.
+    font.family: Core.Style.fontFamily
     font.pixelSize: root.fontSize
     clip: true
     selectByMouse: true
@@ -97,6 +99,7 @@ Rectangle {
       verticalAlignment: Text.AlignVCenter
       text: root.placeholder
       color: root.placeholderColor
+      font.family: Core.Style.fontFamily
       font.pixelSize: root.fontSize
       visible: !textInput.text && !textInput.activeFocus
     }

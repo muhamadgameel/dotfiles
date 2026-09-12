@@ -65,7 +65,7 @@ RowLayout {
       Components.StatusDot {
         anchors.bottom: parent.bottom
         anchors.horizontalCenter: parent.horizontalCenter
-        anchors.bottomMargin: 1
+        anchors.bottomMargin: Core.Style.spaceXXS
         size: Core.Style.px(4)
         visible: entry.item?.status === Status.NeedsAttention
         pulse: true

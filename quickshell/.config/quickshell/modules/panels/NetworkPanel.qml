@@ -157,7 +157,7 @@ Components.SlidingPanel {
     Layout.topMargin: Core.Style.spaceXL
     visible: !Services.Network.wifiEnabled
     icon: "wifi-off"
-    iconSize: Core.Style.fontXXL * 2
+    iconSize: Core.Style.emptyIconSizeLarge
     message: "Wi-Fi is disabled"
     hint: "Enable Wi-Fi to see available networks"
   }

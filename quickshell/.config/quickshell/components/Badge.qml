@@ -48,7 +48,7 @@ Rectangle {
   property color backgroundColor: {
     if (variant === "count")
       return Core.Theme.error;
-    return Core.Theme.alpha(textColor, 0.2);
+    return Core.Theme.alpha(textColor, Core.Style.opacityTintStrong);
   }
   property color borderColor: Core.Theme.transparent
   property int borderWidth: 0
@@ -68,13 +68,13 @@ Rectangle {
   // === Dimensions ===
   implicitWidth: {
     if (isCountVariant) {
-      return count > 0 ? Math.max(14, badgeText.implicitWidth + 6) : 8;
+      return count > 0 ? Math.max(Core.Style.px(14), badgeText.implicitWidth + Core.Style.px(6)) : Core.Style.px(8);
     }
     return badgeText.width + Core.Style.spaceM;
   }
   implicitHeight: {
     if (isCountVariant) {
-      return count > 0 ? 14 : 8;
+      return count > 0 ? Core.Style.px(14) : Core.Style.px(8);
     }
     return badgeText.height + Core.Style.spaceXS;
   }
@@ -100,10 +100,12 @@ Rectangle {
   }
 
   // === Text Content ===
+  // QtQuick's Text, so the family is set explicitly - see Button.qml.
   Text {
     id: badgeText
     anchors.centerIn: parent
     text: root.displayText
+    font.family: Core.Style.fontFamily
     font.pixelSize: root.fontSize
     font.weight: root.isCountVariant ? Font.Bold : Font.Normal
     color: root.isCountVariant ? Core.Theme.bg : root.textColor

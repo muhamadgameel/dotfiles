@@ -83,7 +83,7 @@ Rectangle {
 
   // === Computed Colors Based on Variant ===
   readonly property color _backgroundColor: {
-    if (backgroundColor !== Core.Theme.transparent)
+    if (!Qt.colorEqual(backgroundColor, Core.Theme.transparent))
       return backgroundColor;
     switch (variant) {
     case "primary":
@@ -100,11 +100,11 @@ Rectangle {
   }
 
   readonly property color _hoverColor: {
-    if (hoverColor !== Core.Theme.transparent)
+    if (!Qt.colorEqual(hoverColor, Core.Theme.transparent))
       return hoverColor;
     switch (variant) {
     case "primary":
-      return Core.Theme.lighten(Core.Theme.accent, 0.1);
+      return Core.Theme.accentHover;
     case "secondary":
       return Core.Theme.surfaceHover;
     case "danger":
@@ -117,7 +117,7 @@ Rectangle {
   }
 
   readonly property color _iconColor: {
-    if (iconColor !== Core.Theme.transparent)
+    if (!Qt.colorEqual(iconColor, Core.Theme.transparent))
       return iconColor;
     switch (variant) {
     case "primary":
@@ -130,7 +130,7 @@ Rectangle {
   }
 
   readonly property color _textColor: {
-    if (textColor !== Core.Theme.transparent)
+    if (!Qt.colorEqual(textColor, Core.Theme.transparent))
       return textColor;
     switch (variant) {
     case "primary":
@@ -160,8 +160,9 @@ Rectangle {
     }
   }
 
-  // Use hoverColor's RGB with 0 alpha when transparent to prevent black flash during animation
-  readonly property color _effectiveBackground: _backgroundColor == Core.Theme.transparent ? Qt.rgba(_hoverColor.r, _hoverColor.g, _hoverColor.b, 0) : _backgroundColor
+  // Fades from the hover colour at zero alpha rather than from `transparent`,
+  // which would run the channels through black mid-fade. See Theme.transparentOf.
+  readonly property color _effectiveBackground: Qt.colorEqual(_backgroundColor, Core.Theme.transparent) ? Core.Theme.transparentOf(_hoverColor) : _backgroundColor
 
   color: hovered ? _hoverColor : _effectiveBackground
 
@@ -187,9 +188,14 @@ Rectangle {
 
     Text {
       id: textLabel
+      // QtQuick's Text, not components/Text (an Item with a layout and an icon
+      // slot - too much to repeat in every button). That means setting the
+      // family here: without it the label fell back to the system sans (Noto
+      // Sans) instead of the shell's font.
       anchors.verticalCenter: parent.verticalCenter
       visible: root.text !== ""
       text: root.text
+      font.family: Core.Style.fontFamily
       font.pixelSize: root.textSize
       font.weight: Core.Style.weightMedium
       color: root._textColor

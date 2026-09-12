@@ -31,7 +31,7 @@ Rectangle {
   property bool reversed: false
 
   implicitWidth: Core.Style.px(200)
-  implicitHeight: Core.Style.px(6)
+  implicitHeight: Core.Style.progressHeightM
   radius: Core.Style.radiusFull
   color: trackColor
 

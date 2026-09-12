@@ -36,7 +36,7 @@ Flickable {
 
   // === Scrollbar Properties ===
   property bool showScrollbar: true
-  property int scrollbarWidth: 2
+  property int scrollbarWidth: Core.Style.px(2)
   property color scrollbarColor: Core.Theme.alpha(Core.Theme.accent, 0.8)
 
   // === Behavior Properties ===
@@ -62,7 +62,7 @@ Flickable {
     id: verticalScrollbar
     visible: root.showScrollbar && root.orientation === Qt.Vertical && root.contentHeight > root.height
     parent: root
-    z: 100
+    z: Core.Style.zOverlay
 
     anchors.right: parent.right
     anchors.top: parent.top
@@ -83,7 +83,7 @@ Flickable {
 
       // Calculate handle position and size
       readonly property real viewRatio: root.height / root.contentHeight
-      readonly property real handleHeight: Math.max(20, parent.height * viewRatio)
+      readonly property real handleHeight: Math.max(Core.Style.px(20), parent.height * viewRatio)
 
       height: handleHeight
       y: root.contentHeight > root.height ? (parent.height - handleHeight) * (root.contentY / (root.contentHeight - root.height)) : 0
@@ -101,7 +101,7 @@ Flickable {
     id: horizontalScrollbar
     visible: root.showScrollbar && root.orientation === Qt.Horizontal && root.contentWidth > root.width
     parent: root
-    z: 100
+    z: Core.Style.zOverlay
 
     anchors.left: parent.left
     anchors.right: parent.right
@@ -122,7 +122,7 @@ Flickable {
 
       // Calculate handle position and size
       readonly property real viewRatio: root.width / root.contentWidth
-      readonly property real handleWidth: Math.max(20, parent.width * viewRatio)
+      readonly property real handleWidth: Math.max(Core.Style.px(20), parent.width * viewRatio)
 
       width: handleWidth
       x: root.contentWidth > root.width ? (parent.width - handleWidth) * (root.contentX / (root.contentWidth - root.width)) : 0
