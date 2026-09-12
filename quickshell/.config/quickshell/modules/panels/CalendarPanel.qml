@@ -46,15 +46,21 @@ Components.SlidingPanel {
   readonly property int viewYear: viewMonth.getFullYear()
   readonly property int viewMonthIndex: viewMonth.getMonth()
 
-  // Monday-first, matching the locale convention here.
-  readonly property var dayNames: ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"]
+  // First column of the grid, as a JS weekday (0 = Sunday). 6 is Saturday, the
+  // convention here; 1 would be a Monday-first calendar.
+  readonly property int weekStart: 6
+
+  readonly property var _weekdayNames: ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"]
+
+  // The week rotated to begin at weekStart.
+  readonly property var dayNames: root._weekdayNames.slice(root.weekStart).concat(root._weekdayNames.slice(0, root.weekStart))
 
   readonly property int daysInMonth: new Date(viewYear, viewMonthIndex + 1, 0).getDate()
 
-  // Weekday index of the 1st, shifted so Monday is 0.
+  // How far the 1st sits from the first column.
   readonly property int leadingBlanks: {
     const jsDay = new Date(viewYear, viewMonthIndex, 1).getDay();  // 0 = Sunday
-    return (jsDay + 6) % 7;
+    return (jsDay - root.weekStart + 7) % 7;
   }
 
   function isToday(day) {
