@@ -6,6 +6,7 @@ import Quickshell.Services.Notifications
 
 import "../config" as Config
 import "../core" as Core
+import "../services" as Services
 
 /**
 * Notification Service
@@ -26,7 +27,9 @@ Singleton {
   property var urgencyDurations: [3000, 5000, 10000]
 
   // === State ===
-  readonly property bool doNotDisturb: Config.Config.doNotDisturb
+  // The saved setting, or game mode holding popups back. Game mode never writes
+  // the setting, so turning it off leaves your own choice exactly as it was.
+  readonly property bool doNotDisturb: Config.Config.doNotDisturb || Services.GameMode.active
   property int unreadCount: 0
 
   // Active notifications with no room on screen. Derived, so the popup stack's

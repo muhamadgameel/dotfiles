@@ -22,7 +22,7 @@ Item {
     id: notificationButton
     icon: Services.Notification.doNotDisturb ? "bell-off" : "bell"
     iconColor: Services.Notification.doNotDisturb ? Config.Theme.warning : Config.Theme.text
-    tooltipText: Services.Notification.doNotDisturb ? "Do Not Disturb" : "Notifications" + (root.unreadCount > 0 ? " (" + root.unreadCount + " unread)" : "")
+    tooltipText: Services.Notification.doNotDisturb ? (Services.GameMode.active && !Config.Config.doNotDisturb ? "Do Not Disturb (game mode)" : "Do Not Disturb") : "Notifications" + (root.unreadCount > 0 ? " (" + root.unreadCount + " unread)" : "")
 
     onClicked: function (button) {
       if (button === Qt.RightButton) {

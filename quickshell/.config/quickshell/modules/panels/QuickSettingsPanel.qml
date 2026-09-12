@@ -102,7 +102,8 @@ Components.SlidingPanel {
 
       icon: Services.Notification.doNotDisturb ? "bell-off" : "bell"
       label: "Do Not Disturb"
-      subtitle: Services.Notification.doNotDisturb ? "Popups hidden" : "Off"
+      // Says so when game mode, not the setting, is what is holding popups.
+      subtitle: !Services.Notification.doNotDisturb ? "Off" : Config.Config.doNotDisturb ? "Popups hidden" : "Game mode"
       active: Services.Notification.doNotDisturb
 
       // No chevron: the label needs the room, and the bar's bell already opens
@@ -120,6 +121,19 @@ Components.SlidingPanel {
       busy: Services.Idle.busy
 
       onToggled: Services.Idle.toggle()
+    }
+
+    // Full width: a seventh toggle in a two-column grid would sit alone.
+    Components.QuickToggle {
+      Layout.fillWidth: true
+      Layout.columnSpan: 2
+
+      icon: "gamepad"
+      label: "Game Mode"
+      subtitle: Services.GameMode.active ? `${Services.GameMode.reason} - popups held, Performance power` : "Off"
+      active: Services.GameMode.active
+
+      onToggled: Services.GameMode.toggle()
     }
   }
 

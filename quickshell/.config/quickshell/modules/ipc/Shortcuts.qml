@@ -109,6 +109,13 @@ Scope {
 
   GlobalShortcut {
     appid: "quickshell"
+    name: "toggleGameMode"
+    description: "Toggle game mode by hand"
+    onPressed: Services.GameMode.toggle()
+  }
+
+  GlobalShortcut {
+    appid: "quickshell"
     name: "toggleIdleInhibit"
     description: "Toggle the idle inhibitor"
     onPressed: Services.Idle.toggle()

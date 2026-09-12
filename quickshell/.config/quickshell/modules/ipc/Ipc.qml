@@ -16,6 +16,7 @@ import "../../services" as Services
 *   qs ipc call notifications toggleDnd
 *   qs ipc call media playPause
 *   qs ipc call idle toggle
+*   qs ipc call gamemode toggle
 *
 * `qs ipc show` lists the handlers and their signatures.
 *
@@ -175,6 +176,31 @@ Scope {
 
     function status(): string {
       return Services.Idle.inhibited ? "inhibited" : "released";
+    }
+  }
+
+  // `enter` and `exit` are what gamemode.ini's [custom] hooks call; `toggle`
+  // is the manual switch.
+  IpcHandler {
+    target: "gamemode"
+
+    function enter(): string {
+      Services.GameMode.enter();
+      return Services.GameMode.reason;
+    }
+
+    function exit(): string {
+      Services.GameMode.exit();
+      return Services.GameMode.reason;
+    }
+
+    function toggle(): string {
+      Services.GameMode.toggle();
+      return Services.GameMode.reason;
+    }
+
+    function status(): string {
+      return Services.GameMode.reason;
     }
   }
 
