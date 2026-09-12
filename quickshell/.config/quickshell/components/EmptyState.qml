@@ -1,6 +1,5 @@
 import QtQuick
 import QtQuick.Layouts
-import "../config" as Config
 import "../core" as Core
 
 import "." as Components
@@ -58,7 +57,7 @@ Item {
       Layout.alignment: Qt.AlignHCenter
       icon: root.icon
       size: root.iconSize
-      color: Config.Theme.textMuted
+      color: Core.Theme.textMuted
     }
 
     Components.Text {
@@ -66,7 +65,7 @@ Item {
       horizontalAlignment: Text.AlignHCenter
       text: root.message
       size: root.hint ? Core.Style.fontXL : Core.Style.fontL
-      color: Config.Theme.textMuted
+      color: Core.Theme.textMuted
       wrapMode: Text.WordWrap
     }
 
@@ -76,7 +75,7 @@ Item {
       visible: root.hint !== ""
       text: root.hint
       size: Core.Style.fontM
-      color: Config.Theme.textDim
+      color: Core.Theme.textDim
       wrapMode: Text.WordWrap
     }
   }

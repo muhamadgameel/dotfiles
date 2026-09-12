@@ -1,6 +1,5 @@
 import QtQuick
 
-import "../config" as Config
 import "../core" as Core
 import "../services" as Services
 
@@ -63,10 +62,10 @@ Rectangle {
   property real padding: Core.Style.spaceS
 
   // === Color Properties (for easy customization) ===
-  property color iconColor: Config.Theme.transparent
-  property color textColor: Config.Theme.transparent
-  property color backgroundColor: Config.Theme.transparent
-  property color hoverColor: Config.Theme.transparent
+  property color iconColor: Core.Theme.transparent
+  property color textColor: Core.Theme.transparent
+  property color backgroundColor: Core.Theme.transparent
+  property color hoverColor: Core.Theme.transparent
 
   // === Tooltip Properties ===
   property string tooltipText: ""
@@ -84,62 +83,62 @@ Rectangle {
 
   // === Computed Colors Based on Variant ===
   readonly property color _backgroundColor: {
-    if (backgroundColor !== Config.Theme.transparent)
+    if (backgroundColor !== Core.Theme.transparent)
       return backgroundColor;
     switch (variant) {
     case "primary":
-      return Config.Theme.accent;
+      return Core.Theme.accent;
     case "secondary":
-      return Config.Theme.surface;
+      return Core.Theme.surface;
     case "danger":
-      return Config.Theme.transparent;
+      return Core.Theme.transparent;
     case "ghost":
-      return Config.Theme.transparent;
+      return Core.Theme.transparent;
     default:
-      return Config.Theme.transparent;
+      return Core.Theme.transparent;
     }
   }
 
   readonly property color _hoverColor: {
-    if (hoverColor !== Config.Theme.transparent)
+    if (hoverColor !== Core.Theme.transparent)
       return hoverColor;
     switch (variant) {
     case "primary":
-      return Config.Theme.lighten(Config.Theme.accent, 0.1);
+      return Core.Theme.lighten(Core.Theme.accent, 0.1);
     case "secondary":
-      return Config.Theme.surfaceHover;
+      return Core.Theme.surfaceHover;
     case "danger":
-      return Config.Theme.error;
+      return Core.Theme.error;
     case "ghost":
-      return Config.Theme.alpha(Config.Theme.text, 0.1);
+      return Core.Theme.alpha(Core.Theme.text, 0.1);
     default:
-      return Config.Theme.surfaceHover;
+      return Core.Theme.surfaceHover;
     }
   }
 
   readonly property color _iconColor: {
-    if (iconColor !== Config.Theme.transparent)
+    if (iconColor !== Core.Theme.transparent)
       return iconColor;
     switch (variant) {
     case "primary":
-      return Config.Theme.bg;
+      return Core.Theme.bg;
     case "danger":
-      return hovered ? Config.Theme.bg : Config.Theme.text;
+      return hovered ? Core.Theme.bg : Core.Theme.text;
     default:
-      return Config.Theme.text;
+      return Core.Theme.text;
     }
   }
 
   readonly property color _textColor: {
-    if (textColor !== Config.Theme.transparent)
+    if (textColor !== Core.Theme.transparent)
       return textColor;
     switch (variant) {
     case "primary":
-      return Config.Theme.bg;
+      return Core.Theme.bg;
     case "danger":
-      return hovered ? Config.Theme.bg : Config.Theme.text;
+      return hovered ? Core.Theme.bg : Core.Theme.text;
     default:
-      return Config.Theme.text;
+      return Core.Theme.text;
     }
   }
 
@@ -162,7 +161,7 @@ Rectangle {
   }
 
   // Use hoverColor's RGB with 0 alpha when transparent to prevent black flash during animation
-  readonly property color _effectiveBackground: _backgroundColor == Config.Theme.transparent ? Qt.rgba(_hoverColor.r, _hoverColor.g, _hoverColor.b, 0) : _backgroundColor
+  readonly property color _effectiveBackground: _backgroundColor == Core.Theme.transparent ? Qt.rgba(_hoverColor.r, _hoverColor.g, _hoverColor.b, 0) : _backgroundColor
 
   color: hovered ? _hoverColor : _effectiveBackground
 
@@ -206,9 +205,9 @@ Rectangle {
     z: -1
 
     visible: root.activeFocus
-    color: Config.Theme.transparent
+    color: Core.Theme.transparent
     radius: parent.radius + Core.Style.focusRingOffset
-    border.color: Config.Theme.focusRing
+    border.color: Core.Theme.focusRing
     border.width: Core.Style.focusRingWidth
   }
 

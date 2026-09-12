@@ -1,6 +1,5 @@
 import QtQuick
 
-import "../config" as Config
 import "../core" as Core
 
 /**
@@ -38,7 +37,7 @@ Flickable {
   // === Scrollbar Properties ===
   property bool showScrollbar: true
   property int scrollbarWidth: 2
-  property color scrollbarColor: Config.Theme.alpha(Config.Theme.accent, 0.8)
+  property color scrollbarColor: Core.Theme.alpha(Core.Theme.accent, 0.8)
 
   // === Behavior Properties ===
   property int orientation: Qt.Vertical
@@ -72,7 +71,7 @@ Flickable {
 
     width: root.scrollbarWidth
     radius: Core.Style.radiusFull
-    color: Config.Theme.transparent
+    color: Core.Theme.transparent
 
     anchors.rightMargin: root.scrollbarWidth + Core.Style.spaceXXS
 
@@ -111,7 +110,7 @@ Flickable {
 
     height: root.scrollbarWidth
     radius: Core.Style.radiusFull
-    color: Config.Theme.transparent
+    color: Core.Theme.transparent
 
     anchors.bottomMargin: root.scrollbarWidth + Core.Style.spaceXXS
 

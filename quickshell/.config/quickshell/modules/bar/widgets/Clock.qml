@@ -41,7 +41,7 @@ Item {
     Components.Text {
       text: Services.Time.dateShort
       size: Core.Style.fontM
-      color: Config.Theme.textDim
+      color: Core.Theme.textDim
       weight: Core.Style.weightNormal
     }
   }

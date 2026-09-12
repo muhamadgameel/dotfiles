@@ -1,7 +1,6 @@
 import QtQuick
 
 import "../../../components" as Components
-import "../../../config" as Config
 import "../../../core" as Core
 import "../../../services" as Services
 
@@ -19,7 +18,7 @@ Components.Button {
 
   icon: Services.Audio.getMicIcon()
 
-  iconColor: Services.Audio.micMuted ? Config.Theme.textMuted : Config.Theme.text
+  iconColor: Services.Audio.micMuted ? Core.Theme.textMuted : Core.Theme.text
   iconSize: Core.Style.fontL
 
   text: {
@@ -30,7 +29,7 @@ Components.Button {
     return Math.round(Services.Audio.micVolume * 100) + "%";
   }
 
-  textColor: Services.Audio.micMuted ? Config.Theme.textMuted : Config.Theme.text
+  textColor: Services.Audio.micMuted ? Core.Theme.textMuted : Core.Theme.text
 
   tooltipText: {
     const name = Services.Audio.deviceName(Services.Audio.source);

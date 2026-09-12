@@ -236,8 +236,8 @@ Scope {
     target: "theme"
 
     function set(name: string): string {
-      if (!Config.Themes.has(name))
-        return `unknown theme "${name}"; known: ${Config.Themes.names.join(", ")}`;
+      if (!Core.Themes.has(name))
+        return `unknown theme "${name}"; known: ${Core.Themes.names.join(", ")}`;
       Config.Config.setTheme(name);
       return `theme: ${name}`;
     }
@@ -247,7 +247,7 @@ Scope {
     }
 
     function list(): string {
-      return Config.Themes.names.join(", ");
+      return Core.Themes.names.join(", ");
     }
 
     function scale(factor: real): string {

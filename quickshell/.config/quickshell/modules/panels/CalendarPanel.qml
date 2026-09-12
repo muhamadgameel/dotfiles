@@ -4,7 +4,6 @@ import QtQuick
 import QtQuick.Layouts
 
 import "../../components" as Components
-import "../../config" as Config
 import "../../core" as Core
 import "../../services" as Services
 
@@ -17,7 +16,7 @@ Components.SlidingPanel {
   panelId: "calendar"
 
   headerIcon: "calendar"
-  headerIconColor: Config.Theme.accent
+  headerIconColor: Core.Theme.accent
   headerTitle: Services.Time.timeShort
   headerSubtitle: Services.Time.dateLong
 
@@ -122,7 +121,7 @@ Components.SlidingPanel {
         horizontalAlignment: Text.AlignHCenter
         text: modelData
         size: Core.Style.fontXS
-        color: Config.Theme.textMuted
+        color: Core.Theme.textMuted
         weight: Core.Style.weightBold
       }
     }
@@ -161,13 +160,13 @@ Components.SlidingPanel {
         Layout.preferredHeight: Core.Style.controlHeightS
 
         radius: Core.Style.radiusS
-        color: today ? Config.Theme.accent : Config.Theme.transparent
+        color: today ? Core.Theme.accent : Core.Theme.transparent
 
         Components.Text {
           anchors.centerIn: parent
           text: dayCell.day
           size: Core.Style.fontS
-          color: dayCell.today ? Config.Theme.bg : Config.Theme.text
+          color: dayCell.today ? Core.Theme.bg : Core.Theme.text
           weight: dayCell.today ? Core.Style.weightBold : Core.Style.weightNormal
         }
       }
@@ -196,7 +195,7 @@ Components.SlidingPanel {
       horizontalAlignment: Text.AlignHCenter
       text: Services.Time.dateLong
       size: Core.Style.fontS
-      color: Config.Theme.textDim
+      color: Core.Theme.textDim
     }
   }
 }

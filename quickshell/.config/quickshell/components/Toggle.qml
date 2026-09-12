@@ -1,6 +1,5 @@
 import QtQuick
 
-import "../config" as Config
 import "../core" as Core
 
 /**
@@ -35,11 +34,11 @@ Rectangle {
   // Was inert on hover - it read only `checked`, despite being the control you
   // reach for most in a FormRow.
   color: {
-    const base = checked ? Config.Theme.accent : Config.Theme.surfaceHover;
+    const base = checked ? Core.Theme.accent : Core.Theme.surfaceHover;
     if (mouse.pressed)
-      return Config.Theme.stateLayer(base, Core.Style.opacityPressed);
+      return Core.Theme.stateLayer(base, Core.Style.opacityPressed);
     if (mouse.containsMouse)
-      return Config.Theme.stateLayer(base, Core.Style.opacityHover);
+      return Core.Theme.stateLayer(base, Core.Style.opacityHover);
     return base;
   }
 
@@ -66,7 +65,7 @@ Rectangle {
     x: root.checked ? parent.width - width - Core.Style.px(3) : Core.Style.px(3)
     anchors.verticalCenter: parent.verticalCenter
 
-    color: Config.Theme.text
+    color: Core.Theme.text
 
     Behavior on x {
       NumberAnimation {
@@ -85,9 +84,9 @@ Rectangle {
     z: -1
 
     visible: root.activeFocus
-    color: Config.Theme.transparent
+    color: Core.Theme.transparent
     radius: parent.radius + Core.Style.focusRingOffset
-    border.color: Config.Theme.focusRing
+    border.color: Core.Theme.focusRing
     border.width: Core.Style.focusRingWidth
   }
 

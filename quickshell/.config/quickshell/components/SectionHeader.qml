@@ -1,6 +1,5 @@
 import QtQuick
 import QtQuick.Layouts
-import "../config" as Config
 import "../core" as Core
 
 import "." as Components
@@ -20,7 +19,7 @@ import "." as Components
 *
 *   SectionHeader {
 *     title: "Applications"
-*     Text { text: `${count} active`; color: Config.Theme.textDim }
+*     Text { text: `${count} active`; color: Core.Theme.textDim }
 *   }
 */
 RowLayout {
@@ -28,7 +27,7 @@ RowLayout {
 
   property string title: ""
   property string icon: ""
-  property color iconColor: Config.Theme.accent
+  property color iconColor: Core.Theme.accent
 
   // Trailing content, right-aligned on the same line as the title.
   default property alias trailing: trailingRow.data
@@ -48,7 +47,7 @@ RowLayout {
     text: root.title
     size: Core.Style.fontM
     weight: Core.Style.weightBold
-    color: Config.Theme.textDim
+    color: Core.Theme.textDim
 
     // Slight tracking: the heading is set smaller and dimmer than the rows it
     // labels, so it needs the extra separation to still read as a heading

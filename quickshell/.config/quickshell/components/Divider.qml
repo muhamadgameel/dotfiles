@@ -1,7 +1,7 @@
 import QtQuick
 import QtQuick.Layouts
 
-import "../config" as Config
+import "../core" as Core
 
 /**
 * Divider - one-pixel separator line
@@ -27,5 +27,5 @@ Rectangle {
   Layout.fillWidth: !vertical
   Layout.fillHeight: vertical
 
-  color: Config.Theme.surfaceHover
+  color: Core.Theme.surfaceHover
 }

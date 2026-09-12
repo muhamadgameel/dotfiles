@@ -46,7 +46,7 @@ Variants {
     readonly property bool atTop: Config.Config.barPosition === "top"
 
     implicitHeight: Core.Style.barHeight
-    color: Config.Theme.transparent
+    color: Core.Theme.transparent
 
     WlrLayershell.namespace: "quickshell-bar"
     WlrLayershell.layer: WlrLayer.Top

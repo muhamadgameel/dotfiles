@@ -4,7 +4,6 @@ import QtQuick
 import QtQuick.Layouts
 
 import "../../components" as Components
-import "../../config" as Config
 import "../../core" as Core
 import "../../services" as Services
 
@@ -26,7 +25,7 @@ Components.SlidingPanel {
 
   // Header configuration
   headerIcon: Services.Audio.getVolumeIcon()
-  headerIconColor: Services.Audio.muted ? Config.Theme.error : Config.Theme.accent
+  headerIconColor: Services.Audio.muted ? Core.Theme.error : Core.Theme.accent
   headerTitle: "Sound"
   headerSubtitle: Services.Audio.deviceName(Services.Audio.sink)
 
@@ -86,7 +85,7 @@ Components.SlidingPanel {
 
     Components.Text {
       text: _streamCount + " active"
-      color: Config.Theme.textDim
+      color: Core.Theme.textDim
       size: Core.Style.fontS
 
       readonly property int _streamCount: Services.Audio.sinkStreams.length + Services.Audio.sourceStreams.length
@@ -168,13 +167,13 @@ Components.SlidingPanel {
       Components.Icon {
         icon: section.levelIcon
         size: Core.Style.fontL
-        color: section.muted ? Config.Theme.error : Config.Theme.accent
+        color: section.muted ? Core.Theme.error : Core.Theme.accent
       }
 
       Components.Text {
         text: Services.Audio.deviceName(section.node)
         size: Core.Style.fontS
-        color: Config.Theme.textDim
+        color: Core.Theme.textDim
         Layout.fillWidth: true
       }
 
@@ -183,13 +182,13 @@ Components.SlidingPanel {
         text: Math.round(section.volume * 100) + "%"
         size: Core.Style.fontM
         weight: Core.Style.weightBold
-        color: section.muted ? Config.Theme.textMuted : section._boosted ? Config.Theme.warning : Config.Theme.text
+        color: section.muted ? Core.Theme.textMuted : section._boosted ? Core.Theme.warning : Core.Theme.text
       }
 
       // Mute button
       Components.Button {
         icon: section.muted ? section.mutedIcon : section.icon
-        iconColor: section.muted ? Config.Theme.error : Config.Theme.text
+        iconColor: section.muted ? Core.Theme.error : Core.Theme.text
         tooltipText: section.muted ? "Unmute" : "Mute"
         onClicked: section.muteToggled()
       }
@@ -201,7 +200,7 @@ Components.SlidingPanel {
       value: section.volume
       maxValue: section.maxValue
       onValueUpdated: newValue => section.volumeRequested(newValue)
-      progressColor: section.muted ? Config.Theme.error : section._boosted ? Config.Theme.warning : Config.Theme.accent
+      progressColor: section.muted ? Core.Theme.error : section._boosted ? Core.Theme.warning : Core.Theme.accent
     }
 
     // Device selector (collapsible)
@@ -238,8 +237,8 @@ Components.SlidingPanel {
 
         readonly property bool isActive: deviceSelectorRoot.currentDevice?.id === modelData.id
 
-        backgroundColor: isActive ? Config.Theme.alpha(Config.Theme.accent, 0.15) : Config.Theme.transparent
-        borderColor: isActive ? Config.Theme.accent : Config.Theme.transparent
+        backgroundColor: isActive ? Core.Theme.alpha(Core.Theme.accent, 0.15) : Core.Theme.transparent
+        borderColor: isActive ? Core.Theme.accent : Core.Theme.transparent
         borderWidth: isActive ? 1 : 0
 
         interactive: !isActive
@@ -256,7 +255,7 @@ Components.SlidingPanel {
           Components.Icon {
             icon: Services.Audio.deviceIcon(deviceCard.modelData)
             size: Core.Style.fontL
-            color: deviceCard.isActive ? Config.Theme.accent : Config.Theme.text
+            color: deviceCard.isActive ? Core.Theme.accent : Core.Theme.text
           }
 
           ColumnLayout {
@@ -265,7 +264,7 @@ Components.SlidingPanel {
 
             Components.Text {
               text: Services.Audio.deviceName(deviceCard.modelData)
-              color: deviceCard.isActive ? Config.Theme.accent : Config.Theme.text
+              color: deviceCard.isActive ? Core.Theme.accent : Core.Theme.text
               weight: deviceCard.isActive ? Core.Style.weightBold : Core.Style.weightNormal
               elide: Text.ElideRight
               Layout.fillWidth: true
@@ -275,7 +274,7 @@ Components.SlidingPanel {
               visible: deviceCard.modelData.description && deviceCard.modelData.description !== deviceCard.modelData.nickname
               text: deviceCard.modelData.name || ""
               size: Core.Style.fontXS
-              color: Config.Theme.textMuted
+              color: Core.Theme.textMuted
               elide: Text.ElideRight
               Layout.fillWidth: true
             }
@@ -285,7 +284,7 @@ Components.SlidingPanel {
             visible: deviceCard.isActive
             icon: "check"
             size: Core.Style.fontM
-            color: Config.Theme.accent
+            color: Core.Theme.accent
           }
         }
       }
@@ -337,33 +336,33 @@ Components.SlidingPanel {
         Components.Icon {
           icon: streamRoot.streamIcon
           size: Core.Style.fontL
-          color: streamRoot.streamMuted ? Config.Theme.textMuted : Config.Theme.text
+          color: streamRoot.streamMuted ? Core.Theme.textMuted : Core.Theme.text
         }
 
         Components.Text {
           text: streamRoot.streamName
           elide: Text.ElideRight
           Layout.fillWidth: true
-          color: streamRoot.streamMuted ? Config.Theme.textMuted : Config.Theme.text
+          color: streamRoot.streamMuted ? Core.Theme.textMuted : Core.Theme.text
         }
 
         // Recording indicator
         Components.Badge {
           visible: !streamRoot.isOutput
           text: "REC"
-          backgroundColor: Config.Theme.error
+          backgroundColor: Core.Theme.error
         }
 
         Components.Text {
           text: Math.round(streamRoot.streamVolume * 100) + "%"
           size: Core.Style.fontS
-          color: streamRoot.streamMuted ? Config.Theme.textMuted : Config.Theme.textDim
+          color: streamRoot.streamMuted ? Core.Theme.textMuted : Core.Theme.textDim
         }
 
         Components.Button {
           icon: streamRoot.streamMuted ? (streamRoot.isOutput ? "volume-mute" : "microphone-off") : (streamRoot.isOutput ? "volume-high" : "microphone")
           iconSize: Core.Style.fontM
-          iconColor: streamRoot.streamMuted ? Config.Theme.error : Config.Theme.text
+          iconColor: streamRoot.streamMuted ? Core.Theme.error : Core.Theme.text
           tooltipText: streamRoot.streamMuted ? "Unmute" : "Mute"
           onClicked: {
             if (streamRoot.node?.audio) {
@@ -382,7 +381,7 @@ Components.SlidingPanel {
             streamRoot.node.audio.volume = Core.Utils.clamp(newValue, 0, 1.5);
           }
         }
-        progressColor: streamRoot.streamMuted ? Config.Theme.error : (streamRoot.streamVolume > 1.0 ? Config.Theme.warning : Config.Theme.accent)
+        progressColor: streamRoot.streamMuted ? Core.Theme.error : (streamRoot.streamVolume > 1.0 ? Core.Theme.warning : Core.Theme.accent)
       }
     }
   }

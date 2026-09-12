@@ -39,7 +39,7 @@ RowLayout {
   Components.Button {
     icon: "power"
     iconSize: Core.Style.fontL
-    iconColor: Config.Theme.error
+    iconColor: Core.Theme.error
     visible: Config.Config.barShowPower
     tooltipText: "Power menu"
     onClicked: root.powerRequested()

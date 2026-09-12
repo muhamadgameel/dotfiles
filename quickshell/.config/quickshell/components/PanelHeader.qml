@@ -1,6 +1,5 @@
 import QtQuick
 import QtQuick.Layouts
-import "../config" as Config
 import "../core" as Core
 
 import "." as Components
@@ -23,7 +22,7 @@ RowLayout {
   id: root
 
   property string icon: ""
-  property color iconColor: Config.Theme.text
+  property color iconColor: Core.Theme.text
   property string title: ""
   property string subtitle: ""
 
@@ -67,7 +66,7 @@ RowLayout {
     Components.Text {
       text: root.subtitle
       size: Core.Style.fontS
-      color: Config.Theme.textDim
+      color: Core.Theme.textDim
       visible: root.subtitle !== ""
     }
   }

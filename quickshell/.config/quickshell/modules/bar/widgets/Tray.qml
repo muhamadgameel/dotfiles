@@ -7,7 +7,6 @@ import Quickshell.Services.SystemTray
 import Quickshell.Widgets
 
 import "../../../components" as Components
-import "../../../config" as Config
 import "../../../core" as Core
 import "../../../services" as Services
 
@@ -45,7 +44,7 @@ RowLayout {
       Rectangle {
         anchors.fill: parent
         radius: Core.Style.radiusS
-        color: mouse.containsMouse ? Config.Theme.surfaceHover : Config.Theme.transparent
+        color: mouse.containsMouse ? Core.Theme.surfaceHover : Core.Theme.transparent
 
         Behavior on color {
           ColorAnimation {
@@ -70,7 +69,7 @@ RowLayout {
         size: Core.Style.px(4)
         visible: entry.item?.status === Status.NeedsAttention
         pulse: true
-        color: Config.Theme.warning
+        color: Core.Theme.warning
       }
 
       MouseArea {

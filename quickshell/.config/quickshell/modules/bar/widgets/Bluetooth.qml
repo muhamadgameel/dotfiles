@@ -1,7 +1,6 @@
 import QtQuick
 
 import "../../../components" as Components
-import "../../../config" as Config
 import "../../../core" as Core
 import "../../../services" as Services
 
@@ -28,10 +27,10 @@ Components.Button {
 
   readonly property color statusColor: {
     if (!Services.Bluetooth.available || Services.Bluetooth.blocked || !Services.Bluetooth.enabled)
-      return Config.Theme.textMuted;
+      return Core.Theme.textMuted;
     if (Services.Bluetooth.hasConnectedDevices)
-      return Config.Theme.accentAlt;
-    return Config.Theme.text;
+      return Core.Theme.accentAlt;
+    return Core.Theme.text;
   }
 
   readonly property string _displayText: {
@@ -89,6 +88,6 @@ Components.Button {
     visible: Services.Bluetooth.discovering
     pulse: true
     pulseLoops: Animation.Infinite
-    color: Config.Theme.accentAlt
+    color: Core.Theme.accentAlt
   }
 }

@@ -1,7 +1,6 @@
 import QtQuick
 
 import "../../../components" as Components
-import "../../../config" as Config
 import "../../../core" as Core
 import "../../../services" as Services
 
@@ -28,11 +27,11 @@ Components.Button {
   iconColor: {
     switch (Services.SystemStats.healthStatus) {
     case "critical":
-      return Config.Theme.error;
+      return Core.Theme.error;
     case "warning":
-      return Config.Theme.warning;
+      return Core.Theme.warning;
     default:
-      return Config.Theme.text;
+      return Core.Theme.text;
     }
   }
 

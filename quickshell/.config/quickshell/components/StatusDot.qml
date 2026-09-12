@@ -1,6 +1,5 @@
 import QtQuick
 
-import "../config" as Config
 import "../core" as Core
 
 /**
@@ -56,7 +55,7 @@ Rectangle {
   radius: Core.Style.radiusFull
 
   // === Appearance ===
-  color: Config.Theme.accent
+  color: Core.Theme.accent
 
   // === Pulse Animation ===
   // Started and stopped explicitly rather than through a `running:` binding. A

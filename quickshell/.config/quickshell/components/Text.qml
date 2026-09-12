@@ -1,7 +1,6 @@
 import QtQuick
 import QtQuick.Layouts
 
-import "../config" as Config
 import "../core" as Core
 
 /**
@@ -79,7 +78,7 @@ Item {
       font.family: Core.Style.fontFamily
       font.pixelSize: root.size
       font.weight: root.weight
-      color: Config.Theme.text
+      color: Core.Theme.text
       elide: Text.ElideRight
       verticalAlignment: Text.AlignVCenter
 

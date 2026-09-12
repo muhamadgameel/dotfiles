@@ -1,6 +1,5 @@
 import QtQuick
 import QtQuick.Layouts
-import "../config" as Config
 import "../core" as Core
 
 import "." as Components
@@ -47,7 +46,7 @@ ColumnLayout {
         visible: root.icon !== ""
         icon: root.icon
         size: Core.Style.fontL
-        color: Config.Theme.text
+        color: Core.Theme.text
       }
 
       Components.Text {
@@ -59,7 +58,7 @@ ColumnLayout {
       Components.Icon {
         icon: "chevron-right"
         size: Core.Style.fontS
-        color: Config.Theme.textDim
+        color: Core.Theme.textDim
         rotation: root.expanded ? 90 : 0
 
         Behavior on rotation {

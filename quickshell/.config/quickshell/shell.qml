@@ -12,6 +12,7 @@ import "core" as Core
 import "modules/bar" as Bar
 import "modules/ipc" as Ipc
 import "modules/popups" as Popups
+import "services" as Services
 
 /**
 * shell.qml - entry point
@@ -46,6 +47,19 @@ ShellRoot {
 
   // === Transient notification popups ===
   Popups.NotificationPopups {}
+
+  // === The shared tooltip ===
+  // Built here and handed to Services.Tooltip, so that service never has to
+  // import the view layer to create it.
+  Popups.TooltipWindow {
+    id: tooltipWindow
+  }
+
+  Binding {
+    target: Services.Tooltip
+    property: "window"
+    value: tooltipWindow
+  }
 
   // === External control: `qs ipc call ...` and Hyprland global shortcuts ===
   Ipc.Ipc {}

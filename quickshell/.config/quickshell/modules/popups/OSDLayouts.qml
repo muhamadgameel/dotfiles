@@ -1,7 +1,7 @@
 import QtQuick
-
 import "../../components" as Components
-import "../../config" as Config
+
+import "../../core" as Core
 import "../../services" as Services
 
 /**
@@ -35,10 +35,10 @@ Item {
     id: progressRowComponent
     Components.ProgressRow {
       icon: Services.OSD.payload.icon ?? ""
-      iconColor: Services.OSD.payload.iconColor ?? Config.Theme.text
+      iconColor: Services.OSD.payload.iconColor ?? Core.Theme.text
       value: Services.OSD.payload.value ?? 0
       maxValue: Services.OSD.payload.maxValue ?? 1
-      progressColor: Services.OSD.payload.progressColor ?? Config.Theme.accent
+      progressColor: Services.OSD.payload.progressColor ?? Core.Theme.accent
       valueText: Services.OSD.payload.valueText ?? ""
     }
   }

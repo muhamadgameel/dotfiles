@@ -4,7 +4,6 @@ import QtQuick
 import QtQuick.Layouts
 
 import "../../components" as Components
-import "../../config" as Config
 import "../../core" as Core
 import "../../services" as Services
 
@@ -19,7 +18,7 @@ Components.SlidingPanel {
 
   // Header configuration
   headerIcon: Services.Network.connectionIcon
-  headerIconColor: Services.Network.isConnected ? Config.Theme.accent : Config.Theme.textMuted
+  headerIconColor: Services.Network.isConnected ? Core.Theme.accent : Core.Theme.textMuted
   headerTitle: "Network"
   headerSubtitle: Services.Network.connectionStatusText
 
@@ -110,7 +109,7 @@ Components.SlidingPanel {
 
       Components.Text {
         text: Services.Network.scanning ? "Scanning..." : `${Object.keys(Services.Network.networks).length} networks`
-        color: Config.Theme.textDim
+        color: Core.Theme.textDim
         size: Core.Style.fontS
       }
 
@@ -233,7 +232,7 @@ Components.SlidingPanel {
         Components.Icon {
           icon: Services.Network.getSignalIcon(netItem.signalStrength)
           size: Core.Style.fontL
-          color: netItem.connected ? Config.Theme.accent : Config.Theme.text
+          color: netItem.connected ? Core.Theme.accent : Core.Theme.text
         }
 
         // Network info
@@ -247,7 +246,7 @@ Components.SlidingPanel {
 
             Components.Text {
               text: netItem.ssid
-              color: netItem.connected ? Config.Theme.accent : Config.Theme.text
+              color: netItem.connected ? Core.Theme.accent : Core.Theme.text
               weight: netItem.connected ? Core.Style.weightBold : Core.Style.weightNormal
               Layout.fillWidth: true
             }
@@ -266,14 +265,14 @@ Components.SlidingPanel {
             Components.Text {
               text: netItem.signalStrength + "%"
               size: Core.Style.fontS
-              color: Config.Theme.textDim
+              color: Core.Theme.textDim
             }
 
             Components.Icon {
               visible: netItem.secured
               icon: "lock"
               size: Core.Style.fontS
-              color: Config.Theme.textDim
+              color: Core.Theme.textDim
             }
 
             Components.Text {
@@ -281,7 +280,7 @@ Components.SlidingPanel {
               visible: netItem.security && netItem.security !== "--"
               text: netItem.security
               size: Core.Style.fontXS
-              color: Config.Theme.textMuted
+              color: Core.Theme.textMuted
             }
           }
         }
@@ -290,7 +289,7 @@ Components.SlidingPanel {
         Components.Spinner {
           running: netItem.isBusy
           size: Core.Style.fontM
-          color: Config.Theme.accent
+          color: Core.Theme.accent
         }
 
         // Action buttons
@@ -325,7 +324,7 @@ Components.SlidingPanel {
           visible: netItem.hovered && !netItem.connected && !netItem.isBusy
           icon: "chevron-right"
           size: Core.Style.fontM
-          color: Config.Theme.textDim
+          color: Core.Theme.textDim
         }
       }
 
@@ -364,7 +363,7 @@ Components.SlidingPanel {
           Layout.fillWidth: true
           text: Services.Network.lastError !== "" ? Services.Network.lastError : `Password for "${netItem.ssid}"`
           size: Core.Style.fontS
-          color: Services.Network.lastError !== "" ? Config.Theme.error : Config.Theme.textDim
+          color: Services.Network.lastError !== "" ? Core.Theme.error : Core.Theme.textDim
         }
 
         RowLayout {

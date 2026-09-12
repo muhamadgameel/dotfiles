@@ -47,7 +47,7 @@ Singleton {
   readonly property bool barShowPower: Settings.get("barShowPower", true)
 
   // === Appearance ===
-  readonly property string theme: Settings.get("theme", Themes.defaultName)
+  readonly property string theme: Settings.get("theme", Core.Themes.defaultName)
   readonly property real uiScale: Settings.get("uiScale", 1.0)
 
   readonly property string fontFamily: Settings.get("fontFamily", "Roboto")

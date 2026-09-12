@@ -1,6 +1,5 @@
 import QtQuick
 
-import "../config" as Config
 import "../core" as Core
 
 /**
@@ -55,10 +54,10 @@ Rectangle {
 
   // === Styling Properties ===
   // Each defaults from the variant but stays overridable per instance.
-  property color backgroundColor: root._filled ? Config.Theme.alpha(Config.Theme.surface, 0.5) : Config.Theme.transparent
-  property color hoverColor: root._filled ? Config.Theme.surface : Config.Theme.stateLayer(Config.Theme.surface, Core.Style.opacityHover)
-  property color activeColor: Config.Theme.surfaceActive
-  property color borderColor: root._outlined ? Config.Theme.surfaceHover : Config.Theme.transparent
+  property color backgroundColor: root._filled ? Core.Theme.alpha(Core.Theme.surface, 0.5) : Core.Theme.transparent
+  property color hoverColor: root._filled ? Core.Theme.surface : Core.Theme.stateLayer(Core.Theme.surface, Core.Style.opacityHover)
+  property color activeColor: Core.Theme.surfaceActive
+  property color borderColor: root._outlined ? Core.Theme.surfaceHover : Core.Theme.transparent
   property int borderWidth: root._outlined ? Core.Style.borderThin : 0
   property int padding: 0
 
@@ -79,7 +78,7 @@ Rectangle {
   // === Appearance ===
   radius: Core.Style.radiusS
 
-  readonly property color _effectiveBackground: backgroundColor == Config.Theme.transparent ? Config.Theme.transparentOf(hoverColor) : backgroundColor
+  readonly property color _effectiveBackground: backgroundColor == Core.Theme.transparent ? Core.Theme.transparentOf(hoverColor) : backgroundColor
 
   color: {
     if (!hoverEnabled)

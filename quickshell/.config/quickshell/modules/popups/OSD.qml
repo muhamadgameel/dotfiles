@@ -45,7 +45,7 @@ Variants {
       }
     }
 
-    sourceComponent: Core.PositionedPanelWindow {
+    sourceComponent: Components.PositionedPanelWindow {
       id: osdWindow
 
       screen: osdLoader.screen
@@ -112,8 +112,8 @@ Variants {
           anchors.fill: parent
           anchors.margins: osdWindow.shadowRoom
           radius: Core.Style.radiusL
-          color: Config.Theme.panelBg
-          border.color: Config.Theme.surfaceHover
+          color: Core.Theme.panelBg
+          border.color: Core.Theme.surfaceHover
           border.width: Core.Style.borderThin
 
           // Dynamic layout based on OSD type

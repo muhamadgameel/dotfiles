@@ -3,10 +3,12 @@ pragma Singleton
 import QtQuick
 import Quickshell
 
+import "../config" as Config
+
 /**
 * Theme - the active colour palette, plus derived helpers
 *
-* Colours come from Themes.palettes, selected by Config.theme, so switching is
+* Colours come from Themes.palettes, selected by Config.Config.theme, so switching is
 * `qs ipc call theme set catppuccin-latte` rather than editing this file.
 *
 * Every colour resolves through _pick(), which falls back to the default
@@ -17,7 +19,7 @@ Singleton {
   id: root
 
   // Active theme identifier
-  readonly property string name: Themes.has(Config.theme) ? Config.theme : Themes.defaultName
+  readonly property string name: Themes.has(Config.Config.theme) ? Config.Config.theme : Themes.defaultName
 
   readonly property var palette: Themes.get(name)
   readonly property var fallback: Themes.get(Themes.defaultName)
@@ -73,9 +75,9 @@ Singleton {
   // Opacity follows what sits behind a surface, not a fixed offset between them:
   //
   // - panelBg is over windows (panels, the OSD), so it carries text across busy
-  //   content and needs to be nearly opaque. Config.surfaceOpacity, 0.96.
+  //   content and needs to be nearly opaque. Config.Config.surfaceOpacity, 0.96.
   // - barBg is only ever over the wallpaper, so it can be more see-through.
-  //   Config.barOpacity, 0.85.
+  //   Config.Config.barOpacity, 0.85.
   //
   // Do not count on the compositor's blur for legibility. Measured over a tiled
   // window, text behind a panel came through exactly as sharp as the original,
@@ -84,8 +86,8 @@ Singleton {
   //
   // Used to be three values derived by +/-0.05 from one setting, one of which
   // (popupBg) nothing read.
-  readonly property color panelBg: alpha(bg, Config.surfaceOpacity)
-  readonly property color barBg: alpha(bg, Config.barOpacity)
+  readonly property color panelBg: alpha(bg, Config.Config.surfaceOpacity)
+  readonly property color barBg: alpha(bg, Config.Config.barOpacity)
 
   // === Focus ===
   readonly property color focusRing: accent

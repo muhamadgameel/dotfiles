@@ -1,7 +1,6 @@
 import QtQuick
 
 import "../../../components" as Components
-import "../../../config" as Config
 import "../../../core" as Core
 import "../../../services" as Services
 
@@ -23,16 +22,16 @@ Components.Button {
     return Services.Audio.getVolumeIcon();
   }
 
-  iconColor: Services.Audio.muted ? Config.Theme.textMuted : Config.Theme.text
+  iconColor: Services.Audio.muted ? Core.Theme.textMuted : Core.Theme.text
   iconSize: Core.Style.fontL
 
   text: Services.Audio.hasSink ? Math.round(Services.Audio.volume * 100) + "%" : "--"
 
   textColor: {
     if (Services.Audio.muted)
-      return Config.Theme.textMuted;
+      return Core.Theme.textMuted;
     // Above unity gain is where clipping starts, so it is worth flagging.
-    return Services.Audio.volume > 1.0 ? Config.Theme.warning : Config.Theme.text;
+    return Services.Audio.volume > 1.0 ? Core.Theme.warning : Core.Theme.text;
   }
 
   tooltipText: {

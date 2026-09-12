@@ -3,7 +3,6 @@ import QtQuick.Layouts
 import Quickshell
 import Quickshell.Hyprland
 import Quickshell.Wayland
-import "../config" as Config
 import "../core" as Core
 import "../services" as Services
 
@@ -54,7 +53,7 @@ Item {
   property string headerIcon: ""
   property string headerTitle: ""
   property string headerSubtitle: ""
-  property color headerIconColor: Config.Theme.text
+  property color headerIconColor: Core.Theme.text
 
   // === Content Configuration ===
   property bool scrollable: true
@@ -184,7 +183,7 @@ Item {
 
     screen: root.screen
     visible: root.isOpen || root.revealed || slideAnim.running
-    color: Config.Theme.transparent
+    color: Core.Theme.transparent
 
     // Hidden means the slide-out is over, so the loader may tear this down.
     // Deferred a tick: releasing destroys this object, which must not happen
@@ -296,10 +295,10 @@ Item {
         clip: true
 
         radius: Core.Style.radiusL
-        color: Config.Theme.panelBg
+        color: Core.Theme.panelBg
 
         border {
-          color: Config.Theme.surfaceHover
+          color: Core.Theme.surfaceHover
           width: Core.Style.borderThin
         }
 
@@ -362,7 +361,7 @@ Item {
             Layout.topMargin: root._pinnedGap
             Layout.preferredHeight: Core.Style.borderThin
             visible: root.hasPinned
-            color: Config.Theme.surfaceHover
+            color: Core.Theme.surfaceHover
             opacity: scrollArea.contentY > 0 ? 1 : 0
 
             Behavior on opacity {

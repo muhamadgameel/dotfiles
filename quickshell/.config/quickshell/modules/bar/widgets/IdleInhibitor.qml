@@ -1,7 +1,6 @@
 import QtQuick
 
 import "../../../components" as Components
-import "../../../config" as Config
 import "../../../core" as Core
 import "../../../services" as Services
 
@@ -17,7 +16,7 @@ Components.Button {
 
   icon: Services.Idle.statusIcon
   iconSize: Core.Style.fontL
-  iconColor: Services.Idle.inhibited ? Config.Theme.warning : Config.Theme.textMuted
+  iconColor: Services.Idle.inhibited ? Core.Theme.warning : Core.Theme.textMuted
 
   tooltipText: {
     const lines = [Services.Idle.inhibited ? "Keeping the screen awake" : "Idle timeout active"];
@@ -35,6 +34,6 @@ Components.Button {
     anchors.bottomMargin: Core.Style.spaceXXS
     visible: Services.Idle.inhibited
     pulse: true
-    color: Config.Theme.warning
+    color: Core.Theme.warning
   }
 }

@@ -1,7 +1,6 @@
 import QtQuick
 
 import "../../../components" as Components
-import "../../../config" as Config
 import "../../../core" as Core
 import "../../../services" as Services
 
@@ -34,7 +33,7 @@ Components.Button {
     lines.push("Brightness: " + Math.round(Services.Brightness.brightness * 100) + "%");
 
     if (Services.Brightness.device) {
-      lines.push(Config.Icons.get("monitor") + "  " + Services.Brightness.device);
+      lines.push(Core.Icons.get("monitor") + "  " + Services.Brightness.device);
     }
 
     lines.push("");

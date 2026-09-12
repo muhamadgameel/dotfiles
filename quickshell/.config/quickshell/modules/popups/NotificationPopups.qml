@@ -5,7 +5,6 @@ import QtQuick.Layouts
 import Quickshell
 
 import "../../components" as Components
-import "../../config" as Config
 import "../../core" as Core
 import "../../services" as Services
 
@@ -20,7 +19,7 @@ Variants {
 
     required property ShellScreen modelData
 
-    sourceComponent: Core.PositionedPanelWindow {
+    sourceComponent: Components.PositionedPanelWindow {
       id: notifWindow
 
       // Hidden when there is nothing to show, so the window never blocks input
@@ -250,13 +249,13 @@ Variants {
             Components.Icon {
               icon: "bell"
               size: Core.Style.fontM
-              color: Config.Theme.textDim
+              color: Core.Theme.textDim
             }
 
             Components.Text {
               text: overflowPill.shownCount === 1 ? "1 more notification" : `${overflowPill.shownCount} more notifications`
               size: Core.Style.fontS
-              color: Config.Theme.textDim
+              color: Core.Theme.textDim
             }
           }
         }

@@ -26,7 +26,7 @@ Components.SlidingPanel {
   panelId: "quicksettings"
 
   headerIcon: "dashboard"
-  headerIconColor: Config.Theme.accent
+  headerIconColor: Core.Theme.accent
   headerTitle: "Quick Settings"
   headerSubtitle: Services.Time.dateLong
 
@@ -202,11 +202,11 @@ Components.SlidingPanel {
         Layout.fillWidth: true
 
         icon: Services.Audio.muted ? "volume-mute" : Services.Audio.getVolumeIcon()
-        iconColor: Services.Audio.muted ? Config.Theme.error : Config.Theme.text
+        iconColor: Services.Audio.muted ? Core.Theme.error : Core.Theme.text
         iconTooltip: Services.Audio.muted ? "Unmute" : "Mute"
         value: Services.Audio.volume
         maxValue: Services.Audio.maxVolume
-        progressColor: Services.Audio.muted ? Config.Theme.error : Services.Audio.volume > 1.0 ? Config.Theme.warning : Config.Theme.accent
+        progressColor: Services.Audio.muted ? Core.Theme.error : Services.Audio.volume > 1.0 ? Core.Theme.warning : Core.Theme.accent
 
         onIconClicked: Services.Audio.toggleMute()
         onMoved: value => Services.Audio.setVolume(value)
@@ -246,7 +246,7 @@ Components.SlidingPanel {
         Rectangle {
           anchors.fill: parent
           radius: Core.Style.radiusS
-          color: Config.Theme.surface
+          color: Core.Theme.surface
         }
 
         Components.Icon {
@@ -254,7 +254,7 @@ Components.SlidingPanel {
           visible: thumb.status !== Image.Ready
           icon: "music"
           size: Core.Style.fontL
-          color: Config.Theme.textDim
+          color: Core.Theme.textDim
         }
 
         Components.RoundedImage {
@@ -283,7 +283,7 @@ Components.SlidingPanel {
           visible: Services.Media.trackArtist !== ""
           text: Services.Media.trackArtist
           size: Core.Style.fontXS
-          color: Config.Theme.textDim
+          color: Core.Theme.textDim
           elide: Text.ElideRight
         }
       }
@@ -320,11 +320,11 @@ Components.SlidingPanel {
     id: sliderRow
 
     property string icon: ""
-    property color iconColor: Config.Theme.text
+    property color iconColor: Core.Theme.text
     property string iconTooltip: ""
     property real value: 0
     property real maxValue: 1.0
-    property color progressColor: Config.Theme.accent
+    property color progressColor: Core.Theme.accent
 
     signal iconClicked
     signal moved(real value)
@@ -354,7 +354,7 @@ Components.SlidingPanel {
       horizontalAlignment: Text.AlignRight
       text: Math.round(sliderRow.value * 100) + "%"
       size: Core.Style.fontS
-      color: Config.Theme.textDim
+      color: Core.Theme.textDim
     }
   }
 }

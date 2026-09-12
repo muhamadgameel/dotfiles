@@ -30,7 +30,7 @@ Rectangle {
   // only names it, and BarWindow does the routing.
   signal panelRequested(string panelId)
 
-  color: Config.Theme.barBg
+  color: Core.Theme.barBg
 
   // ===================================================================
   // CENTRE - absolutely centred, never overlapped

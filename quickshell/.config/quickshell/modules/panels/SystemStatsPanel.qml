@@ -4,7 +4,6 @@ import QtQuick
 import QtQuick.Layouts
 
 import "../../components" as Components
-import "../../config" as Config
 import "../../core" as Core
 import "../../services" as Services
 
@@ -69,7 +68,7 @@ Components.SlidingPanel {
         label: "Core " + index
         labelInfo: Math.round(usage) + "%"
         value: usage / 100
-        progressColor: usage > 90 ? Config.Theme.error : usage > 70 ? Config.Theme.warning : Config.Theme.accentAlt
+        progressColor: usage > 90 ? Core.Theme.error : usage > 70 ? Core.Theme.warning : Core.Theme.accentAlt
         progressHeight: Core.Style.px(4)
         showPercentage: false
       }
@@ -102,7 +101,7 @@ Components.SlidingPanel {
     label: "Swap"
     labelInfo: Core.Utils.formatBytes(Services.SystemStats.swapUsed, 1) + " / " + Core.Utils.formatBytes(Services.SystemStats.swapTotal, 1)
     value: Services.SystemStats.swapPercent / 100
-    progressColor: Services.SystemStats.swapPercent > 50 ? Config.Theme.warning : Config.Theme.accentAlt
+    progressColor: Services.SystemStats.swapPercent > 50 ? Core.Theme.warning : Core.Theme.accentAlt
     progressHeight: Core.Style.px(6)
     showPercentage: false
   }
@@ -123,11 +122,11 @@ Components.SlidingPanel {
     Layout.fillWidth: true
     visible: Services.SystemStats.hasCpuTemp
     icon: "chip"
-    iconColor: root._statusColor(Services.SystemStats.cpuTempStatus, Config.Theme.text)
+    iconColor: root._statusColor(Services.SystemStats.cpuTempStatus, Core.Theme.text)
     label: "CPU"
     value: Services.SystemStats.cpuTemp / 100
     valueText: Core.Utils.formatTemp(Services.SystemStats.cpuTemp)
-    progressColor: root._statusColor(Services.SystemStats.cpuTempStatus, Config.Theme.success)
+    progressColor: root._statusColor(Services.SystemStats.cpuTempStatus, Core.Theme.success)
     progressHeight: Core.Style.px(6)
   }
 
@@ -136,11 +135,11 @@ Components.SlidingPanel {
     Layout.fillWidth: true
     visible: Services.SystemStats.hasGpuTemp
     icon: "gpu"
-    iconColor: root._statusColor(Services.SystemStats.gpuTempStatus, Config.Theme.text)
+    iconColor: root._statusColor(Services.SystemStats.gpuTempStatus, Core.Theme.text)
     label: "GPU"
     value: Services.SystemStats.gpuTemp / 100
     valueText: Core.Utils.formatTemp(Services.SystemStats.gpuTemp)
-    progressColor: root._statusColor(Services.SystemStats.gpuTempStatus, Config.Theme.success)
+    progressColor: root._statusColor(Services.SystemStats.gpuTempStatus, Core.Theme.success)
     progressHeight: Core.Style.px(6)
   }
 
@@ -149,7 +148,7 @@ Components.SlidingPanel {
     visible: !Services.SystemStats.hasCpuTemp && !Services.SystemStats.hasGpuTemp
     text: "No temperature sensors detected"
     size: Core.Style.fontS
-    color: Config.Theme.textMuted
+    color: Core.Theme.textMuted
     Layout.fillWidth: true
     horizontalAlignment: Text.AlignHCenter
   }
@@ -177,7 +176,7 @@ Components.SlidingPanel {
       Components.Icon {
         icon: "arrow-down"
         size: Core.Style.fontL
-        color: Config.Theme.success
+        color: Core.Theme.success
       }
 
       ColumnLayout {
@@ -186,7 +185,7 @@ Components.SlidingPanel {
         Components.Text {
           text: "Download"
           size: Core.Style.fontXS
-          color: Config.Theme.textMuted
+          color: Core.Theme.textMuted
         }
 
         Components.Text {
@@ -204,7 +203,7 @@ Components.SlidingPanel {
       Components.Icon {
         icon: "arrow-up"
         size: Core.Style.fontL
-        color: Config.Theme.accent
+        color: Core.Theme.accent
       }
 
       ColumnLayout {
@@ -213,7 +212,7 @@ Components.SlidingPanel {
         Components.Text {
           text: "Upload"
           size: Core.Style.fontXS
-          color: Config.Theme.textMuted
+          color: Core.Theme.textMuted
         }
 
         Components.Text {
@@ -228,7 +227,7 @@ Components.SlidingPanel {
       Layout.topMargin: Core.Style.spaceXS
       text: Services.SystemStats.netInterface ? "Interface: " + Services.SystemStats.netInterface : "No active interface"
       size: Core.Style.fontXS
-      color: Config.Theme.textMuted
+      color: Core.Theme.textMuted
     }
   }
 
@@ -255,7 +254,7 @@ Components.SlidingPanel {
   Components.Text {
     text: Core.Utils.formatBytes(Services.SystemStats.diskTotal - Services.SystemStats.diskUsed, 1) + " free"
     size: Core.Style.fontXS
-    color: Services.SystemStats.diskStatus !== "normal" ? Config.Theme.warning : Config.Theme.textMuted
+    color: Services.SystemStats.diskStatus !== "normal" ? Core.Theme.warning : Core.Theme.textMuted
   }
 
   // ═══════════════════════════════════════════════════════════════════
@@ -272,7 +271,7 @@ Components.SlidingPanel {
     Components.Text {
       text: "Updates every " + (Services.SystemStats.pollingInterval / 1000) + "s"
       size: Core.Style.fontXS
-      color: Config.Theme.textMuted
+      color: Core.Theme.textMuted
     }
 
     Components.Spacer {}
@@ -283,13 +282,13 @@ Components.SlidingPanel {
 
       Components.StatusDot {
         size: Core.Style.px(8)
-        color: root._statusColor(Services.SystemStats.healthStatus, Config.Theme.success)
+        color: root._statusColor(Services.SystemStats.healthStatus, Core.Theme.success)
       }
 
       Components.Text {
         text: root._healthText(Services.SystemStats.healthStatus)
         size: Core.Style.fontXS
-        color: Config.Theme.textMuted
+        color: Core.Theme.textMuted
       }
     }
   }
@@ -304,10 +303,10 @@ Components.SlidingPanel {
 
   function _statusColor(status, normalColor) {
     if (status === "critical")
-      return Config.Theme.error;
+      return Core.Theme.error;
     if (status === "warning")
-      return Config.Theme.warning;
-    return normalColor !== undefined ? normalColor : Config.Theme.accent;
+      return Core.Theme.warning;
+    return normalColor !== undefined ? normalColor : Core.Theme.accent;
   }
 
   function _healthText(status) {

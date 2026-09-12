@@ -1,6 +1,5 @@
 import QtQuick
 
-import "../config" as Config
 import "../core" as Core
 
 /**
@@ -43,8 +42,8 @@ Rectangle {
 
   color: {
     if (severity === "critical")
-      return Config.Theme.error;
-    return Config.Theme.warning;
+      return Core.Theme.error;
+    return Core.Theme.warning;
   }
 
   visible: active

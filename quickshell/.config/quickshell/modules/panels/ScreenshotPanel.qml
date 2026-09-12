@@ -4,7 +4,6 @@ import QtQuick
 import QtQuick.Layouts
 
 import "../../components" as Components
-import "../../config" as Config
 import "../../core" as Core
 import "../../services" as Services
 
@@ -19,7 +18,7 @@ Components.SlidingPanel {
   panelId: "screenshot"
 
   headerIcon: "camera"
-  headerIconColor: Config.Theme.accent
+  headerIconColor: Core.Theme.accent
   headerTitle: "Screenshot"
   headerSubtitle: Services.Screenshot.capturing ? "Capturing…" : "~/Pictures/Screenshots"
 
@@ -112,7 +111,7 @@ Components.SlidingPanel {
       Layout.fillWidth: true
       implicitHeight: Core.Style.controlHeightL
       interactive: true
-      hoverColor: Config.Theme.surfaceHover
+      hoverColor: Core.Theme.surfaceHover
 
       onClicked: root.capture(modeCard.modelData.id)
 
@@ -125,7 +124,7 @@ Components.SlidingPanel {
         Components.Icon {
           icon: modeCard.modelData.icon
           size: Core.Style.fontXL
-          color: Config.Theme.accent
+          color: Core.Theme.accent
         }
 
         ColumnLayout {
@@ -142,7 +141,7 @@ Components.SlidingPanel {
             Layout.fillWidth: true
             text: modeCard.modelData.hint
             size: Core.Style.fontXS
-            color: Config.Theme.textMuted
+            color: Core.Theme.textMuted
           }
         }
 
@@ -150,7 +149,7 @@ Components.SlidingPanel {
           visible: modeCard.hovered
           icon: "chevron-right"
           size: Core.Style.fontM
-          color: Config.Theme.textDim
+          color: Core.Theme.textDim
         }
       }
     }
@@ -170,7 +169,7 @@ Components.SlidingPanel {
       Layout.fillWidth: true
       text: "Last capture"
       size: Core.Style.fontS
-      color: Config.Theme.textDim
+      color: Core.Theme.textDim
       weight: Core.Style.weightBold
     }
 
@@ -178,7 +177,7 @@ Components.SlidingPanel {
       Layout.fillWidth: true
       text: Services.Screenshot.lastPath
       size: Core.Style.fontXS
-      color: Config.Theme.textMuted
+      color: Core.Theme.textMuted
       elide: Text.ElideLeft
     }
 

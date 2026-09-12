@@ -8,7 +8,7 @@ import Quickshell
 *
 * Usage:
 *   import "../config" as Config
-*   Text { text: Config.Icons.get("bell") }
+*   Text { text: Core.Icons.get("bell") }
 *
 * Or with the Icon component:
 *   Icon { name: "bell" }

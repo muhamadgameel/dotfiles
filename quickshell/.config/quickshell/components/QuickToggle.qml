@@ -1,6 +1,5 @@
 import QtQuick
 import QtQuick.Layouts
-import "../config" as Config
 import "../core" as Core
 
 import "." as Components
@@ -42,8 +41,8 @@ Components.Card {
   signal detailsRequested
 
   // Foreground on the accent fill when on, on the surface when off.
-  readonly property color _fg: root.active ? Config.Theme.bg : Config.Theme.text
-  readonly property color _fgDim: root.active ? Config.Theme.alpha(Config.Theme.bg, 0.72) : Config.Theme.textDim
+  readonly property color _fg: root.active ? Core.Theme.bg : Core.Theme.text
+  readonly property color _fgDim: root.active ? Core.Theme.alpha(Core.Theme.bg, 0.72) : Core.Theme.textDim
 
   implicitHeight: Core.Style.controlHeightL + Core.Style.spaceS
   radius: Core.Style.radiusM
@@ -51,9 +50,9 @@ Components.Card {
   interactive: !root.busy
   opacity: root.enabled ? 1 : Core.Style.opacityDisabled
 
-  backgroundColor: root.active ? Config.Theme.accent : Config.Theme.alpha(Config.Theme.surface, 0.5)
-  hoverColor: root.active ? Config.Theme.lighten(Config.Theme.accent, 0.08) : Config.Theme.surface
-  activeColor: root.active ? Config.Theme.lighten(Config.Theme.accent, 0.16) : Config.Theme.surfaceActive
+  backgroundColor: root.active ? Core.Theme.accent : Core.Theme.alpha(Core.Theme.surface, 0.5)
+  hoverColor: root.active ? Core.Theme.lighten(Core.Theme.accent, 0.08) : Core.Theme.surface
+  activeColor: root.active ? Core.Theme.lighten(Core.Theme.accent, 0.16) : Core.Theme.surfaceActive
 
   onClicked: button => {
     if (button === Qt.RightButton && root.hasDetails)
@@ -108,7 +107,7 @@ Components.Card {
       icon: "chevron-right"
       iconSize: Core.Style.fontM
       iconColor: root._fg
-      hoverColor: Config.Theme.alpha(root._fg, 0.14)
+      hoverColor: Core.Theme.alpha(root._fg, 0.14)
       tooltipText: "More settings"
       onClicked: root.detailsRequested()
     }

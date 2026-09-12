@@ -4,7 +4,6 @@ import QtQuick
 import Quickshell
 import Quickshell.Io
 
-import "../config" as Config
 import "../core" as Core
 import "../services" as Services
 
@@ -138,8 +137,8 @@ Singleton {
       icon: getIcon(brightness),
       value: brightness,
       maxValue: 1.0,
-      iconColor: Config.Theme.text,
-      progressColor: Config.Theme.accent
+      iconColor: Core.Theme.text,
+      progressColor: Core.Theme.accent
     }, "brightness");
   }
 

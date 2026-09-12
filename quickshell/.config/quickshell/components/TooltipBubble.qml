@@ -1,5 +1,4 @@
 import QtQuick
-import "../config" as Config
 import "../core" as Core
 
 import "." as Components
@@ -29,9 +28,9 @@ Rectangle {
 
   // === Properties ===
   property string text: ""
-  property color backgroundColor: Config.Theme.surface
-  property color textColor: Config.Theme.text
-  property color borderColor: Config.Theme.surfaceHover
+  property color backgroundColor: Core.Theme.surface
+  property color textColor: Core.Theme.text
+  property color borderColor: Core.Theme.surfaceHover
   property int borderWidth: 1
   property real fontSize: Core.Style.fontS
   property real paddingH: Core.Style.spaceM

@@ -4,7 +4,6 @@ import QtQuick
 import QtQuick.Layouts
 
 import "../../components" as Components
-import "../../config" as Config
 import "../../core" as Core
 import "../../services" as Services
 
@@ -20,7 +19,7 @@ Components.SlidingPanel {
   panelId: "power"
 
   headerIcon: "power"
-  headerIconColor: Config.Theme.error
+  headerIconColor: Core.Theme.error
   headerTitle: "Power"
   headerSubtitle: "Session and power actions"
 
@@ -65,9 +64,9 @@ Components.SlidingPanel {
       implicitHeight: Core.Style.controlHeightL
       interactive: true
 
-      backgroundColor: armed ? Config.Theme.alpha(Config.Theme.error, 0.2) : Config.Theme.transparent
-      hoverColor: modelData.destructive ? Config.Theme.alpha(Config.Theme.error, 0.15) : Config.Theme.surfaceHover
-      borderColor: armed ? Config.Theme.error : Config.Theme.transparent
+      backgroundColor: armed ? Core.Theme.alpha(Core.Theme.error, 0.2) : Core.Theme.transparent
+      hoverColor: modelData.destructive ? Core.Theme.alpha(Core.Theme.error, 0.15) : Core.Theme.surfaceHover
+      borderColor: armed ? Core.Theme.error : Core.Theme.transparent
       borderWidth: armed ? 1 : 0
 
       onClicked: root.trigger(actionCard.modelData)
@@ -81,7 +80,7 @@ Components.SlidingPanel {
         Components.Icon {
           icon: actionCard.modelData.icon
           size: Core.Style.fontXL
-          color: actionCard.modelData.destructive ? Config.Theme.error : Config.Theme.text
+          color: actionCard.modelData.destructive ? Core.Theme.error : Core.Theme.text
         }
 
         ColumnLayout {
@@ -92,14 +91,14 @@ Components.SlidingPanel {
             Layout.fillWidth: true
             text: actionCard.armed ? `Confirm ${actionCard.modelData.label.toLowerCase()}?` : actionCard.modelData.label
             weight: Core.Style.weightBold
-            color: actionCard.armed ? Config.Theme.error : Config.Theme.text
+            color: actionCard.armed ? Core.Theme.error : Core.Theme.text
           }
 
           Components.Text {
             Layout.fillWidth: true
             text: actionCard.armed ? "Click again to confirm" : actionCard.modelData.description
             size: Core.Style.fontXS
-            color: Config.Theme.textMuted
+            color: Core.Theme.textMuted
           }
         }
 
@@ -107,7 +106,7 @@ Components.SlidingPanel {
           visible: actionCard.armed
           icon: "warning"
           size: Core.Style.fontL
-          color: Config.Theme.error
+          color: Core.Theme.error
         }
       }
     }

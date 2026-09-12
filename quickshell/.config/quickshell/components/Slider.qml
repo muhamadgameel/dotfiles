@@ -1,6 +1,5 @@
 import QtQuick
 
-import "../config" as Config
 import "../core" as Core
 
 /**
@@ -43,11 +42,11 @@ Item {
   property real step: 0  // 0 = continuous
 
   // === Styling Properties ===
-  property color trackColor: Config.Theme.surface
-  property color progressColor: Config.Theme.accent
-  property color handleColor: Config.Theme.text
-  property color handleHoverColor: Config.Theme.text
-  property color handleDragColor: Config.Theme.accent
+  property color trackColor: Core.Theme.surface
+  property color progressColor: Core.Theme.accent
+  property color handleColor: Core.Theme.text
+  property color handleHoverColor: Core.Theme.text
+  property color handleDragColor: Core.Theme.accent
   property int trackHeight: Core.Style.px(8)
   property int handleSize: Core.Style.px(16)
   property bool showHandle: true
@@ -125,7 +124,7 @@ Item {
     x: track.width * (1.0 / root.maxValue) - width / 2
     height: track.height + Core.Style.px(4)
     radius: width / 2
-    color: Config.Theme.textMuted
+    color: Core.Theme.textMuted
     opacity: 0.5
   }
 

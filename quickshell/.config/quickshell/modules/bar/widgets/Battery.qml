@@ -2,7 +2,6 @@ import QtQuick
 import Quickshell.Services.UPower
 
 import "../../../components" as Components
-import "../../../config" as Config
 import "../../../core" as Core
 
 /**
@@ -56,16 +55,16 @@ Components.Button {
 
   iconColor: {
     if (!isReady)
-      return Config.Theme.textMuted;
+      return Core.Theme.textMuted;
     if (isFullyCharged)
-      return Config.Theme.text;
+      return Core.Theme.text;
     if (isCharging)
-      return Config.Theme.success;
+      return Core.Theme.success;
     if (isCritical)
-      return Config.Theme.error;
+      return Core.Theme.error;
     if (isLow)
-      return Config.Theme.warning;
-    return Config.Theme.text;
+      return Core.Theme.warning;
+    return Core.Theme.text;
   }
 
   text: isFullyCharged ? "" : isReady ? Math.round(percent) + "%" : "--"
@@ -89,9 +88,9 @@ Components.Button {
 
     // Time remaining
     if (isDischarging && battery.timeToEmpty > 0) {
-      lines.push(Config.Icons.get("clock") + "  " + Core.Utils.formatDuration(battery.timeToEmpty) + " remaining");
+      lines.push(Core.Icons.get("clock") + "  " + Core.Utils.formatDuration(battery.timeToEmpty) + " remaining");
     } else if (isCharging && battery.timeToFull > 0) {
-      lines.push(Config.Icons.get("clock") + "  " + Core.Utils.formatDuration(battery.timeToFull) + " until full");
+      lines.push(Core.Icons.get("clock") + "  " + Core.Utils.formatDuration(battery.timeToFull) + " until full");
     }
 
     // Power rate
@@ -101,7 +100,7 @@ Components.Button {
 
     // Health
     if (battery.healthPercentage > 0) {
-      lines.push(Config.Icons.get("heart") + "   " + "Health: " + Math.round(battery.healthPercentage) + "%");
+      lines.push(Core.Icons.get("heart") + "   " + "Health: " + Math.round(battery.healthPercentage) + "%");
     }
 
     return lines.join("\n");
@@ -116,7 +115,7 @@ Components.Button {
     anchors.bottomMargin: Core.Style.spaceXXS
     visible: root.isCharging
     pulse: true
-    color: Config.Theme.success
+    color: Core.Theme.success
   }
 
   // Critical battery warning overlay

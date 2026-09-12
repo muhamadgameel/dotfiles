@@ -1,6 +1,5 @@
 import QtQuick
 import QtQuick.Layouts
-import "../config" as Config
 import "../core" as Core
 
 import "." as Components
@@ -29,15 +28,15 @@ Rectangle {
   readonly property color _statusColor: {
     switch (type) {
     case "success":
-      return Config.Theme.success;
+      return Core.Theme.success;
     case "warning":
-      return Config.Theme.warning;
+      return Core.Theme.warning;
     case "info":
-      return Config.Theme.accentAlt;
+      return Core.Theme.accentAlt;
     case "error":
-      return Config.Theme.error;
+      return Core.Theme.error;
     default:
-      return Config.Theme.overlay;
+      return Core.Theme.overlay;
     }
   }
 
@@ -59,7 +58,7 @@ Rectangle {
 
   implicitHeight: visible ? content.height + Core.Style.spaceS * 2 : 0
   radius: Core.Style.radiusS
-  color: Config.Theme.alpha(_statusColor, 0.2)
+  color: Core.Theme.alpha(_statusColor, 0.2)
 
   RowLayout {
     id: content

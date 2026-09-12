@@ -2,7 +2,7 @@ import QtQuick
 import Quickshell
 import Quickshell.Wayland
 
-import "../config" as Config
+import "../core" as Core
 
 /**
 * PositionedPanelWindow - PanelWindow with built-in position handling
@@ -54,7 +54,7 @@ PanelWindow {
   }
 
   // Default transparent background
-  color: Config.Theme.transparent
+  color: Core.Theme.transparent
 
   // Wayland layer settings
   WlrLayershell.namespace: namespace + "-" + (screen?.name ?? "unknown")

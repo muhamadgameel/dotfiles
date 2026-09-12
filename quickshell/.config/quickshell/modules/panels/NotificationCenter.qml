@@ -19,7 +19,7 @@ Components.SlidingPanel {
   panelWidth: Math.round(420 * Core.Style.uiScale)
 
   headerIcon: Services.Notification.doNotDisturb ? "bell-off" : "bell"
-  headerIconColor: Services.Notification.doNotDisturb ? Config.Theme.warning : Config.Theme.accent
+  headerIconColor: Services.Notification.doNotDisturb ? Core.Theme.warning : Core.Theme.accent
   headerTitle: "Notifications"
   headerSubtitle: {
     const n = Services.Notification.historyList.count;
@@ -43,7 +43,7 @@ Components.SlidingPanel {
       icon: Services.Notification.doNotDisturb ? "bell-off" : "bell"
       text: Services.Notification.doNotDisturb ? "DND on" : "DND off"
       textSize: Core.Style.fontS
-      iconColor: Services.Notification.doNotDisturb ? Config.Theme.warning : Config.Theme.text
+      iconColor: Services.Notification.doNotDisturb ? Core.Theme.warning : Core.Theme.text
       tooltipText: "Suppress notification popups"
       onClicked: Config.Config.toggleDoNotDisturb()
     }

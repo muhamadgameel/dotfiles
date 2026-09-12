@@ -1,6 +1,5 @@
 import QtQuick
 
-import "../config" as Config
 import "../core" as Core
 
 /**
@@ -64,7 +63,7 @@ Item {
     }
 
     // Try to look up in Icons registry
-    return Config.Icons.get(root.icon);
+    return Core.Icons.get(root.icon);
   }
 
   // === Dimensions ===
@@ -75,7 +74,7 @@ Item {
   Rectangle {
     id: background
     anchors.fill: parent
-    color: Config.Theme.transparent
+    color: Core.Theme.transparent
     radius: 0
     Behavior on color {
       ColorAnimation {
@@ -105,9 +104,9 @@ Item {
     id: iconText
     visible: !root._isFilePath && root._source !== ""
     text: root._source
-    font.family: Config.Icons.fontFamily
+    font.family: Core.Icons.fontFamily
     font.pixelSize: root.size
-    color: Config.Theme.text
+    color: Core.Theme.text
     anchors.centerIn: parent
 
     // Gated on visibility like the other looping animations: a running

@@ -4,7 +4,6 @@ import QtQuick
 import Quickshell
 import Quickshell.Services.Mpris
 
-import "../config" as Config
 import "../core" as Core
 import "../services" as Services
 
@@ -204,8 +203,8 @@ Singleton {
       icon: value <= 0 ? "volume-mute" : (value < 0.5 ? "volume-low" : "volume-high"),
       value: value,
       maxValue: 1.0,
-      iconColor: Config.Theme.text,
-      progressColor: Config.Theme.accent
+      iconColor: Core.Theme.text,
+      progressColor: Core.Theme.accent
     }, "media-volume");
   }
 

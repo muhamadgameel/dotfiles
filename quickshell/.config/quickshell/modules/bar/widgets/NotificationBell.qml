@@ -2,6 +2,7 @@ import QtQuick
 
 import "../../../components" as Components
 import "../../../config" as Config
+import "../../../core" as Core
 import "../../../services" as Services
 
 /**
@@ -21,7 +22,7 @@ Item {
   Components.Button {
     id: notificationButton
     icon: Services.Notification.doNotDisturb ? "bell-off" : "bell"
-    iconColor: Services.Notification.doNotDisturb ? Config.Theme.warning : Config.Theme.text
+    iconColor: Services.Notification.doNotDisturb ? Core.Theme.warning : Core.Theme.text
     tooltipText: Services.Notification.doNotDisturb ? (Services.GameMode.active && !Config.Config.doNotDisturb ? "Do Not Disturb (game mode)" : "Do Not Disturb") : "Notifications" + (root.unreadCount > 0 ? " (" + root.unreadCount + " unread)" : "")
 
     onClicked: function (button) {
@@ -41,6 +42,6 @@ Item {
     anchors.topMargin: 1
     variant: "count"
     count: root.unreadCount
-    backgroundColor: Services.Notification.doNotDisturb ? Config.Theme.warning : Config.Theme.error
+    backgroundColor: Services.Notification.doNotDisturb ? Core.Theme.warning : Core.Theme.error
   }
 }

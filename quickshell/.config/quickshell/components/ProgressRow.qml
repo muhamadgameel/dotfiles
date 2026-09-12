@@ -1,6 +1,5 @@
 import QtQuick
 import QtQuick.Layouts
-import "../config" as Config
 import "../core" as Core
 
 import "." as Components
@@ -27,7 +26,7 @@ ColumnLayout {
 
   // === Icon Properties ===
   property string icon: ""
-  property color iconColor: Config.Theme.text
+  property color iconColor: Core.Theme.text
   property int iconSize: Core.Style.fontXL
 
   // === Label Properties ===
@@ -37,7 +36,7 @@ ColumnLayout {
   // === Progress Properties ===
   property real value: 0
   property real maxValue: 1
-  property color progressColor: Config.Theme.accent
+  property color progressColor: Core.Theme.accent
   property int progressHeight: Core.Style.px(6)
 
   // === Value Display ===
@@ -88,7 +87,7 @@ ColumnLayout {
           visible: root.hasLabelInfo
           text: root.labelInfo
           size: Core.Style.fontS
-          color: Config.Theme.textDim
+          color: Core.Theme.textDim
         }
       }
 
@@ -118,7 +117,7 @@ ColumnLayout {
       text: root.hasValueText ? root.valueText : Math.round(root.value / root.maxValue * 100) + "%"
       size: root.hasValueText ? Core.Style.fontL : Core.Style.fontM
       font.weight: root.hasValueText ? Core.Style.weightBold : Core.Style.weightMedium
-      color: root.hasValueText ? root.iconColor : Config.Theme.text
+      color: root.hasValueText ? root.iconColor : Core.Theme.text
     }
   }
 }

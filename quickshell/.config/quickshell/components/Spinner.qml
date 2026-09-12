@@ -1,6 +1,5 @@
 import QtQuick
 
-import "../config" as Config
 import "../core" as Core
 import "." as Components
 
@@ -33,7 +32,7 @@ Item {
   // === Properties ===
   property bool running: true
   property real size: Core.Style.fontL
-  property color color: Config.Theme.text
+  property color color: Core.Theme.text
   property int duration: Core.Style.spinDuration
   property string icon: "loading"
 

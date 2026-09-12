@@ -8,8 +8,8 @@ import "../../core" as Core
 /**
 * Tooltip - the single tooltip surface for the shell
 *
-* Created once by Services.Tooltip and re-anchored per target, rather than
-* constructed and destroyed on every hover.
+* Created once, in shell.qml, and driven by Services.Tooltip: re-anchored per
+* target rather than constructed and destroyed on every hover.
 *
 * Placement is delegated to PopupAnchor's edges/gravity/adjustment, which flips
 * and slides the popup to keep it on screen. The hand-rolled geometry helper
@@ -23,7 +23,7 @@ PopupWindow {
   property string direction: "auto"
 
   visible: false
-  color: Config.Theme.transparent
+  color: Core.Theme.transparent
 
   readonly property int shadowRoom: Core.Style.elevationRoom(1)
 

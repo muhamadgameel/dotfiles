@@ -1,6 +1,5 @@
 import QtQuick
 
-import "../config" as Config
 import "../core" as Core
 
 /**
@@ -38,7 +37,7 @@ Rectangle {
 
   // === Text Variant Properties ===
   property string text: ""
-  property color textColor: Config.Theme.accent
+  property color textColor: Core.Theme.accent
   property real fontSize: Core.Style.fontS
 
   // === Count Variant Properties ===
@@ -48,10 +47,10 @@ Rectangle {
   // === Shared Properties ===
   property color backgroundColor: {
     if (variant === "count")
-      return Config.Theme.error;
-    return Config.Theme.alpha(textColor, 0.2);
+      return Core.Theme.error;
+    return Core.Theme.alpha(textColor, 0.2);
   }
-  property color borderColor: Config.Theme.transparent
+  property color borderColor: Core.Theme.transparent
   property int borderWidth: 0
 
   // === Computed Properties ===
@@ -107,7 +106,7 @@ Rectangle {
     text: root.displayText
     font.pixelSize: root.fontSize
     font.weight: root.isCountVariant ? Font.Bold : Font.Normal
-    color: root.isCountVariant ? Config.Theme.bg : root.textColor
+    color: root.isCountVariant ? Core.Theme.bg : root.textColor
     visible: root.isTextVariant || root.count > 0
   }
 }

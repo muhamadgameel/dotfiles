@@ -1,7 +1,6 @@
 import QtQuick
 import QtQuick.Layouts
 
-import "../config" as Config
 import "../core" as Core
 
 /**
@@ -37,11 +36,11 @@ Rectangle {
   property int inputMethodHints: Qt.ImhNone
 
   // === Styling Properties ===
-  property color backgroundColor: Config.Theme.bgDark
-  property color borderColor: Config.Theme.surfaceHover
-  property color borderFocusColor: Config.Theme.accent
-  property color textColor: Config.Theme.text
-  property color placeholderColor: Config.Theme.textMuted
+  property color backgroundColor: Core.Theme.bgDark
+  property color borderColor: Core.Theme.surfaceHover
+  property color borderFocusColor: Core.Theme.accent
+  property color textColor: Core.Theme.text
+  property color placeholderColor: Core.Theme.textMuted
   property real fontSize: Core.Style.fontM
   property int borderRadius: Core.Style.radiusS
   property int borderWidth: 1

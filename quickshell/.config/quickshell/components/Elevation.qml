@@ -3,7 +3,6 @@ pragma ComponentBehavior: Bound
 import QtQuick
 import QtQuick.Effects
 
-import "../config" as Config
 import "../core" as Core
 
 /**
@@ -52,7 +51,7 @@ Loader {
   // Overridable so a bottom-anchored surface can throw its shadow upwards.
   property real offsetY: Core.Style.shadowOffsetY(root.level)
 
-  property color shadowColor: Config.Theme.alpha(Config.Theme.shadow, Core.Style.shadowAlpha(root.level) * Config.Theme.shadowStrength)
+  property color shadowColor: Core.Theme.alpha(Core.Theme.shadow, Core.Style.shadowAlpha(root.level) * Core.Theme.shadowStrength)
 
   // A Loader rather than a plain item, so switching shadows off removes the
   // scene graph node entirely instead of drawing a transparent one.

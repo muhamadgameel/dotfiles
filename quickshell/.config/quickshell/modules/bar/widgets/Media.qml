@@ -2,7 +2,6 @@ import QtQuick
 import QtQuick.Layouts
 
 import "../../../components" as Components
-import "../../../config" as Config
 import "../../../core" as Core
 import "../../../services" as Services
 
@@ -32,7 +31,7 @@ Item {
   Rectangle {
     anchors.fill: parent
     radius: Core.Style.radiusS
-    color: mouse.containsMouse ? Config.Theme.surfaceHover : Config.Theme.transparent
+    color: mouse.containsMouse ? Core.Theme.surfaceHover : Core.Theme.transparent
 
     Behavior on color {
       ColorAnimation {
@@ -54,7 +53,7 @@ Item {
     Components.Icon {
       icon: Services.Media.statusIcon
       size: Core.Style.fontM
-      color: Services.Media.isPlaying ? Config.Theme.accent : Config.Theme.textDim
+      color: Services.Media.isPlaying ? Core.Theme.accent : Core.Theme.textDim
     }
 
     Components.Text {
@@ -62,7 +61,7 @@ Item {
       Layout.maximumWidth: root.maxTextWidth
       text: Services.Media.summary
       size: Core.Style.fontS
-      color: Services.Media.isPlaying ? Config.Theme.text : Config.Theme.textDim
+      color: Services.Media.isPlaying ? Core.Theme.text : Core.Theme.textDim
       elide: Text.ElideRight
     }
   }

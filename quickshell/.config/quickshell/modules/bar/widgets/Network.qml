@@ -1,7 +1,6 @@
 import QtQuick
 
 import "../../../components" as Components
-import "../../../config" as Config
 import "../../../core" as Core
 import "../../../services" as Services
 
@@ -18,10 +17,10 @@ Components.Button {
   icon: Services.Network.connectionIcon
   iconColor: {
     if (!Services.Network.isConnected)
-      return Config.Theme.textMuted;
+      return Core.Theme.textMuted;
     if (!Services.Network.hasInternet)
-      return Config.Theme.warning;
-    return Config.Theme.text;
+      return Core.Theme.warning;
+    return Core.Theme.text;
   }
 
   text: {
@@ -66,6 +65,6 @@ Components.Button {
     visible: Services.Network.connecting
     pulse: true
     pulseLoops: Animation.Infinite
-    color: Config.Theme.accent
+    color: Core.Theme.accent
   }
 }

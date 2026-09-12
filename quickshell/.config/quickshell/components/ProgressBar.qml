@@ -1,6 +1,5 @@
 import QtQuick
 
-import "../config" as Config
 import "../core" as Core
 
 /**
@@ -27,8 +26,8 @@ Rectangle {
 
   property real value: 0.0
   property real maxValue: 1.0
-  property color progressColor: Config.Theme.accent
-  property color trackColor: Config.Theme.surface
+  property color progressColor: Core.Theme.accent
+  property color trackColor: Core.Theme.surface
   property bool reversed: false
 
   implicitWidth: Core.Style.px(200)
