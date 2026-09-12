@@ -269,7 +269,7 @@ Components.SlidingPanel {
 
         RowLayout {
           spacing: Core.Style.spaceXS
-          
+
           Components.Text {
             text: devItem.device?.address ?? ""
             size: Core.Style.fontXS

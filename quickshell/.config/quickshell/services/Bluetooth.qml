@@ -283,7 +283,6 @@ Singleton {
     return "Unknown device";
   }
 
-
   function getDeviceIcon(device) {
     if (!device)
       return "bluetooth";
