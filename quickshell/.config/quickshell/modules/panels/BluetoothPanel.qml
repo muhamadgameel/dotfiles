@@ -221,7 +221,7 @@ Components.SlidingPanel {
 
     property var device: null
 
-    readonly property string deviceName: device?.name || device?.address || "Unknown"
+    readonly property string deviceName: Services.Bluetooth.deviceLabel(device)
     readonly property string deviceIcon: Services.Bluetooth.getDeviceIcon(device)
     readonly property bool isConnected: device?.connected ?? false
     readonly property bool isPaired: device?.paired ?? device?.trusted ?? false
@@ -269,7 +269,13 @@ Components.SlidingPanel {
 
         RowLayout {
           spacing: Core.Style.spaceXS
-          visible: devItem.statusText || devItem.batteryText || devItem.isPaired
+          
+          Components.Text {
+            text: devItem.device?.address ?? ""
+            size: Core.Style.fontXS
+            color: Config.Theme.textMuted
+            font.family: Core.Style.fontMono
+          }
 
           // Status text
           Components.Text {
@@ -299,7 +305,7 @@ Components.SlidingPanel {
 
           // Tap to connect hint (for paired but not connected)
           Components.Text {
-            visible: devItem.isPaired && !devItem.isConnected && !devItem.batteryText
+            visible: devItem.isPaired && !devItem.isConnected && !devItem.batteryText && !devItem.isBusy
             text: "Tap to connect"
             size: Core.Style.fontS
             color: Config.Theme.textMuted

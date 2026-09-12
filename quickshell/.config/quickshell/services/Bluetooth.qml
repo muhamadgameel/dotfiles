@@ -46,7 +46,17 @@ Singleton {
   readonly property var availableDevices: {
     if (!devices)
       return [];
-    return devices.values.filter(d => d && !d.paired && !d.trusted && !d.blocked);
+    // Named devices first. The rest are anonymous BLE beacons - phones and
+    // watches advertising on rotating random addresses - and burying the device
+    // you are looking for under a dozen of them made the list unusable.
+    // filter() already copied, so sorting here does not reorder the model.
+    return devices.values.filter(d => d && !d.paired && !d.trusted && !d.blocked).sort((a, b) => {
+      const an = root.isNamed(a);
+      const bn = root.isNamed(b);
+      if (an !== bn)
+        return an ? -1 : 1;
+      return root.deviceLabel(a).localeCompare(root.deviceLabel(b));
+    });
   }
 
   readonly property var devicesWithBattery: {
@@ -82,10 +92,7 @@ Singleton {
     return devices.values.some(d => d?.state === BluetoothDeviceState.Connecting || d?.pairing);
   }
 
-  readonly property string firstConnectedName: {
-    const dev = connectedDevices[0];
-    return dev?.name || dev?.deviceName || "";
-  }
+  readonly property string firstConnectedName: connectedDevices.length > 0 ? root.deviceLabel(connectedDevices[0]) : ""
 
   readonly property string statusIcon: {
     if (!available || blocked || !enabled)
@@ -197,6 +204,85 @@ Singleton {
   }
 
   // === Device Helpers ===
+
+  // A device that publishes no name reaches us as its own address with dashes
+  // ("24-42-E3-20-81-F1"): BlueZ's Alias falls back to that, and the panel used
+  // to list it verbatim.
+  readonly property var _addressLike: /^([0-9a-f]{2}[-:]){5}[0-9a-f]{2}$/i
+
+  /**
+  * The name a device actually published, or "" if it published none.
+  *
+  * deviceName is BlueZ's Name; name is its Alias, which the user may have
+  * renamed - so the alias wins when it is a real name rather than the address.
+  */
+  function _publishedName(device) {
+    if (!device)
+      return "";
+
+    for (const candidate of [device.name, device.deviceName]) {
+      const text = (candidate ?? "").trim();
+      if (text !== "" && !root._addressLike.test(text))
+        return text;
+    }
+
+    return "";
+  }
+
+  /**
+  * Whether this device told us what it is called.
+  */
+  function isNamed(device) {
+    return root._publishedName(device) !== "";
+  }
+
+  /**
+  * A human-readable label: the published name, else what kind of device it is
+  * plus the tail of its address ("Headphones - 40:5B"), which at least says what
+  * it is and tells two of them apart.
+  */
+  function deviceLabel(device) {
+    if (!device)
+      return "Unknown device";
+
+    const published = root._publishedName(device);
+    if (published !== "")
+      return published;
+
+    return root._deviceKind(device);
+  }
+
+  // BlueZ leaves Icon empty for a device that never identified itself, which is
+  // exactly the case this is for - so "Unknown device" is the common answer.
+  function _deviceKind(device) {
+    const icon = (device?.icon ?? "").toLowerCase();
+
+    if (/headset|headphone/.test(icon))
+      return "Headphones";
+    if (/audio|speaker/.test(icon))
+      return "Speaker";
+    if (icon.includes("mouse"))
+      return "Mouse";
+    if (icon.includes("keyboard"))
+      return "Keyboard";
+    if (/gamepad|joystick/.test(icon))
+      return "Controller";
+    if (icon.includes("phone"))
+      return "Phone";
+    if (/computer|laptop/.test(icon))
+      return "Computer";
+    if (icon.includes("watch"))
+      return "Watch";
+    if (/display|video|tv/.test(icon))
+      return "Display";
+    if (icon.includes("printer"))
+      return "Printer";
+    if (icon.includes("input"))
+      return "Input device";
+
+    return "Unknown device";
+  }
+
 
   function getDeviceIcon(device) {
     if (!device)
