@@ -52,7 +52,14 @@ Singleton {
 
   readonly property string fontFamily: Settings.get("fontFamily", "Roboto")
 
-  readonly property real surfaceOpacity: Settings.get("surfaceOpacity", 0.9)
+  // Opacity of surfaces drawn over windows: the panels and the OSD. Kept high
+  // because they carry text over whatever is open - at 0.90, white text in a
+  // window behind a panel stayed readable straight through it. See Theme.qml.
+  readonly property real surfaceOpacity: Settings.get("surfaceOpacity", 0.96)
+
+  // The bar reserves its own strip, so only the wallpaper is ever behind it and
+  // it can stay more translucent without costing legibility.
+  readonly property real barOpacity: Settings.get("barOpacity", 0.85)
 
   // === OSD Configuration ===
   readonly property string osdPosition: Settings.get("osdPosition", "top_right")

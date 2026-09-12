@@ -70,11 +70,22 @@ Singleton {
   readonly property real shadowStrength: isDark ? 1.0 : 0.45
 
   // === Surfaces ===
-  // Panels and the bar are drawn translucent and lean on the compositor's blur.
-  // Single source of truth so a legibility tweak is one edit, not thirteen.
+  // Opacity follows what sits behind a surface, not a fixed offset between them:
+  //
+  // - panelBg is over windows (panels, the OSD), so it carries text across busy
+  //   content and needs to be nearly opaque. Config.surfaceOpacity, 0.96.
+  // - barBg is only ever over the wallpaper, so it can be more see-through.
+  //   Config.barOpacity, 0.85.
+  //
+  // Do not count on the compositor's blur for legibility. Measured over a tiled
+  // window, text behind a panel came through exactly as sharp as the original,
+  // only dimmed - so at the old 0.90 it was plainly readable. At 0.96 the
+  // background stops being legible whether or not blur is applied.
+  //
+  // Used to be three values derived by +/-0.05 from one setting, one of which
+  // (popupBg) nothing read.
   readonly property color panelBg: alpha(bg, Config.surfaceOpacity)
-  readonly property color barBg: alpha(bg, Math.max(0.5, Config.surfaceOpacity - 0.05))
-  readonly property color popupBg: alpha(bg, Math.min(1.0, Config.surfaceOpacity + 0.05))
+  readonly property color barBg: alpha(bg, Config.barOpacity)
 
   // === Focus ===
   readonly property color focusRing: accent
