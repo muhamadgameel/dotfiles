@@ -4,6 +4,7 @@ import QtQuick
 import Quickshell
 import Quickshell.Io
 
+import "../config" as Config
 import "../core" as Core
 
 /**
@@ -46,24 +47,18 @@ Singleton {
   readonly property int nvidiaPollingInterval: 10000
   readonly property int diskPollingInterval: 60000
 
-  // Thresholds (used by statusLevel function and widgets)
-  readonly property real tempWarning: 70
-  readonly property real tempCritical: 85
-  readonly property real usageWarning: 70
-  readonly property real usageCritical: 90
-  readonly property real memWarning: 80
-  readonly property real memCritical: 90
-  readonly property real diskWarning: 85
-  readonly property real diskCritical: 95
+  // Warning/critical thresholds live in config/Config.qml, with the reasoning
+  // for the temperature values.
 
   // How far a reading must fall back below a threshold before its status may
   // drop, in the reading's own units (degrees, or percentage points).
   //
   // Without it a sensor sitting near a threshold flipped the status on nearly
-  // every poll. This laptop's CPU idles at 70-72 C against a 70 C warning, so the
-  // bar icon flickered orange-white every few seconds - and each flip back into
-  // "warning" restarted the widget's pulse animation, which kept the window
-  // rendering at the display refresh rate almost continuously.
+  // every poll. It was found with the CPU idling at 70-72 C against an old 70 C
+  // warning: the bar icon flickered orange-white every few seconds, and each flip
+  // back into "warning" restarted the widget's pulse animation, keeping the
+  // window rendering at the display refresh rate almost continuously. The
+  // thresholds have since moved, but any reading can sit near any threshold.
   readonly property real hysteresis: 5
 
   // ═══════════════════════════════════════════════════════════════════════════
@@ -120,11 +115,11 @@ Singleton {
   property string memStatus: "normal"
   property string diskStatus: "normal"
 
-  onCpuTempChanged: cpuTempStatus = statusLevel(cpuTemp, tempWarning, tempCritical, cpuTempStatus)
-  onGpuTempChanged: gpuTempStatus = statusLevel(gpuTemp, tempWarning, tempCritical, gpuTempStatus)
-  onCpuUsageChanged: cpuUsageStatus = statusLevel(cpuUsage, usageWarning, usageCritical, cpuUsageStatus)
-  onMemPercentChanged: memStatus = statusLevel(memPercent, memWarning, memCritical, memStatus)
-  onDiskPercentChanged: diskStatus = statusLevel(diskPercent, diskWarning, diskCritical, diskStatus)
+  onCpuTempChanged: cpuTempStatus = statusLevel(cpuTemp, Config.Config.cpuTempWarning, Config.Config.cpuTempCritical, cpuTempStatus)
+  onGpuTempChanged: gpuTempStatus = statusLevel(gpuTemp, Config.Config.gpuTempWarning, Config.Config.gpuTempCritical, gpuTempStatus)
+  onCpuUsageChanged: cpuUsageStatus = statusLevel(cpuUsage, Config.Config.cpuUsageWarning, Config.Config.cpuUsageCritical, cpuUsageStatus)
+  onMemPercentChanged: memStatus = statusLevel(memPercent, Config.Config.memWarning, Config.Config.memCritical, memStatus)
+  onDiskPercentChanged: diskStatus = statusLevel(diskPercent, Config.Config.diskWarning, Config.Config.diskCritical, diskStatus)
 
   // Overall health status
   readonly property string healthStatus: {

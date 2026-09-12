@@ -67,6 +67,35 @@ Singleton {
   readonly property int tooltipDelay: Settings.get("tooltipDelay", 500)
   readonly property int tooltipMaxWidth: Settings.get("tooltipMaxWidth", 320)
 
+  // === System Monitor Thresholds ===
+  // Where a reading turns the SystemStats icon orange (warning) or red
+  // (critical). SystemStats needs a reading to fall 5 back below a threshold
+  // before the status drops again.
+  //
+  // The temperatures are tuned to this machine, because what counts as hot
+  // depends entirely on the part:
+  //
+  // - CPU, i9-13900HX: TjMax is 100 C, which is where Intel throttles, and HX
+  //   parts are designed to run at 90-100 C under sustained load. The package
+  //   sensor idles here at 69-71 C. At 90 there is little headroom left; 97 is
+  //   effectively the throttle point. The old shared 70 fired at idle.
+  // - GPU, RTX 4080 Max-Q: the driver's target temperature is 87 C, where it
+  //   starts cutting clocks and power (`nvidia-smi -q -d TEMPERATURE`). It idles
+  //   at ~56 C. Warn a few degrees before the target.
+  //
+  // On different hardware, start from TjMax (`/sys/class/hwmon/*/temp*_crit`)
+  // and the GPU's target temperature rather than from these numbers.
+  readonly property real cpuTempWarning: Settings.get("cpuTempWarning", 90)
+  readonly property real cpuTempCritical: Settings.get("cpuTempCritical", 97)
+  readonly property real gpuTempWarning: Settings.get("gpuTempWarning", 83)
+  readonly property real gpuTempCritical: Settings.get("gpuTempCritical", 87)
+  readonly property real cpuUsageWarning: Settings.get("cpuUsageWarning", 70)
+  readonly property real cpuUsageCritical: Settings.get("cpuUsageCritical", 90)
+  readonly property real memWarning: Settings.get("memWarning", 80)
+  readonly property real memCritical: Settings.get("memCritical", 90)
+  readonly property real diskWarning: Settings.get("diskWarning", 85)
+  readonly property real diskCritical: Settings.get("diskCritical", 95)
+
   // === Workspaces ===
   // By default the bar shows only the workspaces that exist on its monitor -
   // Hyprland keeps one alive while it has windows or focus. Turn this on to get
