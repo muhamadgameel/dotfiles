@@ -25,24 +25,17 @@ Singleton {
 
   // === Startup Suppression ===
   //
-  // Services emit change signals while populating their initial state
-  // (PipeWire reporting the current sink volume, brightnessctl reporting the
-  // current backlight level). Those are not user actions and must not flash an
-  // OSD at login.
-  property var _armed: ({})
+  // Services report their current values while they populate - PipeWire the
+  // sink volume, the backlight watcher its first read. Those are not user
+  // actions and must not flash an OSD at login, so nothing shows until the
+  // shell has been up for settleMs.
+  readonly property int settleMs: 2000
+  property bool _settled: false
 
-  /**
-  * Mark a source as having produced a value. The first call returns false -
-  * that event is initial state - and every later call returns true.
-  *
-  * @param source - Stable id for the calling service, e.g. "volume"
-  * @returns whether the source may show an OSD
-  */
-  function arm(source) {
-    if (_armed[source])
-      return true;
-    _armed[source] = true;
-    return false;
+  Timer {
+    interval: root.settleMs
+    running: true
+    onTriggered: root._settled = true
   }
 
   // === Public API ===
@@ -52,14 +45,9 @@ Singleton {
   *
   * @param type - Layout id, resolved by OSDLayouts.getComponent()
   * @param osdPayload - Layout-specific values
-  * @param source - Optional source id for startup suppression (see arm())
   */
-  function show(type, osdPayload, source) {
-    if (!Config.Config.osdEnabled)
-      return;
-
-    // First value from this source is initial state, not a user action.
-    if (source !== undefined && !arm(source))
+  function show(type, osdPayload) {
+    if (!Config.Config.osdEnabled || !root._settled)
       return;
 
     currentType = type;

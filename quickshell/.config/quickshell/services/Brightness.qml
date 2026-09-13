@@ -139,7 +139,7 @@ Singleton {
       maxValue: 1.0,
       iconColor: Core.Theme.text,
       progressColor: Core.Theme.accent
-    }, "brightness");
+    });
   }
 
   // Read the value the watcher already holds - no process spawn.

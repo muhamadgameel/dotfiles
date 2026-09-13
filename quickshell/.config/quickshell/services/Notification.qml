@@ -95,7 +95,11 @@ Singleton {
     repeat: true
     running: root.activeList.count > 0
     onTriggered: root._updateProgress()
+    // A fresh start, so the first tick does not count the time spent idle.
+    onRunningChanged: root._lastTick = Date.now()
   }
+
+  property real _lastTick: 0
 
   // === Signals ===
   signal animateAndRemove(string notificationId)
@@ -213,11 +217,11 @@ Singleton {
     for (const name of lookupNames) {
       const entry = DesktopEntries.heuristicLookup(name);
       if (entry && entry.icon) {
-        let resolved = Quickshell.iconPath(entry.icon, true);
-        if (resolved && resolved !== "") {
+        const resolved = Quickshell.iconPath(entry.icon, true);
+        if (resolved && resolved !== "")
           return resolved;
-        }
-        return resolved;
+        // No icon on disk for this entry: keep going. An unconditional return
+        // here meant only the first candidate name was ever tried.
       }
     }
 
@@ -256,10 +260,16 @@ Singleton {
 
     // Only the backstop is enforced here. Everything between maxVisible and
     // maxActive stays in the model and is counted by hiddenCount.
-    while (activeList.count > maxActive) {
-      const last = activeList.get(activeList.count - 1);
-      dismiss(last.id);  // closed signal handles _remove() and cleanup
-    }
+    //
+    // The ids are collected first. This used to be `while (count > maxActive)
+    // dismiss(last)`, which only terminates because dismiss() shrinks the model
+    // synchronously through the closed signal - true today, but the loop would
+    // spin forever the day that signal is queued instead.
+    const overflow = [];
+    for (let i = maxActive; i < activeList.count; i++)
+      overflow.push(activeList.get(i).id);
+    for (const id of overflow)
+      dismiss(id);
   }
 
   function _calculateDuration(data) {
@@ -326,6 +336,8 @@ Singleton {
 
   function _updateProgress() {
     const now = Date.now();
+    const tick = now - root._lastTick;
+    root._lastTick = now;
     const expired = [];
 
     for (var i = 0; i < activeList.count; i++) {
@@ -335,7 +347,18 @@ Singleton {
         continue;
 
       const meta = entry.meta;
-      if (meta.duration < 0 || meta.paused)
+
+      // Queued below the visible stack: the clock stands still until the card
+      // has a slot, by pushing its start forward by this tick. Without this a
+      // burst of eight low-urgency notifications all expired together at 3 s,
+      // and the three that were queued only flashed on screen as they went.
+      // One pushed down mid-countdown keeps the time it had left.
+      if (i >= maxVisible) {
+        meta.startTime += tick;
+        continue;
+      }
+
+      if (meta.duration < 0 || meta.paused || meta.expired)
         continue;
 
       const elapsed = now - meta.startTime;
@@ -343,7 +366,9 @@ Singleton {
 
       if (progress <= 0) {
         // Collected rather than dispatched here: emitting mutates activeList
-        // underneath this loop.
+        // underneath this loop. Marked so the next ticks, which run while the
+        // card animates out, do not send it again.
+        meta.expired = true;
         expired.push(item.id);
         continue;
       }

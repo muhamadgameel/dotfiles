@@ -205,7 +205,7 @@ Singleton {
       maxValue: 1.0,
       iconColor: Core.Theme.text,
       progressColor: Core.Theme.accent
-    }, "media-volume");
+    });
   }
 
   function toggleShuffle() {

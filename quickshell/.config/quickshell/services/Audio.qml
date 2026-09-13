@@ -155,7 +155,7 @@ Singleton {
       iconColor: isMuted ? Core.Theme.error : Core.Theme.text,
       progressColor: isMuted ? Core.Theme.error : (value > 1.0 ? Core.Theme.warning : Core.Theme.accent),
       valueText: Math.round(value * 100) + "%"
-    }, "volume");
+    });
   }
 
   // Same reasoning as _showVolumeOSD().
@@ -174,7 +174,7 @@ Singleton {
       iconColor: isMuted ? Core.Theme.error : Core.Theme.text,
       progressColor: isMuted ? Core.Theme.error : Core.Theme.accent,
       valueText: Math.round(value * 100) + "%"
-    }, "mic");
+    });
   }
 
   // === Icons ===
