@@ -52,10 +52,7 @@ Components.Card {
     Components.Toggle {
       visible: root.hasToggle
       checked: root.toggleChecked
-      onToggled: checked => {
-        root.toggleChecked = checked;
-        root.toggled(checked);
-      }
+      onToggled: checked => root.toggled(checked)
     }
   }
 }

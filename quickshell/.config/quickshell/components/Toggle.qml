@@ -98,9 +98,6 @@ Rectangle {
     enabled: root.enabled
     cursorShape: enabled ? Qt.PointingHandCursor : Qt.ArrowCursor
 
-    onClicked: {
-      root.checked = !root.checked;
-      root.toggled(root.checked);
-    }
+    onClicked: root.toggled(!root.checked)
   }
 }
