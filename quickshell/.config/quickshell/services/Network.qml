@@ -98,7 +98,8 @@ Singleton {
 
   function refreshAll() {
     _connectionStatusProcess.running = true;
-    scan();
+    // Rescans once it has confirmed the radio is on.
+    _wifiStateProcess.running = true;
   }
 
   function setWifiEnabled(enabled) {
@@ -107,7 +108,12 @@ Singleton {
     // re-evaluating before `running` was set.
     _wifiToggleProcess.command = ["nmcli", "radio", "wifi", enabled ? "on" : "off"];
     _wifiToggleProcess.running = true;
+
+    // Shown at once. _wifiToggleProcess reads the radio back when it finishes,
+    // which corrects this if the switch did not take.
     wifiEnabled = enabled;
+    if (!enabled)
+      _clearWifiState();
   }
 
   /**
@@ -119,13 +125,23 @@ Singleton {
   *   "active only if the panel is open".
   */
   function scan(force) {
-    if (!wifiEnabled || scanning)
+    if (!wifiEnabled)
       return;
 
     const active = force ?? panelOpen;
 
+    // Queue rather than drop: the scan already running may have started before
+    // the change this call is reacting to.
+    if (scanning) {
+      _scanQueued = true;
+      _scanQueuedActive = _scanQueuedActive || active;
+      return;
+    }
+
+    // lastError is deliberately left alone. Clearing it here meant the 20s
+    // timer wiped a connect error - "Incorrect password" included - while the
+    // user was still reading it.
     scanning = true;
-    lastError = "";
     _scanProcess.command = ["nmcli", "-t", "-e", "yes", "-f", "SSID,SECURITY,SIGNAL,IN-USE", "device", "wifi", "list", "--rescan", active ? "yes" : "no"];
     _scanProcess.running = true;
   }
@@ -147,6 +163,7 @@ Singleton {
     passwordRequiredFor = "";
 
     _connectProcess.ssid = ssid;
+    _connectProcess.withPassword = !!password;
     _connectProcess.command = password ? ["nmcli", "device", "wifi", "connect", ssid, "password", password] : ["nmcli", "device", "wifi", "connect", ssid];
     _connectProcess.running = true;
   }
@@ -159,15 +176,38 @@ Singleton {
     lastError = "";
   }
 
+  /**
+  * Disconnect Wi-Fi, and stay disconnected.
+  *
+  * Disconnects the device rather than bringing its profile down. `nmcli
+  * connection down` leaves the device free to autoconnect, so NetworkManager
+  * would join another saved network in range within seconds. The device
+  * autoconnects again after the next manual connect, a resume or a reboot.
+  *
+  * @param ssid - Network being disconnected, for the row's busy state
+  */
   function disconnect(ssid) {
+    // One at a time: a second call would retarget the running process's
+    // result at the wrong row.
+    if (disconnectingFrom !== "" || _wifiDevice === "")
+      return;
+
     disconnectingFrom = ssid;
     _disconnectProcess.ssid = ssid;
+    _disconnectProcess.command = ["nmcli", "device", "disconnect", _wifiDevice];
     _disconnectProcess.running = true;
   }
 
+  /**
+  * Delete every saved Wi-Fi profile for a network.
+  */
   function forget(ssid) {
+    if (forgettingNetwork !== "")
+      return;
+
     forgettingNetwork = ssid;
     _forgetProcess.ssid = ssid;
+    _forgetProcess.command = ["sh", "-c", _forgetScript, "sh", ssid];
     _forgetProcess.running = true;
   }
 
@@ -183,10 +223,37 @@ Singleton {
   // === Private ===
   readonly property var _wifiTypes: ["802-11-wireless", "wifi"]
   readonly property var _ethernetTypes: ["802-3-ethernet", "ethernet"]
-  readonly property var _connectionEvents: [": connected", ": using connection", ": disconnected", ": deactivating", ": unmanaged"]
+  // `nmcli monitor` lines that can change what is connected or whether the
+  // radio is on. The monitor prints nothing for the radio itself, so each of
+  // these re-reads it too (see _refreshDebounce).
+  // - ": unavailable": a cable unplugged or the radio switched off, which skip
+  //   "disconnected" entirely.
+  // - "primary connection": the default route moved to another link.
+  // - "NetworkManager is running": it restarted, and anything may have changed.
+  readonly property var _connectionEvents: [": connected", ": using connection", ": disconnected", ": deactivating", ": unmanaged", ": unavailable", ": device removed", "primary connection", "NetworkManager is running"]
   readonly property var _errorMappings: [[/No network with SSID/i, "Network not found"], [/Timeout/i, "Connection timeout"]]
 
-  // NetworkManager holds no key for the network - a prompt, not a failure.
+  // Wi-Fi interface of the active connection, which disconnect() acts on.
+  property string _wifiDevice: ""
+
+  // A scan asked for while one was running, run when it finishes.
+  property bool _scanQueued: false
+  property bool _scanQueuedActive: false
+
+  // Deletes every saved Wi-Fi profile whose SSID is $1. Profiles are matched on
+  // the SSID they hold and deleted by UUID. Deleting by *name*, as before,
+  // missed a profile named differently from its SSID, and would have deleted a
+  // wired or VPN profile that happened to share the name.
+  readonly property string _forgetScript: `
+    nmcli -t -f UUID,TYPE connection show | while IFS=: read -r uuid type; do
+      [ "$type" = 802-11-wireless ] || continue
+      [ "$(nmcli -e no -g 802-11-wireless.ssid connection show uuid "$uuid")" = "$1" ] || continue
+      nmcli connection delete uuid "$uuid" || exit
+    done`
+
+  // NetworkManager asked for a key. Without one supplied, that is the first
+  // prompt. With one supplied, it is how nmcli reports a key the network
+  // rejected - see _connectProcess.
   readonly property var _secretsRequired: /secrets? (were|was) required|no secrets provided|secrets are required/i
 
   // The key we supplied was rejected - re-prompt rather than dead-end.
@@ -239,6 +306,24 @@ Singleton {
       Core.Logger.w("Network", `${tag}: ${msg}`);
   }
 
+  // The first line of nmcli's stderr worth showing. After a NetworkManager
+  // upgrade, and until the daemon restarts, every command's stderr starts with
+  // a "Warning: ... versions don't match" line, which used to become the error.
+  function _firstError(text) {
+    return text.split("\n").map(line => line.trim()).find(line => line && !line.startsWith("Warning:")) ?? "";
+  }
+
+  // Everything that only means something while the radio is on. The connection
+  // itself is left to _connectionStatusProcess, which the monitor re-runs as
+  // the device goes down.
+  function _clearWifiState() {
+    networks = Object.create(null);
+    wifiSignal = 0;
+    wifiSecurity = "";
+    passwordRequiredFor = "";
+    lastError = "";
+  }
+
   function _triggerRefresh() {
     _refreshDebounce.restart();
   }
@@ -272,6 +357,10 @@ Singleton {
     onTriggered: {
       _connectionStatusProcess.running = true;
       _connectivityCheckProcess.running = true;
+      // Re-reads the radio and then the cached scan list, so the rows'
+      // Connected badges and the signal in the bar follow a change the panel
+      // did not make: autoconnect, a dropped link, an rfkill key.
+      _wifiStateProcess.running = true;
     }
   }
 
@@ -314,26 +403,14 @@ Singleton {
           _refreshDebounce.restart();
           return;
         }
-
-        // WiFi radio state
-        if (line.includes("WiFi is now enabled")) {
-          root.wifiEnabled = true;
-          root.scan();
-        } else if (line.includes("WiFi is now disabled")) {
-          root.wifiEnabled = false;
-          root.wifiConnected = false;
-          root.wifiSSID = "";
-          root.wifiSignal = 0;
-          root.wifiSecurity = "";
-          root.networks = Object.create(null);
-        }
       }
     }
 
     onExited: {
-      // `nmcli monitor` exits at once when NetworkManager is not running, so
-      // restarting on the spot spun a process as fast as it could fail. Back
-      // off, and reset once a run has survived a while.
+      // Restarting on the spot would spin a process as fast as it could fail.
+      // Back off, and reset once a run has survived a while. (A stopped
+      // NetworkManager does not end the monitor: it prints "NetworkManager is
+      // stopped" and waits.)
       const uptime = Date.now() - root._monitorStartedAt;
       if (uptime > root._monitorHealthyMs) {
         root._monitorBackoffMs = root._monitorMinBackoffMs;
@@ -365,46 +442,72 @@ Singleton {
     onTriggered: _monitorProcess.running = true
   }
 
-  // WiFi radio state check
+  // Wi-Fi radio state. Read at startup, after every connection event and after
+  // each toggle - `nmcli monitor` prints nothing when the radio changes, so
+  // this is how an rfkill key or a terminal `nmcli radio wifi off` is noticed.
   Process {
     id: _wifiStateProcess
     command: ["nmcli", "radio", "wifi"]
 
     stdout: StdioCollector {
-      onStreamFinished: {
-        root.wifiEnabled = text.trim() === "enabled";
-        if (root.wifiEnabled) {
-          root.scan();
-        }
-      }
+      id: _wifiStateOut
+    }
+
+    onExited: exitCode => {
+      // A failed read is not an answer. Taking it as "disabled" turned Wi-Fi
+      // off in the shell for the whole session if NetworkManager was not up yet.
+      const state = _wifiStateOut.text.trim();
+      if (exitCode !== 0 || (state !== "enabled" && state !== "disabled"))
+        return;
+
+      root.wifiEnabled = state === "enabled";
+      if (root.wifiEnabled)
+        root.scan(false);
+      else
+        root._clearWifiState();
     }
   }
 
-  // WiFi radio toggle. `command` is set by setWifiEnabled() before each run.
+  // Wi-Fi radio toggle. `command` is set by setWifiEnabled() before each run.
   Process {
     id: _wifiToggleProcess
+
+    stderr: StdioCollector {
+      onStreamFinished: root._logError("Wi-Fi toggle", text)
+    }
+
+    // Read back what actually happened. A refused toggle fails, but a radio
+    // held off by rfkill reports success, so only the read-back catches both.
+    onExited: _wifiStateProcess.running = true
   }
 
   // Active connection status
   Process {
     id: _connectionStatusProcess
-    command: ["nmcli", "-t", "-e", "yes", "-f", "NAME,TYPE,DEVICE", "connection", "show", "--active"]
+    command: ["nmcli", "-t", "-e", "yes", "-f", "NAME,TYPE,DEVICE,STATE", "connection", "show", "--active"]
 
     stdout: StdioCollector {
       onStreamFinished: {
         let wifi = false, eth = false;
-        let wifiName = "", ethIface = "", activeIface = "";
+        let wifiName = "", wifiIface = "", ethIface = "", activeIface = "";
 
         for (const line of text.split("\n")) {
-          const parts = root._parseNmcliLine(line, 3);
+          const parts = root._parseNmcliLine(line, 4);
           if (!parts)
             continue;
 
-          const [name, type, device] = parts;
+          const [name, type, device, state] = parts;
+
+          // `--active` also lists connections still activating or deactivating.
+          // Counting those showed a network as connected while it was still
+          // authenticating, including ones about to fail.
+          if (state !== "activated")
+            continue;
 
           if (root._wifiTypes.includes(type)) {
             wifi = true;
             wifiName = name;
+            wifiIface = device;
             activeIface = device;
           } else if (root._ethernetTypes.includes(type)) {
             eth = true;
@@ -415,6 +518,7 @@ Singleton {
 
         root.wifiConnected = wifi;
         root.wifiSSID = wifi ? wifiName : "";
+        root._wifiDevice = wifiIface;
         root.ethernetConnected = eth;
         root.ethernetInterface = ethIface;
         root.activeInterface = activeIface;
@@ -475,26 +579,36 @@ Singleton {
   }
 
   // WiFi scan. `command` is set by scan(), which picks the rescan mode.
+  //
+  // The processes below act on exitCode, not on what nmcli printed. `exited`
+  // arrives after both streams have been read, so the collected text is
+  // complete by then. Matching stdout text reported every failure as success.
   Process {
     id: _scanProcess
 
     stdout: StdioCollector {
-      onStreamFinished: {
-        // Nothing at all on stdout means nmcli itself failed - NetworkManager
-        // restarting, the Wi-Fi device not ready yet - and stderr says why.
-        // Replacing the list with that empty result blanked the panel. Keep the
-        // last list instead; a radio that is really off is cleared by the
-        // monitor, not by a scan.
-        if (text.trim() === "") {
-          root.scanning = false;
-          Core.Logger.d("Network", "Scan returned nothing; keeping the previous list");
-          return;
-        }
+      id: _scanOut
+    }
 
+    stderr: StdioCollector {
+      onStreamFinished: root._logError("Scan", text)
+    }
+
+    onExited: exitCode => {
+      root.scanning = false;
+
+      // A failed run (NetworkManager restarting, the device not ready) keeps
+      // the last list rather than blanking the panel. An empty list from a
+      // run that succeeded is real - nothing in range, or the radio went off -
+      // and used to be mistaken for a failure, so the old list never cleared.
+      if (exitCode !== 0) {
+        Core.Logger.d("Network", `Scan failed (exit ${exitCode}); keeping the previous list`);
+      } else if (root.wifiEnabled) {
         // SSIDs are arbitrary strings, including Object prototype names.
         const networksMap = Object.create(null);
+        let inUseSignal = 0, inUseSecurity = "";
 
-        for (const line of text.split("\n")) {
+        for (const line of _scanOut.text.split("\n")) {
           const parts = root._parseNmcliLine(line, 4);
           if (!parts)
             continue;
@@ -507,8 +621,8 @@ Singleton {
           const connected = inUse === "*";
 
           if (connected) {
-            root.wifiSignal = signal;
-            root.wifiSecurity = security;
+            inUseSignal = signal;
+            inUseSecurity = security;
           }
 
           // Keep the strongest AP, but retain association with any AP of the
@@ -528,15 +642,17 @@ Singleton {
         }
 
         root.networks = networksMap;
-        root.scanning = false;
+        // Reset when nothing is in use, rather than keeping the last network's.
+        root.wifiSignal = inUseSignal;
+        root.wifiSecurity = inUseSecurity;
         Core.Logger.d("Network", `Scan complete: ${Object.keys(networksMap).length} networks`);
       }
-    }
 
-    stderr: StdioCollector {
-      onStreamFinished: {
-        root.scanning = false;
-        root._logError("Scan", text);
+      if (root._scanQueued) {
+        const active = root._scanQueuedActive;
+        root._scanQueued = false;
+        root._scanQueuedActive = false;
+        root.scan(active);
       }
     }
   }
@@ -546,101 +662,109 @@ Singleton {
   Process {
     id: _connectProcess
     property string ssid: ""
-
-    stdout: StdioCollector {
-      onStreamFinished: {
-        if (text.includes("successfully")) {
-          Core.Logger.i("Network", `Connected to: ${_connectProcess.ssid}`);
-          // Immediately update networks list to reflect connection
-          root._updateNetworkConnection(_connectProcess.ssid, true);
-        }
-        root.connectingTo = "";
-      }
-    }
+    property bool withPassword: false
 
     stderr: StdioCollector {
-      onStreamFinished: {
-        root.connectingTo = "";
+      id: _connectErr
+    }
 
-        const error = text.trim();
-        if (!error)
-          return;
+    onExited: exitCode => {
+      const ssid = _connectProcess.ssid;
+      root.connectingTo = "";
 
-        // No stored key for this network. That is a prompt, not a failure.
-        if (root._secretsRequired.test(error)) {
-          root.passwordRequiredFor = _connectProcess.ssid;
-          root.lastError = "";
-          Core.Logger.d("Network", `Password required for ${_connectProcess.ssid}`);
-          return;
-        }
-
-        // Wrong key - ask again rather than dead-ending on the raw message.
-        if (root._badPassword.test(error)) {
-          root.passwordRequiredFor = _connectProcess.ssid;
-          root.lastError = "Incorrect password";
-          Core.Logger.w("Network", `Connect: ${error}`);
-          return;
-        }
-
-        // Map common errors to user-friendly messages
-        for (const [pattern, message] of root._errorMappings) {
-          if (pattern.test(error)) {
-            root.lastError = message;
-            Core.Logger.w("Network", `Connect: ${error}`);
-            return;
-          }
-        }
-
-        root.lastError = error.split("\n")[0];
-        Core.Logger.w("Network", `Connect: ${error}`);
+      if (exitCode === 0) {
+        Core.Logger.i("Network", `Connected to: ${ssid}`);
+        // Immediately update networks list to reflect connection
+        root._updateNetworkConnection(ssid, true);
+        return;
       }
+
+      const stderr = _connectErr.text;
+
+      // NetworkManager wants a key. When one was supplied, this is a wrong
+      // password: nmcli reports a rejected key as "Secrets were required", not
+      // as anything about the password. Checking this before _badPassword used
+      // to re-prompt silently, with no sign the key had been wrong.
+      if (root._secretsRequired.test(stderr)) {
+        root.passwordRequiredFor = ssid;
+        if (_connectProcess.withPassword) {
+          root.lastError = "Incorrect password";
+          Core.Logger.w("Network", `Connect: ${stderr.trim()}`);
+        } else {
+          root.lastError = "";
+          Core.Logger.d("Network", `Password required for ${ssid}`);
+        }
+        return;
+      }
+
+      // Wrong key - ask again rather than dead-ending on the raw message.
+      if (root._badPassword.test(stderr)) {
+        root.passwordRequiredFor = ssid;
+        root.lastError = "Incorrect password";
+        Core.Logger.w("Network", `Connect: ${stderr.trim()}`);
+        return;
+      }
+
+      Core.Logger.w("Network", `Connect (exit ${exitCode}): ${stderr.trim()}`);
+
+      // Map common errors to user-friendly messages
+      for (const [pattern, message] of root._errorMappings) {
+        if (pattern.test(stderr)) {
+          root.lastError = message;
+          return;
+        }
+      }
+
+      root.lastError = root._firstError(stderr) || "Could not connect";
     }
   }
 
-  // WiFi disconnect
+  // WiFi disconnect. `command` is set by disconnect().
   Process {
     id: _disconnectProcess
     property string ssid: ""
-    command: ["nmcli", "connection", "down", "id", ssid]
-
-    stdout: StdioCollector {
-      onStreamFinished: {
-        Core.Logger.i("Network", `Disconnected from: ${_disconnectProcess.ssid}`);
-        // Immediately update networks list to reflect disconnection
-        root._updateNetworkConnection(_disconnectProcess.ssid, false);
-        root.disconnectingFrom = "";
-      }
-    }
 
     stderr: StdioCollector {
-      onStreamFinished: {
-        root.disconnectingFrom = "";
-        root._logError("Disconnect", text);
+      id: _disconnectErr
+    }
+
+    onExited: exitCode => {
+      root.disconnectingFrom = "";
+
+      if (exitCode !== 0) {
+        root.lastError = root._firstError(_disconnectErr.text) || "Could not disconnect";
+        root._logError("Disconnect", _disconnectErr.text);
+        return;
       }
+
+      Core.Logger.i("Network", `Disconnected from: ${_disconnectProcess.ssid}`);
+      // Immediately update networks list to reflect disconnection
+      root._updateNetworkConnection(_disconnectProcess.ssid, false);
     }
   }
 
-  // Forget saved network
+  // Forget saved network. `command` is set by forget().
   Process {
     id: _forgetProcess
     property string ssid: ""
-    command: ["nmcli", "connection", "delete", "id", ssid]
-
-    stdout: StdioCollector {
-      onStreamFinished: {
-        Core.Logger.i("Network", `Forgot network: ${_forgetProcess.ssid}`);
-        root.forgettingNetwork = "";
-        root.scan();
-      }
-    }
 
     stderr: StdioCollector {
-      onStreamFinished: {
-        root.forgettingNetwork = "";
-        if (text.trim() && !text.includes("not found")) {
-          root._logError("Forget", text);
-        }
+      id: _forgetErr
+    }
+
+    onExited: exitCode => {
+      root.forgettingNetwork = "";
+
+      if (exitCode !== 0) {
+        root.lastError = root._firstError(_forgetErr.text) || "Could not forget network";
+        root._logError("Forget", _forgetErr.text);
+        return;
       }
+
+      // Also reached when nothing was saved for this network: there was
+      // nothing to delete, which is the outcome asked for.
+      Core.Logger.i("Network", `Forgot network: ${_forgetProcess.ssid}`);
+      root.scan();
     }
   }
 }
