@@ -73,15 +73,8 @@ Components.SlidingPanel {
   Components.Divider {}
 
   // === STREAMS SECTION ===
-  RowLayout {
-    Layout.fillWidth: true
-    spacing: Core.Style.spaceS
-
-    Components.Text {
-      text: "Applications"
-      weight: Core.Style.weightBold
-      Layout.fillWidth: true
-    }
+  Components.SectionHeader {
+    title: "Applications"
 
     Components.Text {
       text: _streamCount + " active"

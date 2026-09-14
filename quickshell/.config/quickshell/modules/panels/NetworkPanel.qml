@@ -89,18 +89,9 @@ Components.SlidingPanel {
         return rows;
       }
     },
-
-    // List heading with scan button
-    RowLayout {
-      Layout.fillWidth: true
-      spacing: Core.Style.spaceS
+    Components.SectionHeader {
+      title: "Available Networks"
       visible: Services.Network.wifiEnabled
-
-      Components.Text {
-        text: "Available Networks"
-        weight: Core.Style.weightBold
-        Layout.fillWidth: true
-      }
 
       Components.Text {
         text: Services.Network.searching ? "Searching..." : Services.Network.scanning ? "Scanning..." : `${Object.keys(Services.Network.networks).length} networks`

@@ -68,18 +68,9 @@ Components.SlidingPanel {
         },
       ]
     },
-
-    // List heading with scan button
-    RowLayout {
-      Layout.fillWidth: true
-      spacing: Core.Style.spaceS
+    Components.SectionHeader {
+      title: "Devices"
       visible: Services.Bluetooth.enabled
-
-      Components.Text {
-        text: "Devices"
-        weight: Core.Style.weightBold
-        Layout.fillWidth: true
-      }
 
       Components.Text {
         visible: Services.Bluetooth.discovering

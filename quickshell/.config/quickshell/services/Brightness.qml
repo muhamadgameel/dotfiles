@@ -41,6 +41,9 @@ Singleton {
 
   // === Private Properties ===
   property real _queuedBrightness: NaN
+
+  // The level the last request asked for, even while it is still queued.
+  readonly property real requestedBrightness: isNaN(_queuedBrightness) ? brightness : _queuedBrightness
   property real _lastSelfWrite: 0
 
   // === Debounce Timer ===
@@ -75,7 +78,7 @@ Singleton {
   function increase() {
     if (!root.ready)
       return;
-    set((isNaN(root._queuedBrightness) ? root.brightness : root._queuedBrightness) + root.stepSize);
+    set(root.requestedBrightness + root.stepSize);
   }
 
   /**
@@ -84,7 +87,7 @@ Singleton {
   function decrease() {
     if (!root.ready)
       return;
-    set((isNaN(root._queuedBrightness) ? root.brightness : root._queuedBrightness) - root.stepSize);
+    set(root.requestedBrightness - root.stepSize);
   }
 
   /**

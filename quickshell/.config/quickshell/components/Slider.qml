@@ -5,7 +5,7 @@ import "../core" as Core
 /**
 * Slider - Horizontal slider control for adjusting values
 *
-* A draggable slider with smooth animations and keyboard support.
+* A draggable slider with smooth animations.
 * Ideal for volume, brightness, and similar controls.
 *
 * The slider never writes `value`. Bind it to the state it controls and apply
@@ -39,17 +39,12 @@ Item {
   property real value: 0
   property real minValue: 0
   property real maxValue: 1
-  property real step: 0  // 0 = continuous
 
   // === Styling Properties ===
-  property color trackColor: Core.Theme.surface
   property color progressColor: Core.Theme.accent
-  property color handleColor: Core.Theme.text
-  property color handleHoverColor: Core.Theme.text
   property color handleDragColor: Core.Theme.accent
   property int trackHeight: Core.Style.px(8)
   property int handleSize: Core.Style.px(16)
-  property bool showHandle: true
 
   // === Behavior Properties ===
   // Emit valueUpdated while dragging. False emits once, on release.
@@ -66,13 +61,11 @@ Item {
 
   // === Signals ===
   signal valueUpdated(real newValue)
-  signal dragStarted
-  signal dragEnded
 
   // === Internal ===
   property real _dragValue: 0
 
-  // Showing _dragValue. Set as a drag or key press starts, and cleared once the
+  // Showing _dragValue. Set as a drag starts, and cleared once the
   // bound value catches up (or the grace period runs out) - but never mid-drag,
   // where `value` can move for unrelated reasons, a playing track's position.
   property bool _holding: false
@@ -113,7 +106,7 @@ Item {
     width: parent.width
     height: root.trackHeight
     radius: Core.Style.radiusFull
-    color: root.trackColor
+    color: Core.Theme.surface
   }
 
   // Normal range marker (100%)
@@ -150,7 +143,6 @@ Item {
   // === Handle ===
   Rectangle {
     id: handle
-    visible: root.showHandle
     x: (track.width - width) * root.normalizedValue
     anchors.verticalCenter: track.verticalCenter
 
@@ -164,7 +156,7 @@ Item {
     width: root.handleSize
     height: root.handleSize
     radius: Core.Style.radiusFull
-    color: root.dragging ? root.handleDragColor : (root.hovered ? root.handleHoverColor : root.handleColor)
+    color: root.dragging ? root.handleDragColor : Core.Theme.text
     scale: root.dragging ? 1.1 : (root.hovered ? 1.05 : 1.0)
 
     Behavior on color {
@@ -191,7 +183,6 @@ Item {
 
     onPressed: mouse => {
       root._hold(root.value);
-      root.dragStarted();
       updateValue(mouse.x);
     }
 
@@ -206,19 +197,11 @@ Item {
       holdTimer.restart();
       if (!root.liveUpdate)
         root.valueUpdated(root._dragValue);
-      root.dragEnded();
     }
 
     function updateValue(mouseX) {
-      let normalized = Core.Utils.clamp(mouseX / track.width, 0, 1);
-      let newValue = root.minValue + normalized * (root.maxValue - root.minValue);
-
-      // Apply step if defined
-      if (root.step > 0) {
-        newValue = Math.round(newValue / root.step) * root.step;
-      }
-
-      newValue = Core.Utils.clamp(newValue, root.minValue, root.maxValue);
+      const normalized = Core.Utils.clamp(mouseX / track.width, 0, 1);
+      const newValue = root.minValue + normalized * (root.maxValue - root.minValue);
 
       if (newValue !== root._dragValue) {
         root._dragValue = newValue;
@@ -227,28 +210,5 @@ Item {
         }
       }
     }
-  }
-
-  // === Keyboard Support ===
-  Keys.onLeftPressed: adjustValue(-1)
-  Keys.onRightPressed: adjustValue(1)
-  Keys.onUpPressed: adjustValue(1)
-  Keys.onDownPressed: adjustValue(-1)
-
-  function adjustValue(direction) {
-    if (!enabled)
-      return;
-    const stepSize = step > 0 ? step : (maxValue - minValue) / 20;
-    root.setValue(root.displayValue + direction * stepSize);
-  }
-
-  // === Public API ===
-  // Moves the handle and reports the change; the caller applies it to `value`.
-  function setValue(newValue) {
-    const clamped = Core.Utils.clamp(newValue, minValue, maxValue);
-    if (clamped === root.displayValue)
-      return;
-    root._hold(clamped);
-    root.valueUpdated(clamped);
   }
 }

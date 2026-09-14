@@ -283,17 +283,17 @@ Scope {
 
     function set(percent: int): string {
       Services.Brightness.setPercent(percent);
-      return `${Math.round(Services.Brightness.brightness * 100)}%`;
+      return `${Math.round(Services.Brightness.requestedBrightness * 100)}%`;
     }
 
     function up(): string {
       Services.Brightness.increase();
-      return `${Math.round(Services.Brightness.brightness * 100)}%`;
+      return `${Math.round(Services.Brightness.requestedBrightness * 100)}%`;
     }
 
     function down(): string {
       Services.Brightness.decrease();
-      return `${Math.round(Services.Brightness.brightness * 100)}%`;
+      return `${Math.round(Services.Brightness.requestedBrightness * 100)}%`;
     }
   }
 }
