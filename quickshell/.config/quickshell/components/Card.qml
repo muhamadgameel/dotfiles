@@ -66,7 +66,10 @@ Rectangle {
   property bool hoverEnabled: true
 
   // === State (readonly) ===
-  readonly property bool hovered: mouseArea.containsMouse
+  // From a HoverHandler rather than the MouseArea, which stops containing the
+  // mouse as soon as the pointer moves onto a button inside the card. A row
+  // that shows its buttons on hover then hid them again, in a loop.
+  readonly property bool hovered: hoverHandler.hovered
   readonly property bool pressed: mouseArea.pressed
 
   // === Signals ===
@@ -113,6 +116,11 @@ Rectangle {
     onDoubleClicked: mouse => root.doubleClicked(mouse.button)
     onEntered: root.entered()
     onExited: root.exited()
+  }
+
+  HoverHandler {
+    id: hoverHandler
+    enabled: root.hoverEnabled
   }
 
   // === Content Container ===
