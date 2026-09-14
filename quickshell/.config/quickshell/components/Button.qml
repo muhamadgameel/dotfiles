@@ -11,7 +11,6 @@ import "../services" as Services
 * - "primary": Accent colored background
 * - "secondary": Surface colored background
 * - "danger": Error colored, for destructive actions
-* - "ghost": No background, subtle hover
 *
 * Usage:
 *   // Icon-only button
@@ -34,13 +33,6 @@ import "../services" as Services
 *       text: "Delete"
 *       onClicked: delete()
 *   }
-*
-*   // Ghost button
-*   Button {
-*       variant: "ghost"
-*       icon: "close"
-*       onClicked: close()
-*   }
 */
 Rectangle {
   id: root
@@ -48,7 +40,7 @@ Rectangle {
   activeFocusOnTab: root.enabled
 
   // === Variant ===
-  property string variant: "default"  // "default", "primary", "secondary", "danger", "ghost"
+  property string variant: "default"  // "default", "primary", "secondary", "danger"
 
   // === Content Properties ===
   property string icon: ""
@@ -58,7 +50,6 @@ Rectangle {
   property string text: ""
   property real textSize: Core.Style.fontM
 
-  // property real padding: Core.Style.spaceS
   property real padding: Core.Style.spaceS
 
   // === Color Properties (for easy customization) ===
@@ -74,12 +65,9 @@ Rectangle {
   // === Signals ===
   signal clicked(int button)
   signal wheel(var wheel)
-  signal entered
-  signal exited
 
   // === State (readonly) ===
   readonly property bool hovered: mouseArea.containsMouse
-  readonly property bool pressed: mouseArea.pressed
 
   // === Computed Colors Based on Variant ===
   readonly property color _backgroundColor: {
@@ -90,10 +78,6 @@ Rectangle {
       return Core.Theme.accent;
     case "secondary":
       return Core.Theme.surface;
-    case "danger":
-      return Core.Theme.transparent;
-    case "ghost":
-      return Core.Theme.transparent;
     default:
       return Core.Theme.transparent;
     }
@@ -109,16 +93,13 @@ Rectangle {
       return Core.Theme.surfaceHover;
     case "danger":
       return Core.Theme.error;
-    case "ghost":
-      return Core.Theme.alpha(Core.Theme.text, 0.1);
     default:
       return Core.Theme.surfaceHover;
     }
   }
 
-  readonly property color _iconColor: {
-    if (!Qt.colorEqual(iconColor, Core.Theme.transparent))
-      return iconColor;
+  // Icon and label share this unless iconColor or textColor is set.
+  readonly property color _contentColor: {
     switch (variant) {
     case "primary":
       return Core.Theme.bg;
@@ -129,18 +110,8 @@ Rectangle {
     }
   }
 
-  readonly property color _textColor: {
-    if (!Qt.colorEqual(textColor, Core.Theme.transparent))
-      return textColor;
-    switch (variant) {
-    case "primary":
-      return Core.Theme.bg;
-    case "danger":
-      return hovered ? Core.Theme.bg : Core.Theme.text;
-    default:
-      return Core.Theme.text;
-    }
-  }
+  readonly property color _iconColor: Qt.colorEqual(iconColor, Core.Theme.transparent) ? _contentColor : iconColor
+  readonly property color _textColor: Qt.colorEqual(textColor, Core.Theme.transparent) ? _contentColor : textColor
 
   // === Internal ===
   readonly property bool hasText: text !== ""
@@ -229,16 +200,12 @@ Rectangle {
     onWheel: wheel => root.wheel(wheel)
 
     onEntered: {
-      root.entered();
       if (root.tooltipText !== "") {
         Services.Tooltip.show(root, root.tooltipText, root.tooltipDirection);
       }
     }
 
-    onExited: {
-      root.exited();
-      Services.Tooltip.hide();
-    }
+    onExited: Services.Tooltip.hide()
   }
 
   // Repeater and Variants delegates get destroyed while still hovered, which

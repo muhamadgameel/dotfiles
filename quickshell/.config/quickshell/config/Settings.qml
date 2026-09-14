@@ -77,19 +77,6 @@ Singleton {
     return set(key, !get(key, fallback ?? false));
   }
 
-  /**
-  * Forget a setting, so its caller-supplied default applies again.
-  */
-  function unset(key) {
-    if (!(key in values))
-      return;
-
-    const next = Object.assign({}, values);
-    delete next[key];
-    values = next;
-    saveTimer.restart();
-  }
-
   // === Internals ===
 
   /**

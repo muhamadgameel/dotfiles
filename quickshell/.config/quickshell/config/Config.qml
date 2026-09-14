@@ -72,7 +72,6 @@ Singleton {
 
   // === Tooltip Configuration ===
   readonly property int tooltipDelay: Settings.get("tooltipDelay", 500)
-  readonly property int tooltipMaxWidth: Settings.get("tooltipMaxWidth", 320)
 
   // === System Monitor Thresholds ===
   // Where a reading turns the SystemStats icon orange (warning) or red
@@ -126,10 +125,6 @@ Singleton {
     Settings.set("theme", name);
   }
 
-  function setFontFamily(name) {
-    Settings.set("fontFamily", name);
-  }
-
   function setUiScale(scale) {
     Settings.set("uiScale", Core.Utils.clamp(scale, 0.5, 2.0));
   }
@@ -140,22 +135,6 @@ Singleton {
 
   function toggleDoNotDisturb() {
     return Settings.toggle("doNotDisturb");
-  }
-
-  function setWidgetVisible(key, visible) {
-    Settings.set(key, visible);
-  }
-
-  function toggleDebugMode() {
-    return Settings.toggle("debugMode");
-  }
-
-  function toggleShadows() {
-    return Settings.toggle("shadowsEnabled", true);
-  }
-
-  function setSurfaceOpacity(value) {
-    Settings.set("surfaceOpacity", Core.Utils.clamp(value, 0.3, 1.0));
   }
 
   function setNetworkBackend(name) {
