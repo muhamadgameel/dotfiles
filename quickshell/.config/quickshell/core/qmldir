@@ -3,8 +3,7 @@ module core
 singleton Enums 1.0 Enums.qml
 singleton Icons 1.0 Icons.qml
 singleton Logger 1.0 Logger.qml
-PopAnimator 1.0 PopAnimator.qml
-SlideAnimator 1.0 SlideAnimator.qml
+ShowHideAnimator 1.0 ShowHideAnimator.qml
 singleton Style 1.0 Style.qml
 singleton Theme 1.0 Theme.qml
 singleton Themes 1.0 Themes.qml

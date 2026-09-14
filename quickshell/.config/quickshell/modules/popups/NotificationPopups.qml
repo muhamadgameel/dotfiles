@@ -99,7 +99,7 @@ Variants {
             }
 
             // === Slide Animator ===
-            Core.SlideAnimator {
+            Core.ShowHideAnimator {
               id: slideAnimator
               target: card
 
@@ -145,7 +145,7 @@ Variants {
             }
 
             // === Notification Card ===
-            // Inside the animated card Item, so SlideAnimator carries it.
+            // Inside the animated card Item, so ShowHideAnimator carries it.
             Components.Elevation {
               surface: cardContent
               level: 2

@@ -75,9 +75,11 @@ Variants {
         hideTimer.restart();
       }
 
-      Core.PopAnimator {
+      Core.ShowHideAnimator {
         id: animator
         target: content
+        slideFrom: "none"
+        hiddenScale: Core.Style.popHiddenScale
         // A larger surface than a tooltip, so it settles rather than overshoots.
         showDuration: Core.Style.duration(Core.Style.animNormal)
         hideDuration: Core.Style.duration(Core.Style.animNormal)

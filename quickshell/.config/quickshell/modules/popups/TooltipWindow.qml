@@ -110,9 +110,13 @@ PopupWindow {
     }
   }
 
-  Core.PopAnimator {
+  Core.ShowHideAnimator {
     id: animator
     target: content
+    slideFrom: "none"
+    showDuration: Core.Style.duration(Core.Style.popShowDuration)
+    hideDuration: Core.Style.duration(Core.Style.popHideDuration)
+    hiddenScale: Core.Style.popHiddenScale
     onHideFinished: {
       root.visible = false;
       root.anchor.item = null;
