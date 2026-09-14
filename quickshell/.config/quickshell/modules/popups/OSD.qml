@@ -15,8 +15,8 @@ import "../../services" as Services
 * inactive until something is shown and is torn down again once the hide
 * animation finishes, so an idle session carries no OSD windows at all.
 *
-* What is drawn comes from OSDLayouts, keyed by the layout name the caller
-* passed to Services.OSD.show().
+* It draws the payload the caller passed to Services.OSD.show(). Every field
+* is read with a default, so a caller that omits one gets a sane value.
 */
 Variants {
   id: root
@@ -118,18 +118,17 @@ Variants {
           border.color: Core.Theme.surfaceHover
           border.width: Core.Style.borderThin
 
-          // Dynamic layout based on OSD type
-          Loader {
+          Components.ProgressRow {
             anchors.fill: parent
             anchors.margins: Core.Style.spaceM
-            sourceComponent: layouts.getComponent(Services.OSD.currentType)
+            icon: Services.OSD.payload.icon ?? ""
+            iconColor: Services.OSD.payload.iconColor ?? Core.Theme.text
+            value: Services.OSD.payload.value ?? 0
+            maxValue: Services.OSD.payload.maxValue ?? 1
+            progressColor: Services.OSD.payload.progressColor ?? Core.Theme.accent
+            valueText: Services.OSD.payload.valueText ?? ""
           }
         }
-      }
-
-      // Layout component definitions
-      OSDLayouts {
-        id: layouts
       }
     }
   }

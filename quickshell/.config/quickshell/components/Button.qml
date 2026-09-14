@@ -188,10 +188,9 @@ Rectangle {
 
     Text {
       id: textLabel
-      // QtQuick's Text, not components/Text (an Item with a layout and an icon
-      // slot - too much to repeat in every button). That means setting the
-      // family here: without it the label fell back to the system sans (Noto
-      // Sans) instead of the shell's font.
+      // QtQuick's Text, not components/Text, whose colour fade would lag the
+      // button's own hover colours. That means setting the family here: without
+      // it the label fell back to the system sans (Noto Sans).
       anchors.verticalCenter: parent.verticalCenter
       visible: root.text !== ""
       text: root.text

@@ -274,8 +274,10 @@ Components.SlidingPanel {
         }
 
         // Loading spinner
-        Components.Spinner {
-          running: netItem.isBusy
+        Components.Icon {
+          visible: netItem.isBusy
+          icon: "loading"
+          spinning: true
           size: Core.Style.fontM
           color: Core.Theme.accent
         }

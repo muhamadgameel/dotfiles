@@ -148,7 +148,7 @@ Singleton {
     const value = audio?.volume ?? root.volume;
     const isMuted = audio?.muted ?? root.muted;
 
-    Services.OSD.show("progressRow", {
+    Services.OSD.show({
       icon: getVolumeIcon(value, isMuted),
       value: value,
       maxValue: root.maxVolume,
@@ -167,7 +167,7 @@ Singleton {
     const value = audio?.volume ?? root.micVolume;
     const isMuted = audio?.muted ?? root.micMuted;
 
-    Services.OSD.show("progressRow", {
+    Services.OSD.show({
       icon: getMicIcon(value, isMuted),
       value: value,
       maxValue: 1.0,

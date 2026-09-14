@@ -14,8 +14,6 @@ Singleton {
   id: root
 
   // === Current OSD State ===
-  property string currentType: ""
-
   // Named `payload`, not `data`: `data` is the default-property name on every
   // QML Item, so `OSD.data` reads as a child list rather than OSD content.
   property var payload: ({})
@@ -43,14 +41,13 @@ Singleton {
   /**
   * Show an OSD.
   *
-  * @param type - Layout id, resolved by OSDLayouts.getComponent()
-  * @param osdPayload - Layout-specific values
+  * @param osdPayload - { icon, iconColor, value, maxValue, progressColor,
+  *   valueText }, as read in modules/popups/OSD.qml
   */
-  function show(type, osdPayload) {
+  function show(osdPayload) {
     if (!Config.Config.osdEnabled || !root._settled)
       return;
 
-    currentType = type;
     payload = osdPayload ?? ({});
     showRequested();
   }

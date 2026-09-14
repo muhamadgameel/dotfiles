@@ -387,10 +387,6 @@ Item {
             // So it can still be squeezed once the content exceeds the cap.
             Layout.minimumHeight: 0
 
-            // The column places itself inside the padding, so no Flickable margins.
-            leftMargin: 0
-            rightMargin: 0
-
             interactive: root.scrollable
             showScrollbar: root.scrollable
             contentWidth: width

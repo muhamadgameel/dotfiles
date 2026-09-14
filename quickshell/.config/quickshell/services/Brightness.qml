@@ -136,7 +136,7 @@ Singleton {
     if (Services.Panels.openPanel === "quicksettings")
       return;
 
-    Services.OSD.show("progressRow", {
+    Services.OSD.show({
       icon: getIcon(brightness),
       value: brightness,
       maxValue: 1.0,

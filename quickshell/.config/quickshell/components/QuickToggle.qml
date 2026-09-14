@@ -96,9 +96,10 @@ Components.Card {
       }
     }
 
-    Components.Spinner {
+    Components.Icon {
       visible: root.busy
-      running: root.busy
+      icon: "loading"
+      spinning: true
       size: Core.Style.fontM
       color: root._fg
     }

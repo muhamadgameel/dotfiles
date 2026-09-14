@@ -3,30 +3,15 @@ import QtQuick
 import "../core" as Core
 
 /**
-* ScrollArea - Styled Flickable wrapper with consistent scrollbar
-*
-* Provides a scrollable area with optional styled scrollbar.
-* Wraps Flickable with common settings and visual consistency.
+* ScrollArea - vertical Flickable with the shell's thin scrollbar
 *
 * Usage:
-*   // Basic scrollable content
 *   ScrollArea {
 *       contentHeight: column.height
 *
 *       Column {
 *           id: column
 *           width: parent.width
-*           // content...
-*       }
-*   }
-*
-*   // Horizontal scroll
-*   ScrollArea {
-*       orientation: Qt.Horizontal
-*       contentWidth: row.width
-*
-*       Row {
-*           id: row
 *           // content...
 *       }
 *   }
@@ -39,28 +24,15 @@ Flickable {
   property int scrollbarWidth: Core.Style.px(2)
   property color scrollbarColor: Core.Theme.alpha(Core.Theme.accent, 0.8)
 
-  // === Behavior Properties ===
-  property int orientation: Qt.Vertical
-
-  // === State (readonly) ===
-  readonly property bool scrolling: moving
-  readonly property bool atStart: orientation === Qt.Vertical ? atYBeginning : atXBeginning
-  readonly property bool atEnd: orientation === Qt.Vertical ? atYEnd : atXEnd
-
   // === Flickable Setup ===
   clip: true
   boundsBehavior: Flickable.StopAtBounds
-  flickableDirection: orientation === Qt.Vertical ? Flickable.VerticalFlick : Flickable.HorizontalFlick
+  flickableDirection: Flickable.VerticalFlick
 
-  rightMargin: orientation === Qt.Vertical ? Core.Style.panelPadding : 0
-  leftMargin: orientation === Qt.Vertical ? Core.Style.panelPadding : 0
-  bottomMargin: orientation === Qt.Horizontal ? Core.Style.panelPadding : 0
-  topMargin: orientation === Qt.Horizontal ? Core.Style.panelPadding : 0
-
-  // === Vertical Scrollbar ===
+  // === Scrollbar ===
   Rectangle {
-    id: verticalScrollbar
-    visible: root.showScrollbar && root.orientation === Qt.Vertical && root.contentHeight > root.height
+    id: scrollbar
+    visible: root.showScrollbar && root.contentHeight > root.height
     parent: root
     z: Core.Style.zOverlay
 
@@ -76,7 +48,7 @@ Flickable {
     anchors.rightMargin: root.scrollbarWidth + Core.Style.spaceXXS
 
     Rectangle {
-      id: verticalHandle
+      id: handle
       width: parent.width
       radius: Core.Style.radiusFull
       color: root.scrollbarColor
@@ -94,61 +66,5 @@ Flickable {
         }
       }
     }
-  }
-
-  // === Horizontal Scrollbar ===
-  Rectangle {
-    id: horizontalScrollbar
-    visible: root.showScrollbar && root.orientation === Qt.Horizontal && root.contentWidth > root.width
-    parent: root
-    z: Core.Style.zOverlay
-
-    anchors.left: parent.left
-    anchors.right: parent.right
-    anchors.bottom: parent.bottom
-    anchors.margins: Core.Style.spaceXXS
-
-    height: root.scrollbarWidth
-    radius: Core.Style.radiusFull
-    color: Core.Theme.transparent
-
-    anchors.bottomMargin: root.scrollbarWidth + Core.Style.spaceXXS
-
-    Rectangle {
-      id: horizontalHandle
-      height: parent.height
-      radius: Core.Style.radiusFull
-      color: root.scrollbarColor
-
-      // Calculate handle position and size
-      readonly property real viewRatio: root.width / root.contentWidth
-      readonly property real handleWidth: Math.max(Core.Style.px(20), parent.width * viewRatio)
-
-      width: handleWidth
-      x: root.contentWidth > root.width ? (parent.width - handleWidth) * (root.contentX / (root.contentWidth - root.width)) : 0
-
-      Behavior on color {
-        ColorAnimation {
-          duration: Core.Style.duration(Core.Style.animFast)
-        }
-      }
-    }
-  }
-
-  // === Public API ===
-  function scrollToTop() {
-    contentY = 0;
-  }
-
-  function scrollToBottom() {
-    contentY = contentHeight - height;
-  }
-
-  function scrollToLeft() {
-    contentX = 0;
-  }
-
-  function scrollToRight() {
-    contentX = contentWidth - width;
   }
 }

@@ -199,7 +199,7 @@ Singleton {
   }
 
   function _showVolumeOSD(value) {
-    Services.OSD.show("progressRow", {
+    Services.OSD.show({
       icon: value <= 0 ? "volume-mute" : (value < 0.5 ? "volume-low" : "volume-high"),
       value: value,
       maxValue: 1.0,

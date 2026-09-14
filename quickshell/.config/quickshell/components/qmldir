@@ -24,7 +24,6 @@ SectionHeader 1.0 SectionHeader.qml
 Slider 1.0 Slider.qml
 SlidingPanel 1.0 SlidingPanel.qml
 Spacer 1.0 Spacer.qml
-Spinner 1.0 Spinner.qml
 StatusBanner 1.0 StatusBanner.qml
 StatusDot 1.0 StatusDot.qml
 Text 1.0 Text.qml

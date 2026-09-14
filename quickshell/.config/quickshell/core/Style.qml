@@ -207,7 +207,7 @@ Singleton {
   // Gap between consecutive cards in a stack, so they arrive in sequence.
   readonly property int slideStagger: 80
 
-  // One turn of a spinner. Icon.qml and Spinner.qml each had their own 1000.
+  // One turn of a spinning Icon.
   readonly property int spinDuration: 1000
 
   // Stacking order for things that float over panel content (scrollbars,
