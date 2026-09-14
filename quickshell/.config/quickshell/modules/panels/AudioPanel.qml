@@ -350,7 +350,7 @@ Components.SlidingPanel {
         Components.Badge {
           visible: !streamRoot.isOutput
           text: "REC"
-          backgroundColor: Core.Theme.error
+          textColor: Core.Theme.error
         }
 
         Components.Text {

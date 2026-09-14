@@ -177,21 +177,26 @@ Singleton {
   }
 
   function _createData(n) {
-    const urgency = (n.urgency >= 0 && n.urgency <= 2) ? n.urgency : 1;
+    return Object.assign({
+      id: Core.Utils.generateId("notif"),
+      expireTimeout: n.expireTimeout,
+      timestamp: new Date(),
+      progress: 1.0
+    }, _content(n));
+  }
+
+  // The fields an app can change by updating a notification in place.
+  function _content(n) {
     const actions = (n.actions || []).map(a => ({
           text: a.text || "Action",
           identifier: a.identifier || ""
         }));
 
     return {
-      id: Core.Utils.generateId("notif"),
       summary: n.summary || "",
       body: Core.Utils.stripTags(n.body || ""),
       appName: Core.Utils.formatAppName(n.appName || n.desktopEntry || ""),
-      urgency: urgency,
-      expireTimeout: n.expireTimeout,
-      timestamp: new Date(),
-      progress: 1.0,
+      urgency: (n.urgency >= 0 && n.urgency <= 2) ? n.urgency : 1,
       image: _resolveImage(n),
       actionsJson: JSON.stringify(actions)
     };
@@ -286,24 +291,16 @@ Singleton {
       return;
 
     const n = entry.notification;
-    const urgency = (n.urgency >= 0 && n.urgency <= 2) ? n.urgency : 1;
-    const actions = (n.actions || []).map(a => ({
-          text: a.text || "Action",
-          identifier: a.identifier || ""
-        }));
+    const content = _content(n);
 
-    Core.Utils.updateModelItem(activeList, "id", id, {
-      summary: n.summary || "",
-      body: Core.Utils.stripTags(n.body || ""),
-      appName: Core.Utils.formatAppName(n.appName || n.desktopEntry || ""),
-      urgency: urgency,
-      image: _resolveImage(n),
-      actionsJson: JSON.stringify(actions)
-    });
+    // The history row is a separate copy of the same data. Updating only the
+    // popup left the notification center showing the first version.
+    Core.Utils.updateModelItem(activeList, "id", id, content);
+    Core.Utils.updateModelItem(historyList, "id", id, content);
 
     // Update duration if urgency changed
     entry.meta.duration = _calculateDuration({
-      urgency: urgency,
+      urgency: content.urgency,
       expireTimeout: n.expireTimeout
     });
   }

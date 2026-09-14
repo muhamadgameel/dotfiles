@@ -341,7 +341,8 @@ Components.SlidingPanel {
 
         Layout.fillWidth: true
         implicitHeight: Core.Style.controlHeightM
-        interactive: true
+        interactive: !isActive
+        hoverEnabled: !isActive
 
         backgroundColor: isActive ? Core.Theme.alpha(Core.Theme.accent, Core.Style.opacityTint) : Core.Theme.transparent
         borderColor: isActive ? Core.Theme.accent : Core.Theme.transparent

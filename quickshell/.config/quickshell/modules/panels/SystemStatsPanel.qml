@@ -4,6 +4,7 @@ import QtQuick
 import QtQuick.Layouts
 
 import "../../components" as Components
+import "../../config" as Config
 import "../../core" as Core
 import "../../services" as Services
 
@@ -68,7 +69,7 @@ Components.SlidingPanel {
         label: "Core " + index
         labelInfo: Math.round(usage) + "%"
         value: usage / 100
-        progressColor: usage > 90 ? Core.Theme.error : usage > 70 ? Core.Theme.warning : Core.Theme.accentAlt
+        progressColor: Core.Theme.statusColor(Services.SystemStats.statusLevel(usage, Config.Config.cpuUsageWarning, Config.Config.cpuUsageCritical), Core.Theme.accentAlt)
         progressHeight: Core.Style.progressHeightS
         showPercentage: false
       }

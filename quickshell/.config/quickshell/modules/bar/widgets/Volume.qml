@@ -46,6 +46,9 @@ Components.Button {
 
   // Scroll to change volume
   onWheel: function (wheel) {
+    // A sideways touchpad swipe has no vertical delta; it used to count as down.
+    if (wheel.angleDelta.y === 0)
+      return;
     const delta = wheel.angleDelta.y > 0 ? 0.05 : -0.05;
     Services.Audio.setVolume(Services.Audio.volume + delta);
   }

@@ -46,6 +46,9 @@ Components.Button {
 
   // Scroll to adjust brightness
   onWheel: function (wheel) {
+    // A sideways touchpad swipe has no vertical delta; it used to count as down.
+    if (wheel.angleDelta.y === 0)
+      return;
     if (wheel.angleDelta.y > 0) {
       Services.Brightness.increase();
     } else {

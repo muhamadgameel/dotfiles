@@ -44,7 +44,9 @@ RowLayout {
       Rectangle {
         anchors.fill: parent
         radius: Core.Style.radiusS
-        color: mouse.containsMouse ? Core.Theme.surfaceHover : Core.Theme.transparent
+        // Fades from surfaceHover at zero alpha, not from transparent black,
+        // which darkened mid-fade. See Theme.transparentOf.
+        color: mouse.containsMouse ? Core.Theme.surfaceHover : Core.Theme.transparentOf(Core.Theme.surfaceHover)
 
         Behavior on color {
           ColorAnimation {
