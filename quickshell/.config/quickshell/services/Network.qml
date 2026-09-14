@@ -1,51 +1,68 @@
 pragma Singleton
+pragma ComponentBehavior: Bound
 
 import QtQuick
 import Quickshell
 
+import "../config" as Config
 import "network" as Backends
 
 /**
 * Network - Wi-Fi and Ethernet state and actions for the UI
 *
-* The backend in services/network does the work and exposes raw state. What
-* the UI derives from that state - icons, labels, sorting - lives here.
+* A backend in services/network does the work and exposes raw state. What the
+* UI derives from that state - icons, labels, sorting - lives here.
+*
+* The networkBackend setting picks the backend, and only that one is created:
+* - "nmcli" (default): NmcliBackend
+* - "native": NativeBackend, on Quickshell.Networking. A preview.
+*
+* Switch with `qs ipc call network backend native` (or `nmcli`).
 */
 Singleton {
   id: root
 
+  readonly property string backendName: Config.Config.networkBackend === "native" ? "native" : "nmcli"
+
+  // Null for a moment at startup, until the loader has created it.
+  readonly property var backend: backendName === "native" ? nativeBackend.item : nmcliBackend.item
+
   // === State (from the backend) ===
-  readonly property var networks: backend.networks
-  readonly property bool scanning: backend.scanning
-  readonly property string connectingTo: backend.connectingTo
-  readonly property string disconnectingFrom: backend.disconnectingFrom
-  readonly property string forgettingNetwork: backend.forgettingNetwork
-  readonly property string lastError: backend.lastError
+  readonly property var networks: backend?.networks ?? ({})
+  readonly property bool scanning: backend?.scanning ?? false
+  // False when the backend keeps the list fresh on its own.
+  readonly property bool canScan: backend?.canScan ?? false
+  readonly property string connectingTo: backend?.connectingTo ?? ""
+  readonly property string disconnectingFrom: backend?.disconnectingFrom ?? ""
+  readonly property string forgettingNetwork: backend?.forgettingNetwork ?? ""
+  readonly property string lastError: backend?.lastError ?? ""
 
   // SSID that NetworkManager reported it has no key for, and which is now
   // waiting on a password. Empty when no prompt is pending.
-  readonly property string passwordRequiredFor: backend.passwordRequiredFor
+  readonly property string passwordRequiredFor: backend?.passwordRequiredFor ?? ""
 
-  // Set by NetworkPanel while it is visible.
-  property bool panelOpen: false
+  // Whether the network panel is open, on any screen. Read from Panels rather
+  // than set by the panel: moving it to another monitor closes one instance
+  // after the other has opened, which left this false while it was showing.
+  readonly property bool panelOpen: Panels.openPanel === "network"
 
   // WiFi
-  readonly property bool wifiEnabled: backend.wifiEnabled
-  readonly property bool wifiConnected: backend.wifiConnected
-  readonly property string wifiSSID: backend.wifiSSID
-  readonly property int wifiSignal: backend.wifiSignal
-  readonly property string wifiSecurity: backend.wifiSecurity
+  readonly property bool wifiEnabled: backend?.wifiEnabled ?? false
+  readonly property bool wifiConnected: backend?.wifiConnected ?? false
+  readonly property string wifiSSID: backend?.wifiSSID ?? ""
+  readonly property int wifiSignal: backend?.wifiSignal ?? 0
+  readonly property string wifiSecurity: backend?.wifiSecurity ?? ""
 
   // Ethernet (includes USB tethering)
-  readonly property bool ethernetConnected: backend.ethernetConnected
-  readonly property string ethernetInterface: backend.ethernetInterface
+  readonly property bool ethernetConnected: backend?.ethernetConnected ?? false
+  readonly property string ethernetInterface: backend?.ethernetInterface ?? ""
 
   // Connectivity & Active Connection
-  readonly property string connectivityStatus: backend.connectivityStatus
-  readonly property string activeInterface: backend.activeInterface
-  readonly property string activeIP: backend.activeIP
-  readonly property string activeGateway: backend.activeGateway
-  readonly property string activeDNS: backend.activeDNS
+  readonly property string connectivityStatus: backend?.connectivityStatus ?? "unknown"
+  readonly property string activeInterface: backend?.activeInterface ?? ""
+  readonly property string activeIP: backend?.activeIP ?? ""
+  readonly property string activeGateway: backend?.activeGateway ?? ""
+  readonly property string activeDNS: backend?.activeDNS ?? ""
 
   // === Computed Properties ===
   readonly property bool connecting: connectingTo !== ""
@@ -97,11 +114,11 @@ Singleton {
   }
 
   function refreshAll() {
-    backend.refreshAll();
+    backend?.refreshAll();
   }
 
   function setWifiEnabled(enabled) {
-    backend.setWifiEnabled(enabled);
+    backend?.setWifiEnabled(enabled);
   }
 
   /**
@@ -113,7 +130,7 @@ Singleton {
   *   "active only if the panel is open".
   */
   function scan(force) {
-    backend.scan(force);
+    backend?.scan(force);
   }
 
   /**
@@ -125,14 +142,14 @@ Singleton {
   *   passwordRequiredFor is set so the UI can prompt and call this again.
   */
   function connect(ssid, password) {
-    backend.connect(ssid, password);
+    backend?.connect(ssid, password);
   }
 
   /**
   * Dismiss a pending password prompt without connecting.
   */
   function cancelPasswordPrompt() {
-    backend.cancelPasswordPrompt();
+    backend?.cancelPasswordPrompt();
   }
 
   /**
@@ -141,20 +158,32 @@ Singleton {
   * @param ssid - Network being disconnected, for the row's busy state
   */
   function disconnect(ssid) {
-    backend.disconnect(ssid);
+    backend?.disconnect(ssid);
   }
 
   /**
   * Delete every saved Wi-Fi profile for a network.
   */
   function forget(ssid) {
-    backend.forget(ssid);
+    backend?.forget(ssid);
   }
 
-  // === Backend ===
-  Backends.NmcliBackend {
-    id: backend
+  // === Backends ===
+  LazyLoader {
+    id: nmcliBackend
+    active: root.backendName === "nmcli"
 
-    panelOpen: root.panelOpen
+    component: Backends.NmcliBackend {
+      panelOpen: root.panelOpen
+    }
+  }
+
+  LazyLoader {
+    id: nativeBackend
+    active: root.backendName === "native"
+
+    component: Backends.NativeBackend {
+      panelOpen: root.panelOpen
+    }
   }
 }

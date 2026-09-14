@@ -16,6 +16,7 @@ Scope {
   // === Public State ===
   property var networks: Object.create(null)
   property bool scanning: false
+  readonly property bool canScan: true
   property string connectingTo: ""
   property string disconnectingFrom: ""
   property string forgettingNetwork: ""

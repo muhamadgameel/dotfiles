@@ -17,6 +17,7 @@ import "../../services" as Services
 *   qs ipc call media playPause
 *   qs ipc call idle toggle
 *   qs ipc call gamemode toggle
+*   qs ipc call network backend native
 *
 * `qs ipc show` lists the handlers and their signatures.
 *
@@ -163,6 +164,27 @@ Scope {
 
     function status(): string {
       return Services.Media.hasPlayer ? `${Services.Media.isPlaying ? "playing" : "paused"}: ${Services.Media.summary}` : "no player";
+    }
+  }
+
+  IpcHandler {
+    target: "network"
+
+    /**
+    * Pick how the shell talks to NetworkManager.
+    * @param name - "nmcli" or "native"
+    */
+    function backend(name: string): string {
+      if (name !== "nmcli" && name !== "native")
+        return `unknown backend "${name}"; known: nmcli, native`;
+      Config.Config.setNetworkBackend(name);
+      return `network backend: ${name}`;
+    }
+
+    function status(): string {
+      const n = Services.Network;
+      const signal = n.wifiConnected ? ` ${n.wifiSignal}%` : "";
+      return `${n.backendName}: wifi ${n.wifiEnabled ? "on" : "off"}, ${n.connectionStatusText}${signal}, internet ${n.connectivityStatus}`;
     }
   }
 

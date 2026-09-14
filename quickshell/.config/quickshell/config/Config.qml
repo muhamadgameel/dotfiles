@@ -113,6 +113,11 @@ Singleton {
   // Slot count for the fixed row above; ignored unless workspaceShowEmpty.
   readonly property int workspaceCount: Settings.get("workspaceCount", 5)
 
+  // === Network ===
+  // How the shell talks to NetworkManager: "nmcli", or "native" for the
+  // Quickshell.Networking preview. See services/Network.qml.
+  readonly property string networkBackend: Settings.get("networkBackend", "nmcli")
+
   // === Setters ===
   // Assigning to the readonly properties above is not possible by design -
   // route changes through here so they persist.
@@ -151,5 +156,9 @@ Singleton {
 
   function setSurfaceOpacity(value) {
     Settings.set("surfaceOpacity", Core.Utils.clamp(value, 0.3, 1.0));
+  }
+
+  function setNetworkBackend(name) {
+    Settings.set("networkBackend", name);
   }
 }

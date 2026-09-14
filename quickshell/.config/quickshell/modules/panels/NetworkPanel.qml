@@ -22,12 +22,7 @@ Components.SlidingPanel {
   headerTitle: "Network"
   headerSubtitle: Services.Network.connectionStatusText
 
-  // panelOpen gates active rescans in the service; see Network.scan().
-  onOpened: {
-    Services.Network.panelOpen = true;
-    Services.Network.scan(true);
-  }
-  onClosed: Services.Network.panelOpen = false
+  onOpened: Services.Network.scan(true)
 
   // === Pinned: the toggle, connection details and the list's heading ===
   // The network list below scrolls under these with the panel's own scrollbar.
@@ -114,6 +109,7 @@ Components.SlidingPanel {
       }
 
       Components.ScanButton {
+        visible: Services.Network.canScan
         scanning: Services.Network.scanning
         tooltipText: "Scan for networks"
         onClicked: Services.Network.scan()
