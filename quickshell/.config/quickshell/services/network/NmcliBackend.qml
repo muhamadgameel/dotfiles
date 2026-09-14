@@ -94,6 +94,11 @@ Scope {
     // lastError is deliberately left alone. Clearing it here meant the 20s
     // timer wiped a connect error - "Incorrect password" included - while the
     // user was still reading it.
+    // Which networks are saved only matters on the panel's rows. nmcli monitor
+    // says nothing when a profile is added or deleted, so it is re-read here.
+    if (panelOpen)
+      _savedProcess.running = true;
+
     scanning = true;
     _scanProcess.command = ["nmcli", "-t", "-e", "yes", "-f", "SSID,SECURITY,SIGNAL,IN-USE", "device", "wifi", "list", "--rescan", active ? "yes" : "no"];
     _scanProcess.running = true;
@@ -204,6 +209,15 @@ Scope {
       nmcli connection delete uuid "$uuid" || exit
     done`
 
+  // SSIDs that have a saved Wi-Fi profile, as read by _savedProcess.
+  property var _savedSsids: []
+
+  // Prints the SSID of every saved Wi-Fi profile, one per line. The guard
+  // matters: `connection show` with no profile named lists every connection.
+  readonly property string _savedScript: `
+    uuids=$(nmcli -t -f UUID,TYPE connection show | awk -F: '$2 == "802-11-wireless" { printf "uuid %s ", $1 }')
+    [ -z "$uuids" ] || nmcli -e no -g 802-11-wireless.ssid connection show $uuids`
+
   // NetworkManager asked for a key. Without one supplied, that is the first
   // prompt. With one supplied, it is how nmcli reports a key the network
   // rejected - see _connectProcess.
@@ -280,8 +294,10 @@ Scope {
     const updated = Object.assign(Object.create(null), root.networks);
     for (const key in updated) {
       if (key === ssid) {
+        // A network that has connected has a saved profile.
         updated[key] = Object.assign({}, updated[key], {
-          connected: connected
+          connected: connected,
+          known: connected || updated[key].known
         });
       } else if (connected && updated[key].connected) {
         // If connecting to a new network, mark others as disconnected
@@ -291,6 +307,17 @@ Scope {
       }
     }
     root.networks = updated;
+  }
+
+  // Sets each row's `known` from _savedSsids.
+  function _markSaved(map) {
+    const marked = Object.create(null);
+    for (const ssid in map) {
+      marked[ssid] = Object.assign({}, map[ssid], {
+        known: _savedSsids.includes(ssid)
+      });
+    }
+    return marked;
   }
 
   // === Timers ===
@@ -546,7 +573,8 @@ Scope {
               security: security || "--",
               signal,
               connected: connected || (previous?.connected ?? false),
-              secured: !!(security && security !== "--" && security.trim())
+              secured: !!(security && security !== "--" && security.trim()),
+              known: root._savedSsids.includes(ssid)
             };
           } else if (connected) {
             networksMap[ssid].connected = true;
@@ -677,6 +705,27 @@ Scope {
       // nothing to delete, which is the outcome asked for.
       Core.Logger.i("Network", `Forgot network: ${_forgetProcess.ssid}`);
       root.scan();
+    }
+  }
+
+  // Saved Wi-Fi profiles. Started by scan() while the panel is open.
+  Process {
+    id: _savedProcess
+    command: ["sh", "-c", root._savedScript]
+
+    stdout: StdioCollector {
+      id: _savedOut
+    }
+
+    stderr: StdioCollector {
+      onStreamFinished: root._logError("Saved networks", text)
+    }
+
+    onExited: exitCode => {
+      if (exitCode !== 0)
+        return;
+      root._savedSsids = _savedOut.text.split("\n").filter(ssid => ssid !== "");
+      root.networks = root._markSaved(root.networks);
     }
   }
 }

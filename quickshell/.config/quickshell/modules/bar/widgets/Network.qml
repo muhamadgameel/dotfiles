@@ -34,7 +34,7 @@ Components.Button {
 
   tooltipText: {
     if (!Services.Network.isConnected)
-      return "No network connection";
+      return Services.Network.searching ? "Searching for networks..." : "No network connection";
 
     let tip = Services.Network.connectionStatusText;
     if (Services.Network.activeIP) {
@@ -62,7 +62,7 @@ Components.Button {
     anchors.bottom: parent.bottom
     anchors.horizontalCenter: parent.horizontalCenter
     anchors.bottomMargin: Core.Style.spaceXXS
-    visible: Services.Network.connecting
+    visible: Services.Network.connecting || Services.Network.searching
     pulse: true
     pulseLoops: Animation.Infinite
     color: Core.Theme.accent

@@ -28,6 +28,8 @@ Singleton {
   readonly property var backend: backendName === "native" ? nativeBackend.item : nmcliBackend.item
 
   // === State (from the backend) ===
+  // SSID -> { ssid, security, signal, connected, secured, known }. `known`
+  // means a profile is saved for it.
   readonly property var networks: backend?.networks ?? ({})
   readonly property bool scanning: backend?.scanning ?? false
   // False when the backend keeps the list fresh on its own.
@@ -69,6 +71,11 @@ Singleton {
   readonly property bool isConnected: wifiConnected || ethernetConnected
   readonly property bool hasInternet: connectivityStatus === "full"
 
+  // For a while after Wi-Fi comes on, until something connects.
+  // NetworkManager scans every channel before it autoconnects, which takes 3-6
+  // seconds, and "Disconnected" made that look like nothing was happening.
+  readonly property bool searching: _searchArmed && wifiEnabled && !isConnected
+
   readonly property string connectionIcon: {
     if (!isConnected)
       return "network-off";
@@ -81,7 +88,7 @@ Singleton {
 
   readonly property string connectionStatusText: {
     if (!isConnected)
-      return "Disconnected";
+      return searching ? "Searching..." : "Disconnected";
     if (ethernetConnected)
       return "Ethernet";
     return wifiSSID;
@@ -166,6 +173,31 @@ Singleton {
   */
   function forget(ssid) {
     backend?.forget(ssid);
+  }
+
+  // === Searching ===
+  property bool _searchArmed: false
+
+  onWifiEnabledChanged: {
+    _searchArmed = wifiEnabled && !isConnected;
+    if (_searchArmed)
+      _searchTimer.restart();
+    else
+      _searchTimer.stop();
+  }
+
+  onIsConnectedChanged: {
+    if (isConnected) {
+      _searchArmed = false;
+      _searchTimer.stop();
+    }
+  }
+
+  // Long enough for a slow scan; past it, nothing known is in range.
+  Timer {
+    id: _searchTimer
+    interval: 20000
+    onTriggered: root._searchArmed = false
   }
 
   // === Backends ===

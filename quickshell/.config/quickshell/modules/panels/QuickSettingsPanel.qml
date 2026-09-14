@@ -49,7 +49,7 @@ Components.SlidingPanel {
 
       icon: !wifiOn ? "wifi-off" : Services.Network.wifiConnected ? Services.Network.getSignalIcon(Services.Network.wifiSignal) : "wifi"
       label: "Wi-Fi"
-      subtitle: !wifiOn ? "Off" : Services.Network.wifiConnected ? Services.Network.wifiSSID : "Not connected"
+      subtitle: !wifiOn ? "Off" : Services.Network.wifiConnected ? Services.Network.wifiSSID : Services.Network.searching ? "Searching..." : "Not connected"
       active: wifiOn
       hasDetails: true
 

@@ -103,7 +103,7 @@ Components.SlidingPanel {
       }
 
       Components.Text {
-        text: Services.Network.scanning ? "Scanning..." : `${Object.keys(Services.Network.networks).length} networks`
+        text: Services.Network.searching ? "Searching..." : Services.Network.scanning ? "Scanning..." : `${Object.keys(Services.Network.networks).length} networks`
         color: Core.Theme.textDim
         size: Core.Style.fontS
       }
@@ -142,7 +142,7 @@ Components.SlidingPanel {
     // Empty state
     Components.EmptyState {
       width: networkList.width
-      visible: Object.keys(Services.Network.networks).length === 0 && !Services.Network.scanning
+      visible: Object.keys(Services.Network.networks).length === 0 && !Services.Network.scanning && !Services.Network.searching
       icon: "wifi-off"
       message: "No networks found"
     }
@@ -188,6 +188,7 @@ Components.SlidingPanel {
     readonly property bool secured: network?.secured ?? false
     readonly property bool connected: network?.connected ?? false
     readonly property string security: network?.security ?? ""
+    readonly property bool known: network?.known ?? false
 
     // Busy states
     readonly property bool isConnecting: Services.Network.connectingTo === ssid
@@ -303,10 +304,10 @@ Components.SlidingPanel {
             onClicked: Services.Network.disconnect(netItem.ssid)
           }
 
-          // Forget button. Offered on hover for any network, not only the
-          // connected one - it sat inside a row that was itself visible only
-          // when connected, so a saved network could never be removed.
+          // Forget button, for saved networks: there is nothing to forget on
+          // the others.
           Components.Button {
+            visible: netItem.known
             icon: "trash"
             iconSize: Core.Style.fontM
             variant: "danger"
