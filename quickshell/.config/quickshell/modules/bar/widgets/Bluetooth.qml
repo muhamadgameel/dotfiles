@@ -7,6 +7,9 @@ import "../../../services" as Services
 /**
 * Bluetooth - Bar widget showing Bluetooth status
 *
+* Just the icon, in the accent colour while a device is connected; the device
+* name is in the tooltip.
+*
 * - Left click: Open panel
 * - Middle click: Toggle Bluetooth
 * - Right click: Toggle discovery
@@ -20,9 +23,6 @@ Components.Button {
   iconSize: Core.Style.fontL
   iconColor: root.statusColor
 
-  text: _displayText
-  textColor: root.statusColor
-
   tooltipText: _tooltip
 
   readonly property color statusColor: {
@@ -31,16 +31,6 @@ Components.Button {
     if (Services.Bluetooth.hasConnectedDevices)
       return Core.Theme.accentAlt;
     return Core.Theme.text;
-  }
-
-  readonly property string _displayText: {
-    if (!Services.Bluetooth.enabled)
-      return "";
-    if (Services.Bluetooth.connectedCount === 1)
-      return Services.Bluetooth.firstConnectedName;
-    if (Services.Bluetooth.connectedCount > 1)
-      return Services.Bluetooth.connectedCount.toString();
-    return "";
   }
 
   readonly property string _tooltip: {

@@ -90,11 +90,6 @@ Rectangle {
     // Pushes everything to the right edge.
     Components.Spacer {}
 
-    Widgets.Media {
-      visible: Config.Config.barShowMedia && Services.Media.hasPlayer
-      onPanelRequested: root.panelRequested("media")
-    }
-
     Widgets.Tray {
       id: tray
 
@@ -107,43 +102,57 @@ Rectangle {
       vertical: true
     }
 
+    // Only while it is on: left on by accident, it keeps the machine awake and
+    // drains the battery. Quick Settings has the switch.
     Widgets.IdleInhibitor {
-      visible: Config.Config.barShowIdleInhibitor
+      visible: Config.Config.barShowIdleInhibitor && Services.Idle.inhibited
     }
 
-    Widgets.Network {
-      visible: Config.Config.barShowNetwork
-      onPanelRequested: root.panelRequested("network")
+    BarGroup {
+      Widgets.Volume {
+        visible: Config.Config.barShowVolume
+        onPanelRequested: root.panelRequested("audio")
+      }
+
+      Widgets.Microphone {
+        visible: Config.Config.barShowMicrophone
+        onPanelRequested: root.panelRequested("audio")
+      }
+
+      Widgets.Media {
+        visible: Config.Config.barShowMedia && Services.Media.hasPlayer
+        onPanelRequested: root.panelRequested("media")
+      }
     }
 
-    Widgets.Bluetooth {
-      visible: Config.Config.barShowBluetooth
-      onPanelRequested: root.panelRequested("bluetooth")
+    BarGroup {
+      Widgets.Network {
+        visible: Config.Config.barShowNetwork
+        onPanelRequested: root.panelRequested("network")
+      }
+
+      Widgets.Bluetooth {
+        visible: Config.Config.barShowBluetooth
+        onPanelRequested: root.panelRequested("bluetooth")
+      }
     }
 
-    Widgets.Volume {
-      visible: Config.Config.barShowVolume
-      onPanelRequested: root.panelRequested("audio")
+    BarGroup {
+      Widgets.SystemStats {
+        visible: Config.Config.barShowSystemStats
+        onPanelRequested: root.panelRequested("systemstats")
+      }
+
+      Widgets.Battery {
+        id: battery
+
+        visible: Config.Config.barShowBattery && battery.hasBattery
+      }
     }
 
-    Widgets.Microphone {
-      visible: Config.Config.barShowMicrophone
-      onPanelRequested: root.panelRequested("audio")
-    }
-
+    // Off by default; Quick Settings has the slider.
     Widgets.Brightness {
       visible: Config.Config.barShowBrightness && Services.Brightness.ready
-    }
-
-    Widgets.SystemStats {
-      visible: Config.Config.barShowSystemStats
-      onPanelRequested: root.panelRequested("systemstats")
-    }
-
-    Widgets.Battery {
-      id: battery
-
-      visible: Config.Config.barShowBattery && battery.hasBattery
     }
 
     Widgets.NotificationBell {

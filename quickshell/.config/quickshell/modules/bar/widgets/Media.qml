@@ -1,120 +1,57 @@
 import QtQuick
-import QtQuick.Layouts
 
 import "../../../components" as Components
 import "../../../core" as Core
 import "../../../services" as Services
 
 /**
-* Media - now-playing indicator and transport
+* Media - play/pause indicator for the current player
+*
+* Just the icon; the track is in the tooltip. A scrolling title took up to
+* 220px of the bar.
 *
 * - Left click:   open the media panel
 * - Middle click: play/pause
 * - Right click:  next track
 * - Scroll:       volume, where the player supports it
 */
-Item {
+Components.Button {
   id: root
 
   signal panelRequested
 
-  // Cap the title so a long track name cannot push the rest of the bar around.
-  readonly property int maxTextWidth: 220
+  icon: Services.Media.statusIcon
+  iconSize: Core.Style.fontL
+  iconColor: Services.Media.isPlaying ? Core.Theme.accent : Core.Theme.textDim
 
-  visible: Services.Media.hasPlayer
-  implicitWidth: visible ? row.implicitWidth + Core.Style.spaceS * 2 : 0
-  implicitHeight: Core.Style.widgetSize
-  Layout.fillWidth: true
-  Layout.minimumWidth: Core.Style.fontM + Core.Style.spaceS * 3
-  Layout.maximumWidth: implicitWidth
+  tooltipText: {
+    const m = Services.Media;
+    const lines = [m.trackTitle, m.trackArtist, m.trackAlbum].filter(line => line !== "");
+    if (m.identity !== "")
+      lines.push(`— ${m.identity}`);
 
-  Rectangle {
-    anchors.fill: parent
-    radius: Core.Style.radiusS
-    color: mouse.containsMouse ? Core.Theme.surfaceHover : Core.Theme.transparent
-
-    Behavior on color {
-      ColorAnimation {
-        duration: Core.Style.duration(Core.Style.animFast)
-      }
-    }
+    lines.push("");
+    lines.push("Left click: Open media panel");
+    lines.push("Middle click: Play/pause");
+    lines.push("Right click: Next track");
+    if (m.volumeSupported)
+      lines.push(`Scroll: Volume (${Math.round(m.volume * 100)}%)`);
+    return lines.join("\n");
   }
 
-  RowLayout {
-    id: row
-
-    anchors.left: parent.left
-    anchors.right: parent.right
-    anchors.leftMargin: Core.Style.spaceS
-    anchors.rightMargin: Core.Style.spaceS
-    anchors.verticalCenter: parent.verticalCenter
-    spacing: Core.Style.spaceS
-
-    Components.Icon {
-      icon: Services.Media.statusIcon
-      size: Core.Style.fontM
-      color: Services.Media.isPlaying ? Core.Theme.accent : Core.Theme.textDim
-    }
-
-    Components.Text {
-      Layout.fillWidth: true
-      Layout.maximumWidth: root.maxTextWidth
-      text: Services.Media.summary
-      size: Core.Style.fontS
-      color: Services.Media.isPlaying ? Core.Theme.text : Core.Theme.textDim
-      elide: Text.ElideRight
-    }
+  onClicked: function (button) {
+    if (button === Qt.MiddleButton)
+      Services.Media.playPause();
+    else if (button === Qt.RightButton)
+      Services.Media.next();
+    else
+      root.panelRequested();
   }
 
-  MouseArea {
-    id: mouse
-
-    anchors.fill: parent
-    hoverEnabled: true
-    cursorShape: Qt.PointingHandCursor
-    acceptedButtons: Qt.LeftButton | Qt.MiddleButton | Qt.RightButton
-
-    onEntered: {
-      const m = Services.Media;
-      const lines = [];
-
-      if (m.trackTitle !== "")
-        lines.push(m.trackTitle);
-      if (m.trackArtist !== "")
-        lines.push(m.trackArtist);
-      if (m.trackAlbum !== "")
-        lines.push(m.trackAlbum);
-      if (m.identity !== "")
-        lines.push(`— ${m.identity}`);
-
-      lines.push("");
-      lines.push("Left click: Open media panel");
-      lines.push("Middle click: Play/pause");
-      lines.push("Right click: Next track");
-      if (Services.Media.volumeSupported)
-        lines.push(`Scroll: Volume (${Math.round(Services.Media.volume * 100)}%)`);
-
-      Services.Tooltip.show(root, lines.join("\n"), "bottom");
-    }
-
-    onExited: Services.Tooltip.hide()
-
-    onClicked: mouseEvent => {
-      if (mouseEvent.button === Qt.MiddleButton)
-        Services.Media.playPause();
-      else if (mouseEvent.button === Qt.RightButton)
-        Services.Media.next();
-      else
-        root.panelRequested();
-    }
-
-    onWheel: wheelEvent => {
-      if (!Services.Media.volumeSupported)
-        return;
-      const delta = wheelEvent.angleDelta.y > 0 ? 0.05 : -0.05;
-      Services.Media.setVolume(Services.Media.volume + delta);
-    }
+  onWheel: function (wheel) {
+    if (!Services.Media.volumeSupported)
+      return;
+    const delta = wheel.angleDelta.y > 0 ? 0.05 : -0.05;
+    Services.Media.setVolume(Services.Media.volume + delta);
   }
-
-  Component.onDestruction: Services.Tooltip.forget(root)
 }

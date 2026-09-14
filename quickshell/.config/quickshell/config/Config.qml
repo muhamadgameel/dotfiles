@@ -32,7 +32,7 @@ Singleton {
   readonly property bool barClockShowSeconds: Settings.get("barClockShowSeconds", false)
   readonly property bool barShowVolume: Settings.get("barShowVolume", true)
   readonly property bool barShowMicrophone: Settings.get("barShowMicrophone", true)
-  readonly property bool barShowBrightness: Settings.get("barShowBrightness", true)
+  readonly property bool barShowBrightness: Settings.get("barShowBrightness", false)
   readonly property bool barShowBattery: Settings.get("barShowBattery", true)
   readonly property bool barShowLauncher: Settings.get("barShowLauncher", true)
   readonly property bool barShowNotification: Settings.get("barShowNotification", true)
