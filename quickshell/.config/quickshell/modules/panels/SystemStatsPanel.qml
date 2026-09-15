@@ -14,7 +14,7 @@ import "../../services" as Services
 * Displays comprehensive system information:
 * - CPU usage with per-core breakdown
 * - Memory usage (RAM + Swap)
-* - GPU usage, VRAM and power (NVIDIA)
+* - GPU usage, VRAM, power and VRAM by process (NVIDIA)
 * - Temperatures (CPU + GPU)
 * - Network throughput
 * - Disk usage
@@ -153,7 +153,30 @@ Components.SlidingPanel {
     visible: Services.SystemStats.hasGpuDetails && Services.SystemStats.gpuThrottle !== ""
     text: Services.SystemStats.gpuThrottle
     size: Core.Style.fontS
-    color: Services.SystemStats.gpuThrottle === "Power limited" ? Core.Theme.textDim : Core.Theme.warning
+    color: Core.Theme.warning
+  }
+
+  Components.Collapsible {
+    title: "VRAM by Process"
+    Layout.fillWidth: true
+    visible: Services.SystemStats.hasGpuDetails
+
+    Repeater {
+      model: Services.SystemStats.gpuProcesses.length
+
+      Components.ProgressRow {
+        required property int index
+
+        readonly property var client: Services.SystemStats.gpuProcesses[index]
+
+        label: client?.name ?? ""
+        labelInfo: Core.Utils.formatBytes(client?.memory ?? 0, 0)
+        value: (client?.memory ?? 0) / Services.SystemStats.gpuMemTotal
+        progressColor: Core.Theme.accentAlt
+        progressHeight: Core.Style.progressHeightS
+        showPercentage: false
+      }
+    }
   }
 
   // ═══════════════════════════════════════════════════════════════════

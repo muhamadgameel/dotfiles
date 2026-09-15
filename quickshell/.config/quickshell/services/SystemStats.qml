@@ -15,6 +15,7 @@ import "../services" as Services
 * - CPU temperature (Intel coretemp package, AMD k10temp/zenpower Tctl)
 * - GPU temperature (AMD via hwmon, NVIDIA via one looping nvidia-smi)
 * - NVIDIA usage, VRAM, power draw and throttling, from the same query
+* - NVIDIA VRAM by process, while the System Monitor is open
 * - CPU usage (overall and per-core)
 * - Memory usage (RAM + Swap)
 * - Network speeds (download/upload)
@@ -86,6 +87,9 @@ Singleton {
   property real gpuPowerLimit: 0  // watts, the limit the driver enforces now
   // Why the driver is holding the GPU back, or "" when it is not.
   property string gpuThrottle: ""
+  // [{ name, memory }] per app, largest first. Sampled while the System
+  // Monitor is open.
+  property var gpuProcesses: []
 
   // === Memory ===
   property real memUsed: 0      // bytes
@@ -159,6 +163,10 @@ Singleton {
   property string _cpuTempPath: ""
   property string _gpuType: ""         // "amd", "nvidia"
   property string _gpuTempPath: ""
+  readonly property bool _monitorOpen: Services.Panels.openPanel === "systemstats"
+
+  // pid -> process name, for the GPU clients seen in the last sample.
+  property var _gpuClients: ({})
 
   // CPU stats delta tracking
   property var _prevCpuStats: null
@@ -170,6 +178,7 @@ Singleton {
 
   readonly property var _whitespace: /\s+/
   readonly property var _meminfoLine: /^(\w+):\s+(\d+)/
+  readonly property var _ppidLine: /^PPid:\s+(\d+)/m
 
   // Interfaces excluded from the totals.
   //
@@ -385,7 +394,7 @@ done'
   // with the CPU and memory rows. It stops when the panel closes.
   Process {
     command: root._nvidiaQuery.concat([String(root.pollingInterval / 1000)])
-    running: root._gpuType === "nvidia" && Services.Panels.openPanel === "systemstats"
+    running: root._gpuType === "nvidia" && root._monitorOpen
 
     stdout: SplitParser {
       splitMarker: "\n"
@@ -416,23 +425,91 @@ done'
     root.gpuPower = number(fields[4], 1) ?? root.gpuPower;
     root.gpuPowerLimit = number(fields[5], 1) ?? root.gpuPowerLimit;
 
-    // clocks_event_reasons bits: 0x20/0x40 software/hardware thermal,
-    // 0x08/0x80 hardware slowdown and power brake, 0x04 the power cap - normal
-    // under load on a laptop. 0x01 is only "idle".
+    // clocks_event_reasons hardware bits: 0x40 thermal, 0x08/0x80 slowdown and
+    // power brake. The software thermal and power-cap bits (0x20, 0x04) are set
+    // whenever a laptop GPU leaves idle, so they say nothing.
     const reasons = parseInt(fields[6], 16);
-    if (isNaN(reasons))
-      root.gpuThrottle = "";
-    else if (reasons & 0x60)
+    if (reasons & 0x40)
       root.gpuThrottle = "Thermal throttling";
     else if (reasons & 0x88)
       root.gpuThrottle = "Hardware slowdown";
-    else if (reasons & 0x04)
-      root.gpuThrottle = "Power limited";
     else
       root.gpuThrottle = "";
 
     root.gpuName = fields.slice(7).join(", ");
     return true;
+  }
+
+  // `pmon` also lists graphics-only clients such as hyprpaper and Hyprland,
+  // which --query-compute-apps leaves out.
+  Timer {
+    interval: root.pollingInterval
+    repeat: true
+    triggeredOnStart: true
+    running: root._gpuType === "nvidia" && root._monitorOpen
+    onTriggered: _gpuProcessQuery.running = true
+  }
+
+  Process {
+    id: _gpuProcessQuery
+    command: ["nvidia-smi", "pmon", "-c", "1", "-s", "m"]
+
+    stdout: StdioCollector {
+      onStreamFinished: root._readGpuProcesses(text)
+    }
+  }
+
+  FileView {
+    id: _procFile
+    blockAllReads: true
+    printErrors: false
+  }
+
+  function _readProc(pid, file) {
+    _procFile.path = `/proc/${pid}/${file}`;
+    return _procFile.text();
+  }
+
+  // Rows are "gpu pid type fb ccpm command", fb in MiB. pmon's own command
+  // column is truncated, so the name comes from /proc instead.
+  function _readGpuProcesses(text) {
+    const clients = {};
+    const memory = {};
+
+    for (const line of text.split("\n")) {
+      const fields = line.trim().split(root._whitespace);
+      const pid = parseInt(fields[1], 10);
+      const mib = parseInt(fields[3], 10);
+      if (line.startsWith("#") || isNaN(pid) || isNaN(mib))
+        continue;
+
+      clients[pid] = root._gpuClients[pid] ?? root._gpuClientName(pid);
+      if (clients[pid] === "")
+        continue;
+
+      const name = DesktopEntries.heuristicLookup(clients[pid])?.name || clients[pid];
+      memory[name] = (memory[name] ?? 0) + mib * 1024 * 1024;
+    }
+
+    root._gpuClients = clients;
+    root.gpuProcesses = Object.keys(memory).map(name => ({
+          name: name,
+          memory: memory[name]
+        })).sort((a, b) => b.memory - a.memory);
+  }
+
+  // Chromium and Electron draw from a "--type=gpu-process" helper two levels
+  // below the process that owns the window, and only that one has the app's
+  // name.
+  function _gpuClientName(pid) {
+    let owner = pid;
+    for (let hops = 0; hops < 4 && root._readProc(owner, "cmdline").includes("--type="); hops++) {
+      const parent = root._readProc(owner, "status").match(root._ppidLine);
+      if (!parent)
+        break;
+      owner = parent[1];
+    }
+    return root._readProc(owner, "comm").trim();
   }
 
   // ═══════════════════════════════════════════════════════════════════════════
