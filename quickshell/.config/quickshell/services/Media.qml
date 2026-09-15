@@ -243,11 +243,14 @@ Singleton {
   // is playing and a view is interested. Reading it is computed locally from the
   // last known position and the time since, so a short interval costs no D-Bus
   // round trip - and moves the seek bar smoothly rather than in 1s steps.
+  // triggeredOnStart reads it as soon as a view starts watching; otherwise the
+  // panel opens showing where playback was when it was last closed.
   property bool positionWatched: false
 
   Timer {
     interval: 250
     repeat: true
+    triggeredOnStart: true
     running: root.positionWatched && root.isPlaying && root.canSeek
     onTriggered: {
       if (root.active)

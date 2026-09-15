@@ -200,6 +200,7 @@ Components.SlidingPanel {
           enabled: Services.Media.canSeek
           value: Services.Media.progress
           liveUpdate: false
+          animateValue: false
           progressColor: root.tint
           handleDragColor: root.artColor
           trackHeight: Core.Style.px(6)

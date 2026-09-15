@@ -161,9 +161,8 @@ Rectangle {
 
     Text {
       id: textLabel
-      // QtQuick's Text, not components/Text, whose colour fade would lag the
-      // button's own hover colours. That means setting the family here: without
-      // it the label fell back to the system sans (Noto Sans).
+      // QtQuick's Text, so the family is set here; without it the label falls
+      // back to the system sans (Noto Sans).
       anchors.verticalCenter: parent.verticalCenter
       visible: root.text !== ""
       text: root.text
@@ -171,6 +170,13 @@ Rectangle {
       font.pixelSize: root.textSize
       font.weight: Core.Style.weightMedium
       color: root._textColor
+
+      Behavior on color {
+        ColorAnimation {
+          duration: Core.Style.duration(Core.Style.animFast)
+          easing.type: Core.Style.easeStandard
+        }
+      }
     }
   }
 

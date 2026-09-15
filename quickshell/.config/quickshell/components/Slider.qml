@@ -50,6 +50,10 @@ Item {
   // Emit valueUpdated while dragging. False emits once, on release.
   property bool liveUpdate: true
 
+  // Off for a value fed by a poll (the seek bar): each update would start a
+  // 150 ms animation, keeping the output rendering most of the time.
+  property bool animateValue: true
+
   // === State (readonly) ===
   readonly property bool hovered: mouseArea.containsMouse
   readonly property bool dragging: mouseArea.pressed
@@ -133,7 +137,7 @@ Item {
     color: root.progressColor
 
     Behavior on width {
-      enabled: !root.dragging
+      enabled: root.animateValue && !root.dragging
       NumberAnimation {
         duration: Core.Style.duration(Core.Style.animFast)
         easing.type: Core.Style.easeStandard
@@ -148,7 +152,7 @@ Item {
     anchors.verticalCenter: track.verticalCenter
 
     Behavior on x {
-      enabled: !root.dragging
+      enabled: root.animateValue && !root.dragging
       NumberAnimation {
         duration: Core.Style.duration(Core.Style.animFast)
         easing.type: Core.Style.easeStandard
