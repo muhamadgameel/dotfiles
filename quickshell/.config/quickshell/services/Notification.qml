@@ -89,12 +89,12 @@ Singleton {
     }
   }
 
-  // === Progress Timer ===
+  // === Timeout Timer ===
   Timer {
     interval: 100
     repeat: true
     running: root.activeList.count > 0
-    onTriggered: root._updateProgress()
+    onTriggered: root._expireDue()
     // A fresh start, so the first tick does not count the time spent idle.
     onRunningChanged: root._lastTick = Date.now()
   }
@@ -180,8 +180,7 @@ Singleton {
     return Object.assign({
       id: Core.Utils.generateId("notif"),
       expireTimeout: n.expireTimeout,
-      timestamp: new Date(),
-      progress: 1.0
+      timestamp: new Date()
     }, _content(n));
   }
 
@@ -329,9 +328,9 @@ Singleton {
     delete _active[id];
   }
 
-  // === Progress ===
+  // === Timeouts ===
 
-  function _updateProgress() {
+  function _expireDue() {
     const now = Date.now();
     const tick = now - root._lastTick;
     root._lastTick = now;
@@ -358,20 +357,12 @@ Singleton {
       if (meta.duration < 0 || meta.paused || meta.expired)
         continue;
 
-      const elapsed = now - meta.startTime;
-      const progress = Math.max(1.0 - elapsed / meta.duration, 0);
-
-      if (progress <= 0) {
+      if (now - meta.startTime >= meta.duration) {
         // Collected rather than dispatched here: emitting mutates activeList
         // underneath this loop. Marked so the next ticks, which run while the
         // card animates out, do not send it again.
         meta.expired = true;
         expired.push(item.id);
-        continue;
-      }
-
-      if (Math.abs(item.progress - progress) > 0.01) {
-        activeList.setProperty(i, "progress", progress);
       }
     }
 

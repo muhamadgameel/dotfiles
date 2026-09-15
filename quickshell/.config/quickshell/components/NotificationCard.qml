@@ -20,7 +20,6 @@ import "." as Components
 * Usage:
 *   NotificationCard {
 *       notificationData: model
-*       showProgress: true
 *       onCloseClicked: dismiss()
 *       onActionClicked: handleAction(actionId)
 *   }
@@ -30,11 +29,7 @@ Components.Card {
 
   // === Properties ===
   property var notificationData: null
-  property bool showProgress: true
   property bool compact: false
-
-  // Progress value (0.0 to 1.0)
-  property real progressValue: notificationData?.progress ?? 1.0
 
   // Extracted data (with fallbacks)
   readonly property string summary: notificationData?.summary ?? "No summary"
@@ -59,18 +54,6 @@ Components.Card {
   implicitHeight: contentColumn.implicitHeight + Core.Style.spaceM * 2
 
   interactive: true
-
-  // === Progress Bar ===
-  Components.ProgressBar {
-    visible: root.showProgress
-    value: root.progressValue
-    trackColor: Core.Theme.transparent
-    progressColor: Core.Theme.urgencyColor(root.urgency)
-    height: Core.Style.px(2)
-    width: root.width - (2 * root.radius)
-    anchors.horizontalCenter: parent.horizontalCenter
-    reversed: true
-  }
 
   // === Content ===
   ColumnLayout {

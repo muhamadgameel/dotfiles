@@ -5,7 +5,7 @@ import "../core" as Core
 /**
 * ProgressBar - Horizontal progress indicator
 *
-* A simple progress bar that fills from left to right (or right to left when reversed).
+* A simple progress bar that fills from left to right.
 * Automatically animates value changes with a smooth easing transition.
 *
 * Usage:
@@ -17,9 +17,6 @@ import "../core" as Core
 *
 *   // Custom colors
 *   ProgressBar { value: 0.5; progressColor: Theme.success }
-*
-*   // Reversed (fills from right, useful for countdowns)
-*   ProgressBar { value: 0.3; reversed: true }
 */
 Rectangle {
   id: root
@@ -27,18 +24,15 @@ Rectangle {
   property real value: 0.0
   property real maxValue: 1.0
   property color progressColor: Core.Theme.accent
-  property color trackColor: Core.Theme.surface
-  property bool reversed: false
 
   implicitWidth: Core.Style.px(200)
   implicitHeight: Core.Style.progressHeightM
   radius: Core.Style.radiusFull
-  color: trackColor
+  color: Core.Theme.surface
 
   Rectangle {
     id: fill
-    anchors.left: root.reversed ? undefined : parent.left
-    anchors.right: root.reversed ? parent.right : undefined
+    anchors.left: parent.left
     anchors.top: parent.top
     anchors.bottom: parent.bottom
 

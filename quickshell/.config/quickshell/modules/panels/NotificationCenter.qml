@@ -108,7 +108,6 @@ Components.SlidingPanel {
 
           width: parent.width
           compact: true
-          showProgress: false
           notificationData: historyRow.model
 
           // A Repeater destroys its delegate the instant the model row goes,

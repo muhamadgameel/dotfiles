@@ -158,8 +158,6 @@ Variants {
               anchors.margins: notifWindow.shadowRoom
 
               notificationData: card.notificationData
-              showProgress: true
-              progressValue: card.model.progress
 
               onHoveredChanged: {
                 if (hovered) {
