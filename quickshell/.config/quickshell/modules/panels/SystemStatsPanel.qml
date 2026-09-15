@@ -14,6 +14,7 @@ import "../../services" as Services
 * Displays comprehensive system information:
 * - CPU usage with per-core breakdown
 * - Memory usage (RAM + Swap)
+* - GPU usage, VRAM and power (NVIDIA)
 * - Temperatures (CPU + GPU)
 * - Network throughput
 * - Disk usage
@@ -100,6 +101,59 @@ Components.SlidingPanel {
     progressColor: Services.SystemStats.swapPercent > 50 ? Core.Theme.warning : Core.Theme.accentAlt
     progressHeight: Core.Style.progressHeightM
     showPercentage: false
+  }
+
+  // ═══════════════════════════════════════════════════════════════════
+  // GPU SECTION
+  // ═══════════════════════════════════════════════════════════════════
+
+  Components.SectionHeader {
+    Layout.topMargin: Core.Style.spaceXL
+    visible: Services.SystemStats.hasGpuDetails
+    icon: "gpu"
+    title: "GPU"
+
+    Components.Text {
+      text: Services.SystemStats.gpuName.replace(/^NVIDIA (GeForce )?/, "")
+      size: Core.Style.fontXS
+      color: Core.Theme.textDim
+    }
+  }
+
+  Components.ProgressRow {
+    visible: Services.SystemStats.hasGpuDetails
+    label: "Usage"
+    labelInfo: Math.round(Services.SystemStats.gpuUsage) + "%"
+    value: Services.SystemStats.gpuUsage / 100
+    progressHeight: Core.Style.progressHeightL
+    showPercentage: false
+  }
+
+  Components.ProgressRow {
+    visible: Services.SystemStats.hasGpuDetails
+    label: "VRAM"
+    labelInfo: Core.Utils.formatBytes(Services.SystemStats.gpuMemUsed, 1) + " / " + Core.Utils.formatBytes(Services.SystemStats.gpuMemTotal, 1)
+    value: Services.SystemStats.gpuMemUsed / Services.SystemStats.gpuMemTotal
+    progressColor: Core.Theme.accentAlt
+    progressHeight: Core.Style.progressHeightM
+    showPercentage: false
+  }
+
+  Components.ProgressRow {
+    visible: Services.SystemStats.hasGpuDetails && Services.SystemStats.gpuPowerLimit > 0
+    label: "Power"
+    labelInfo: Math.round(Services.SystemStats.gpuPower) + " / " + Math.round(Services.SystemStats.gpuPowerLimit) + " W"
+    value: Services.SystemStats.gpuPower / Services.SystemStats.gpuPowerLimit
+    progressColor: Core.Theme.accentAlt
+    progressHeight: Core.Style.progressHeightM
+    showPercentage: false
+  }
+
+  Components.Text {
+    visible: Services.SystemStats.hasGpuDetails && Services.SystemStats.gpuThrottle !== ""
+    text: Services.SystemStats.gpuThrottle
+    size: Core.Style.fontS
+    color: Services.SystemStats.gpuThrottle === "Power limited" ? Core.Theme.textDim : Core.Theme.warning
   }
 
   // ═══════════════════════════════════════════════════════════════════

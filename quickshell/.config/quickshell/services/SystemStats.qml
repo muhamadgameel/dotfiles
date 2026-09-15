@@ -6,6 +6,7 @@ import Quickshell.Io
 
 import "../config" as Config
 import "../core" as Core
+import "../services" as Services
 
 /**
 * SystemStats - Service for monitoring system hardware metrics
@@ -13,6 +14,7 @@ import "../core" as Core
 * Provides real-time monitoring of:
 * - CPU temperature (Intel coretemp package, AMD k10temp/zenpower Tctl)
 * - GPU temperature (AMD via hwmon, NVIDIA via one looping nvidia-smi)
+* - NVIDIA usage, VRAM, power draw and throttling, from the same query
 * - CPU usage (overall and per-core)
 * - Memory usage (RAM + Swap)
 * - Network speeds (download/upload)
@@ -75,6 +77,16 @@ Singleton {
   // === GPU ===
   property real gpuTemp: 0
 
+  // NVIDIA only; empty or 0 until the first reading.
+  property string gpuName: ""
+  property real gpuUsage: 0       // percent
+  property real gpuMemUsed: 0     // bytes
+  property real gpuMemTotal: 0    // bytes
+  property real gpuPower: 0       // watts
+  property real gpuPowerLimit: 0  // watts, the limit the driver enforces now
+  // Why the driver is holding the GPU back, or "" when it is not.
+  property string gpuThrottle: ""
+
   // === Memory ===
   property real memUsed: 0      // bytes
   property real memTotal: 0     // bytes
@@ -101,6 +113,7 @@ Singleton {
   // Detection flags
   readonly property bool hasCpuTemp: cpuTemp > 0
   readonly property bool hasGpuTemp: gpuTemp > 0
+  readonly property bool hasGpuDetails: gpuMemTotal > 0
   readonly property bool hasSwap: swapTotal > 0
 
   // Status levels: "normal", "warning", "critical"
@@ -329,17 +342,15 @@ done'
   // NVIDIA GPU it exits straight away and stays down.
   Process {
     id: _nvidiaProcess
-    command: ["nvidia-smi", "--query-gpu=temperature.gpu", "--format=csv,noheader,nounits", "-l", String(root.nvidiaPollingInterval / 1000)]
+    command: root._nvidiaQuery.concat([String(root.nvidiaPollingInterval / 1000)])
     running: false
 
     stdout: SplitParser {
       splitMarker: "\n"
       onRead: data => {
-        const temp = parseInt(data.trim(), 10);
-        if (isNaN(temp) || temp <= 0)
+        if (!root._readNvidia(data))
           return;
 
-        root.gpuTemp = temp;
         if (root._gpuType === "") {
           root._gpuType = "nvidia";
           Core.Logger.i("SystemStats", "NVIDIA GPU detected");
@@ -368,6 +379,60 @@ done'
     interval: root.nvidiaPollingInterval
     repeat: false
     onTriggered: _nvidiaProcess.running = true
+  }
+
+  // A faster second loop while the System Monitor is open, so its GPU rows move
+  // with the CPU and memory rows. It stops when the panel closes.
+  Process {
+    command: root._nvidiaQuery.concat([String(root.pollingInterval / 1000)])
+    running: root._gpuType === "nvidia" && Services.Panels.openPanel === "systemstats"
+
+    stdout: SplitParser {
+      splitMarker: "\n"
+      onRead: data => root._readNvidia(data)
+    }
+  }
+
+  readonly property var _nvidiaQuery: ["nvidia-smi", "--query-gpu=temperature.gpu,utilization.gpu,memory.used,memory.total,power.draw,enforced.power.limit,clocks_event_reasons.active,name", "--format=csv,noheader,nounits", "-l"]
+
+  // One line of _nvidiaQuery. A field the driver reports as "[N/A]" keeps its
+  // last value. Returns false for anything that is not a reading.
+  function _readNvidia(line) {
+    const fields = line.trim().split(", ");
+    const temp = parseInt(fields[0], 10);
+    if (fields.length < 8 || isNaN(temp) || temp <= 0)
+      return false;
+
+    const number = (text, scale) => {
+      const value = parseFloat(text);
+      return isNaN(value) ? null : value * scale;
+    };
+    const mib = 1024 * 1024;
+
+    root.gpuTemp = temp;
+    root.gpuUsage = number(fields[1], 1) ?? root.gpuUsage;
+    root.gpuMemUsed = number(fields[2], mib) ?? root.gpuMemUsed;
+    root.gpuMemTotal = number(fields[3], mib) ?? root.gpuMemTotal;
+    root.gpuPower = number(fields[4], 1) ?? root.gpuPower;
+    root.gpuPowerLimit = number(fields[5], 1) ?? root.gpuPowerLimit;
+
+    // clocks_event_reasons bits: 0x20/0x40 software/hardware thermal,
+    // 0x08/0x80 hardware slowdown and power brake, 0x04 the power cap - normal
+    // under load on a laptop. 0x01 is only "idle".
+    const reasons = parseInt(fields[6], 16);
+    if (isNaN(reasons))
+      root.gpuThrottle = "";
+    else if (reasons & 0x60)
+      root.gpuThrottle = "Thermal throttling";
+    else if (reasons & 0x88)
+      root.gpuThrottle = "Hardware slowdown";
+    else if (reasons & 0x04)
+      root.gpuThrottle = "Power limited";
+    else
+      root.gpuThrottle = "";
+
+    root.gpuName = fields.slice(7).join(", ");
+    return true;
   }
 
   // ═══════════════════════════════════════════════════════════════════════════
