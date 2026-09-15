@@ -26,7 +26,6 @@ Components.Button {
       return Core.Theme.textMuted;
     return Services.Audio.micMuted ? Core.Theme.error : Core.Theme.text;
   }
-  iconSize: Core.Style.fontL
 
   tooltipText: {
     if (!Services.Audio.hasSource)

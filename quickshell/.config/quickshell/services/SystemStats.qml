@@ -102,7 +102,6 @@ Singleton {
   readonly property bool hasCpuTemp: cpuTemp > 0
   readonly property bool hasGpuTemp: gpuTemp > 0
   readonly property bool hasSwap: swapTotal > 0
-  readonly property bool hasNetworkData: netDownSpeed > 0 || netUpSpeed > 0
 
   // Status levels: "normal", "warning", "critical"
   //
@@ -144,7 +143,6 @@ Singleton {
   // ═══════════════════════════════════════════════════════════════════════════
 
   // Resolved sensor paths (empty until detection finishes)
-  property string _cpuSensorType: ""   // "coretemp", "k10temp", "zenpower"
   property string _cpuTempPath: ""
   property string _gpuType: ""         // "amd", "nvidia"
   property string _gpuTempPath: ""
@@ -216,7 +214,6 @@ Singleton {
           const path = parts[2];
 
           if (kind === "cpu" && root._cpuTempPath === "") {
-            root._cpuSensorType = type;
             root._cpuTempPath = path;
             Core.Logger.i("SystemStats", `CPU sensor: ${type} at ${path}`);
           } else if (kind === "gpu" && root._gpuTempPath === "") {

@@ -34,7 +34,6 @@ Singleton {
   property bool busy: false
 
   readonly property string statusIcon: inhibited ? "eye" : "eye-off"
-  readonly property string statusText: inhibited ? "Staying awake" : "Idle timeout active"
 
   // === Public API ===
 

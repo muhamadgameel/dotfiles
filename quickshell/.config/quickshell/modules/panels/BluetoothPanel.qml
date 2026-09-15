@@ -39,7 +39,6 @@ Components.SlidingPanel {
   pinned: [
     // Bluetooth Toggle
     Components.FormRow {
-      Layout.fillWidth: true
       label: "Bluetooth"
       hasToggle: true
       toggleChecked: Services.Bluetooth.enabled
@@ -253,7 +252,6 @@ Components.SlidingPanel {
           text: devItem.deviceName
           color: devItem.isConnected ? Core.Theme.accentAlt : Core.Theme.text
           weight: devItem.isConnected ? Core.Style.weightBold : Core.Style.weightNormal
-          elide: Text.ElideRight
           Layout.fillWidth: true
         }
 

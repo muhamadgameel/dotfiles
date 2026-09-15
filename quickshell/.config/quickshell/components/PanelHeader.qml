@@ -26,23 +26,13 @@ RowLayout {
   property string title: ""
   property string subtitle: ""
 
-  // === Margin Properties ===
-  property int leftMargin: Core.Style.panelPadding
-  property int rightMargin: Core.Style.panelPadding
-  property int topMargin: Core.Style.panelPadding
-  property int bottomMargin: Core.Style.panelPadding
-
   signal closeClicked
 
   // Prevent expanding in parent ColumnLayout
   Layout.fillHeight: false
   Layout.fillWidth: true
 
-  // Apply margins via Layout attached properties
-  Layout.leftMargin: root.leftMargin
-  Layout.rightMargin: root.rightMargin
-  Layout.topMargin: root.topMargin
-  Layout.bottomMargin: root.bottomMargin
+  Layout.margins: Core.Style.panelPadding
 
   spacing: Core.Style.spaceM
 

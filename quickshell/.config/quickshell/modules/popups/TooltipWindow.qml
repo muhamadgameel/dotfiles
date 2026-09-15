@@ -60,7 +60,7 @@ PopupWindow {
 
   // === Public API (driven by Services.Tooltip) ===
 
-  function showFor(target, tipText, tipDirection, delay) {
+  function showFor(target, tipText, tipDirection) {
     if (!target || !tipText)
       return;
 
@@ -74,7 +74,6 @@ PopupWindow {
       return;
     }
 
-    showTimer.interval = delay ?? Config.Config.tooltipDelay;
     showTimer.restart();
   }
 

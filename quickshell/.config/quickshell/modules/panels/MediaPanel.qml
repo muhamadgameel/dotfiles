@@ -165,7 +165,6 @@ Components.SlidingPanel {
           text: Services.Media.trackTitle || "Unknown track"
           size: Core.Style.fontL
           weight: Core.Style.weightBold
-          elide: Text.ElideRight
         }
 
         Components.Text {
@@ -174,7 +173,6 @@ Components.SlidingPanel {
           text: Services.Media.trackArtist
           size: Core.Style.fontM
           color: Core.Theme.textDim
-          elide: Text.ElideRight
         }
 
         Components.Text {
@@ -183,7 +181,6 @@ Components.SlidingPanel {
           text: Services.Media.trackAlbum
           size: Core.Style.fontS
           color: Core.Theme.textMuted
-          elide: Text.ElideRight
         }
       }
 
@@ -326,7 +323,6 @@ Components.SlidingPanel {
     Layout.fillWidth: true
     title: "Players"
     icon: "playlist"
-    expanded: false
     visible: Services.Media.players.length > 1
 
     Repeater {
@@ -366,7 +362,6 @@ Components.SlidingPanel {
             Layout.fillWidth: true
             text: playerCard.modelData.identity || playerCard.modelData.dbusName
             color: playerCard.isActive ? Core.Theme.accent : Core.Theme.text
-            elide: Text.ElideRight
           }
 
           Components.Icon {

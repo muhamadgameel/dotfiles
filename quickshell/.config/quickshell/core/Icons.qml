@@ -7,11 +7,10 @@ import Quickshell
 * Icons - Central registry of icon name to Nerd Font glyph mappings
 *
 * Usage:
-*   import "../config" as Config
 *   Text { text: Core.Icons.get("bell") }
 *
 * Or with the Icon component:
-*   Icon { name: "bell" }
+*   Icon { icon: "bell" }
 */
 Singleton {
   id: root

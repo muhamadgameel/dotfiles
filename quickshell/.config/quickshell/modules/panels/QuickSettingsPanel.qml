@@ -275,7 +275,6 @@ Components.SlidingPanel {
           Layout.fillWidth: true
           text: Services.Media.trackTitle || Services.Media.identity
           weight: Core.Style.weightBold
-          elide: Text.ElideRight
         }
 
         Components.Text {
@@ -284,7 +283,6 @@ Components.SlidingPanel {
           text: Services.Media.trackArtist
           size: Core.Style.fontXS
           color: Core.Theme.textDim
-          elide: Text.ElideRight
         }
       }
 

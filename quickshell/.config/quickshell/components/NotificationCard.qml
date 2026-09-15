@@ -31,8 +31,6 @@ Components.Card {
   // === Properties ===
   property var notificationData: null
   property bool showProgress: true
-  property bool showCloseButton: true
-  property bool showUrgencyDot: true
   property bool compact: false
 
   // Progress value (0.0 to 1.0)
@@ -50,10 +48,6 @@ Components.Card {
   // === Signals ===
   signal closeClicked
   signal actionClicked(string actionId)
-  signal hoverChanged(bool isHovered)
-
-  // Forward hover changes
-  onHoveredChanged: hoverChanged(hovered)
 
   // === Card Configuration ===
   radius: Core.Style.radiusL
@@ -114,7 +108,6 @@ Components.Card {
           // Urgency dot
           Components.StatusDot {
             Layout.alignment: Qt.AlignVCenter
-            visible: root.showUrgencyDot
             size: Core.Style.px(6)
             color: Core.Theme.urgencyColor(root.urgency)
           }
@@ -185,7 +178,7 @@ Components.Card {
       Components.Button {
         id: trashButton
         Layout.alignment: Qt.AlignCenter
-        visible: root.showCloseButton && root.compact
+        visible: root.compact
         icon: "trash"
         variant: "danger"
         onClicked: root.closeClicked()
@@ -200,7 +193,7 @@ Components.Card {
     anchors.topMargin: Core.Style.spaceM
     anchors.right: parent.right
     anchors.rightMargin: Core.Style.spaceM
-    visible: root.showCloseButton && !root.compact
+    visible: !root.compact
     icon: "close"
     variant: "danger"
     onClicked: root.closeClicked()

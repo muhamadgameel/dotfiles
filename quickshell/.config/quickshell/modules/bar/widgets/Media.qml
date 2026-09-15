@@ -21,7 +21,6 @@ Components.Button {
   signal panelRequested
 
   icon: Services.Media.statusIcon
-  iconSize: Core.Style.fontL
   iconColor: Services.Media.isPlaying ? Core.Theme.accent : Core.Theme.textDim
 
   tooltipText: {

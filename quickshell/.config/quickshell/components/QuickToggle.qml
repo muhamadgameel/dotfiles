@@ -83,7 +83,6 @@ Components.Card {
         text: root.label
         weight: Core.Style.weightBold
         color: root._fg
-        elide: Text.ElideRight
       }
 
       Components.Text {
@@ -92,7 +91,6 @@ Components.Card {
         text: root.subtitle
         size: Core.Style.fontXS
         color: root._fgDim
-        elide: Text.ElideRight
       }
     }
 

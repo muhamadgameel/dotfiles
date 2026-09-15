@@ -153,16 +153,8 @@ Item {
   }
 
   // === Public API ===
-  function open() {
-    Services.Panels.open(root.panelId, root.screen);
-  }
-
   function close() {
     Services.Panels.close();
-  }
-
-  function toggle() {
-    Services.Panels.toggle(root.panelId, root.screen);
   }
 
   onIsOpenChanged: {

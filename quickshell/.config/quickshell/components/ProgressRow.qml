@@ -27,7 +27,6 @@ ColumnLayout {
   // === Icon Properties ===
   property string icon: ""
   property color iconColor: Core.Theme.text
-  property int iconSize: Core.Style.fontXL
 
   // === Label Properties ===
   property string label: ""        // Row label (e.g., "RAM", "CPU")
@@ -60,20 +59,19 @@ ColumnLayout {
     // Icon
     Components.Icon {
       icon: root.icon
-      size: root.iconSize
+      size: Core.Style.fontXL
       color: root.iconColor
       visible: root.hasIcon
     }
 
-    // Label column with progress (when label is present)
+    // Optional label row above the bar
     ColumnLayout {
       Layout.fillWidth: true
       spacing: Core.Style.spaceXS
-      visible: root.hasLabel || root.hasLabelInfo
 
-      // Label row with info
       RowLayout {
         Layout.fillWidth: true
+        visible: root.hasLabel || root.hasLabelInfo
 
         Components.Text {
           visible: root.hasLabel
@@ -91,7 +89,6 @@ ColumnLayout {
         }
       }
 
-      // Progress bar below label
       Components.ProgressBar {
         Layout.fillWidth: true
         Layout.preferredHeight: root.progressHeight
@@ -99,16 +96,6 @@ ColumnLayout {
         maxValue: root.maxValue
         progressColor: root.progressColor
       }
-    }
-
-    // Progress bar inline with icon (when no label)
-    Components.ProgressBar {
-      Layout.fillWidth: true
-      Layout.preferredHeight: root.progressHeight
-      visible: !root.hasLabel && !root.hasLabelInfo
-      value: root.value
-      maxValue: root.maxValue
-      progressColor: root.progressColor
     }
 
     // Value/Percentage display

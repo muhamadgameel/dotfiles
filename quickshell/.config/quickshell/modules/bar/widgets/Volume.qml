@@ -23,7 +23,6 @@ Components.Button {
   }
 
   iconColor: Services.Audio.muted ? Core.Theme.textMuted : Core.Theme.text
-  iconSize: Core.Style.fontL
 
   text: Services.Audio.hasSink ? Math.round(Services.Audio.volume * 100) + "%" : "--"
 

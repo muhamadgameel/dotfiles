@@ -38,7 +38,6 @@ Components.SlidingPanel {
   }
 
   Components.ProgressRow {
-    Layout.fillWidth: true
     value: Services.SystemStats.cpuUsage / 100
     progressColor: Core.Theme.statusColor(Services.SystemStats.cpuUsageStatus)
     progressHeight: Core.Style.progressHeightL
@@ -51,7 +50,6 @@ Components.SlidingPanel {
   // with 32+ threads that is the whole section.
   Components.Collapsible {
     title: "Per-Core Details"
-    expanded: false
     Layout.fillWidth: true
     visible: Services.SystemStats.cpuCoreCount > 0
 
@@ -65,7 +63,6 @@ Components.SlidingPanel {
 
         readonly property real usage: Services.SystemStats.cpuCores[index] ?? 0
 
-        Layout.fillWidth: true
         label: "Core " + index
         labelInfo: Math.round(usage) + "%"
         value: usage / 100
@@ -87,7 +84,6 @@ Components.SlidingPanel {
   }
 
   Components.ProgressRow {
-    Layout.fillWidth: true
     label: "RAM"
     labelInfo: Core.Utils.formatBytes(Services.SystemStats.memUsed, 1) + " / " + Core.Utils.formatBytes(Services.SystemStats.memTotal, 1)
     value: Services.SystemStats.memPercent / 100
@@ -97,7 +93,6 @@ Components.SlidingPanel {
   }
 
   Components.ProgressRow {
-    Layout.fillWidth: true
     visible: Services.SystemStats.hasSwap
     label: "Swap"
     labelInfo: Core.Utils.formatBytes(Services.SystemStats.swapUsed, 1) + " / " + Core.Utils.formatBytes(Services.SystemStats.swapTotal, 1)
@@ -120,7 +115,6 @@ Components.SlidingPanel {
 
   // CPU Temperature
   Components.ProgressRow {
-    Layout.fillWidth: true
     visible: Services.SystemStats.hasCpuTemp
     icon: "chip"
     iconColor: Core.Theme.statusColor(Services.SystemStats.cpuTempStatus, Core.Theme.text)
@@ -133,7 +127,6 @@ Components.SlidingPanel {
 
   // GPU Temperature
   Components.ProgressRow {
-    Layout.fillWidth: true
     visible: Services.SystemStats.hasGpuTemp
     icon: "gpu"
     iconColor: Core.Theme.statusColor(Services.SystemStats.gpuTempStatus, Core.Theme.text)
@@ -243,7 +236,6 @@ Components.SlidingPanel {
   }
 
   Components.ProgressRow {
-    Layout.fillWidth: true
     label: Services.SystemStats.diskMount
     labelInfo: Core.Utils.formatBytes(Services.SystemStats.diskUsed, 1) + " / " + Core.Utils.formatBytes(Services.SystemStats.diskTotal, 1)
     value: Services.SystemStats.diskPercent / 100

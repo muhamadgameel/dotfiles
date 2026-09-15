@@ -98,12 +98,6 @@ Singleton {
   readonly property int connectedCount: connectedDevices.length
   readonly property bool hasConnectedDevices: connectedCount > 0
 
-  readonly property bool connecting: {
-    if (!devices)
-      return false;
-    return devices.values.some(d => d?.state === BluetoothDeviceState.Connecting || d?.pairing);
-  }
-
   readonly property string firstConnectedName: connectedDevices.length > 0 ? root.deviceLabel(connectedDevices[0]) : ""
 
   readonly property string statusIcon: {

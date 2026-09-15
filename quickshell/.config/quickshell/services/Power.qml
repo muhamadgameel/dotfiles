@@ -83,8 +83,4 @@ Singleton {
     Quickshell.execDetached(action.command);
     return true;
   }
-
-  function lock() {
-    run("lock");
-  }
 }

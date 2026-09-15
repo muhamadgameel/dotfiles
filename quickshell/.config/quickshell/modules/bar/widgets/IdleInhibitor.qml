@@ -15,7 +15,6 @@ Components.Button {
   id: root
 
   icon: Services.Idle.statusIcon
-  iconSize: Core.Style.fontL
   iconColor: Services.Idle.inhibited ? Core.Theme.warning : Core.Theme.textMuted
 
   tooltipText: {

@@ -25,7 +25,6 @@ Singleton {
   property PwNode sink: Pipewire.defaultAudioSink
   property PwNode source: Pipewire.defaultAudioSource
 
-  property bool ready: Pipewire.ready
   readonly property bool sinkReady: sink?.ready ?? false
   readonly property bool sourceReady: source?.ready ?? false
 

@@ -57,7 +57,6 @@ Singleton {
 
   // Ethernet (includes USB tethering)
   readonly property bool ethernetConnected: backend?.ethernetConnected ?? false
-  readonly property string ethernetInterface: backend?.ethernetInterface ?? ""
 
   // Connectivity & Active Connection
   readonly property string connectivityStatus: backend?.connectivityStatus ?? "unknown"

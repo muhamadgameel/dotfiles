@@ -215,8 +215,6 @@ Components.SlidingPanel {
 
     signal deviceSelected(var node)
 
-    expanded: false
-
     Repeater {
       model: deviceSelectorRoot.devices
 
@@ -259,7 +257,6 @@ Components.SlidingPanel {
               text: Services.Audio.deviceName(deviceCard.modelData)
               color: deviceCard.isActive ? Core.Theme.accent : Core.Theme.text
               weight: deviceCard.isActive ? Core.Style.weightBold : Core.Style.weightNormal
-              elide: Text.ElideRight
               Layout.fillWidth: true
             }
 
@@ -268,7 +265,6 @@ Components.SlidingPanel {
               text: deviceCard.modelData.name || ""
               size: Core.Style.fontXS
               color: Core.Theme.textMuted
-              elide: Text.ElideRight
               Layout.fillWidth: true
             }
           }
@@ -334,7 +330,6 @@ Components.SlidingPanel {
 
         Components.Text {
           text: streamRoot.streamName
-          elide: Text.ElideRight
           Layout.fillWidth: true
           color: streamRoot.streamMuted ? Core.Theme.textMuted : Core.Theme.text
         }

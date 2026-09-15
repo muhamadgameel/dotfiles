@@ -17,11 +17,7 @@ import "../../../services" as Services
 Components.Button {
   id: root
 
-  // Hide when no backlight device is available (desktops without backlight)
-  visible: Services.Brightness.ready
-
   icon: Services.Brightness.getIcon()
-  iconSize: Core.Style.fontL
 
   text: Services.Brightness.ready ? Math.round(Services.Brightness.brightness * 100) + "%" : "--"
 

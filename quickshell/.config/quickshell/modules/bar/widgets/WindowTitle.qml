@@ -146,7 +146,6 @@ Item {
       text: root.displayTitle
       size: Core.Style.fontS
       color: Core.Theme.textDim
-      elide: Text.ElideRight
     }
   }
 

@@ -33,9 +33,6 @@ Components.Button {
   readonly property bool isLow: isReady && !isCharging && percent <= lowThreshold
   readonly property bool isCritical: isReady && !isCharging && percent <= criticalThreshold
 
-  // Hide when no battery present (desktop/AC only)
-  visible: hasBattery
-
   // === Display ===
   icon: {
     if (!isReady)

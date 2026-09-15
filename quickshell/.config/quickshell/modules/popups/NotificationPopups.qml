@@ -161,7 +161,7 @@ Variants {
               showProgress: true
               progressValue: card.model.progress
 
-              onHoverChanged: {
+              onHoveredChanged: {
                 if (hovered) {
                   Services.Notification.pauseTimeout(card.notificationId);
                 } else {

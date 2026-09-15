@@ -22,7 +22,6 @@ Components.Button {
 
   // === Icon ===
   icon: Services.SystemStats.healthIcon
-  iconSize: Core.Style.fontL
 
   iconColor: {
     switch (Services.SystemStats.healthStatus) {

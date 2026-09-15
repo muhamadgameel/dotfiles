@@ -38,11 +38,9 @@ Rectangle {
   // === Text Variant Properties ===
   property string text: ""
   property color textColor: Core.Theme.accent
-  property real fontSize: Core.Style.fontS
 
   // === Count Variant Properties ===
   property int count: 0
-  property int maxCount: 99
 
   // === Shared Properties ===
   property color backgroundColor: {
@@ -50,15 +48,13 @@ Rectangle {
       return Core.Theme.error;
     return Core.Theme.alpha(textColor, Core.Style.opacityTintStrong);
   }
-  property color borderColor: Core.Theme.transparent
-  property int borderWidth: 0
 
   // === Computed Properties ===
   readonly property bool isTextVariant: variant === "text"
   readonly property bool isCountVariant: variant === "count"
   readonly property string displayText: {
     if (isCountVariant)
-      return count > maxCount ? maxCount + "+" : count.toString();
+      return count > 99 ? "99+" : count.toString();
     return text;
   }
 
@@ -82,8 +78,6 @@ Rectangle {
   // === Appearance ===
   radius: Core.Style.radiusFull
   color: backgroundColor
-  border.color: borderColor
-  border.width: borderWidth
 
   Behavior on implicitWidth {
     NumberAnimation {
@@ -106,7 +100,7 @@ Rectangle {
     anchors.centerIn: parent
     text: root.displayText
     font.family: Core.Style.fontFamily
-    font.pixelSize: root.fontSize
+    font.pixelSize: Core.Style.fontS
     font.weight: root.isCountVariant ? Font.Bold : Font.Normal
     color: root.isCountVariant ? Core.Theme.bg : root.textColor
     visible: root.isTextVariant || root.count > 0

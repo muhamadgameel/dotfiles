@@ -29,7 +29,6 @@ Components.SlidingPanel {
   pinned: [
     // WiFi Toggle
     Components.FormRow {
-      Layout.fillWidth: true
       label: "Wi-Fi"
       hasToggle: true
       toggleChecked: Services.Network.wifiEnabled

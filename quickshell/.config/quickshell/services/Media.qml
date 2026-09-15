@@ -157,10 +157,6 @@ Singleton {
     }
   }
 
-  function stop() {
-    active?.stop();
-  }
-
   function seek(seconds) {
     if (active?.canSeek)
       active.position = Core.Utils.clamp(seconds, 0, root.length);
@@ -235,11 +231,6 @@ Singleton {
   */
   function selectPlayer(id) {
     preferredId = id ?? "";
-  }
-
-  function raise() {
-    if (active?.canRaise)
-      active.raise();
   }
 
   // Drop a pin whose player has gone away, so the heuristic takes over again.

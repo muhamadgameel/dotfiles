@@ -27,7 +27,6 @@ Singleton {
   // === Public Properties ===
   property real brightness: 0.0       // Current brightness (0.0 - 1.0)
   property int maxBrightness: 0       // Maximum raw value
-  property int currentBrightness: 0   // Current raw value
   property bool ready: false          // Whether brightness control is available
   property string device: ""          // Backlight device name
 
@@ -124,7 +123,6 @@ Singleton {
   function _applyBrightness(value) {
     root._lastSelfWrite = Date.now();
     root.brightness = value;
-    root.currentBrightness = Math.round(value * root.maxBrightness);
     root._showOSD();
 
     _setProc.command = ["brightnessctl", "-c", "backlight", "-d", root.device, "-q", "s", Math.round(value * 100) + "%"];
@@ -160,7 +158,6 @@ Singleton {
 
     const value = raw / root.maxBrightness;
     const changed = Math.abs(value - root.brightness) >= 0.005;
-    root.currentBrightness = raw;
     root.brightness = value;
     if (changed)
       root._showOSD();
@@ -229,7 +226,6 @@ Singleton {
         }
 
         root.device = parts[0];
-        root.currentBrightness = current;
         root.maxBrightness = max;
         root.brightness = current / max;
         root.ready = true;

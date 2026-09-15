@@ -20,7 +20,6 @@ Components.Button {
   signal panelRequested
 
   icon: Services.Bluetooth.statusIcon
-  iconSize: Core.Style.fontL
   iconColor: root.statusColor
 
   tooltipText: _tooltip

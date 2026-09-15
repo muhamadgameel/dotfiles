@@ -67,7 +67,6 @@ Components.SlidingPanel {
 
   // === Options ===
   Components.FormRow {
-    Layout.fillWidth: true
     label: "Copy to clipboard"
     hasToggle: true
     toggleChecked: root.toClipboard

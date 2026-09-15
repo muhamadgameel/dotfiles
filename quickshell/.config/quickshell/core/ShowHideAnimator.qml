@@ -55,14 +55,7 @@ Item {
   property int entryDelay: 0
 
   // === Signals ===
-  signal showStarted
-  signal showFinished
-  signal hideStarted
   signal hideFinished
-
-  // === State ===
-  readonly property bool isAnimating: showAnim.running || hideAnim.running || delayTimer.running
-  readonly property bool isVisible: target ? target.opacity > 0 : false
 
   // === Internal ===
   // Fresh callers need a hidden starting frame, but reversals must retain it.
@@ -101,7 +94,6 @@ Item {
       setHidden();
     const reversing = hideAnim.running;
     hideAnim.stop();
-    showStarted();
 
     // Stagger hidden entrances only; never pause an in-flight reversal.
     if (delayTimer.interval > 0 && !reversing && !showAnim.running && target.opacity === hiddenOpacity) {
@@ -118,7 +110,6 @@ Item {
     _initialized = true;
     delayTimer.stop();
     showAnim.stop();
-    hideStarted();
     hideAnim.start();
   }
 
@@ -156,7 +147,6 @@ Item {
   // === Animations ===
   ParallelAnimation {
     id: showAnim
-    onFinished: root.showFinished()
 
     PropertyAnimation {
       target: root.target

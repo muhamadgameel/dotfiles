@@ -39,7 +39,6 @@ Scope {
 
   // Ethernet (includes USB tethering)
   property bool ethernetConnected: false
-  property string ethernetInterface: ""
 
   // Connectivity & Active Connection
   property string connectivityStatus: "unknown"
@@ -463,7 +462,7 @@ Scope {
     stdout: StdioCollector {
       onStreamFinished: {
         let wifi = false, eth = false;
-        let wifiName = "", wifiIface = "", ethIface = "", activeIface = "";
+        let wifiName = "", wifiIface = "", activeIface = "";
 
         for (const line of text.split("\n")) {
           const parts = root._parseNmcliLine(line, 4);
@@ -485,7 +484,6 @@ Scope {
             activeIface = device;
           } else if (root._ethernetTypes.includes(type)) {
             eth = true;
-            ethIface = device;
             activeIface = device;
           }
         }
@@ -494,7 +492,6 @@ Scope {
         root.wifiSSID = wifi ? wifiName : "";
         root._wifiDevice = wifiIface;
         root.ethernetConnected = eth;
-        root.ethernetInterface = ethIface;
         root.activeInterface = activeIface;
 
         _details.device = activeIface;

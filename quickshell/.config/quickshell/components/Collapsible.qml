@@ -10,7 +10,6 @@ import "." as Components
 * Usage:
 *   Collapsible {
 *       title: "Advanced Settings"
-*       expanded: false
 *
 *       FormRow { label: "Option 1" }
 *       FormRow { label: "Option 2" }
@@ -20,7 +19,7 @@ ColumnLayout {
   id: root
 
   property string title: "Section"
-  property bool expanded: true
+  property bool expanded: false
   property string icon: ""
 
   default property alias content: contentColumn.data

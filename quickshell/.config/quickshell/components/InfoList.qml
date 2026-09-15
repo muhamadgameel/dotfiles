@@ -23,8 +23,6 @@ Components.Collapsible {
   // [{ label, value }]
   property var rows: []
 
-  expanded: false
-
   // Driven by the row count rather than by the array. `rows` is a fresh array
   // whenever any one value in it changes - a signal-strength poll, say - and a
   // Repeater on the array rebuilt every row each time. Keyed by count, a row

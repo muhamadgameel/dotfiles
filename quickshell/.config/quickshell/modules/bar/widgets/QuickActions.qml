@@ -23,14 +23,12 @@ RowLayout {
 
   Components.Button {
     icon: "dashboard"
-    iconSize: Core.Style.fontL
     tooltipText: "Quick settings"
     onClicked: root.quickSettingsRequested()
   }
 
   Components.Button {
     icon: "camera"
-    iconSize: Core.Style.fontL
     visible: Config.Config.barShowScreenshot
     tooltipText: "Take a screenshot"
     onClicked: root.screenshotRequested()
@@ -38,7 +36,6 @@ RowLayout {
 
   Components.Button {
     icon: "power"
-    iconSize: Core.Style.fontL
     iconColor: Core.Theme.error
     visible: Config.Config.barShowPower
     tooltipText: "Power menu"

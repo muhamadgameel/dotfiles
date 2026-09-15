@@ -19,11 +19,9 @@ Singleton {
   property var window: null
 
   // The item the tooltip is currently following, if any.
-  readonly property Item currentTarget: _target
-
   property Item _target: null
 
-  function show(target, text, direction, delay) {
+  function show(target, text, direction) {
     if (!target || !text || !root.window)
       return;
 
@@ -33,7 +31,7 @@ Singleton {
       return;
 
     root._target = target;
-    root.window.showFor(target, text, direction, delay);
+    root.window.showFor(target, text, direction);
   }
 
   function hide() {

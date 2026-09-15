@@ -38,8 +38,6 @@ Singleton {
   // torn down mid-slide.
   property string retainedPanel: ""
 
-  readonly property bool anyOpen: openPanel !== ""
-
   // === Queries used by the bar and by SlidingPanel ===
 
   /**
