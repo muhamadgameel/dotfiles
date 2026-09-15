@@ -23,7 +23,7 @@ Components.SlidingPanel {
   panelId: "media"
 
   headerIcon: "music"
-  headerIconColor: Services.Media.isPlaying ? root.tint : Core.Theme.textDim
+  headerIconColor: Services.Media.isPlaying ? root.artColor : Core.Theme.textDim
   headerTitle: "Media"
   headerSubtitle: Services.Media.identity || "Nothing playing"
 
@@ -201,7 +201,7 @@ Components.SlidingPanel {
           value: Services.Media.progress
           liveUpdate: false
           progressColor: root.tint
-          handleDragColor: root.tint
+          handleDragColor: root.artColor
           trackHeight: Core.Style.px(6)
           handleSize: Core.Style.px(12)
           onValueUpdated: v => Services.Media.seekFraction(v)
@@ -215,7 +215,7 @@ Components.SlidingPanel {
           Components.Text {
             text: Core.Utils.formatClock(seekBar.displayValue * Services.Media.length)
             size: Core.Style.fontXS
-            color: seekBar.dragging ? root.tint : Core.Theme.textMuted
+            color: seekBar.dragging ? root.artColor : Core.Theme.textMuted
           }
 
           Components.Spacer {}
@@ -238,7 +238,7 @@ Components.SlidingPanel {
           icon: "shuffle"
           iconSize: Core.Style.fontM
           visible: Services.Media.shuffleSupported
-          iconColor: Services.Media.active?.shuffle ? root.tint : Core.Theme.textDim
+          iconColor: Services.Media.active?.shuffle ? root.artColor : Core.Theme.textDim
           tooltipText: "Shuffle"
           onClicked: Services.Media.toggleShuffle()
         }
@@ -258,8 +258,8 @@ Components.SlidingPanel {
           icon: Services.Media.statusIcon
           iconSize: Core.Style.fontXL
           padding: Core.Style.spaceM
-          backgroundColor: root.tint
-          hoverColor: Qt.lighter(root.tint, 1.15)
+          backgroundColor: root.artColor
+          hoverColor: Qt.lighter(root.artColor, 1.15)
           tooltipText: Services.Media.isPlaying ? "Pause" : "Play"
           enabled: Services.Media.isPlaying ? Services.Media.canPause : Services.Media.canPlay
           onClicked: Services.Media.playPause()
@@ -283,7 +283,7 @@ Components.SlidingPanel {
           }
           iconSize: Core.Style.fontM
           visible: Services.Media.loopSupported
-          iconColor: (Services.Media.active?.loopState ?? MprisLoopState.None) !== MprisLoopState.None ? root.tint : Core.Theme.textDim
+          iconColor: (Services.Media.active?.loopState ?? MprisLoopState.None) !== MprisLoopState.None ? root.artColor : Core.Theme.textDim
           tooltipText: "Repeat"
           onClicked: Services.Media.cycleLoop()
         }

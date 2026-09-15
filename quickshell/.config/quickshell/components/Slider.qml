@@ -96,6 +96,7 @@ Item {
   Behavior on opacity {
     NumberAnimation {
       duration: Core.Style.duration(Core.Style.animFast)
+      easing.type: Core.Style.easeStandard
     }
   }
 
@@ -162,6 +163,7 @@ Item {
     Behavior on color {
       ColorAnimation {
         duration: Core.Style.duration(Core.Style.animFast)
+        easing.type: Core.Style.easeStandard
       }
     }
 

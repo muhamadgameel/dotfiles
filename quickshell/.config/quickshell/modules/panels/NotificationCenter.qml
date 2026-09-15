@@ -32,6 +32,8 @@ Components.SlidingPanel {
   // by deleting entries one at a time.
   onOpened: Services.Notification.markAllRead()
 
+  signal clearRequested
+
   // === Toolbar ===
   // Pinned, so DND and Clear stay in reach however far the list is scrolled.
   pinned: RowLayout {
@@ -57,7 +59,7 @@ Components.SlidingPanel {
       textSize: Core.Style.fontS
       enabled: Services.Notification.historyList.count > 0
       tooltipText: "Clear all notifications"
-      onClicked: Services.Notification.clearHistory()
+      onClicked: root.clearRequested()
     }
   }
 
@@ -135,6 +137,14 @@ Components.SlidingPanel {
             to: 0
             duration: Core.Style.duration(Core.Style.slideHideDuration)
             easing.type: Core.Style.easeExit
+          }
+        }
+
+        Connections {
+          target: root
+
+          function onClearRequested() {
+            exitAnim.start();
           }
         }
       }
