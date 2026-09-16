@@ -26,6 +26,7 @@ Components.SlidingPanel {
 
   // Header configuration
   headerIcon: Services.SystemStats.healthIcon
+  headerIconColor: Core.Theme.statusColor(Services.SystemStats.healthStatus, Core.Theme.accent)
   headerTitle: "System Monitor"
   headerSubtitle: "Up " + Core.Utils.formatUptime(Services.SystemStats.uptime)
 

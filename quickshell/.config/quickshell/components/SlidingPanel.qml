@@ -135,6 +135,22 @@ Item {
 
   property int frameHeight: 0
 
+  // Whether the content's height is already being animated by the content
+  // itself - a Collapsible opening, say - judged by changes arriving on
+  // back-to-back frames. The surface then follows it frame for frame: easing
+  // the edge on top meant restarting a 250 ms animation every frame to chase a
+  // moving target, so a section finished collapsing while the edge was still
+  // 40% of the way from its final height, and crept the rest over another
+  // 200 ms. A change that arrives on its own still eases.
+  property bool _contentAnimating: false
+  property real _lastFrameChange: 0
+
+  onFrameHeightChanged: {
+    const now = Date.now();
+    root._contentAnimating = now - root._lastFrameChange < Core.Style.animFaster;
+    root._lastFrameChange = now;
+  }
+
   readonly property int surfaceHeight: root.fillHeight ? root.maxSurfaceHeight : Core.Utils.clamp(root.frameHeight, root.minSurfaceHeight, root.maxSurfaceHeight)
 
   // Content that reports no height is almost always a Layout.fillHeight child
@@ -269,9 +285,11 @@ Item {
 
         // The edge glides to the new height while the content underneath is
         // already laid out at it. Off until the slide-in has finished, so the
-        // panel arrives at its size instead of growing on the way in.
+        // panel arrives at its size instead of growing on the way in, and off
+        // while the content animates its own height (see _contentAnimating).
+        // Disabling mid-animation is safe: the next write stops the running one.
         Behavior on height {
-          enabled: root.revealed && !slideAnim.running
+          enabled: root.revealed && !slideAnim.running && !root._contentAnimating
 
           NumberAnimation {
             duration: Core.Style.duration(Core.Style.animNormal)

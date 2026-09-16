@@ -24,7 +24,9 @@ ColumnLayout {
 
   default property alias content: contentColumn.data
 
-  spacing: Core.Style.spaceS
+  // The gap under the header belongs to the content below (see its height), so
+  // it animates away with it instead of vanishing in one frame at the end.
+  spacing: 0
 
   // Header
   Components.Card {
@@ -74,7 +76,7 @@ ColumnLayout {
   Item {
     Layout.fillWidth: true
     Layout.leftMargin: Core.Style.spaceS
-    Layout.preferredHeight: root.expanded ? contentColumn.implicitHeight : 0
+    Layout.preferredHeight: root.expanded ? contentColumn.implicitHeight + Core.Style.spaceS : 0
 
     clip: true
 
@@ -102,6 +104,7 @@ ColumnLayout {
     ColumnLayout {
       id: contentColumn
 
+      y: Core.Style.spaceS
       width: parent.width
       spacing: Core.Style.spaceXS
     }
