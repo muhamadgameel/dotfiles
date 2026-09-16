@@ -302,10 +302,8 @@ Components.SlidingPanel {
       }
 
       // Loading Spinner
-      Components.Icon {
+      Components.Spinner {
         visible: devItem.isBusy
-        icon: "loading"
-        spinning: true
         size: Core.Style.fontM
         color: Core.Theme.accentAlt
       }

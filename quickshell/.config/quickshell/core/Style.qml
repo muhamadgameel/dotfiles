@@ -223,7 +223,7 @@ Singleton {
   // Gap between consecutive cards in a stack, so they arrive in sequence.
   readonly property int slideStagger: 80
 
-  // One turn of a spinning Icon.
+  // One turn of a Spinner.
   readonly property int spinDuration: 1000
 
   // Stacking order for things that float over panel content (scrollbars,

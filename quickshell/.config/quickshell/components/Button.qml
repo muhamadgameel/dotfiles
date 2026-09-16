@@ -152,10 +152,17 @@ Rectangle {
 
     Icon {
       anchors.verticalCenter: parent.verticalCenter
-      visible: root.icon !== ""
+      visible: root.icon !== "" && !root.iconSpinning
       icon: root.icon
       size: root.iconSize
-      spinning: root.iconSpinning
+      color: root._iconColor
+    }
+
+    // Same size as the icon it stands in for, so the button does not resize.
+    Spinner {
+      anchors.verticalCenter: parent.verticalCenter
+      visible: root.icon !== "" && root.iconSpinning
+      size: root.iconSize
       color: root._iconColor
     }
 

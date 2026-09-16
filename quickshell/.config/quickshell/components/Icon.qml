@@ -23,8 +23,7 @@ import "../core" as Core
 *   // With background padding
 *   Icon { icon: "bell"; padding: 8; backgroundColor: Theme.surface; radius: Style.radiusM }
 *
-*   // With spinning animation (for loading states)
-*   Icon { icon: "refresh"; spinning: true }
+* For a loading state use Spinner, not a turning glyph.
 */
 Item {
   id: root
@@ -39,10 +38,6 @@ Item {
   property alias backgroundColor: background.color
   property real padding: 0
   property alias radius: background.radius
-
-  // === Animation ===
-  property bool spinning: false
-  property int spinDuration: Core.Style.spinDuration
 
   // === Internal: Determine icon type ===
   readonly property bool _isFilePath: {
@@ -108,17 +103,6 @@ Item {
     font.pixelSize: root.size
     color: Core.Theme.text
     anchors.centerIn: parent
-
-    // Gated on visibility like the other looping animations: a running
-    // animation keeps its window rendering at the refresh rate even when the
-    // thing it moves is hidden.
-    RotationAnimation on rotation {
-      running: root.spinning && iconText.visible && Core.Style.motionEnabled
-      from: 0
-      to: 360
-      duration: root.spinDuration
-      loops: Animation.Infinite
-    }
 
     Behavior on color {
       ColorAnimation {
