@@ -211,6 +211,18 @@ Singleton {
   }
 
   /**
+  * How long something has been up, at day resolution: "3d 4h", "5h 12m".
+  */
+  function formatUptime(seconds) {
+    if (seconds <= 0)
+      return "";
+    const days = Math.floor(seconds / 86400);
+    if (days > 0)
+      return `${days}d ${Math.floor((seconds % 86400) / 3600)}h`;
+    return formatDuration(seconds, true);
+  }
+
+  /**
   * Playback-style timestamp: m:ss, or h:mm:ss past an hour.
   */
   function formatClock(seconds) {

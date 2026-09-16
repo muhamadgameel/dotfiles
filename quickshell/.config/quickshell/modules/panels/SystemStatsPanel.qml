@@ -27,6 +27,7 @@ Components.SlidingPanel {
   // Header configuration
   headerIcon: Services.SystemStats.healthIcon
   headerTitle: "System Monitor"
+  headerSubtitle: "Up " + Core.Utils.formatUptime(Services.SystemStats.uptime)
 
   // ═══════════════════════════════════════════════════════════════════
   // CPU SECTION
@@ -36,6 +37,14 @@ Components.SlidingPanel {
     Layout.topMargin: Core.Style.spaceL
     icon: "cpu"
     title: "CPU"
+
+    // Runnable tasks, averaged over 1, 5 and 15 minutes. Past one per thread
+    // the machine has more work than it can run at once.
+    Components.Text {
+      text: "load " + Services.SystemStats.loadAverage.map(v => v.toFixed(2)).join(" · ")
+      size: Core.Style.fontXS
+      color: Services.SystemStats.loadAverage[0] > Services.SystemStats.cpuCoreCount ? Core.Theme.warning : Core.Theme.textDim
+    }
   }
 
   Components.ProgressRow {

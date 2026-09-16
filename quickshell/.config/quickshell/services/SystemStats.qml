@@ -114,6 +114,10 @@ Singleton {
   property real diskReadSpeed: 0   // bytes/sec, all physical disks
   property real diskWriteSpeed: 0
 
+  // === System ===
+  property var loadAverage: [0, 0, 0]  // 1, 5 and 15 minute averages
+  property real uptime: 0              // seconds
+
   // === History ===
   // The last historyLength readings, oldest first, for the panel's sparklines.
   // Recorded on the poll below, which runs whether or not anything is looking,
@@ -339,6 +343,7 @@ done'
       _memInfoFile.reload();
       _netDevFile.reload();
       _diskStatsFile.reload();
+      _loadAvgFile.reload();
 
       // Last tick's readings: this one's are still being read.
       root._recordHistory();
@@ -371,7 +376,32 @@ done'
     repeat: true
     running: true
     triggeredOnStart: true
-    onTriggered: _diskProcess.running = true
+    onTriggered: {
+      _diskProcess.running = true;
+      _uptimeFile.reload();
+    }
+  }
+
+  // Runnable tasks averaged over 1, 5 and 15 minutes, and how long the machine
+  // has been up. Both are one short read.
+  FileView {
+    id: _loadAvgFile
+    path: "/proc/loadavg"
+    printErrors: false
+
+    onLoaded: {
+      const parts = text().trim().split(root._whitespace);
+      if (parts.length >= 3)
+        root.loadAverage = [parseFloat(parts[0]) || 0, parseFloat(parts[1]) || 0, parseFloat(parts[2]) || 0];
+    }
+  }
+
+  FileView {
+    id: _uptimeFile
+    path: "/proc/uptime"
+    printErrors: false
+
+    onLoaded: root.uptime = parseFloat(text().trim().split(root._whitespace)[0]) || 0
   }
 
   // ═══════════════════════════════════════════════════════════════════════════
