@@ -63,6 +63,15 @@ Scope {
     onPressed: Services.Panels.close()
   }
 
+  // Bound to the mouse button itself, non-consuming, so the click that closes
+  // a panel still lands on whatever is underneath.
+  GlobalShortcut {
+    appid: "quickshell"
+    name: "panelDismiss"
+    description: "Close an open panel when clicking away from it"
+    onPressed: Services.Panels.dismiss()
+  }
+
   GlobalShortcut {
     appid: "quickshell"
     name: "panelQuickSettings"

@@ -38,6 +38,12 @@ Singleton {
   // torn down mid-slide.
   property string retainedPanel: ""
 
+  // Whether the pointer is over the shell's own surfaces, maintained by
+  // SlidingPanel and BarWindow. One flag each, so moving between them cannot
+  // race a single shared one. dismiss() is the only reader.
+  property bool pointerOverPanel: false
+  property bool pointerOverBar: false
+
   // === Queries used by the bar and by SlidingPanel ===
 
   /**
@@ -74,6 +80,21 @@ Singleton {
 
   function close() {
     openPanel = "";
+    pointerOverPanel = false;
+  }
+
+  /**
+  * Close on a click that landed somewhere else.
+  *
+  * Hyprland reports every click through a non-consuming mouse binding, so the
+  * click still reaches whatever it was aimed at - unlike a focus grab, which
+  * swallowed it. Clicks on the shell's own surfaces are its own business: the
+  * panel handles its rows, and a bar widget toggles its panel, which a dismiss
+  * would undo by closing the panel the click was about to reopen.
+  */
+  function dismiss() {
+    if (!pointerOverPanel && !pointerOverBar)
+      close();
   }
 
   /**

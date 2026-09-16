@@ -1,7 +1,6 @@
 import QtQuick
 import QtQuick.Layouts
 import Quickshell
-import Quickshell.Hyprland
 import Quickshell.Wayland
 import "../core" as Core
 import "../services" as Services
@@ -15,15 +14,18 @@ import "." as Components
 * - A PanelWindow that slides in from the right edge
 * - Optional header with icon, title, subtitle and close button
 * - Optional scrollable content area
-* - Escape to close, and click-outside to close via HyprlandFocusGrab
+* - Escape, the close button or the toggle to close
 *
 * Open/closed state lives in Services.Panels, not here, so only one panel is
 * open at a time and IPC/shortcuts can drive them. Set `panelId` to one of
 * Services.Panels.ids.
 *
-* Dismissal is a focus grab rather than a full-screen dimmed backdrop window.
-* The backdrop doubled the window count (one extra PanelWindow per panel, per
-* screen) and vanished instantly on close while the panel was still sliding out.
+* Dismissal deliberately grabs nothing. A full-screen backdrop window doubled
+* the window count and vanished instantly on close while the panel was still
+* sliding out; a Hyprland focus grab swallowed the very click that dismissed
+* it, so the first click on another window was lost. The panel's input region
+* is its own surface and nothing else, so every other click still lands where
+* it was aimed.
 *
 * Usage:
 *   SlidingPanel {
@@ -221,15 +223,10 @@ Item {
 
     WlrLayershell.namespace: root.namespace
     WlrLayershell.layer: WlrLayer.Overlay
+    // Reserve nothing: a panel floats over the desktop, and anything else
+    // retiles every window on the output each time one opens.
     WlrLayershell.exclusionMode: ExclusionMode.Ignore
     WlrLayershell.keyboardFocus: root.isOpen ? WlrKeyboardFocus.OnDemand : WlrKeyboardFocus.None
-
-    // Click anywhere outside the panel to dismiss it.
-    HyprlandFocusGrab {
-      active: root.isOpen
-      windows: [panelWindow]
-      onCleared: root.close()
-    }
 
     // === Sliding Container ===
     Item {
@@ -297,6 +294,14 @@ Item {
         focus: root.isOpen
 
         Keys.onEscapePressed: root.close()
+
+        // Whether a click belongs to the panel, for Panels.dismiss(). On the
+        // surface rather than on the input region beside it: hover events go to
+        // the deepest item, and only an ancestor of the rows stays hovered
+        // while the pointer is over a card or a button inside them.
+        HoverHandler {
+          onHoveredChanged: Services.Panels.pointerOverPanel = hovered
+        }
 
         MouseArea {
           anchors.fill: parent

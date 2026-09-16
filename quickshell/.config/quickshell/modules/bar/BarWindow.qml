@@ -65,6 +65,12 @@ Variants {
       screen: barWindow.modelData
 
       onPanelRequested: panelId => Services.Panels.toggle(panelId, barWindow.modelData)
+
+      // A click on the bar is the bar's own: a widget toggling its panel must
+      // not also be read as clicking away from it. See Panels.dismiss().
+      HoverHandler {
+        onHoveredChanged: Services.Panels.pointerOverBar = hovered
+      }
     }
 
     // === Panels (built on first open, torn down after the close animation) ===

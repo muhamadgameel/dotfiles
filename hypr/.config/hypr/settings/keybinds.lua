@@ -75,6 +75,15 @@ hl.bind(mod .. " + U", hl.dsp.focus({ urgent_or_last = true }), { description = 
 hl.bind(mod .. " + mouse:272", hl.dsp.window.drag(), { mouse = true })
 hl.bind(mod .. " + mouse:273", hl.dsp.window.resize(), { mouse = true })
 
+-- Clicking away from an open shell panel closes it. non_consuming so the click
+-- still reaches whatever it was aimed at: the shell used to take a compositor
+-- focus grab for this, which swallowed that first click. The shell ignores the
+-- ones that land on the panel itself.
+hl.bind("mouse:272", hl.dsp.global("quickshell:panelDismiss"), {
+	non_consuming = true,
+	description = "Dismiss an open shell panel",
+})
+
 -- ╔═══════════════════════════════════════════════════════════════════╗
 -- ║                          WORKSPACES                               ║
 -- ╚═══════════════════════════════════════════════════════════════════╝
