@@ -44,6 +44,13 @@ Components.SlidingPanel {
     progressHeight: Core.Style.progressHeightL
   }
 
+  Components.Sparkline {
+    Layout.fillWidth: true
+    values: Services.SystemStats.cpuHistory.map(v => v / 100)
+    count: Services.SystemStats.historyLength
+    color: Core.Theme.statusColor(Services.SystemStats.cpuUsageStatus)
+  }
+
   // Per-core breakdown.
   //
   // Bound to cpuCoreCount, not the cpuCores array: the array is replaced on
@@ -110,6 +117,13 @@ Components.SlidingPanel {
     showPercentage: false
   }
 
+  Components.Sparkline {
+    Layout.fillWidth: true
+    values: Services.SystemStats.memHistory.map(v => v / 100)
+    count: Services.SystemStats.historyLength
+    color: Core.Theme.statusColor(Services.SystemStats.memStatus)
+  }
+
   Components.ProgressRow {
     visible: Services.SystemStats.hasSwap
     label: "Swap"
@@ -161,6 +175,13 @@ Components.SlidingPanel {
     value: Services.SystemStats.gpuUsage / 100
     progressHeight: Core.Style.progressHeightL
     showPercentage: false
+  }
+
+  Components.Sparkline {
+    Layout.fillWidth: true
+    visible: Services.SystemStats.hasGpuDetails
+    values: Services.SystemStats.gpuHistory.map(v => v / 100)
+    count: Services.SystemStats.historyLength
   }
 
   Components.ProgressRow {
@@ -336,6 +357,35 @@ Components.SlidingPanel {
     }
   }
 
+  // Both directions share one scale, with the peak labelled: without it the
+  // trace of a quiet minute looks exactly like a busy one.
+  Item {
+    Layout.fillWidth: true
+    implicitHeight: Core.Style.sparklineHeight
+
+    Components.Sparkline {
+      anchors.fill: parent
+      values: Services.SystemStats.netDownHistory.map(v => v / Services.SystemStats.netHistoryPeak)
+      count: Services.SystemStats.historyLength
+      color: Core.Theme.success
+    }
+
+    Components.Sparkline {
+      anchors.fill: parent
+      values: Services.SystemStats.netUpHistory.map(v => v / Services.SystemStats.netHistoryPeak)
+      count: Services.SystemStats.historyLength
+      color: Core.Theme.accent
+    }
+
+    Components.Text {
+      anchors.right: parent.right
+      anchors.top: parent.top
+      text: "peak " + Core.Utils.formatSpeed(Services.SystemStats.netHistoryPeak)
+      size: Core.Style.fontXS
+      color: Core.Theme.textMuted
+    }
+  }
+
   // ═══════════════════════════════════════════════════════════════════
   // DISK SECTION
   // ═══════════════════════════════════════════════════════════════════
@@ -373,7 +423,7 @@ Components.SlidingPanel {
     Layout.fillWidth: true
 
     Components.Text {
-      text: "Updates every " + (Services.SystemStats.pollingInterval / 1000) + "s"
+      text: "Updates every " + (Services.SystemStats.pollingInterval / 1000) + "s · graphs show " + Math.round(Services.SystemStats.historyLength * Services.SystemStats.pollingInterval / 60000) + " min"
       size: Core.Style.fontXS
       color: Core.Theme.textMuted
     }

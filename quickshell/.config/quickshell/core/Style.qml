@@ -59,6 +59,10 @@ Singleton {
   readonly property int progressHeightM: px(6)
   readonly property int progressHeightL: px(8)
 
+  // === Sparklines ===
+  // Tall enough to read a shape, short enough that four of them fit a panel.
+  readonly property int sparklineHeight: px(32)
+
   // === Empty States ===
   // The icon over an empty list. Large is for when the whole panel has nothing
   // to show - a radio switched off, no notifications - small for one section.

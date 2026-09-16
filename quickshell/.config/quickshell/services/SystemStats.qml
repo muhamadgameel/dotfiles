@@ -21,6 +21,7 @@ import "../services" as Services
 * - Network speeds (download/upload)
 * - Disk usage (root filesystem)
 * - Top apps by CPU and memory, while the System Monitor is open
+* - Recent history of CPU, memory, GPU and network, for the panel's sparklines
 *
 * Sensor discovery is a single shell pass over /sys/class/hwmon at startup that
 * caches the exact sysfs paths. Each poll is then one file read per metric.
@@ -110,6 +111,20 @@ Singleton {
   property real diskTotal: 0    // bytes
   property real diskPercent: 0
   property string diskMount: "/"
+
+  // === History ===
+  // The last historyLength readings, oldest first, for the panel's sparklines.
+  // Recorded on the poll below, which runs whether or not anything is looking,
+  // so an opened panel already has a trace behind it.
+  readonly property int historyLength: 60  // 2 minutes at pollingInterval
+  property var cpuHistory: []
+  property var memHistory: []
+  property var gpuHistory: []      // NVIDIA usage; stepped, see nvidiaPollingInterval
+  property var netDownHistory: []  // bytes/sec
+  property var netUpHistory: []
+
+  // Both network traces share this scale, so up and down stay comparable.
+  readonly property real netHistoryPeak: Math.max(1, ...netDownHistory, ...netUpHistory)
 
   // === Apps ===
   // [{ name, value, count, pids }] largest first, while the System Monitor is
@@ -314,7 +329,23 @@ done'
       _cpuStatFile.reload();
       _memInfoFile.reload();
       _netDevFile.reload();
+
+      // Last tick's readings: this one's are still being read.
+      root._recordHistory();
     }
+  }
+
+  function _recordHistory() {
+    root.cpuHistory = root._appended(root.cpuHistory, root.cpuUsage);
+    root.memHistory = root._appended(root.memHistory, root.memPercent);
+    root.gpuHistory = root._appended(root.gpuHistory, root.gpuUsage);
+    root.netDownHistory = root._appended(root.netDownHistory, root.netDownSpeed);
+    root.netUpHistory = root._appended(root.netUpHistory, root.netUpSpeed);
+  }
+
+  function _appended(history, value) {
+    const next = history.concat(value);
+    return next.length > root.historyLength ? next.slice(next.length - root.historyLength) : next;
   }
 
   // Disk usage barely moves; once a minute is plenty.
