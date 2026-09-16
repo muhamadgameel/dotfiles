@@ -12,10 +12,9 @@ import "../../services" as Services
 * SystemStatsPanel - Detailed system monitoring panel
 *
 * Displays comprehensive system information:
-* - CPU usage with per-core breakdown and top apps
+* - CPU usage, clocks and temperature, with per-core breakdown and top apps
 * - Memory usage (RAM + Swap) and top apps
-* - GPU usage, VRAM, power and VRAM by process (NVIDIA)
-* - Temperatures (CPU + GPU)
+* - GPU usage, VRAM, power, temperature and VRAM by process (NVIDIA)
 * - Battery health and cycles
 * - Network throughput
 * - Disk usage and I/O
@@ -38,6 +37,13 @@ Components.SlidingPanel {
     Layout.topMargin: Core.Style.spaceL
     icon: "cpu"
     title: "CPU"
+
+    Components.Text {
+      visible: Services.SystemStats.hasCpuTemp
+      text: Core.Utils.formatTemp(Services.SystemStats.cpuTemp)
+      size: Core.Style.fontXS
+      color: Core.Theme.statusColor(Services.SystemStats.cpuTempStatus, Core.Theme.textDim)
+    }
 
     // Runnable tasks, averaged over 1, 5 and 15 minutes. Past one per thread
     // the machine has more work than it can run at once.
@@ -126,9 +132,16 @@ Components.SlidingPanel {
   // ═══════════════════════════════════════════════════════════════════
 
   Components.SectionHeader {
-    Layout.topMargin: Core.Style.spaceXL
+    Layout.topMargin: Core.Style.spaceL
     icon: "memory"
     title: "Memory"
+
+    Components.Text {
+      visible: Services.SystemStats.hasSwap
+      text: "swap " + Core.Utils.formatBytes(Services.SystemStats.swapUsed, 1) + " / " + Core.Utils.formatBytes(Services.SystemStats.swapTotal, 1)
+      size: Core.Style.fontXS
+      color: Services.SystemStats.swapPercent > 50 ? Core.Theme.warning : Core.Theme.textDim
+    }
   }
 
   Components.ProgressRow {
@@ -156,7 +169,7 @@ Components.SlidingPanel {
   }
 
   Components.ProgressRow {
-    visible: Services.SystemStats.hasSwap
+    visible: Services.SystemStats.swapUsed > 0
     label: "Swap"
     labelInfo: Core.Utils.formatBytes(Services.SystemStats.swapUsed, 1) + " / " + Core.Utils.formatBytes(Services.SystemStats.swapTotal, 1)
     value: Services.SystemStats.swapPercent / 100
@@ -187,7 +200,7 @@ Components.SlidingPanel {
   // ═══════════════════════════════════════════════════════════════════
 
   Components.SectionHeader {
-    Layout.topMargin: Core.Style.spaceXL
+    Layout.topMargin: Core.Style.spaceL
     visible: Services.SystemStats.hasGpuDetails
     icon: "gpu"
     title: "GPU"
@@ -196,6 +209,13 @@ Components.SlidingPanel {
       text: Services.SystemStats.gpuName.replace(/^NVIDIA (GeForce )?/, "")
       size: Core.Style.fontXS
       color: Core.Theme.textDim
+    }
+
+    Components.Text {
+      visible: Services.SystemStats.hasGpuTemp
+      text: Core.Utils.formatTemp(Services.SystemStats.gpuTemp)
+      size: Core.Style.fontXS
+      color: Core.Theme.statusColor(Services.SystemStats.gpuTempStatus, Core.Theme.textDim)
     }
   }
 
@@ -270,56 +290,11 @@ Components.SlidingPanel {
   }
 
   // ═══════════════════════════════════════════════════════════════════
-  // TEMPERATURE SECTION
-  // ═══════════════════════════════════════════════════════════════════
-
-  Components.SectionHeader {
-    Layout.topMargin: Core.Style.spaceXL
-    visible: Services.SystemStats.hasCpuTemp || Services.SystemStats.hasGpuTemp
-    icon: "thermometer"
-    title: "Temperatures"
-  }
-
-  // CPU Temperature
-  Components.ProgressRow {
-    visible: Services.SystemStats.hasCpuTemp
-    icon: "chip"
-    iconColor: Core.Theme.statusColor(Services.SystemStats.cpuTempStatus, Core.Theme.text)
-    label: "CPU"
-    value: Services.SystemStats.cpuTemp / 100
-    valueText: Core.Utils.formatTemp(Services.SystemStats.cpuTemp)
-    progressColor: Core.Theme.statusColor(Services.SystemStats.cpuTempStatus, Core.Theme.success)
-    progressHeight: Core.Style.progressHeightM
-  }
-
-  // GPU Temperature
-  Components.ProgressRow {
-    visible: Services.SystemStats.hasGpuTemp
-    icon: "gpu"
-    iconColor: Core.Theme.statusColor(Services.SystemStats.gpuTempStatus, Core.Theme.text)
-    label: "GPU"
-    value: Services.SystemStats.gpuTemp / 100
-    valueText: Core.Utils.formatTemp(Services.SystemStats.gpuTemp)
-    progressColor: Core.Theme.statusColor(Services.SystemStats.gpuTempStatus, Core.Theme.success)
-    progressHeight: Core.Style.progressHeightM
-  }
-
-  // No temperature sensors message
-  Components.Text {
-    visible: !Services.SystemStats.hasCpuTemp && !Services.SystemStats.hasGpuTemp
-    text: "No temperature sensors detected"
-    size: Core.Style.fontS
-    color: Core.Theme.textMuted
-    Layout.fillWidth: true
-    horizontalAlignment: Text.AlignHCenter
-  }
-
-  // ═══════════════════════════════════════════════════════════════════
   // BATTERY SECTION
   // ═══════════════════════════════════════════════════════════════════
 
   Components.SectionHeader {
-    Layout.topMargin: Core.Style.spaceXL
+    Layout.topMargin: Core.Style.spaceL
     visible: Services.SystemStats.hasBattery
     icon: "battery-full"
     title: "Battery"
@@ -364,76 +339,26 @@ Components.SlidingPanel {
   // ═══════════════════════════════════════════════════════════════════
 
   Components.SectionHeader {
-    Layout.topMargin: Core.Style.spaceXL
+    Layout.topMargin: Core.Style.spaceL
     icon: "network"
     title: "Network"
-  }
 
-  GridLayout {
-    Layout.fillWidth: true
-    columns: 2
-    rowSpacing: Core.Style.spaceS
-    columnSpacing: Core.Style.spaceL
-
-    // Download
-    RowLayout {
-      spacing: Core.Style.spaceS
-
-      Components.Icon {
-        icon: "arrow-down"
-        size: Core.Style.fontL
-        color: Core.Theme.success
-      }
-
-      ColumnLayout {
-        spacing: 0
-
-        Components.Text {
-          text: "Download"
-          size: Core.Style.fontXS
-          color: Core.Theme.textMuted
-        }
-
-        Components.Text {
-          text: Core.Utils.formatSpeed(Services.SystemStats.netDownSpeed)
-          size: Core.Style.fontM
-          font.weight: Core.Style.weightBold
-        }
-      }
-    }
-
-    // Upload
-    RowLayout {
-      spacing: Core.Style.spaceS
-
-      Components.Icon {
-        icon: "arrow-up"
-        size: Core.Style.fontL
-        color: Core.Theme.accent
-      }
-
-      ColumnLayout {
-        spacing: 0
-
-        Components.Text {
-          text: "Upload"
-          size: Core.Style.fontXS
-          color: Core.Theme.textMuted
-        }
-
-        Components.Text {
-          text: Core.Utils.formatSpeed(Services.SystemStats.netUpSpeed)
-          size: Core.Style.fontM
-          font.weight: Core.Style.weightBold
-        }
-      }
+    Components.Text {
+      text: Services.SystemStats.netInterface
+      size: Core.Style.fontXS
+      color: Core.Theme.textDim
     }
 
     Components.Text {
-      Layout.topMargin: Core.Style.spaceXS
-      text: Services.SystemStats.netInterface ? "Interface: " + Services.SystemStats.netInterface : "No active interface"
+      text: Core.Icons.get("arrow-down") + " " + Core.Utils.formatSpeed(Services.SystemStats.netDownSpeed)
       size: Core.Style.fontXS
-      color: Core.Theme.textMuted
+      color: Core.Theme.success
+    }
+
+    Components.Text {
+      text: Core.Icons.get("arrow-up") + " " + Core.Utils.formatSpeed(Services.SystemStats.netUpSpeed)
+      size: Core.Style.fontXS
+      color: Core.Theme.accent
     }
   }
 
@@ -465,9 +390,27 @@ Components.SlidingPanel {
   // ═══════════════════════════════════════════════════════════════════
 
   Components.SectionHeader {
-    Layout.topMargin: Core.Style.spaceXL
+    Layout.topMargin: Core.Style.spaceL
     icon: "disk"
     title: "Storage"
+
+    Components.Text {
+      text: Core.Utils.formatBytes(Services.SystemStats.diskTotal - Services.SystemStats.diskUsed, 1) + " free"
+      size: Core.Style.fontXS
+      color: Services.SystemStats.diskStatus !== "normal" ? Core.Theme.warning : Core.Theme.textDim
+    }
+
+    Components.Text {
+      text: Core.Icons.get("arrow-down") + " " + Core.Utils.formatSpeed(Services.SystemStats.diskReadSpeed)
+      size: Core.Style.fontXS
+      color: Core.Theme.success
+    }
+
+    Components.Text {
+      text: Core.Icons.get("arrow-up") + " " + Core.Utils.formatSpeed(Services.SystemStats.diskWriteSpeed)
+      size: Core.Style.fontXS
+      color: Core.Theme.accent
+    }
   }
 
   Components.ProgressRow {
@@ -477,72 +420,6 @@ Components.SlidingPanel {
     progressColor: Core.Theme.statusColor(Services.SystemStats.diskStatus)
     progressHeight: Core.Style.progressHeightL
     showPercentage: false
-  }
-
-  Components.Text {
-    text: Core.Utils.formatBytes(Services.SystemStats.diskTotal - Services.SystemStats.diskUsed, 1) + " free"
-    size: Core.Style.fontXS
-    color: Services.SystemStats.diskStatus !== "normal" ? Core.Theme.warning : Core.Theme.textMuted
-  }
-
-  GridLayout {
-    Layout.fillWidth: true
-    Layout.topMargin: Core.Style.spaceS
-    columns: 2
-    rowSpacing: Core.Style.spaceS
-    columnSpacing: Core.Style.spaceL
-
-    RowLayout {
-      spacing: Core.Style.spaceS
-
-      Components.Icon {
-        icon: "arrow-down"
-        size: Core.Style.fontL
-        color: Core.Theme.success
-      }
-
-      ColumnLayout {
-        spacing: 0
-
-        Components.Text {
-          text: "Read"
-          size: Core.Style.fontXS
-          color: Core.Theme.textMuted
-        }
-
-        Components.Text {
-          text: Core.Utils.formatSpeed(Services.SystemStats.diskReadSpeed)
-          size: Core.Style.fontM
-          font.weight: Core.Style.weightBold
-        }
-      }
-    }
-
-    RowLayout {
-      spacing: Core.Style.spaceS
-
-      Components.Icon {
-        icon: "arrow-up"
-        size: Core.Style.fontL
-        color: Core.Theme.accent
-      }
-
-      ColumnLayout {
-        spacing: 0
-
-        Components.Text {
-          text: "Write"
-          size: Core.Style.fontXS
-          color: Core.Theme.textMuted
-        }
-
-        Components.Text {
-          text: Core.Utils.formatSpeed(Services.SystemStats.diskWriteSpeed)
-          size: Core.Style.fontM
-          font.weight: Core.Style.weightBold
-        }
-      }
-    }
   }
 
   Item {

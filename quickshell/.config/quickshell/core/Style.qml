@@ -61,7 +61,7 @@ Singleton {
 
   // === Sparklines ===
   // Tall enough to read a shape, short enough that four of them fit a panel.
-  readonly property int sparklineHeight: px(32)
+  readonly property int sparklineHeight: px(26)
 
   // === Empty States ===
   // The icon over an empty list. Large is for when the whole panel has nothing
