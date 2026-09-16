@@ -49,8 +49,6 @@ Components.SlidingPanel {
     onDeviceSelected: node => Services.Audio.setDefaultSink(node)
   }
 
-  Components.Divider {}
-
   // === INPUT SECTION ===
   VolumeSection {
     Layout.fillWidth: true
@@ -69,8 +67,6 @@ Components.SlidingPanel {
     onMuteToggled: Services.Audio.toggleMicMute()
     onDeviceSelected: node => Services.Audio.setDefaultSource(node)
   }
-
-  Components.Divider {}
 
   // === STREAMS SECTION ===
   Components.SectionHeader {

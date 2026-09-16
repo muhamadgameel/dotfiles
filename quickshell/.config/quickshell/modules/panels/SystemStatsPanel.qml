@@ -34,7 +34,6 @@ Components.SlidingPanel {
   // ═══════════════════════════════════════════════════════════════════
 
   Components.SectionHeader {
-    Layout.topMargin: Core.Style.spaceL
     icon: "cpu"
     title: "CPU"
 
@@ -132,7 +131,6 @@ Components.SlidingPanel {
   // ═══════════════════════════════════════════════════════════════════
 
   Components.SectionHeader {
-    Layout.topMargin: Core.Style.spaceL
     icon: "memory"
     title: "Memory"
 
@@ -200,7 +198,6 @@ Components.SlidingPanel {
   // ═══════════════════════════════════════════════════════════════════
 
   Components.SectionHeader {
-    Layout.topMargin: Core.Style.spaceL
     visible: Services.SystemStats.hasGpuDetails
     icon: "gpu"
     title: "GPU"
@@ -294,7 +291,6 @@ Components.SlidingPanel {
   // ═══════════════════════════════════════════════════════════════════
 
   Components.SectionHeader {
-    Layout.topMargin: Core.Style.spaceL
     visible: Services.SystemStats.hasBattery
     icon: "battery-full"
     title: "Battery"
@@ -339,7 +335,6 @@ Components.SlidingPanel {
   // ═══════════════════════════════════════════════════════════════════
 
   Components.SectionHeader {
-    Layout.topMargin: Core.Style.spaceL
     icon: "network"
     title: "Network"
 
@@ -390,7 +385,6 @@ Components.SlidingPanel {
   // ═══════════════════════════════════════════════════════════════════
 
   Components.SectionHeader {
-    Layout.topMargin: Core.Style.spaceL
     icon: "disk"
     title: "Storage"
 

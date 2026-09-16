@@ -59,6 +59,15 @@ Singleton {
   readonly property int progressHeightM: px(6)
   readonly property int progressHeightL: px(8)
 
+  // === Sections ===
+  // The rhythm is what groups a panel: a lot of air above a heading, almost
+  // none below it, so the heading belongs to the rows under it rather than
+  // floating between two groups. The rail marks where the section ends, which
+  // spacing alone cannot say.
+  readonly property int sectionGap: spaceXL
+  readonly property int sectionLabelGap: spaceXS
+  readonly property int sectionRail: Math.round(panelPadding / 2)
+
   // === Sparklines ===
   // Tall enough to read a shape, short enough that four of them fit a panel.
   readonly property int sparklineHeight: px(26)
@@ -74,6 +83,9 @@ Singleton {
   readonly property string fontMono: "JetBrainsMono Nerd Font"
 
   readonly property real letterSpacingWide: 0.6
+  // A section heading is set smaller than the rows it labels, so it needs more
+  // tracking than a heading set larger would.
+  readonly property real letterSpacingWider: 1.2
 
   // === Font Sizes ===
   readonly property real fontXS: 8 * uiScale

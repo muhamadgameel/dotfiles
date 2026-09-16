@@ -15,6 +15,10 @@ Rectangle {
 
   property bool vertical: false
 
+  // Ends a section for SectionHeader's rail, so it does not run past a rule
+  // that already separates what follows.
+  readonly property bool sectionBreak: true
+
   // Only the thickness is intrinsic. Taking the long axis from `parent` broke
   // inside layouts, where the parent sizes itself from its children - a
   // divider asking for its parent's width fed that width straight back in.
