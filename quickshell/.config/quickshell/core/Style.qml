@@ -65,7 +65,7 @@ Singleton {
   // floating between two groups. The rail marks where the section ends, which
   // spacing alone cannot say.
   readonly property int sectionGap: spaceXL
-  readonly property int sectionLabelGap: spaceXS
+  readonly property int sectionLabelGap: spaceS
   readonly property int sectionRail: Math.round(panelPadding / 2)
 
   // === Sparklines ===

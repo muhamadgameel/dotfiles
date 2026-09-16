@@ -143,7 +143,7 @@ Components.SlidingPanel {
   }
 
   Components.ProgressRow {
-    label: "RAM"
+    label: "In use"
     labelInfo: Core.Utils.formatBytes(Services.SystemStats.memUsed, 1) + " / " + Core.Utils.formatBytes(Services.SystemStats.memTotal, 1)
     value: Services.SystemStats.memPercent / 100
     progressColor: Core.Theme.statusColor(Services.SystemStats.memStatus)

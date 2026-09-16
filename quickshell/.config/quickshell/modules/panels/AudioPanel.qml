@@ -124,9 +124,9 @@ Components.SlidingPanel {
     id: section
 
     property string title: ""
-    property string icon: ""        // section header, and the unmuted button
+    property string icon: ""        // section heading
     property string mutedIcon: ""
-    property string levelIcon: ""   // follows the level, beside the device name
+    property string levelIcon: ""   // follows the level, on the mute button
 
     property var node: null
     property real volume: 0
@@ -153,12 +153,6 @@ Components.SlidingPanel {
       Layout.fillWidth: true
       spacing: Core.Style.spaceS
 
-      Components.Icon {
-        icon: section.levelIcon
-        size: Core.Style.fontL
-        color: section.muted ? Core.Theme.error : Core.Theme.accent
-      }
-
       Components.Text {
         text: Services.Audio.deviceName(section.node)
         size: Core.Style.fontS
@@ -174,9 +168,9 @@ Components.SlidingPanel {
         color: section.muted ? Core.Theme.textMuted : section._boosted ? Core.Theme.warning : Core.Theme.text
       }
 
-      // Mute button
+      // The only speaker glyph in the row: it shows the level and mutes it.
       Components.Button {
-        icon: section.muted ? section.mutedIcon : section.icon
+        icon: section.muted ? section.mutedIcon : section.levelIcon
         iconColor: section.muted ? Core.Theme.error : Core.Theme.text
         tooltipText: section.muted ? "Unmute" : "Mute"
         onClicked: section.muteToggled()

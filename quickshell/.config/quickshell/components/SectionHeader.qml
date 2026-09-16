@@ -91,6 +91,10 @@ Item {
   implicitWidth: row.implicitWidth
   implicitHeight: row.implicitHeight
 
+  // Dimmed accent rather than a neutral hairline: the rail is the only thing
+  // marking where a section ends, so it has to register as deliberate.
+  readonly property color _railColor: Core.Theme.alpha(Core.Theme.accent, 0.35)
+
   // In the panel's gutter, outside this item's own bounds, so it adds no height.
   Item {
     x: -Core.Style.sectionRail
@@ -106,7 +110,7 @@ Item {
       anchors.right: parent.right
       anchors.top: parent.top
       height: Math.max(0, parent.height - tail.height)
-      color: Core.Theme.surfaceHover
+      color: root._railColor
     }
 
     // Fixed-length fade, rather than a gradient stop derived from the run: that
@@ -122,11 +126,11 @@ Item {
       gradient: Gradient {
         GradientStop {
           position: 0
-          color: Core.Theme.surfaceHover
+          color: root._railColor
         }
         GradientStop {
           position: 1
-          color: Core.Theme.transparentOf(Core.Theme.surfaceHover)
+          color: Core.Theme.transparentOf(root._railColor)
         }
       }
     }
