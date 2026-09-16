@@ -12,8 +12,8 @@ import "../../services" as Services
 * SystemStatsPanel - Detailed system monitoring panel
 *
 * Displays comprehensive system information:
-* - CPU usage with per-core breakdown
-* - Memory usage (RAM + Swap)
+* - CPU usage with per-core breakdown and top apps
+* - Memory usage (RAM + Swap) and top apps
 * - GPU usage, VRAM, power and VRAM by process (NVIDIA)
 * - Temperatures (CPU + GPU)
 * - Network throughput
@@ -74,6 +74,28 @@ Components.SlidingPanel {
     }
   }
 
+  Components.Collapsible {
+    title: "Top Apps"
+    Layout.fillWidth: true
+
+    Repeater {
+      model: Services.SystemStats.topCpuApps.length
+
+      Components.ProgressRow {
+        required property int index
+
+        readonly property var app: Services.SystemStats.topCpuApps[index] ?? root._noApp
+
+        label: app.name
+        labelInfo: root._appDetail(app.value < 0.1 ? "<0.1%" : app.value.toFixed(1) + "%", app.count)
+        value: app.value / 100
+        progressColor: Core.Theme.accentAlt
+        progressHeight: Core.Style.progressHeightS
+        showPercentage: false
+      }
+    }
+  }
+
   // ═══════════════════════════════════════════════════════════════════
   // MEMORY SECTION
   // ═══════════════════════════════════════════════════════════════════
@@ -101,6 +123,28 @@ Components.SlidingPanel {
     progressColor: Services.SystemStats.swapPercent > 50 ? Core.Theme.warning : Core.Theme.accentAlt
     progressHeight: Core.Style.progressHeightM
     showPercentage: false
+  }
+
+  Components.Collapsible {
+    title: "Top Apps"
+    Layout.fillWidth: true
+
+    Repeater {
+      model: Services.SystemStats.topMemoryApps.length
+
+      Components.ProgressRow {
+        required property int index
+
+        readonly property var app: Services.SystemStats.topMemoryApps[index] ?? root._noApp
+
+        label: app.name
+        labelInfo: root._appDetail(Core.Utils.formatBytes(app.value, 1), app.count)
+        value: app.value / Services.SystemStats.memTotal
+        progressColor: Core.Theme.accentAlt
+        progressHeight: Core.Style.progressHeightS
+        showPercentage: false
+      }
+    }
   }
 
   // ═══════════════════════════════════════════════════════════════════
@@ -370,6 +414,16 @@ Components.SlidingPanel {
   // ═══════════════════════════════════════════════════════════════════
   // HELPER FUNCTIONS
   // ═══════════════════════════════════════════════════════════════════
+
+  readonly property var _noApp: ({
+      name: "",
+      value: 0,
+      count: 1
+    })
+
+  function _appDetail(value, count) {
+    return count > 1 ? `${value} · ${count} processes` : value;
+  }
 
   function _healthText(status) {
     if (status === "critical")
