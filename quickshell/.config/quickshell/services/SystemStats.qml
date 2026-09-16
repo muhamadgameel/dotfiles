@@ -20,6 +20,7 @@ import "../services" as Services
 * - Memory usage (RAM + Swap)
 * - Network speeds (download/upload)
 * - Disk usage (root filesystem) and read/write throughput
+* - Battery health, cycles and draw (laptops reporting energy)
 * - Top apps by CPU and memory, while the System Monitor is open
 * - Recent history of CPU, memory, GPU and network, for the panel's sparklines
 *
@@ -114,6 +115,25 @@ Singleton {
   property real diskReadSpeed: 0   // bytes/sec, all physical disks
   property real diskWriteSpeed: 0
 
+  // === Battery ===
+  // The bar widget reads UPower, which smooths the charge and the time left.
+  // These are the facts UPower's display device does not carry: what the pack
+  // holds today against when it was new, and how often it has been cycled.
+  property real batteryCharge: 0   // percent
+  property real batteryEnergy: 0   // Wh now
+  property real batteryFull: 0     // Wh when charged today
+  property real batteryDesign: 0   // Wh when new
+  property real batteryPower: 0    // W, in or out
+  property int batteryCycles: 0
+  property string batteryStatus: ""
+
+  readonly property bool hasBattery: batteryDesign > 0
+  readonly property real batteryHealth: batteryDesign > 0 ? batteryFull / batteryDesign * 100 : 0
+  readonly property bool batteryDischarging: batteryStatus === "Discharging"
+  // Time left at the current draw. UPower's own estimate is better; this only
+  // has to be right enough to read beside the draw it came from.
+  readonly property real batteryTimeLeft: batteryDischarging && batteryPower > 0 ? batteryEnergy / batteryPower * 3600 : 0
+
   // === System ===
   property var loadAverage: [0, 0, 0]  // 1, 5 and 15 minute averages
   property real uptime: 0              // seconds
@@ -197,6 +217,9 @@ Singleton {
   property string _cpuTempPath: ""
   property string _gpuType: ""         // "amd", "nvidia"
   property string _gpuTempPath: ""
+  // Only set for a battery reporting energy (Wh). One reporting charge (Ah)
+  // instead has no energy_full_design, and the health figures below assume it.
+  property string _batteryPath: ""
   readonly property bool _monitorOpen: Services.Panels.openPanel === "systemstats"
 
   // pid -> process name, for the GPU clients seen in the last sample.
@@ -286,6 +309,9 @@ Singleton {
             root._gpuType = type;
             root._gpuTempPath = path;
             Core.Logger.i("SystemStats", `GPU sensor: ${type} at ${path}`);
+          } else if (kind === "battery" && root._batteryPath === "") {
+            root._batteryPath = path;
+            Core.Logger.i("SystemStats", `Battery: ${path}`);
           }
         }
 
@@ -320,6 +346,12 @@ Singleton {
       [ -e "${h}temp1_input" ] && echo "gpu amd ${h}temp1_input"
       ;;
   esac
+done
+for b in /sys/class/power_supply/*/; do
+  [ "$(cat "$b/type" 2>/dev/null)" = "Battery" ] || continue
+  [ -e "${b}energy_full_design" ] || continue
+  echo "battery sysfs $b"
+  break
 done'
 
   // ═══════════════════════════════════════════════════════════════════════════
@@ -344,6 +376,10 @@ done'
       _netDevFile.reload();
       _diskStatsFile.reload();
       _loadAvgFile.reload();
+
+      // Only while someone is watching the draw; otherwise the slow poll has it.
+      if (root._monitorOpen)
+        root._reloadBattery();
 
       // Last tick's readings: this one's are still being read.
       root._recordHistory();
@@ -379,7 +415,80 @@ done'
     onTriggered: {
       _diskProcess.running = true;
       _uptimeFile.reload();
+      root._reloadBattery();
     }
+  }
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // BATTERY READER
+  // ═══════════════════════════════════════════════════════════════════════════
+
+  function _reloadBattery() {
+    if (root._batteryPath === "")
+      return;
+
+    _batteryChargeFile.reload();
+    _batteryEnergyFile.reload();
+    _batteryFullFile.reload();
+    _batteryDesignFile.reload();
+    _batteryPowerFile.reload();
+    _batteryCyclesFile.reload();
+    _batteryStatusFile.reload();
+  }
+
+  // Energy and power are microwatt-hours and microwatts.
+  function _microUnits(text) {
+    const value = parseInt(text.trim(), 10);
+    return isNaN(value) ? 0 : value / 1000000;
+  }
+
+  FileView {
+    id: _batteryChargeFile
+    path: root._batteryPath === "" ? "" : root._batteryPath + "capacity"
+    printErrors: false
+    onLoaded: root.batteryCharge = parseInt(text().trim(), 10) || 0
+  }
+
+  FileView {
+    id: _batteryEnergyFile
+    path: root._batteryPath === "" ? "" : root._batteryPath + "energy_now"
+    printErrors: false
+    onLoaded: root.batteryEnergy = root._microUnits(text())
+  }
+
+  FileView {
+    id: _batteryFullFile
+    path: root._batteryPath === "" ? "" : root._batteryPath + "energy_full"
+    printErrors: false
+    onLoaded: root.batteryFull = root._microUnits(text())
+  }
+
+  FileView {
+    id: _batteryDesignFile
+    path: root._batteryPath === "" ? "" : root._batteryPath + "energy_full_design"
+    printErrors: false
+    onLoaded: root.batteryDesign = root._microUnits(text())
+  }
+
+  FileView {
+    id: _batteryPowerFile
+    path: root._batteryPath === "" ? "" : root._batteryPath + "power_now"
+    printErrors: false
+    onLoaded: root.batteryPower = root._microUnits(text())
+  }
+
+  FileView {
+    id: _batteryCyclesFile
+    path: root._batteryPath === "" ? "" : root._batteryPath + "cycle_count"
+    printErrors: false
+    onLoaded: root.batteryCycles = parseInt(text().trim(), 10) || 0
+  }
+
+  FileView {
+    id: _batteryStatusFile
+    path: root._batteryPath === "" ? "" : root._batteryPath + "status"
+    printErrors: false
+    onLoaded: root.batteryStatus = text().trim()
   }
 
   // Runnable tasks averaged over 1, 5 and 15 minutes, and how long the machine

@@ -16,6 +16,7 @@ import "../../services" as Services
 * - Memory usage (RAM + Swap) and top apps
 * - GPU usage, VRAM, power and VRAM by process (NVIDIA)
 * - Temperatures (CPU + GPU)
+* - Battery health and cycles
 * - Network throughput
 * - Disk usage and I/O
 */
@@ -306,6 +307,51 @@ Components.SlidingPanel {
   }
 
   // ═══════════════════════════════════════════════════════════════════
+  // BATTERY SECTION
+  // ═══════════════════════════════════════════════════════════════════
+
+  Components.SectionHeader {
+    Layout.topMargin: Core.Style.spaceXL
+    visible: Services.SystemStats.hasBattery
+    icon: "battery-full"
+    title: "Battery"
+
+    Components.Text {
+      text: Services.SystemStats.batteryStatus
+      size: Core.Style.fontXS
+      color: Core.Theme.textDim
+    }
+  }
+
+  Components.ProgressRow {
+    visible: Services.SystemStats.hasBattery
+    label: "Charge"
+    labelInfo: Math.round(Services.SystemStats.batteryCharge) + "%"
+    value: Services.SystemStats.batteryCharge / 100
+    progressColor: Services.SystemStats.batteryCharge <= 15 && Services.SystemStats.batteryDischarging ? Core.Theme.error : Core.Theme.accent
+    progressHeight: Core.Style.progressHeightL
+    showPercentage: false
+  }
+
+  // What a full charge holds now, against what it held new.
+  Components.ProgressRow {
+    visible: Services.SystemStats.hasBattery
+    label: "Health"
+    labelInfo: `${Services.SystemStats.batteryFull.toFixed(1)} / ${Services.SystemStats.batteryDesign.toFixed(1)} Wh`
+    value: Services.SystemStats.batteryHealth / 100
+    progressColor: Services.SystemStats.batteryHealth < 70 ? Core.Theme.warning : Core.Theme.accentAlt
+    progressHeight: Core.Style.progressHeightM
+    showPercentage: false
+  }
+
+  Components.Text {
+    visible: Services.SystemStats.hasBattery
+    text: root._batteryDetail()
+    size: Core.Style.fontXS
+    color: Core.Theme.textMuted
+  }
+
+  // ═══════════════════════════════════════════════════════════════════
   // NETWORK SECTION
   // ═══════════════════════════════════════════════════════════════════
 
@@ -563,6 +609,18 @@ Components.SlidingPanel {
       count: 1,
       pids: []
     })
+
+  function _batteryDetail() {
+    const parts = [`${Math.round(Services.SystemStats.batteryHealth)}% health`, `${Services.SystemStats.batteryCycles} cycles`];
+
+    if (Services.SystemStats.batteryPower > 0)
+      parts.push(`${Services.SystemStats.batteryPower.toFixed(1)} W`);
+
+    if (Services.SystemStats.batteryTimeLeft > 0)
+      parts.push(`${Core.Utils.formatDuration(Services.SystemStats.batteryTimeLeft, true)} left`);
+
+    return parts.join(" · ");
+  }
 
   function _appDetail(value, count) {
     return count > 1 ? `${value} · ${count} processes` : value;
