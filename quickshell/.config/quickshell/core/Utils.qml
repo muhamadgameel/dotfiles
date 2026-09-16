@@ -211,6 +211,15 @@ Singleton {
   }
 
   /**
+  * A clock speed given in MHz: "3.2 GHz", or "938 MHz" below a gigahertz.
+  */
+  function formatFrequency(mhz) {
+    if (!mhz || mhz <= 0)
+      return "";
+    return mhz >= 1000 ? (mhz / 1000).toFixed(1) + " GHz" : Math.round(mhz) + " MHz";
+  }
+
+  /**
   * How long something has been up, at day resolution: "3d 4h", "5h 12m".
   */
   function formatUptime(seconds) {

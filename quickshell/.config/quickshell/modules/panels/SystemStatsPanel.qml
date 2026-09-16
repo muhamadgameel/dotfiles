@@ -66,6 +66,12 @@ Components.SlidingPanel {
     label: `peak ${Math.round(cpuGraph.peak)}%`
   }
 
+  Components.Text {
+    text: root._cpuDetail()
+    size: Core.Style.fontXS
+    color: Core.Theme.textMuted
+  }
+
   // Per-core breakdown.
   //
   // Bound to cpuCoreCount, not the cpuCores array: the array is replaced on
@@ -86,8 +92,10 @@ Components.SlidingPanel {
 
         readonly property real usage: Services.SystemStats.cpuCores[index] ?? 0
 
+        readonly property real freq: Services.SystemStats.cpuFreqs[index] ?? 0
+
         label: "Core " + index
-        labelInfo: Math.round(usage) + "%"
+        labelInfo: (freq > 0 ? Core.Utils.formatFrequency(freq) + " · " : "") + Math.round(usage) + "%"
         value: usage / 100
         progressColor: Core.Theme.statusColor(Services.SystemStats.statusLevel(usage, Config.Config.cpuUsageWarning, Config.Config.cpuUsageCritical), Core.Theme.accentAlt)
         progressHeight: Core.Style.progressHeightS
@@ -609,6 +617,19 @@ Components.SlidingPanel {
       count: 1,
       pids: []
     })
+
+  function _cpuDetail() {
+    const parts = [];
+
+    if (Services.SystemStats.cpuFreqAvg > 0)
+      parts.push(Core.Utils.formatFrequency(Services.SystemStats.cpuFreqAvg) + " average");
+    if (Services.SystemStats.cpuGovernor !== "")
+      parts.push(Services.SystemStats.cpuGovernor);
+    if (Services.SystemStats.cpuEpp !== "")
+      parts.push(Services.SystemStats.cpuEpp);
+
+    return parts.join(" · ");
+  }
 
   function _batteryDetail() {
     const parts = [`${Math.round(Services.SystemStats.batteryHealth)}% health`, `${Services.SystemStats.batteryCycles} cycles`];

@@ -78,6 +78,13 @@ Singleton {
   // Stable count so views can bind without rebuilding delegates every poll.
   property int cpuCoreCount: 0
 
+  // Clock speeds in MHz, indexed as cpuCores is. Only read while the System
+  // Monitor is open, which is the only thing that shows them.
+  property var cpuFreqs: []
+  property real cpuFreqAvg: 0
+  property string cpuGovernor: ""
+  property string cpuEpp: ""     // energy_performance_preference, if the driver has one
+
   // === GPU ===
   property real gpuTemp: 0
 
@@ -377,9 +384,11 @@ done'
       _diskStatsFile.reload();
       _loadAvgFile.reload();
 
-      // Only while someone is watching the draw; otherwise the slow poll has it.
-      if (root._monitorOpen)
+      // Only while someone is watching; otherwise the slow poll has them.
+      if (root._monitorOpen) {
         root._reloadBattery();
+        _cpuInfoFile.reload();
+      }
 
       // Last tick's readings: this one's are still being read.
       root._recordHistory();
@@ -416,7 +425,53 @@ done'
       _diskProcess.running = true;
       _uptimeFile.reload();
       root._reloadBattery();
+      _governorFile.reload();
+      _eppFile.reload();
     }
+  }
+
+  // One read gives every core's clock. Reading the 32 scaling_cur_freq files
+  // instead asks the hardware 32 times per poll for the same numbers.
+  FileView {
+    id: _cpuInfoFile
+    path: "/proc/cpuinfo"
+    printErrors: false
+
+    onLoaded: {
+      const freqs = [];
+      let total = 0;
+
+      for (const line of text().split("\n")) {
+        if (!line.startsWith("cpu MHz"))
+          continue;
+        const mhz = parseFloat(line.substring(line.indexOf(":") + 1));
+        if (isNaN(mhz))
+          continue;
+        freqs.push(mhz);
+        total += mhz;
+      }
+
+      if (freqs.length === 0)
+        return;
+
+      root.cpuFreqs = freqs;
+      root.cpuFreqAvg = total / freqs.length;
+    }
+  }
+
+  // The scaling driver's own setting, which a power profile changes underneath.
+  FileView {
+    id: _governorFile
+    path: "/sys/devices/system/cpu/cpu0/cpufreq/scaling_governor"
+    printErrors: false
+    onLoaded: root.cpuGovernor = text().trim()
+  }
+
+  FileView {
+    id: _eppFile
+    path: "/sys/devices/system/cpu/cpu0/cpufreq/energy_performance_preference"
+    printErrors: false
+    onLoaded: root.cpuEpp = text().trim()
   }
 
   // ═══════════════════════════════════════════════════════════════════════════
