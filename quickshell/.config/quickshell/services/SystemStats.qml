@@ -19,7 +19,7 @@ import "../services" as Services
 * - CPU usage (overall and per-core)
 * - Memory usage (RAM + Swap)
 * - Network speeds (download/upload)
-* - Disk usage (root filesystem)
+* - Disk usage (root filesystem) and read/write throughput
 * - Top apps by CPU and memory, while the System Monitor is open
 * - Recent history of CPU, memory, GPU and network, for the panel's sparklines
 *
@@ -111,6 +111,8 @@ Singleton {
   property real diskTotal: 0    // bytes
   property real diskPercent: 0
   property string diskMount: "/"
+  property real diskReadSpeed: 0   // bytes/sec, all physical disks
+  property real diskWriteSpeed: 0
 
   // === History ===
   // The last historyLength readings, oldest first, for the panel's sparklines.
@@ -122,9 +124,12 @@ Singleton {
   property var gpuHistory: []      // NVIDIA usage; stepped, see nvidiaPollingInterval
   property var netDownHistory: []  // bytes/sec
   property var netUpHistory: []
+  property var diskReadHistory: []
+  property var diskWriteHistory: []
 
-  // Both network traces share this scale, so up and down stay comparable.
+  // Each pair shares one scale, so the two directions stay comparable.
   readonly property real netHistoryPeak: Math.max(1, ...netDownHistory, ...netUpHistory)
+  readonly property real diskHistoryPeak: Math.max(1, ...diskReadHistory, ...diskWriteHistory)
 
   // === Apps ===
   // [{ name, value, count, pids }] largest first, while the System Monitor is
@@ -206,6 +211,10 @@ Singleton {
   // Network delta tracking: iface -> { rx, tx }
   property var _prevNetStats: ({})
   property real _prevNetTime: 0
+
+  // Disk delta tracking: device -> { read, write }, in 512-byte sectors
+  property var _prevDiskStats: ({})
+  property real _prevDiskTime: 0
 
   readonly property var _whitespace: /\s+/
   readonly property var _meminfoLine: /^(\w+):\s+(\d+)/
@@ -329,6 +338,7 @@ done'
       _cpuStatFile.reload();
       _memInfoFile.reload();
       _netDevFile.reload();
+      _diskStatsFile.reload();
 
       // Last tick's readings: this one's are still being read.
       root._recordHistory();
@@ -346,6 +356,8 @@ done'
     root.gpuHistory = root._appended(root.gpuHistory, root.gpuUsage);
     root.netDownHistory = root._appended(root.netDownHistory, root.netDownSpeed);
     root.netUpHistory = root._appended(root.netUpHistory, root.netUpSpeed);
+    root.diskReadHistory = root._appended(root.diskReadHistory, root.diskReadSpeed);
+    root.diskWriteHistory = root._appended(root.diskWriteHistory, root.diskWriteSpeed);
   }
 
   function _appended(history, value) {
@@ -783,6 +795,59 @@ done'
   // ═══════════════════════════════════════════════════════════════════════════
   // DISK READER
   // ═══════════════════════════════════════════════════════════════════════════
+
+  // Whole disks only. A partition's traffic is already counted on its disk, and
+  // zram is compressed RAM rather than a device with a queue.
+  readonly property var _virtualDisk: /^(loop|ram|zram|dm-|md|sr|fd)/
+  readonly property var _diskPartition: /^(?:nvme\d+n\d+|mmcblk\d+)p\d+$|^(?:sd|vd|hd|xvd)[a-z]+\d+$/
+
+  FileView {
+    id: _diskStatsFile
+    path: "/proc/diskstats"
+    printErrors: false
+
+    onLoaded: {
+      const now = Date.now() / 1000;
+      const current = {};
+
+      for (const line of text().split("\n")) {
+        const parts = line.trim().split(root._whitespace);
+        if (parts.length < 10)
+          continue;
+
+        const name = parts[2];
+        if (root._virtualDisk.test(name) || root._diskPartition.test(name))
+          continue;
+
+        // Sectors are always 512 bytes here, whatever the drive's own size is.
+        current[name] = {
+          read: parseInt(parts[5], 10) || 0,
+          write: parseInt(parts[9], 10) || 0
+        };
+      }
+
+      const dt = now - root._prevDiskTime;
+      if (root._prevDiskTime > 0 && dt > 0) {
+        let read = 0;
+        let written = 0;
+
+        for (const name in current) {
+          const prev = root._prevDiskStats[name];
+          if (!prev)
+            continue;  // Appeared this tick - no delta to take yet
+
+          read += Math.max(0, current[name].read - prev.read);
+          written += Math.max(0, current[name].write - prev.write);
+        }
+
+        root.diskReadSpeed = Math.round(read * 512 / dt);
+        root.diskWriteSpeed = Math.round(written * 512 / dt);
+      }
+
+      root._prevDiskStats = current;
+      root._prevDiskTime = now;
+    }
+  }
 
   Process {
     id: _diskProcess

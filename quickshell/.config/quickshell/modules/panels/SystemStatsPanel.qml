@@ -17,7 +17,7 @@ import "../../services" as Services
 * - GPU usage, VRAM, power and VRAM by process (NVIDIA)
 * - Temperatures (CPU + GPU)
 * - Network throughput
-* - Disk usage
+* - Disk usage and I/O
 */
 Components.SlidingPanel {
   id: root
@@ -420,6 +420,88 @@ Components.SlidingPanel {
     text: Core.Utils.formatBytes(Services.SystemStats.diskTotal - Services.SystemStats.diskUsed, 1) + " free"
     size: Core.Style.fontXS
     color: Services.SystemStats.diskStatus !== "normal" ? Core.Theme.warning : Core.Theme.textMuted
+  }
+
+  GridLayout {
+    Layout.fillWidth: true
+    Layout.topMargin: Core.Style.spaceS
+    columns: 2
+    rowSpacing: Core.Style.spaceS
+    columnSpacing: Core.Style.spaceL
+
+    RowLayout {
+      spacing: Core.Style.spaceS
+
+      Components.Icon {
+        icon: "arrow-down"
+        size: Core.Style.fontL
+        color: Core.Theme.success
+      }
+
+      ColumnLayout {
+        spacing: 0
+
+        Components.Text {
+          text: "Read"
+          size: Core.Style.fontXS
+          color: Core.Theme.textMuted
+        }
+
+        Components.Text {
+          text: Core.Utils.formatSpeed(Services.SystemStats.diskReadSpeed)
+          size: Core.Style.fontM
+          font.weight: Core.Style.weightBold
+        }
+      }
+    }
+
+    RowLayout {
+      spacing: Core.Style.spaceS
+
+      Components.Icon {
+        icon: "arrow-up"
+        size: Core.Style.fontL
+        color: Core.Theme.accent
+      }
+
+      ColumnLayout {
+        spacing: 0
+
+        Components.Text {
+          text: "Write"
+          size: Core.Style.fontXS
+          color: Core.Theme.textMuted
+        }
+
+        Components.Text {
+          text: Core.Utils.formatSpeed(Services.SystemStats.diskWriteSpeed)
+          size: Core.Style.fontM
+          font.weight: Core.Style.weightBold
+        }
+      }
+    }
+  }
+
+  Item {
+    Layout.fillWidth: true
+    implicitHeight: Core.Style.sparklineHeight
+
+    Components.Sparkline {
+      anchors.fill: parent
+      values: Services.SystemStats.diskReadHistory
+      count: Services.SystemStats.historyLength
+      scaleMax: Services.SystemStats.diskHistoryPeak
+      color: Core.Theme.success
+    }
+
+    Components.Sparkline {
+      anchors.fill: parent
+      values: Services.SystemStats.diskWriteHistory
+      count: Services.SystemStats.historyLength
+      scaleMax: Services.SystemStats.diskHistoryPeak
+      color: Core.Theme.accent
+      label: "peak " + Core.Utils.formatSpeed(Services.SystemStats.diskHistoryPeak)
+    }
   }
 
   // ═══════════════════════════════════════════════════════════════════
