@@ -3,18 +3,25 @@ import QtQuick.Shapes
 
 import "../core" as Core
 
+import "." as Components
+
 /**
 * Sparkline - recent history as one small line
 *
-* values are 0..1, oldest first, and are spread evenly across the width. A
-* series shorter than the one beside it is drawn at the same scale by padding
-* it: pass the same `count` to every sparkline that shares a time span.
+* values are in their own units, oldest first, spread evenly across the width.
+*
+* The axis runs from 0 to the tallest reading, so height keeps meaning
+* something, and minimumSpan stops a quiet window from being magnified into
+* mountains. zoomToRange lifts the floor to the window's own low, for a
+* reading that never approaches zero - memory sits at 40% of RAM all day, and
+* against a 0-100% axis its changes are invisible.
 *
 * Usage:
 *   Sparkline {
-*       Layout.fillWidth: true
 *       values: Services.SystemStats.cpuHistory
 *       count: Services.SystemStats.historyLength
+*       minimumSpan: 20               // percent, so idle stays flat
+*       label: `peak ${Math.round(peak)}%`
 *   }
 */
 Item {
@@ -28,6 +35,29 @@ Item {
   property real strokeWidth: Core.Style.px(1.5)
   property real fillOpacity: 0.18
 
+  // === Scale ===
+  property real scaleMax: 0        // 0 picks the window's own peak
+  property bool zoomToRange: false
+  property real minimumSpan: 0
+  property string label: ""
+
+  readonly property real peak: root.values.length > 0 ? Math.max(...root.values) : 0
+  readonly property real low: root.values.length > 0 ? Math.min(...root.values) : 0
+
+  readonly property real axisMin: {
+    if (!root.zoomToRange)
+      return 0;
+    if (root.peak - root.low >= root.minimumSpan)
+      return root.low;
+    return Math.max(0, (root.peak + root.low - root.minimumSpan) / 2);
+  }
+
+  readonly property real axisMax: {
+    if (root.scaleMax > 0)
+      return root.scaleMax;
+    return Math.max(root.peak, root.axisMin + root.minimumSpan);
+  }
+
   implicitHeight: Core.Style.sparklineHeight
 
   readonly property var _points: {
@@ -35,12 +65,16 @@ Item {
     if (root.values.length < 2 || root.width <= 0 || total < 2)
       return [];
 
-    // Inset by the stroke so the line is not clipped at 0% or 100%.
+    // Inset by the stroke so the line is not clipped at either end of the axis.
     const top = root.strokeWidth / 2;
     const span = Math.max(0, root.height - root.strokeWidth);
     const step = root.width / (total - 1);
+    const range = Math.max(root.axisMax - root.axisMin, 1e-9);
 
-    return root.values.map((value, i) => Qt.point(i * step, top + (1 - Math.max(0, Math.min(1, value))) * span));
+    return root.values.map((value, i) => {
+      const scaled = Math.max(0, Math.min(1, (value - root.axisMin) / range));
+      return Qt.point(i * step, top + (1 - scaled) * span);
+    });
   }
 
   readonly property var _filled: {
@@ -84,5 +118,15 @@ Item {
         path: root._points
       }
     }
+  }
+
+  // What the top of the axis means, since it moves with the readings.
+  Components.Text {
+    anchors.right: parent.right
+    anchors.top: parent.top
+    visible: root.label !== ""
+    text: root.label
+    size: Core.Style.fontXS
+    color: Core.Theme.textMuted
   }
 }

@@ -117,8 +117,8 @@ Singleton {
   // Recorded on the poll below, which runs whether or not anything is looking,
   // so an opened panel already has a trace behind it.
   readonly property int historyLength: 60  // 2 minutes at pollingInterval
-  property var cpuHistory: []
-  property var memHistory: []
+  property var cpuHistory: []      // percent
+  property var memHistory: []      // bytes used, so a zoomed axis can name them
   property var gpuHistory: []      // NVIDIA usage; stepped, see nvidiaPollingInterval
   property var netDownHistory: []  // bytes/sec
   property var netUpHistory: []
@@ -336,8 +336,13 @@ done'
   }
 
   function _recordHistory() {
+    // Nothing has been read yet on the first tick, and a zero recorded there
+    // would hold a zoomed axis down for the whole window.
+    if (root.memTotal === 0)
+      return;
+
     root.cpuHistory = root._appended(root.cpuHistory, root.cpuUsage);
-    root.memHistory = root._appended(root.memHistory, root.memPercent);
+    root.memHistory = root._appended(root.memHistory, root.memUsed);
     root.gpuHistory = root._appended(root.gpuHistory, root.gpuUsage);
     root.netDownHistory = root._appended(root.netDownHistory, root.netDownSpeed);
     root.netUpHistory = root._appended(root.netUpHistory, root.netUpSpeed);

@@ -45,10 +45,15 @@ Components.SlidingPanel {
   }
 
   Components.Sparkline {
+    id: cpuGraph
+
     Layout.fillWidth: true
-    values: Services.SystemStats.cpuHistory.map(v => v / 100)
+    values: Services.SystemStats.cpuHistory
     count: Services.SystemStats.historyLength
     color: Core.Theme.statusColor(Services.SystemStats.cpuUsageStatus)
+    // A quiet window stays low instead of magnifying the idle wobble.
+    minimumSpan: 10
+    label: `peak ${Math.round(cpuGraph.peak)}%`
   }
 
   // Per-core breakdown.
@@ -117,11 +122,19 @@ Components.SlidingPanel {
     showPercentage: false
   }
 
+  // RAM never approaches zero, so this axis holds the window's own range.
   Components.Sparkline {
+    id: memGraph
+
     Layout.fillWidth: true
-    values: Services.SystemStats.memHistory.map(v => v / 100)
+    values: Services.SystemStats.memHistory
     count: Services.SystemStats.historyLength
     color: Core.Theme.statusColor(Services.SystemStats.memStatus)
+    zoomToRange: true
+    minimumSpan: Services.SystemStats.memTotal * 0.05
+    // The floor is not zero here, so an area beneath the line would mean nothing.
+    fillOpacity: 0
+    label: `${Core.Utils.formatBytes(memGraph.axisMin, 1)} – ${Core.Utils.formatBytes(memGraph.axisMax, 1)}`
   }
 
   Components.ProgressRow {
@@ -178,10 +191,14 @@ Components.SlidingPanel {
   }
 
   Components.Sparkline {
+    id: gpuGraph
+
     Layout.fillWidth: true
     visible: Services.SystemStats.hasGpuDetails
-    values: Services.SystemStats.gpuHistory.map(v => v / 100)
+    values: Services.SystemStats.gpuHistory
     count: Services.SystemStats.historyLength
+    minimumSpan: 10
+    label: `peak ${Math.round(gpuGraph.peak)}%`
   }
 
   Components.ProgressRow {
@@ -357,32 +374,26 @@ Components.SlidingPanel {
     }
   }
 
-  // Both directions share one scale, with the peak labelled: without it the
-  // trace of a quiet minute looks exactly like a busy one.
+  // Both directions share one scale, so up and down stay comparable.
   Item {
     Layout.fillWidth: true
     implicitHeight: Core.Style.sparklineHeight
 
     Components.Sparkline {
       anchors.fill: parent
-      values: Services.SystemStats.netDownHistory.map(v => v / Services.SystemStats.netHistoryPeak)
+      values: Services.SystemStats.netDownHistory
       count: Services.SystemStats.historyLength
+      scaleMax: Services.SystemStats.netHistoryPeak
       color: Core.Theme.success
     }
 
     Components.Sparkline {
       anchors.fill: parent
-      values: Services.SystemStats.netUpHistory.map(v => v / Services.SystemStats.netHistoryPeak)
+      values: Services.SystemStats.netUpHistory
       count: Services.SystemStats.historyLength
+      scaleMax: Services.SystemStats.netHistoryPeak
       color: Core.Theme.accent
-    }
-
-    Components.Text {
-      anchors.right: parent.right
-      anchors.top: parent.top
-      text: "peak " + Core.Utils.formatSpeed(Services.SystemStats.netHistoryPeak)
-      size: Core.Style.fontXS
-      color: Core.Theme.textMuted
+      label: "peak " + Core.Utils.formatSpeed(Services.SystemStats.netHistoryPeak)
     }
   }
 
