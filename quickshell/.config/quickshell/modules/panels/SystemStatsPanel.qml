@@ -81,17 +81,12 @@ Components.SlidingPanel {
     Repeater {
       model: Services.SystemStats.topCpuApps.length
 
-      Components.ProgressRow {
+      AppRow {
         required property int index
 
-        readonly property var app: Services.SystemStats.topCpuApps[index] ?? root._noApp
-
-        label: app.name
-        labelInfo: root._appDetail(app.value < 0.1 ? "<0.1%" : app.value.toFixed(1) + "%", app.count)
-        value: app.value / 100
-        progressColor: Core.Theme.accentAlt
-        progressHeight: Core.Style.progressHeightS
-        showPercentage: false
+        app: Services.SystemStats.topCpuApps[index] ?? root._noApp
+        detail: root._appDetail(app.value < 0.1 ? "<0.1%" : app.value.toFixed(1) + "%", app.count)
+        fraction: app.value / 100
       }
     }
   }
@@ -132,17 +127,12 @@ Components.SlidingPanel {
     Repeater {
       model: Services.SystemStats.topMemoryApps.length
 
-      Components.ProgressRow {
+      AppRow {
         required property int index
 
-        readonly property var app: Services.SystemStats.topMemoryApps[index] ?? root._noApp
-
-        label: app.name
-        labelInfo: root._appDetail(Core.Utils.formatBytes(app.value, 1), app.count)
-        value: app.value / Services.SystemStats.memTotal
-        progressColor: Core.Theme.accentAlt
-        progressHeight: Core.Style.progressHeightS
-        showPercentage: false
+        app: Services.SystemStats.topMemoryApps[index] ?? root._noApp
+        detail: root._appDetail(Core.Utils.formatBytes(app.value, 1), app.count)
+        fraction: app.value / Services.SystemStats.memTotal
       }
     }
   }
@@ -418,11 +408,73 @@ Components.SlidingPanel {
   readonly property var _noApp: ({
       name: "",
       value: 0,
-      count: 1
+      count: 1,
+      pids: []
     })
 
   function _appDetail(value, count) {
     return count > 1 ? `${value} · ${count} processes` : value;
+  }
+
+  // Ending an app takes a second click, as the power actions do.
+  property string pendingKill: ""
+
+  onClosed: root.pendingKill = ""
+
+  function endApp(app) {
+    if (root.pendingKill !== app.name) {
+      root.pendingKill = app.name;
+      killTimeout.restart();
+      return;
+    }
+
+    root.pendingKill = "";
+    Services.SystemStats.endApp(app.pids);
+  }
+
+  Timer {
+    id: killTimeout
+    interval: 5000
+    repeat: false
+    onTriggered: root.pendingKill = ""
+  }
+
+  component AppRow: RowLayout {
+    id: appRow
+
+    required property var app
+    required property string detail
+    required property real fraction
+
+    readonly property bool armed: root.pendingKill !== "" && root.pendingKill === appRow.app.name
+
+    Layout.fillWidth: true
+    spacing: Core.Style.spaceXS
+
+    Components.ProgressRow {
+      Layout.fillWidth: true
+      label: appRow.armed ? `End ${appRow.app.name}?` : appRow.app.name
+      labelInfo: appRow.armed ? "Click again to confirm" : appRow.detail
+      value: appRow.fraction
+      progressColor: appRow.armed ? Core.Theme.error : Core.Theme.accentAlt
+      progressHeight: Core.Style.progressHeightS
+      showPercentage: false
+    }
+
+    Components.Button {
+      icon: "close"
+      iconSize: Core.Style.fontS
+      padding: Core.Style.spaceXXS
+      iconColor: appRow.armed ? Core.Theme.error : Core.Theme.textDim
+      // Kept in the layout, so hovering a row does not shift the bars.
+      opacity: appRow.app.pids.length > 0 && (hover.hovered || appRow.armed) ? 1 : 0
+      enabled: opacity > 0
+      onClicked: root.endApp(appRow.app)
+    }
+
+    HoverHandler {
+      id: hover
+    }
   }
 
   function _healthText(status) {

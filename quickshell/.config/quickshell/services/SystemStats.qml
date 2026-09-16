@@ -112,9 +112,11 @@ Singleton {
   property string diskMount: "/"
 
   // === Apps ===
-  // [{ name, value, count }] largest first, while the System Monitor is open.
-  // value is percent of all CPUs, or bytes of private memory. A helper process
-  // counts toward the app that started it when both run the same executable.
+  // [{ name, value, count, pids }] largest first, while the System Monitor is
+  // open. value is percent of all CPUs, or bytes of private memory. A helper
+  // process counts toward the app that started it when both run the same
+  // executable, and pids holds the app's own processes - the ones endApp()
+  // signals. Kernel threads are one row with no pids.
   property var topCpuApps: []
   property var topMemoryApps: []
 
@@ -794,7 +796,7 @@ done'
     }
   }
 
-  // "cpu|memory <tab> value <tab> process count <tab> name", then "end".
+  // "cpu|memory <tab> value <tab> count <tab> pids <tab> name", then "end".
   function _readTopApp(line) {
     const fields = line.split("\t");
     if (fields[0] === "end") {
@@ -804,15 +806,43 @@ done'
         cpu: [],
         memory: []
       };
-    } else if (fields.length >= 4 && fields[0] in root._topApps) {
+    } else if (fields.length >= 5 && fields[0] in root._topApps) {
       // A process name may itself contain a tab, and an empty one matches an
       // arbitrary desktop entry.
-      const comm = fields.slice(3).join("\t");
+      const comm = fields.slice(4).join("\t");
       root._topApps[fields[0]].push({
         name: (comm !== "" && DesktopEntries.heuristicLookup(comm)?.name) || comm,
         value: parseFloat(fields[1]),
-        count: parseInt(fields[2], 10)
+        count: parseInt(fields[2], 10),
+        pids: fields[3] === "" ? [] : fields[3].split(",")
       });
+    }
+  }
+
+  /**
+  * Ask an app to quit, by signalling the processes it started.
+  *
+  * SIGTERM rather than SIGKILL: a browser closes its windows and saves its
+  * session, and the helpers it started exit with it.
+  */
+  function endApp(pids) {
+    if (!pids || pids.length === 0)
+      return;
+
+    Core.Logger.i("SystemStats", `ending ${pids.join(", ")}`);
+    _killProcess.command = ["kill", "-TERM"].concat(pids);
+    _killProcess.running = true;
+  }
+
+  Process {
+    id: _killProcess
+
+    stderr: StdioCollector {
+      onStreamFinished: {
+        const msg = text.trim();
+        if (msg)
+          Core.Logger.w("SystemStats", `kill: ${msg}`);
+      }
     }
   }
 
@@ -880,10 +910,13 @@ done'
     }
 
     function report(   pid, app, cpu, mem, count) {
+      split("", roots)
       for (pid in comm) {
         app = pid
         while ((ppid[app] in comm) && exe[app] != "" && exe[ppid[app]] == exe[app])
           app = ppid[app]
+        if (app == pid && comm[app] != "Kernel")
+          roots[comm[app]] = roots[comm[app]] "," substr(pid, 2)
         cpu[comm[app]] += ticks[pid] - ((pid in before) ? before[pid] : 0)
         mem[comm[app]] += memory[pid]
         count[comm[app]]++
@@ -914,7 +947,7 @@ done'
         if (best == "")
           return
         used[best] = 1
-        print kind, sprintf(format, values[best] * scale), count[best], best
+        print kind, sprintf(format, values[best] * scale), count[best], substr(roots[best], 2), best
       }
     }
 
