@@ -88,7 +88,7 @@ Singleton {
   readonly property real letterSpacingWider: 1.2
 
   // === Font Sizes ===
-  readonly property real fontXS: 8 * uiScale
+  readonly property real fontXS: 9 * uiScale
   readonly property real fontS: 10 * uiScale
   readonly property real fontM: 12 * uiScale
   readonly property real fontL: 14 * uiScale
