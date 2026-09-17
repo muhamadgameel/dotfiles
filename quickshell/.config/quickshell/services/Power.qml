@@ -25,7 +25,10 @@ Singleton {
       icon: "lock",
       description: "Lock the screen",
       destructive: false,
-      command: ["hyprlock"]
+      // Guarded like hypridle's lock_cmd, so a second lock request cannot
+      // start a second hyprlock. Not `loginctl lock-session`: Stay Awake stops
+      // hypridle, and with it the only thing that answers that request.
+      command: ["sh", "-c", "pidof hyprlock || exec hyprlock"]
     },
     {
       id: "logout",

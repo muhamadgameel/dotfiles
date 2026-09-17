@@ -27,6 +27,6 @@ return {
 		fileManager = "thunar",
 		browser = "chromium",
 		menu = "fuzzel",
-		lock = "hyprlock",
+		lock = "pidof hyprlock || hyprlock", -- same guard as hypridle's lock_cmd
 	},
 }

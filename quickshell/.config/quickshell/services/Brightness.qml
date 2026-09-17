@@ -3,6 +3,7 @@ pragma Singleton
 import QtQuick
 import Quickshell
 import Quickshell.Io
+import Quickshell.Wayland
 
 import "../core" as Core
 import "../services" as Services
@@ -44,6 +45,24 @@ Singleton {
   // The level the last request asked for, even while it is still queued.
   readonly property real requestedBrightness: isNaN(_queuedBrightness) ? brightness : _queuedBrightness
   property real _lastSelfWrite: 0
+
+  // hypridle dims the backlight with brightnessctl after five idle minutes and
+  // restores it when you come back. To the watcher that is the same as a key
+  // press, so an unattended machine flashed a brightness OSD, and coming back
+  // to it flashed another. Changes while idle, or in the moment of returning,
+  // are applied without one. The monitor goes idle well before hypridle's
+  // first listener, and respects inhibitors the way hypridle does.
+  readonly property int idleReturnGraceMs: 1000
+  property real _idleEndedAt: 0
+
+  IdleMonitor {
+    id: idleMonitor
+    timeout: 60
+    onIsIdleChanged: {
+      if (!isIdle)
+        root._idleEndedAt = Date.now();
+    }
+  }
 
   // === Debounce Timer ===
   // Prevents command spam during rapid scroll/slider adjustments
@@ -159,7 +178,9 @@ Singleton {
     const value = raw / root.maxBrightness;
     const changed = Math.abs(value - root.brightness) >= 0.005;
     root.brightness = value;
-    if (changed)
+
+    const idleDriven = idleMonitor.isIdle || Date.now() - root._idleEndedAt < root.idleReturnGraceMs;
+    if (changed && !idleDriven)
       root._showOSD();
   }
 
