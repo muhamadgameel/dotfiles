@@ -16,6 +16,8 @@ import "../../services" as Services
 *   qs ipc call notifications toggleDnd
 *   qs ipc call media playPause
 *   qs ipc call idle toggle
+*   qs ipc call gamemode toggle
+*   qs ipc call network backend native
 *
 * `qs ipc show` lists the handlers and their signatures.
 *
@@ -166,6 +168,27 @@ Scope {
   }
 
   IpcHandler {
+    target: "network"
+
+    /**
+    * Pick how the shell talks to NetworkManager.
+    * @param name - "nmcli" or "native"
+    */
+    function backend(name: string): string {
+      if (name !== "nmcli" && name !== "native")
+        return `unknown backend "${name}"; known: nmcli, native`;
+      Config.Config.setNetworkBackend(name);
+      return `network backend: ${name}`;
+    }
+
+    function status(): string {
+      const n = Services.Network;
+      const signal = n.wifiConnected ? ` ${n.wifiSignal}%` : "";
+      return `${n.backendName}: wifi ${n.wifiEnabled ? "on" : "off"}, ${n.connectionStatusText}${signal}, internet ${n.connectivityStatus}`;
+    }
+  }
+
+  IpcHandler {
     target: "idle"
 
     function toggle(): string {
@@ -175,6 +198,95 @@ Scope {
 
     function status(): string {
       return Services.Idle.inhibited ? "inhibited" : "released";
+    }
+  }
+
+  // `enter` and `exit` are what gamemode.ini's [custom] hooks call; `toggle`
+  // is the manual switch.
+  IpcHandler {
+    target: "gamemode"
+
+    function enter(): string {
+      Services.GameMode.enter();
+      return Services.GameMode.reason;
+    }
+
+    function exit(): string {
+      Services.GameMode.exit();
+      return Services.GameMode.reason;
+    }
+
+    function toggle(): string {
+      Services.GameMode.toggle();
+      return Services.GameMode.reason;
+    }
+
+    function status(): string {
+      return Services.GameMode.reason;
+    }
+  }
+
+  IpcHandler {
+    target: "wallpaper"
+
+    /**
+    * Set the wallpaper on every output and keep it across restarts.
+    * @param path - a file in the wallpaper directory; a comma in the name
+    *               cannot be passed to hyprpaper and is refused
+    */
+    function set(path: string): string {
+      return Services.Wallpaper.set(path) ? `set ${path}` : `refused ${path}`;
+    }
+
+    /**
+    * Hand the wallpaper back to hyprpaper's own directory rotation.
+    */
+    function shuffle(): string {
+      Services.Wallpaper.shuffle();
+      return "rotating";
+    }
+
+    function list(): string {
+      return Services.Wallpaper.wallpapers.join("\n");
+    }
+
+    function status(): string {
+      const w = Services.Wallpaper;
+      return `${w.current || "unknown"}\n${w.shuffling ? "rotating" : "pinned"}, ${w.wallpapers.length} available in ${w.directory}`;
+    }
+  }
+
+  IpcHandler {
+    target: "nightlight"
+
+    function toggle(): string {
+      Services.NightLight.toggle();
+      return Services.NightLight.statusText;
+    }
+
+    function set(enabled: bool): string {
+      Services.NightLight.setEnabled(enabled);
+      return Services.NightLight.statusText;
+    }
+
+    /**
+    * @param kelvin - 2500 (warmest) to 6500 (daylight); clamped
+    */
+    function temperature(kelvin: int): string {
+      Services.NightLight.setTemperature(kelvin);
+      return Services.NightLight.statusText;
+    }
+
+    /**
+    * Follow the schedule in the nightLightStart/nightLightEnd settings.
+    */
+    function schedule(enabled: bool): string {
+      Services.NightLight.setSchedule(enabled);
+      return Services.NightLight.statusText;
+    }
+
+    function status(): string {
+      return Services.NightLight.statusText;
     }
   }
 
@@ -207,11 +319,20 @@ Scope {
   }
 
   IpcHandler {
+    target: "display"
+
+    function status(): string {
+      const d = Services.Display;
+      return `${d.output}: ${d.currentRate} Hz (full ${d.fullRate}, battery rate ${Config.Config.batteryRefreshRate}), on ${d.onBattery ? "battery" : "mains"}, follow ${d.enabled}`;
+    }
+  }
+
+  IpcHandler {
     target: "theme"
 
     function set(name: string): string {
-      if (!Config.Themes.has(name))
-        return `unknown theme "${name}"; known: ${Config.Themes.names.join(", ")}`;
+      if (!Core.Themes.has(name))
+        return `unknown theme "${name}"; known: ${Core.Themes.names.join(", ")}`;
       Config.Config.setTheme(name);
       return `theme: ${name}`;
     }
@@ -221,7 +342,7 @@ Scope {
     }
 
     function list(): string {
-      return Config.Themes.names.join(", ");
+      return Core.Themes.names.join(", ");
     }
 
     function scale(factor: real): string {
@@ -235,17 +356,17 @@ Scope {
 
     function set(percent: int): string {
       Services.Brightness.setPercent(percent);
-      return `${Math.round(Services.Brightness.brightness * 100)}%`;
+      return `${Math.round(Services.Brightness.requestedBrightness * 100)}%`;
     }
 
     function up(): string {
       Services.Brightness.increase();
-      return `${Math.round(Services.Brightness.brightness * 100)}%`;
+      return `${Math.round(Services.Brightness.requestedBrightness * 100)}%`;
     }
 
     function down(): string {
       Services.Brightness.decrease();
-      return `${Math.round(Services.Brightness.brightness * 100)}%`;
+      return `${Math.round(Services.Brightness.requestedBrightness * 100)}%`;
     }
   }
 }

@@ -1,7 +1,6 @@
 import QtQuick
 import QtQuick.Layouts
 
-import "../config" as Config
 import "../core" as Core
 
 /**
@@ -34,17 +33,6 @@ Rectangle {
   property string text: ""
   property string placeholder: ""
   property int echoMode: TextInput.Normal  // Normal, Password, NoEcho, PasswordEchoOnEdit
-  property int inputMethodHints: Qt.ImhNone
-
-  // === Styling Properties ===
-  property color backgroundColor: Config.Theme.bgDark
-  property color borderColor: Config.Theme.surfaceHover
-  property color borderFocusColor: Config.Theme.accent
-  property color textColor: Config.Theme.text
-  property color placeholderColor: Config.Theme.textMuted
-  property real fontSize: Core.Style.fontM
-  property int borderRadius: Core.Style.radiusS
-  property int borderWidth: 1
 
   // === Layout Properties ===
   Layout.fillWidth: true
@@ -55,16 +43,17 @@ Rectangle {
   signal cancelled  // Emitted when Escape is pressed
 
   // === Appearance ===
-  radius: borderRadius
-  color: backgroundColor
+  radius: Core.Style.radiusS
+  color: Core.Theme.bgDark
   border {
-    color: textInput.activeFocus ? borderFocusColor : borderColor
-    width: borderWidth
+    color: textInput.activeFocus ? Core.Theme.accent : Core.Theme.surfaceHover
+    width: Core.Style.borderThin
   }
 
   Behavior on border.color {
     ColorAnimation {
       duration: Core.Style.duration(Core.Style.animFast)
+      easing.type: Core.Style.easeStandard
     }
   }
 
@@ -75,10 +64,11 @@ Rectangle {
     anchors.leftMargin: Core.Style.spaceS
     anchors.rightMargin: Core.Style.spaceS
     verticalAlignment: TextInput.AlignVCenter
-    color: root.textColor
+    color: Core.Theme.text
     echoMode: root.echoMode
-    inputMethodHints: root.inputMethodHints
-    font.pixelSize: root.fontSize
+    // Set explicitly: QtQuick's input falls back to the system sans otherwise.
+    font.family: Core.Style.fontFamily
+    font.pixelSize: Core.Style.fontM
     clip: true
     selectByMouse: true
 
@@ -97,8 +87,9 @@ Rectangle {
       anchors.fill: parent
       verticalAlignment: Text.AlignVCenter
       text: root.placeholder
-      color: root.placeholderColor
-      font.pixelSize: root.fontSize
+      color: Core.Theme.textMuted
+      font.family: Core.Style.fontFamily
+      font.pixelSize: Core.Style.fontM
       visible: !textInput.text && !textInput.activeFocus
     }
   }
@@ -106,10 +97,6 @@ Rectangle {
   // === Public API ===
   function clear() {
     textInput.text = "";
-  }
-
-  function selectAll() {
-    textInput.selectAll();
   }
 
   function forceActiveFocus() {

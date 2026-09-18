@@ -3,13 +3,14 @@ import QtQuick
 import "." as Core
 
 /**
-* SlideAnimator
+* ShowHideAnimator
 *
-* Animates an item with coordinated slide, opacity, and scale transitions.
-* Creates a sliding entrance effect for cards, notifications, and panels.
+* Animates an item in on show() and out on hide(): fade and scale, plus a slide
+* from one edge for cards and notifications, or with `slideFrom: "none"`, a pop
+* in place for tooltips and the OSD.
 *
 * Usage:
-*   SlideAnimator {
+*   ShowHideAnimator {
 *     id: animator
 *     target: card
 *     slideDistance: 300
@@ -29,8 +30,8 @@ Item {
   property real slideDistance: Core.Style.slideDistance
 
   // Which edge the item travels in from on show, and back out towards on hide:
-  // "top" | "bottom" | "left" | "right". Hide is always the reverse of show, so
-  // a card that enters from the right leaves to the right.
+  // "top" | "bottom" | "left" | "right", or "none" to pop in place. Hide is always
+  // the reverse of show, so a card that enters from the right leaves to the right.
   property string slideFrom: "top"
 
   // Duration
@@ -54,14 +55,7 @@ Item {
   property int entryDelay: 0
 
   // === Signals ===
-  signal showStarted
-  signal showFinished
-  signal hideStarted
   signal hideFinished
-
-  // === State ===
-  readonly property bool isAnimating: showAnim.running || hideAnim.running || delayTimer.running
-  readonly property bool isVisible: target ? target.opacity > 0 : false
 
   // === Internal ===
   // Fresh callers need a hidden starting frame, but reversals must retain it.
@@ -69,7 +63,7 @@ Item {
   readonly property bool _horizontal: root.slideFrom === "left" || root.slideFrom === "right"
 
   // Negative for the edges the item comes from above/before, positive otherwise.
-  readonly property real _hiddenOffset: (root.slideFrom === "top" || root.slideFrom === "left") ? -root.slideDistance : root.slideDistance
+  readonly property real _hiddenOffset: root.slideFrom === "none" ? 0 : (root.slideFrom === "top" || root.slideFrom === "left") ? -root.slideDistance : root.slideDistance
 
   // The unused axis keeps its binding at 0 forever; the active one has its
   // binding broken by the first _setOffset() write, which is what the animations
@@ -87,7 +81,7 @@ Item {
   }
 
   Component.onCompleted: {
-    if (target) {
+    if (target && root.slideFrom !== "none") {
       target.transform = target.transform ? target.transform.concat([_slideTransform]) : [_slideTransform];
     }
   }
@@ -100,7 +94,6 @@ Item {
       setHidden();
     const reversing = hideAnim.running;
     hideAnim.stop();
-    showStarted();
 
     // Stagger hidden entrances only; never pause an in-flight reversal.
     if (delayTimer.interval > 0 && !reversing && !showAnim.running && target.opacity === hiddenOpacity) {
@@ -117,7 +110,6 @@ Item {
     _initialized = true;
     delayTimer.stop();
     showAnim.stop();
-    hideStarted();
     hideAnim.start();
   }
 
@@ -155,7 +147,6 @@ Item {
   // === Animations ===
   ParallelAnimation {
     id: showAnim
-    onFinished: root.showFinished()
 
     PropertyAnimation {
       target: root.target

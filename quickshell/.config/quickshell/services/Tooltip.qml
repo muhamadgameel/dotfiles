@@ -3,39 +3,26 @@ pragma Singleton
 import QtQuick
 import Quickshell
 
-import "../modules/popups" as Popups
-
 /**
 * Tooltip - shell-wide tooltip controller
 *
-* Owns one tooltip window for the whole shell, created on first use and reused
-* afterwards. Previously a window was created per hover with createObject(null)
-* - unparented, so nothing owned it - and hide() cleared the service's
-* reference while the object was still animating itself towards self-destruct.
+* Drives the one tooltip window the whole shell shares. The window is built in
+* shell.qml and handed over through `window`, the same way shell.qml pushes
+* Logger its level. Building it here meant this service importing modules/popups
+* - a service reaching up into the view layer - so it is built where the OSD and
+* notification popups already are.
 */
 Singleton {
   id: root
 
+  // The shared TooltipWindow, set by shell.qml. Until then show() does nothing.
+  property var window: null
+
   // The item the tooltip is currently following, if any.
-  readonly property Item currentTarget: _target
-
   property Item _target: null
-  property var _window: null
 
-  Component {
-    id: tooltipComponent
-
-    Popups.TooltipWindow {}
-  }
-
-  function _ensureWindow() {
-    if (!_window)
-      _window = tooltipComponent.createObject(root);
-    return _window;
-  }
-
-  function show(target, text, direction, delay) {
-    if (!target || !text)
+  function show(target, text, direction) {
+    if (!target || !text || !root.window)
       return;
 
     // Re-entering the same item (including while it is animating out) must not
@@ -44,13 +31,13 @@ Singleton {
       return;
 
     root._target = target;
-    _ensureWindow().showFor(target, text, direction, delay);
+    root.window.showFor(target, text, direction);
   }
 
   function hide() {
     root._target = null;
-    if (_window)
-      _window.hide();
+    if (root.window)
+      root.window.hide();
   }
 
   /**
@@ -65,7 +52,7 @@ Singleton {
       return;
 
     root._target = null;
-    if (_window)
-      _window.release();
+    if (root.window)
+      root.window.release();
   }
 }

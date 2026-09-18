@@ -1,53 +1,79 @@
 import QtQuick
-
-import "../config" as Config
+import QtQuick.Shapes
 import "../core" as Core
-import "." as Components
 
 /**
-* Spinner - Rotating loading indicator
+* Spinner - something is in progress
 *
-* A simple spinning icon for loading states.
-* Extracted from Icon.spinning for standalone use.
+* A short arc turning over a faint track, drawn rather than taken from the icon
+* font. The font's loading glyph turned about its em box instead of its visual
+* centre, so it wobbled, and at the 12-14px these sit at it was barely a shape.
+*
+* The turn runs on the render thread and only while the spinner is visible:
+* any running animation keeps the window rendering at the refresh rate. With
+* animations off the arc stays still, which still reads as busy.
 *
 * Usage:
-*   // Basic spinner
-*   Spinner { running: isLoading }
-*
-*   // Custom size and color
-*   Spinner {
-*       running: true
-*       size: 24
-*       color: Theme.accent
-*   }
-*
-*   // Custom speed
-*   Spinner {
-*       running: true
-*       duration: 500  // Faster spin
-*   }
+*   Spinner { visible: busy; color: Core.Theme.accent }
 */
 Item {
   id: root
 
-  // === Properties ===
-  property bool running: true
-  property real size: Core.Style.fontL
-  property color color: Config.Theme.text
-  property int duration: Core.Style.spinDuration
-  property string icon: "loading"
+  property real size: Core.Style.fontM
+  property color color: Core.Theme.accent
 
-  // === Dimensions ===
-  implicitWidth: size
-  implicitHeight: size
+  implicitWidth: root.size
+  implicitHeight: root.size
 
-  visible: running
+  // Thick enough to read at 12px, thin enough to stay a ring at 24.
+  readonly property real _stroke: Math.max(Core.Style.px(1.5), root.size / 7)
+  readonly property real _radius: (root.size - root._stroke) / 2
 
-  Components.Icon {
-    icon: root.icon
-    size: root.size
-    color: root.color
-    spinning: root.running && root.visible
-    spinDuration: root.duration
+  Shape {
+    id: ring
+
+    anchors.fill: parent
+    // Analytic antialiasing: the default renderer left a stepped edge on a
+    // circle this small.
+    preferredRendererType: Shape.CurveRenderer
+
+    ShapePath {
+      strokeColor: Core.Theme.alpha(root.color, 0.2)
+      strokeWidth: root._stroke
+      fillColor: Core.Theme.transparent
+
+      PathAngleArc {
+        centerX: root.size / 2
+        centerY: root.size / 2
+        radiusX: root._radius
+        radiusY: root._radius
+        startAngle: 0
+        sweepAngle: 360
+      }
+    }
+
+    ShapePath {
+      strokeColor: root.color
+      strokeWidth: root._stroke
+      fillColor: Core.Theme.transparent
+      capStyle: ShapePath.RoundCap
+
+      PathAngleArc {
+        centerX: root.size / 2
+        centerY: root.size / 2
+        radiusX: root._radius
+        radiusY: root._radius
+        startAngle: -90
+        sweepAngle: 100
+      }
+    }
+
+    RotationAnimator on rotation {
+      running: root.visible && Core.Style.motionEnabled
+      from: 0
+      to: 360
+      duration: Core.Style.spinDuration
+      loops: Animation.Infinite
+    }
   }
 }

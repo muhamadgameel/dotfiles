@@ -3,10 +3,12 @@ pragma Singleton
 import QtQuick
 import Quickshell
 
+import "../config" as Config
+
 /**
 * Theme - the active colour palette, plus derived helpers
 *
-* Colours come from Themes.palettes, selected by Config.theme, so switching is
+* Colours come from Themes.palettes, selected by Config.Config.theme, so switching is
 * `qs ipc call theme set catppuccin-latte` rather than editing this file.
 *
 * Every colour resolves through _pick(), which falls back to the default
@@ -17,7 +19,7 @@ Singleton {
   id: root
 
   // Active theme identifier
-  readonly property string name: Themes.has(Config.theme) ? Config.theme : Themes.defaultName
+  readonly property string name: Themes.has(Config.Config.theme) ? Config.Config.theme : Themes.defaultName
 
   readonly property var palette: Themes.get(name)
   readonly property var fallback: Themes.get(Themes.defaultName)
@@ -70,11 +72,38 @@ Singleton {
   readonly property real shadowStrength: isDark ? 1.0 : 0.45
 
   // === Surfaces ===
-  // Panels and the bar are drawn translucent and lean on the compositor's blur.
-  // Single source of truth so a legibility tweak is one edit, not thirteen.
-  readonly property color panelBg: alpha(bg, Config.surfaceOpacity)
-  readonly property color barBg: alpha(bg, Math.max(0.5, Config.surfaceOpacity - 0.05))
-  readonly property color popupBg: alpha(bg, Math.min(1.0, Config.surfaceOpacity + 0.05))
+  // Opacity follows what sits behind a surface, not a fixed offset between them:
+  //
+  // - panelBg is over windows (panels, the OSD), so it carries text across busy
+  //   content and needs to be nearly opaque. Config.Config.surfaceOpacity, 0.96.
+  // - barBg is only ever over the wallpaper, so it can be more see-through.
+  //   Config.Config.barOpacity, 0.85.
+  //
+  // Do not count on the compositor's blur for legibility. Measured over a tiled
+  // window, text behind a panel came through exactly as sharp as the original,
+  // only dimmed - so at the old 0.90 it was plainly readable. At 0.96 the
+  // background stops being legible whether or not blur is applied.
+  //
+  // Used to be three values derived by +/-0.05 from one setting, one of which
+  // (popupBg) nothing read.
+  readonly property color panelBg: alpha(bg, Config.Config.surfaceOpacity)
+  readonly property color barBg: alpha(bg, Config.Config.barOpacity)
+
+  // A card or tile at rest, half-lifted off the panel behind it. Card and
+  // QuickToggle both used to spell this out as alpha(surface, 0.5).
+  readonly property color cardBg: alpha(surface, 0.5)
+
+  // === Accent States ===
+  // Hover and press on an accent fill: primary buttons and switched-on quick
+  // toggles, which used to lighten by 0.10 and 0.08 for the same interaction.
+  //
+  // Deliberately not stateLayer(). That mixes a fixed share of white in, which
+  // is a big step on a dark surface but a tiny one on a light accent: measured on
+  // this palette, card hover raises luminance x1.29, stateLayer(accent, 0.08)
+  // only x1.08 - hover you can barely see. Lightening by 10% gives x1.21, which
+  // reads as the same strength as the card.
+  readonly property color accentHover: Qt.lighter(accent, 1.10)
+  readonly property color accentPressed: Qt.lighter(accent, 1.16)
 
   // === Focus ===
   readonly property color focusRing: accent
@@ -84,16 +113,6 @@ Singleton {
   // Create a color with alpha transparency
   function alpha(baseColor, a) {
     return Qt.rgba(baseColor.r, baseColor.g, baseColor.b, a);
-  }
-
-  // Lighten a color
-  function lighten(baseColor, amount) {
-    return Qt.lighter(baseColor, 1 + amount);
-  }
-
-  // Darken a color
-  function darken(baseColor, amount) {
-    return Qt.darker(baseColor, 1 + amount);
   }
 
   /**

@@ -4,7 +4,6 @@ import QtQuick
 import QtQuick.Layouts
 
 import "../../components" as Components
-import "../../config" as Config
 import "../../core" as Core
 import "../../services" as Services
 
@@ -17,7 +16,7 @@ Components.SlidingPanel {
   panelId: "calendar"
 
   headerIcon: "calendar"
-  headerIconColor: Config.Theme.accent
+  headerIconColor: Core.Theme.accent
   headerTitle: Services.Time.timeShort
   headerSubtitle: Services.Time.dateLong
 
@@ -68,40 +67,72 @@ Components.SlidingPanel {
   }
 
   // === Month navigation ===
-  RowLayout {
+  ColumnLayout {
     Layout.fillWidth: true
-    spacing: Core.Style.spaceS
+    spacing: 0
 
-    Components.Button {
-      icon: "chevron-left"
-      iconSize: Core.Style.fontM
-      tooltipText: "Previous month"
-      onClicked: root.monthOffset--
-    }
-
-    Components.Text {
+    RowLayout {
       Layout.fillWidth: true
-      horizontalAlignment: Text.AlignHCenter
-      text: Qt.formatDate(root.viewMonth, "MMMM yyyy")
-      size: Core.Style.fontL
-      weight: Core.Style.weightBold
+      spacing: Core.Style.spaceS
+
+      Components.Button {
+        icon: "chevron-left"
+        iconSize: Core.Style.fontM
+        tooltipText: "Previous month"
+        onClicked: root.monthOffset--
+      }
+
+      Components.Text {
+        Layout.fillWidth: true
+        horizontalAlignment: Text.AlignHCenter
+        text: Qt.formatDate(root.viewMonth, "MMMM yyyy")
+        size: Core.Style.fontL
+        weight: Core.Style.weightBold
+      }
+
+      Components.Button {
+        icon: "chevron-right"
+        iconSize: Core.Style.fontM
+        tooltipText: "Next month"
+        onClicked: root.monthOffset++
+      }
     }
 
-    Components.Button {
-      icon: "chevron-right"
-      iconSize: Core.Style.fontM
-      tooltipText: "Next month"
-      onClicked: root.monthOffset++
-    }
-  }
+    // Opens under the month row instead of pushing the grid down in one frame.
+    // The gap above the button is inside the animated height, so closing ends
+    // without a jump.
+    Item {
+      Layout.fillWidth: true
+      Layout.preferredHeight: root.monthOffset !== 0 ? todayButton.implicitHeight + root.contentSpacing : 0
+      clip: true
+      visible: Layout.preferredHeight > 0
+      opacity: root.monthOffset !== 0 ? 1 : 0
 
-  Components.Button {
-    Layout.alignment: Qt.AlignHCenter
-    visible: root.monthOffset !== 0
-    variant: "secondary"
-    text: "Back to today"
-    textSize: Core.Style.fontS
-    onClicked: root.monthOffset = 0
+      Behavior on Layout.preferredHeight {
+        NumberAnimation {
+          duration: Core.Style.duration(Core.Style.animNormal)
+          easing.type: Core.Style.easeStandard
+        }
+      }
+
+      Behavior on opacity {
+        NumberAnimation {
+          duration: Core.Style.duration(Core.Style.animFast)
+          easing.type: Core.Style.easeStandard
+        }
+      }
+
+      Components.Button {
+        id: todayButton
+
+        anchors.horizontalCenter: parent.horizontalCenter
+        anchors.bottom: parent.bottom
+        variant: "secondary"
+        text: "Back to today"
+        textSize: Core.Style.fontS
+        onClicked: root.monthOffset = 0
+      }
+    }
   }
 
   // === Weekday header ===
@@ -122,7 +153,7 @@ Components.SlidingPanel {
         horizontalAlignment: Text.AlignHCenter
         text: modelData
         size: Core.Style.fontXS
-        color: Config.Theme.textMuted
+        color: Core.Theme.textMuted
         weight: Core.Style.weightBold
       }
     }
@@ -161,13 +192,13 @@ Components.SlidingPanel {
         Layout.preferredHeight: Core.Style.controlHeightS
 
         radius: Core.Style.radiusS
-        color: today ? Config.Theme.accent : Config.Theme.transparent
+        color: today ? Core.Theme.accent : Core.Theme.transparent
 
         Components.Text {
           anchors.centerIn: parent
           text: dayCell.day
           size: Core.Style.fontS
-          color: dayCell.today ? Config.Theme.bg : Config.Theme.text
+          color: dayCell.today ? Core.Theme.bg : Core.Theme.text
           weight: dayCell.today ? Core.Style.weightBold : Core.Style.weightNormal
         }
       }
@@ -196,7 +227,7 @@ Components.SlidingPanel {
       horizontalAlignment: Text.AlignHCenter
       text: Services.Time.dateLong
       size: Core.Style.fontS
-      color: Config.Theme.textDim
+      color: Core.Theme.textDim
     }
   }
 }

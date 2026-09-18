@@ -8,8 +8,8 @@ import "../../core" as Core
 /**
 * Tooltip - the single tooltip surface for the shell
 *
-* Created once by Services.Tooltip and re-anchored per target, rather than
-* constructed and destroyed on every hover.
+* Created once, in shell.qml, and driven by Services.Tooltip: re-anchored per
+* target rather than constructed and destroyed on every hover.
 *
 * Placement is delegated to PopupAnchor's edges/gravity/adjustment, which flips
 * and slides the popup to keep it on screen. The hand-rolled geometry helper
@@ -23,7 +23,7 @@ PopupWindow {
   property string direction: "auto"
 
   visible: false
-  color: Config.Theme.transparent
+  color: Core.Theme.transparent
 
   readonly property int shadowRoom: Core.Style.elevationRoom(1)
 
@@ -60,7 +60,7 @@ PopupWindow {
 
   // === Public API (driven by Services.Tooltip) ===
 
-  function showFor(target, tipText, tipDirection, delay) {
+  function showFor(target, tipText, tipDirection) {
     if (!target || !tipText)
       return;
 
@@ -74,7 +74,6 @@ PopupWindow {
       return;
     }
 
-    showTimer.interval = delay ?? Config.Config.tooltipDelay;
     showTimer.restart();
   }
 
@@ -110,9 +109,13 @@ PopupWindow {
     }
   }
 
-  Core.PopAnimator {
+  Core.ShowHideAnimator {
     id: animator
     target: content
+    slideFrom: "none"
+    showDuration: Core.Style.duration(Core.Style.popShowDuration)
+    hideDuration: Core.Style.duration(Core.Style.popHideDuration)
+    hiddenScale: Core.Style.popHiddenScale
     onHideFinished: {
       root.visible = false;
       root.anchor.item = null;

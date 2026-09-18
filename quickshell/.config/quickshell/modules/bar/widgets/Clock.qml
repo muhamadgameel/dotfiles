@@ -26,7 +26,7 @@ Item {
 
     // Time
     Components.Text {
-      text: Services.Time.timeLong
+      text: Config.Config.barClockShowSeconds ? Services.Time.timeLong : Services.Time.timeShort
       size: Core.Style.fontL
       weight: Core.Style.weightBold
     }
@@ -41,7 +41,7 @@ Item {
     Components.Text {
       text: Services.Time.dateShort
       size: Core.Style.fontM
-      color: Config.Theme.textDim
+      color: Core.Theme.textDim
       weight: Core.Style.weightNormal
     }
   }

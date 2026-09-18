@@ -3,8 +3,8 @@ pragma Singleton
 import QtQuick
 import Quickshell
 import Quickshell.Io
+import Quickshell.Wayland
 
-import "../config" as Config
 import "../core" as Core
 import "../services" as Services
 
@@ -28,7 +28,6 @@ Singleton {
   // === Public Properties ===
   property real brightness: 0.0       // Current brightness (0.0 - 1.0)
   property int maxBrightness: 0       // Maximum raw value
-  property int currentBrightness: 0   // Current raw value
   property bool ready: false          // Whether brightness control is available
   property string device: ""          // Backlight device name
 
@@ -42,7 +41,28 @@ Singleton {
 
   // === Private Properties ===
   property real _queuedBrightness: NaN
+
+  // The level the last request asked for, even while it is still queued.
+  readonly property real requestedBrightness: isNaN(_queuedBrightness) ? brightness : _queuedBrightness
   property real _lastSelfWrite: 0
+
+  // hypridle dims the backlight with brightnessctl after five idle minutes and
+  // restores it when you come back. To the watcher that is the same as a key
+  // press, so an unattended machine flashed a brightness OSD, and coming back
+  // to it flashed another. Changes while idle, or in the moment of returning,
+  // are applied without one. The monitor goes idle well before hypridle's
+  // first listener, and respects inhibitors the way hypridle does.
+  readonly property int idleReturnGraceMs: 1000
+  property real _idleEndedAt: 0
+
+  IdleMonitor {
+    id: idleMonitor
+    timeout: 60
+    onIsIdleChanged: {
+      if (!isIdle)
+        root._idleEndedAt = Date.now();
+    }
+  }
 
   // === Debounce Timer ===
   // Prevents command spam during rapid scroll/slider adjustments
@@ -76,7 +96,7 @@ Singleton {
   function increase() {
     if (!root.ready)
       return;
-    set((isNaN(root._queuedBrightness) ? root.brightness : root._queuedBrightness) + root.stepSize);
+    set(root.requestedBrightness + root.stepSize);
   }
 
   /**
@@ -85,7 +105,7 @@ Singleton {
   function decrease() {
     if (!root.ready)
       return;
-    set((isNaN(root._queuedBrightness) ? root.brightness : root._queuedBrightness) - root.stepSize);
+    set(root.requestedBrightness - root.stepSize);
   }
 
   /**
@@ -122,7 +142,6 @@ Singleton {
   function _applyBrightness(value) {
     root._lastSelfWrite = Date.now();
     root.brightness = value;
-    root.currentBrightness = Math.round(value * root.maxBrightness);
     root._showOSD();
 
     _setProc.command = ["brightnessctl", "-c", "backlight", "-d", root.device, "-q", "s", Math.round(value * 100) + "%"];
@@ -134,13 +153,13 @@ Singleton {
     if (Services.Panels.openPanel === "quicksettings")
       return;
 
-    Services.OSD.show("progressRow", {
+    Services.OSD.show({
       icon: getIcon(brightness),
       value: brightness,
       maxValue: 1.0,
-      iconColor: Config.Theme.text,
-      progressColor: Config.Theme.accent
-    }, "brightness");
+      iconColor: Core.Theme.text,
+      progressColor: Core.Theme.accent
+    });
   }
 
   // Read the value the watcher already holds - no process spawn.
@@ -158,9 +177,10 @@ Singleton {
 
     const value = raw / root.maxBrightness;
     const changed = Math.abs(value - root.brightness) >= 0.005;
-    root.currentBrightness = raw;
     root.brightness = value;
-    if (changed)
+
+    const idleDriven = idleMonitor.isIdle || Date.now() - root._idleEndedAt < root.idleReturnGraceMs;
+    if (changed && !idleDriven)
       root._showOSD();
   }
 
@@ -227,7 +247,6 @@ Singleton {
         }
 
         root.device = parts[0];
-        root.currentBrightness = current;
         root.maxBrightness = max;
         root.brightness = current / max;
         root.ready = true;

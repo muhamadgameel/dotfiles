@@ -3,9 +3,12 @@ module services
 singleton Audio 1.0 Audio.qml
 singleton Bluetooth 1.0 Bluetooth.qml
 singleton Brightness 1.0 Brightness.qml
+singleton Display 1.0 Display.qml
+singleton GameMode 1.0 GameMode.qml
 singleton Idle 1.0 Idle.qml
 singleton Media 1.0 Media.qml
 singleton Network 1.0 Network.qml
+singleton NightLight 1.0 NightLight.qml
 singleton Notification 1.0 Notification.qml
 singleton OSD 1.0 OSD.qml
 singleton Panels 1.0 Panels.qml
@@ -13,4 +16,6 @@ singleton Power 1.0 Power.qml
 singleton Screenshot 1.0 Screenshot.qml
 singleton SystemStats 1.0 SystemStats.qml
 singleton Time 1.0 Time.qml
+singleton ThemeSync 1.0 ThemeSync.qml
 singleton Tooltip 1.0 Tooltip.qml
+singleton Wallpaper 1.0 Wallpaper.qml

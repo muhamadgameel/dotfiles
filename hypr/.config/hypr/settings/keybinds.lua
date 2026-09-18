@@ -75,6 +75,15 @@ hl.bind(mod .. " + U", hl.dsp.focus({ urgent_or_last = true }), { description = 
 hl.bind(mod .. " + mouse:272", hl.dsp.window.drag(), { mouse = true })
 hl.bind(mod .. " + mouse:273", hl.dsp.window.resize(), { mouse = true })
 
+-- Clicking away from an open shell panel closes it. non_consuming so the click
+-- still reaches whatever it was aimed at: the shell used to take a compositor
+-- focus grab for this, which swallowed that first click. The shell ignores the
+-- ones that land on the panel itself.
+hl.bind("mouse:272", hl.dsp.global("quickshell:panelDismiss"), {
+	non_consuming = true,
+	description = "Dismiss an open shell panel",
+})
+
 -- ╔═══════════════════════════════════════════════════════════════════╗
 -- ║                          WORKSPACES                               ║
 -- ╚═══════════════════════════════════════════════════════════════════╝
@@ -142,6 +151,51 @@ hl.bind(mod .. " + SHIFT + Print", hl.dsp.exec_cmd("grim - | wl-copy"), { descri
 
 
 -- ╔═══════════════════════════════════════════════════════════════════╗
+-- ║                          SHELL PANELS                             ║
+-- ╚═══════════════════════════════════════════════════════════════════╝
+-- Quickshell registers these with the global-shortcuts protocol
+-- (quickshell/modules/ipc/Shortcuts.qml); `hl.dsp.global` reaches the running
+-- shell directly, with no `qs` process spawn, and the shell answers with its
+-- own state -- so the same key toggles a panel shut again.
+--
+-- Nothing happens if the shell is not running: an unclaimed global shortcut is
+-- simply not bound. Check what is registered with `hyprctl globalshortcuts`.
+--
+-- Panels live on SUPER+SHIFT so the whole SUPER+<letter> row stays with the
+-- apps and window management above.
+
+local panels = {
+	A = "panelAudio",
+	B = "panelBluetooth",
+	D = "toggleDnd",
+	E = "panelSettings",
+	G = "panelSystemStats",
+	I = "toggleIdleInhibit",
+	K = "panelCalendar",
+	L = "toggleNightLight",
+	M = "panelMedia",
+	N = "panelNotifications",
+	P = "panelPower",
+	Q = "panelQuickSettings",
+	W = "panelNetwork",
+	-- Not Print: SUPER+SHIFT+Print is already screenshot-to-clipboard.
+	X = "panelScreenshot",
+	-- No mnemonic left: every letter in "wallpaper" is taken.
+	Y = "panelWallpaper",
+}
+
+for key, action in pairs(panels) do
+	hl.bind(mod .. " + SHIFT + " .. key, hl.dsp.global("quickshell:" .. action), { description = action })
+end
+
+-- Dismiss whatever is open. Not SUPER+SHIFT+Escape -- that is Log out.
+hl.bind(mod .. " + grave", hl.dsp.global("quickshell:panelClose"), { description = "Close any shell panel" })
+
+-- `quickshell:mediaPlayPause` is deliberately left unbound: XF86AudioPlay below
+-- already covers it through playerctl, and that keeps working while the shell
+-- is restarting.
+
+-- ╔═══════════════════════════════════════════════════════════════════╗
 -- ║                       SYSTEM CONTROLS                             ║
 -- ╚═══════════════════════════════════════════════════════════════════╝
 
@@ -151,8 +205,17 @@ hl.bind(mod .. " + Escape", hl.dsp.exec_cmd(apps.lock), { description = "Lock sc
 hl.bind(mod .. " + SHIFT + Escape", hl.dsp.exec_cmd("uwsm stop"), { description = "Log out" })
 
 -- ── Brightness ───────────────────────────────────────────────────────
-hl.bind("XF86MonBrightnessUp", hl.dsp.exec_cmd("brightnessctl -e4 -n2 set 5%+"), { locked = true, repeating = true })
-hl.bind("XF86MonBrightnessDown", hl.dsp.exec_cmd("brightnessctl -e4 -n2 set 5%-"), { locked = true, repeating = true })
+-- Linear (no `-e4`), to match the shell. services/Brightness.qml writes a
+-- plain percentage and reads the raw sysfs value back, so it is linear on both
+-- ends; with the exponential curve here the same 5% step moved the shell's
+-- slider by a different amount depending on where it started.
+--
+-- Perceptually, exponential is the nicer curve -- steps stay fine at the dim
+-- end. Reinstating it means applying it in the service too, and inverting it
+-- on read so the slider still tracks; that belongs with the service work, not
+-- here.
+hl.bind("XF86MonBrightnessUp", hl.dsp.exec_cmd("brightnessctl -n2 set 5%+"), { locked = true, repeating = true })
+hl.bind("XF86MonBrightnessDown", hl.dsp.exec_cmd("brightnessctl -n2 set 5%-"), { locked = true, repeating = true })
 
 -- ── Volume ───────────────────────────────────────────────────────────
 hl.bind(

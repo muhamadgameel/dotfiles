@@ -26,7 +26,7 @@ Components.SlidingPanel {
   panelId: "quicksettings"
 
   headerIcon: "dashboard"
-  headerIconColor: Config.Theme.accent
+  headerIconColor: Core.Theme.accent
   headerTitle: "Quick Settings"
   headerSubtitle: Services.Time.dateLong
 
@@ -49,7 +49,7 @@ Components.SlidingPanel {
 
       icon: !wifiOn ? "wifi-off" : Services.Network.wifiConnected ? Services.Network.getSignalIcon(Services.Network.wifiSignal) : "wifi"
       label: "Wi-Fi"
-      subtitle: !wifiOn ? "Off" : Services.Network.wifiConnected ? Services.Network.wifiSSID : "Not connected"
+      subtitle: !wifiOn ? "Off" : Services.Network.wifiConnected ? Services.Network.wifiSSID : Services.Network.searching ? "Searching..." : "Not connected"
       active: wifiOn
       hasDetails: true
 
@@ -102,7 +102,8 @@ Components.SlidingPanel {
 
       icon: Services.Notification.doNotDisturb ? "bell-off" : "bell"
       label: "Do Not Disturb"
-      subtitle: Services.Notification.doNotDisturb ? "Popups hidden" : "Off"
+      // Says so when game mode, not the setting, is what is holding popups.
+      subtitle: !Services.Notification.doNotDisturb ? "Off" : Config.Config.doNotDisturb ? "Popups hidden" : "Game mode"
       active: Services.Notification.doNotDisturb
 
       // No chevron: the label needs the room, and the bar's bell already opens
@@ -120,6 +121,19 @@ Components.SlidingPanel {
       busy: Services.Idle.busy
 
       onToggled: Services.Idle.toggle()
+    }
+
+    // Full width: a seventh toggle in a two-column grid would sit alone.
+    Components.QuickToggle {
+      Layout.fillWidth: true
+      Layout.columnSpan: 2
+
+      icon: "gamepad"
+      label: "Game Mode"
+      subtitle: Services.GameMode.active ? `${Services.GameMode.reason} - popups held, Performance power` : "Off"
+      active: Services.GameMode.active
+
+      onToggled: Services.GameMode.toggle()
     }
   }
 
@@ -188,11 +202,11 @@ Components.SlidingPanel {
         Layout.fillWidth: true
 
         icon: Services.Audio.muted ? "volume-mute" : Services.Audio.getVolumeIcon()
-        iconColor: Services.Audio.muted ? Config.Theme.error : Config.Theme.text
+        iconColor: Services.Audio.muted ? Core.Theme.error : Core.Theme.text
         iconTooltip: Services.Audio.muted ? "Unmute" : "Mute"
         value: Services.Audio.volume
         maxValue: Services.Audio.maxVolume
-        progressColor: Services.Audio.muted ? Config.Theme.error : Services.Audio.volume > 1.0 ? Config.Theme.warning : Config.Theme.accent
+        progressColor: Services.Audio.muted ? Core.Theme.error : Services.Audio.volume > 1.0 ? Core.Theme.warning : Core.Theme.accent
 
         onIconClicked: Services.Audio.toggleMute()
         onMoved: value => Services.Audio.setVolume(value)
@@ -206,6 +220,33 @@ Components.SlidingPanel {
         value: Services.Brightness.brightness
 
         onMoved: value => Services.Brightness.set(value)
+      }
+
+      // Night light. The slider runs warmest-to-the-right, so it reads as how
+      // much filter rather than as a colour temperature going down; the icon
+      // turns it on and off, the way the volume icon mutes.
+      SliderRow {
+        id: nightLight
+
+        readonly property int span: Services.NightLight.temperatureMin + Services.NightLight.temperatureMax
+
+        Layout.fillWidth: true
+        visible: Services.NightLight.available
+
+        icon: Services.NightLight.enabled ? "moon" : "sun"
+        iconColor: Services.NightLight.active ? Core.Theme.warning : Core.Theme.text
+        iconTooltip: Services.NightLight.enabled ? "Night light off" : "Night light on"
+        minValue: Services.NightLight.temperatureMin
+        maxValue: Services.NightLight.temperatureMax
+        value: nightLight.span - Services.NightLight.temperature
+        progressColor: Services.NightLight.active ? Core.Theme.warning : Core.Theme.textMuted
+        valueText: Services.NightLight.enabled ? `${Services.NightLight.temperature}K` : "Off"
+
+        onIconClicked: Services.NightLight.toggle()
+        onMoved: value => {
+          Services.NightLight.setTemperature(nightLight.span - value);
+          Services.NightLight.setEnabled(true);
+        }
       }
     }
   }
@@ -232,7 +273,7 @@ Components.SlidingPanel {
         Rectangle {
           anchors.fill: parent
           radius: Core.Style.radiusS
-          color: Config.Theme.surface
+          color: Core.Theme.surface
         }
 
         Components.Icon {
@@ -240,7 +281,7 @@ Components.SlidingPanel {
           visible: thumb.status !== Image.Ready
           icon: "music"
           size: Core.Style.fontL
-          color: Config.Theme.textDim
+          color: Core.Theme.textDim
         }
 
         Components.RoundedImage {
@@ -261,7 +302,6 @@ Components.SlidingPanel {
           Layout.fillWidth: true
           text: Services.Media.trackTitle || Services.Media.identity
           weight: Core.Style.weightBold
-          elide: Text.ElideRight
         }
 
         Components.Text {
@@ -269,8 +309,7 @@ Components.SlidingPanel {
           visible: Services.Media.trackArtist !== ""
           text: Services.Media.trackArtist
           size: Core.Style.fontXS
-          color: Config.Theme.textDim
-          elide: Text.ElideRight
+          color: Core.Theme.textDim
         }
       }
 
@@ -306,11 +345,13 @@ Components.SlidingPanel {
     id: sliderRow
 
     property string icon: ""
-    property color iconColor: Config.Theme.text
+    property color iconColor: Core.Theme.text
     property string iconTooltip: ""
     property real value: 0
+    property real minValue: 0
     property real maxValue: 1.0
-    property color progressColor: Config.Theme.accent
+    property color progressColor: Core.Theme.accent
+    property string valueText: Math.round(sliderRow.value * 100) + "%"
 
     signal iconClicked
     signal moved(real value)
@@ -330,6 +371,7 @@ Components.SlidingPanel {
     Components.Slider {
       Layout.fillWidth: true
       value: sliderRow.value
+      minValue: sliderRow.minValue
       maxValue: sliderRow.maxValue
       progressColor: sliderRow.progressColor
       onValueUpdated: newValue => sliderRow.moved(newValue)
@@ -338,9 +380,9 @@ Components.SlidingPanel {
     Components.Text {
       Layout.preferredWidth: Core.Style.controlHeightM
       horizontalAlignment: Text.AlignRight
-      text: Math.round(sliderRow.value * 100) + "%"
+      text: sliderRow.valueText
       size: Core.Style.fontS
-      color: Config.Theme.textDim
+      color: Core.Theme.textDim
     }
   }
 }

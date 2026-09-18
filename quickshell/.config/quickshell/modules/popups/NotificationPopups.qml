@@ -5,7 +5,6 @@ import QtQuick.Layouts
 import Quickshell
 
 import "../../components" as Components
-import "../../config" as Config
 import "../../core" as Core
 import "../../services" as Services
 
@@ -20,7 +19,7 @@ Variants {
 
     required property ShellScreen modelData
 
-    sourceComponent: Core.PositionedPanelWindow {
+    sourceComponent: Components.PositionedPanelWindow {
       id: notifWindow
 
       // Hidden when there is nothing to show, so the window never blocks input
@@ -53,7 +52,14 @@ Variants {
 
       readonly property int shadowRoom: Math.max(Core.Style.spaceXS, Core.Style.elevationRoom(2))
 
-      implicitWidth: notifWidth + (shadowRoom - Core.Style.spaceXS) * 2
+      // While a panel is open on this screen the stack sits to its left, a
+      // spaceM gap from the panel's surface (SlidingPanel's default width and
+      // inset). The window is sized for both positions and never moves; only
+      // the stack slides inside it, which needs no compositor round trip.
+      readonly property bool besidePanel: Services.Panels.openPanel !== "" && Services.Panels.isOpen(Services.Panels.openPanel, root.modelData)
+      readonly property int panelShift: Core.Style.panelWidth + Math.max(Core.Style.spaceS, Core.Style.elevationRoom(2)) - 2 * Core.Style.spaceS + Core.Style.spaceM - margin - shadowRoom
+
+      implicitWidth: notifWidth + (shadowRoom - Core.Style.spaceXS) * 2 + panelShift
 
       Components.AnimatedColumn {
         id: notificationStack
@@ -61,6 +67,14 @@ Variants {
         anchors {
           top: parent.top
           right: parent.right
+          rightMargin: notifWindow.besidePanel ? notifWindow.panelShift : 0
+        }
+
+        Behavior on anchors.rightMargin {
+          NumberAnimation {
+            duration: Core.Style.duration(Core.Style.animNormal)
+            easing.type: Core.Style.easeStandard
+          }
         }
 
         fadeIn: false
@@ -100,7 +114,7 @@ Variants {
             }
 
             // === Slide Animator ===
-            Core.SlideAnimator {
+            Core.ShowHideAnimator {
               id: slideAnimator
               target: card
 
@@ -146,7 +160,7 @@ Variants {
             }
 
             // === Notification Card ===
-            // Inside the animated card Item, so SlideAnimator carries it.
+            // Inside the animated card Item, so ShowHideAnimator carries it.
             Components.Elevation {
               surface: cardContent
               level: 2
@@ -159,10 +173,8 @@ Variants {
               anchors.margins: notifWindow.shadowRoom
 
               notificationData: card.notificationData
-              showProgress: true
-              progressValue: card.model.progress
 
-              onHoverChanged: {
+              onHoveredChanged: {
                 if (hovered) {
                   Services.Notification.pauseTimeout(card.notificationId);
                 } else {
@@ -250,13 +262,13 @@ Variants {
             Components.Icon {
               icon: "bell"
               size: Core.Style.fontM
-              color: Config.Theme.textDim
+              color: Core.Theme.textDim
             }
 
             Components.Text {
               text: overflowPill.shownCount === 1 ? "1 more notification" : `${overflowPill.shownCount} more notifications`
               size: Core.Style.fontS
-              color: Config.Theme.textDim
+              color: Core.Theme.textDim
             }
           }
         }

@@ -10,15 +10,14 @@ import Quickshell
 * console.*, so there is one place that decides the format, the level, and what
 * gets dropped.
 *
-* Deliberately dependency-free. It used to bind `debugEnabled` to
-* Config.debugMode, which meant Config could not log without Settings, Logger
-* and Config all trying to construct each other. The level is *pushed* in from
-* shell.qml instead, so nothing this file touches can call back into it.
+* Deliberately dependency-free. Binding the level to Config.debugMode here
+* meant Config could not log without Settings, Logger and Config all trying to
+* construct each other. The level is *pushed* in from shell.qml instead, so
+* nothing this file touches can call back into it.
 *
 * Usage:
 *   Core.Logger.d("Audio", "sink changed", node.name)
 *   Core.Logger.w("Network", `nmcli exited ${code}`)
-*   Core.Logger.setLevel("debug")
 */
 Singleton {
   id: root
@@ -40,9 +39,6 @@ Singleton {
 
   readonly property string levelName: levelNames[level] ?? "info"
 
-  // Kept for the call sites that only ever asked "are we in debug mode".
-  readonly property bool debugEnabled: level <= levelDebug
-
   // === Repeat suppression ===
   // The polling services can emit the same line every tick when something is
   // wrong. Identical consecutive messages are counted instead of printed, and
@@ -54,19 +50,6 @@ Singleton {
   property double _lastAt: 0
 
   // === Public API ===
-
-  /**
-  * @param name - one of levelNames; anything else is ignored.
-  */
-  function setLevel(name) {
-    const index = levelNames.indexOf(String(name).toLowerCase());
-    if (index < 0) {
-      root.w("Logger", `unknown level '${name}', keeping '${root.levelName}'`);
-      return root.levelName;
-    }
-    root.level = index;
-    return root.levelName;
-  }
 
   function d(module, ...args) {
     root._emit(root.levelDebug, module, args);

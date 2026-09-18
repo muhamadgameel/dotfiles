@@ -46,7 +46,7 @@ Variants {
     readonly property bool atTop: Config.Config.barPosition === "top"
 
     implicitHeight: Core.Style.barHeight
-    color: Config.Theme.transparent
+    color: Core.Theme.transparent
 
     WlrLayershell.namespace: "quickshell-bar"
     WlrLayershell.layer: WlrLayer.Top
@@ -65,6 +65,12 @@ Variants {
       screen: barWindow.modelData
 
       onPanelRequested: panelId => Services.Panels.toggle(panelId, barWindow.modelData)
+
+      // A click on the bar is the bar's own: a widget toggling its panel must
+      // not also be read as clicking away from it. See Panels.dismiss().
+      HoverHandler {
+        onHoveredChanged: Services.Panels.pointerOverBar = hovered
+      }
     }
 
     // === Panels (built on first open, torn down after the close animation) ===
@@ -145,6 +151,22 @@ Variants {
       active: Services.Panels.isLoaded("quicksettings", barWindow.modelData)
 
       component: Panels.QuickSettingsPanel {
+        parentWindow: barWindow
+      }
+    }
+
+    LazyLoader {
+      active: Services.Panels.isLoaded("wallpaper", barWindow.modelData)
+
+      component: Panels.WallpaperPanel {
+        parentWindow: barWindow
+      }
+    }
+
+    LazyLoader {
+      active: Services.Panels.isLoaded("settings", barWindow.modelData)
+
+      component: Panels.SettingsPanel {
         parentWindow: barWindow
       }
     }

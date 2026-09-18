@@ -36,6 +36,8 @@ Singleton {
 
   // === Panel Dimensions ===
   readonly property int panelWidth: Math.round(360 * uiScale)
+  // For panels whose rows carry long text, like the notification centre.
+  readonly property int panelWidthWide: Math.round(420 * uiScale)
   readonly property int panelPadding: Math.round(16 * uiScale)
 
   // === Widget Dimensions ===
@@ -50,16 +52,43 @@ Singleton {
   readonly property int controlHeightM: Math.round(40 * uiScale)
   readonly property int controlHeightL: Math.round(52 * uiScale)
 
+  // === Progress Bars ===
+  // Thickness by importance: L for a headline figure (CPU, RAM, disk), M for a
+  // supporting one and the default, S for a dense breakdown (per-core).
+  readonly property int progressHeightS: px(4)
+  readonly property int progressHeightM: px(6)
+  readonly property int progressHeightL: px(8)
+
+  // === Sections ===
+  // The rhythm is what groups a panel: a lot of air above a heading, almost
+  // none below it, so the heading belongs to the rows under it rather than
+  // floating between two groups. The rail marks where the section ends, which
+  // spacing alone cannot say.
+  readonly property int sectionGap: spaceXL
+  readonly property int sectionLabelGap: spaceS
+  readonly property int sectionRail: Math.round(panelPadding / 2)
+
+  // === Sparklines ===
+  // Tall enough to read a shape, short enough that four of them fit a panel.
+  readonly property int sparklineHeight: px(26)
+
+  // === Empty States ===
+  // The icon over an empty list. Large is for when the whole panel has nothing
+  // to show - a radio switched off, no notifications - small for one section.
+  readonly property int emptyIconSize: Math.round(32 * uiScale)
+  readonly property int emptyIconSizeLarge: Math.round(48 * uiScale)
+
   // === Typography ===
   readonly property string fontFamily: Config.Config.fontFamily
   readonly property string fontMono: "JetBrainsMono Nerd Font"
 
-  readonly property real letterSpacingTight: -0.2
   readonly property real letterSpacingWide: 0.6
+  // A section heading is set smaller than the rows it labels, so it needs more
+  // tracking than a heading set larger would.
+  readonly property real letterSpacingWider: 1.2
 
   // === Font Sizes ===
-  readonly property real fontXXS: 6 * uiScale
-  readonly property real fontXS: 8 * uiScale
+  readonly property real fontXS: 9 * uiScale
   readonly property real fontS: 10 * uiScale
   readonly property real fontM: 12 * uiScale
   readonly property real fontL: 14 * uiScale
@@ -82,16 +111,13 @@ Singleton {
   readonly property int spaceXXL: Math.round(32 * uiScale)
 
   // === Border Radii ===
-  readonly property int radiusXS: Math.round(4 * uiScale)
   readonly property int radiusS: Math.round(6 * uiScale)
   readonly property int radiusM: Math.round(10 * uiScale)
   readonly property int radiusL: Math.round(14 * uiScale)
-  readonly property int radiusXL: Math.round(20 * uiScale)
   readonly property int radiusFull: 9999
 
   // === Border Widths ===
   readonly property int borderThin: 1
-  readonly property int borderMedium: 2
 
   // === State Layers ===
   // How strongly an interaction state tints the surface underneath it. Used via
@@ -100,7 +126,12 @@ Singleton {
   readonly property real opacityHover: 0.08
   readonly property real opacityPressed: 0.14
   readonly property real opacityDisabled: 0.4
-  readonly property real opacityMuted: 0.6
+
+  // A colour washed over a surface: light for a selected row or a hovered
+  // destructive action, strong where the colour itself has to read - a badge,
+  // a status banner, an armed power action.
+  readonly property real opacityTint: 0.15
+  readonly property real opacityTintStrong: 0.2
 
   // === Focus ===
   readonly property int focusRingWidth: Math.max(2, Math.round(2 * uiScale))
@@ -175,6 +206,8 @@ Singleton {
   readonly property int easeEnter: Easing.OutBack
   readonly property int easeExit: Easing.InCubic
   readonly property real enterOvershoot: 1.1
+  // Symmetric, for something that breathes in and out: StatusDot, WarningOverlay.
+  readonly property int easePulse: Easing.InOutQuad
 
   // === Pop (small things appearing in place: tooltips, OSD) ===
   readonly property int popShowDuration: animFast
@@ -190,7 +223,7 @@ Singleton {
   // Gap between consecutive cards in a stack, so they arrive in sequence.
   readonly property int slideStagger: 80
 
-  // One turn of a spinner. Icon.qml and Spinner.qml each had their own 1000.
+  // One turn of a Spinner.
   readonly property int spinDuration: 1000
 
   // Stacking order for things that float over panel content (scrollbars,

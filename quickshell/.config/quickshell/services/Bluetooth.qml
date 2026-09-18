@@ -49,14 +49,26 @@ Singleton {
     // Named devices first. The rest are anonymous BLE beacons - phones and
     // watches advertising on rotating random addresses - and burying the device
     // you are looking for under a dozen of them made the list unusable.
-    // filter() already copied, so sorting here does not reorder the model.
-    return devices.values.filter(d => d && !d.paired && !d.trusted && !d.blocked).sort((a, b) => {
-      const an = root.isNamed(a);
-      const bn = root.isNamed(b);
-      if (an !== bn)
-        return an ? -1 : 1;
-      return root.deviceLabel(a).localeCompare(root.deviceLabel(b));
+    //
+    // Each device's sort key is worked out once, up front, not inside the
+    // comparator. A comparator runs O(n log n) times and this binding re-runs on
+    // every RSSI update while scanning, so deriving the label per comparison
+    // repeated the name lookup - and for an unnamed beacon a chain of regex
+    // tests - many times per device, per update.
+    const candidates = devices.values.filter(d => d && !d.paired && !d.trusted && !d.blocked);
+    const keyed = candidates.map(d => ({
+          device: d,
+          named: root.isNamed(d),
+          label: root.deviceLabel(d)
+        }));
+
+    keyed.sort((a, b) => {
+      if (a.named !== b.named)
+        return a.named ? -1 : 1;
+      return a.label.localeCompare(b.label);
     });
+
+    return keyed.map(entry => entry.device);
   }
 
   readonly property var devicesWithBattery: {
@@ -85,12 +97,6 @@ Singleton {
   // === Computed Properties ===
   readonly property int connectedCount: connectedDevices.length
   readonly property bool hasConnectedDevices: connectedCount > 0
-
-  readonly property bool connecting: {
-    if (!devices)
-      return false;
-    return devices.values.some(d => d?.state === BluetoothDeviceState.Connecting || d?.pairing);
-  }
 
   readonly property string firstConnectedName: connectedDevices.length > 0 ? root.deviceLabel(connectedDevices[0]) : ""
 
@@ -282,7 +288,6 @@ Singleton {
 
     return "Unknown device";
   }
-
 
   function getDeviceIcon(device) {
     if (!device)

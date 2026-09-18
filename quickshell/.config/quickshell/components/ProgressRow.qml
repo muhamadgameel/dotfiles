@@ -1,6 +1,5 @@
 import QtQuick
 import QtQuick.Layouts
-import "../config" as Config
 import "../core" as Core
 
 import "." as Components
@@ -27,8 +26,7 @@ ColumnLayout {
 
   // === Icon Properties ===
   property string icon: ""
-  property color iconColor: Config.Theme.text
-  property int iconSize: Core.Style.fontXL
+  property color iconColor: Core.Theme.text
 
   // === Label Properties ===
   property string label: ""        // Row label (e.g., "RAM", "CPU")
@@ -37,8 +35,8 @@ ColumnLayout {
   // === Progress Properties ===
   property real value: 0
   property real maxValue: 1
-  property color progressColor: Config.Theme.accent
-  property int progressHeight: Core.Style.px(6)
+  property color progressColor: Core.Theme.accent
+  property int progressHeight: Core.Style.progressHeightM
 
   // === Value Display ===
   property bool showPercentage: true
@@ -61,20 +59,19 @@ ColumnLayout {
     // Icon
     Components.Icon {
       icon: root.icon
-      size: root.iconSize
+      size: Core.Style.fontXL
       color: root.iconColor
       visible: root.hasIcon
     }
 
-    // Label column with progress (when label is present)
+    // Optional label row above the bar
     ColumnLayout {
       Layout.fillWidth: true
       spacing: Core.Style.spaceXS
-      visible: root.hasLabel || root.hasLabelInfo
 
-      // Label row with info
       RowLayout {
         Layout.fillWidth: true
+        visible: root.hasLabel || root.hasLabelInfo
 
         Components.Text {
           visible: root.hasLabel
@@ -88,11 +85,10 @@ ColumnLayout {
           visible: root.hasLabelInfo
           text: root.labelInfo
           size: Core.Style.fontS
-          color: Config.Theme.textDim
+          color: Core.Theme.textDim
         }
       }
 
-      // Progress bar below label
       Components.ProgressBar {
         Layout.fillWidth: true
         Layout.preferredHeight: root.progressHeight
@@ -102,23 +98,13 @@ ColumnLayout {
       }
     }
 
-    // Progress bar inline with icon (when no label)
-    Components.ProgressBar {
-      Layout.fillWidth: true
-      Layout.preferredHeight: root.progressHeight
-      visible: !root.hasLabel && !root.hasLabelInfo
-      value: root.value
-      maxValue: root.maxValue
-      progressColor: root.progressColor
-    }
-
     // Value/Percentage display
     Components.Text {
       visible: root.showPercentage || root.hasValueText
       text: root.hasValueText ? root.valueText : Math.round(root.value / root.maxValue * 100) + "%"
       size: root.hasValueText ? Core.Style.fontL : Core.Style.fontM
       font.weight: root.hasValueText ? Core.Style.weightBold : Core.Style.weightMedium
-      color: root.hasValueText ? root.iconColor : Config.Theme.text
+      color: root.hasValueText ? root.iconColor : Core.Theme.text
     }
   }
 }

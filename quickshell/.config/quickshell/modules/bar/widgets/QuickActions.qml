@@ -16,6 +16,8 @@ RowLayout {
   id: root
 
   signal quickSettingsRequested
+  signal settingsRequested
+  signal wallpaperRequested
   signal screenshotRequested
   signal powerRequested
 
@@ -23,14 +25,25 @@ RowLayout {
 
   Components.Button {
     icon: "dashboard"
-    iconSize: Core.Style.fontL
     tooltipText: "Quick settings"
     onClicked: root.quickSettingsRequested()
   }
 
   Components.Button {
+    icon: "settings"
+    tooltipText: "Settings"
+    onClicked: root.settingsRequested()
+  }
+
+  Components.Button {
+    icon: "image"
+    visible: Config.Config.barShowWallpaper
+    tooltipText: "Change the wallpaper"
+    onClicked: root.wallpaperRequested()
+  }
+
+  Components.Button {
     icon: "camera"
-    iconSize: Core.Style.fontL
     visible: Config.Config.barShowScreenshot
     tooltipText: "Take a screenshot"
     onClicked: root.screenshotRequested()
@@ -38,8 +51,7 @@ RowLayout {
 
   Components.Button {
     icon: "power"
-    iconSize: Core.Style.fontL
-    iconColor: Config.Theme.error
+    iconColor: Core.Theme.error
     visible: Config.Config.barShowPower
     tooltipText: "Power menu"
     onClicked: root.powerRequested()

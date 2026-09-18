@@ -5,7 +5,6 @@ import Quickshell.Hyprland
 import Quickshell.Widgets
 
 import "../../../components" as Components
-import "../../../config" as Config
 import "../../../core" as Core
 import "../../../services" as Services
 
@@ -138,7 +137,7 @@ Item {
         visible: root.iconPath === ""
         icon: "window"
         size: Core.Style.iconSize
-        color: Config.Theme.textMuted
+        color: Core.Theme.textMuted
       }
     }
 
@@ -146,8 +145,7 @@ Item {
       Layout.fillWidth: true
       text: root.displayTitle
       size: Core.Style.fontS
-      color: Config.Theme.textDim
-      elide: Text.ElideRight
+      color: Core.Theme.textDim
     }
   }
 

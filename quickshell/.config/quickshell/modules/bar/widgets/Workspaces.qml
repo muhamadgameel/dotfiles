@@ -181,14 +181,14 @@ Item {
 
         backgroundColor: {
           if (isFocused)
-            return Config.Theme.accent;
+            return Core.Theme.accent;
           if (isUrgent)
-            return Config.Theme.error;
+            return Core.Theme.error;
           // Occupied but unfocused reads as "there is something here".
-          return occupied ? Config.Theme.surface : Config.Theme.transparent;
+          return occupied ? Core.Theme.surface : Core.Theme.transparent;
         }
 
-        hoverColor: isFocused ? Config.Theme.accent : (isUrgent ? Config.Theme.error : Config.Theme.surfaceHover)
+        hoverColor: isFocused ? Core.Theme.accent : (isUrgent ? Core.Theme.error : Core.Theme.surfaceHover)
 
         onClicked: button => {
           if (button === Qt.MiddleButton)
@@ -202,9 +202,9 @@ Item {
           text: slot.workspaceId
           color: {
             if (slot.isFocused)
-              return Config.Theme.bg;
+              return Core.Theme.bg;
             // Empty slots are dimmed so the occupied ones stand out.
-            return slot.occupied ? Config.Theme.text : Config.Theme.textMuted;
+            return slot.occupied ? Core.Theme.text : Core.Theme.textMuted;
           }
           weight: slot.isFocused ? Core.Style.weightBold : Core.Style.weightMedium
 
@@ -235,7 +235,7 @@ Item {
               width: Core.Style.px(3)
               height: width
               radius: width / 2
-              color: Config.Theme.textMuted
+              color: Core.Theme.textMuted
             }
           }
         }

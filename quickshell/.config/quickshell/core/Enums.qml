@@ -12,7 +12,7 @@ import Quickshell
 * can drift.
 *
 * Usage:
-*   Config.Enums.Urgency.Critical
+*   Core.Enums.Urgency.Critical
 */
 Singleton {
   id: root

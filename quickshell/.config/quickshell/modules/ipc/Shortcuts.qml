@@ -63,6 +63,15 @@ Scope {
     onPressed: Services.Panels.close()
   }
 
+  // Bound to the mouse button itself, non-consuming, so the click that closes
+  // a panel still lands on whatever is underneath.
+  GlobalShortcut {
+    appid: "quickshell"
+    name: "panelDismiss"
+    description: "Close an open panel when clicking away from it"
+    onPressed: Services.Panels.dismiss()
+  }
+
   GlobalShortcut {
     appid: "quickshell"
     name: "panelQuickSettings"
@@ -98,6 +107,20 @@ Scope {
     onPressed: Services.Panels.toggle("screenshot", Targets.focusedScreen)
   }
 
+  GlobalShortcut {
+    appid: "quickshell"
+    name: "panelWallpaper"
+    description: "Toggle the wallpaper picker"
+    onPressed: Services.Panels.toggle("wallpaper", Targets.focusedScreen)
+  }
+
+  GlobalShortcut {
+    appid: "quickshell"
+    name: "panelSettings"
+    description: "Toggle the settings panel"
+    onPressed: Services.Panels.toggle("settings", Targets.focusedScreen)
+  }
+
   // --- Actions ---
 
   GlobalShortcut {
@@ -105,6 +128,13 @@ Scope {
     name: "mediaPlayPause"
     description: "Play/pause the active media player"
     onPressed: Services.Media.playPause()
+  }
+
+  GlobalShortcut {
+    appid: "quickshell"
+    name: "toggleGameMode"
+    description: "Toggle game mode by hand"
+    onPressed: Services.GameMode.toggle()
   }
 
   GlobalShortcut {
@@ -121,5 +151,12 @@ Scope {
     name: "toggleDnd"
     description: "Toggle do not disturb"
     onPressed: Config.Config.toggleDoNotDisturb()
+  }
+
+  GlobalShortcut {
+    appid: "quickshell"
+    name: "toggleNightLight"
+    description: "Toggle the night light"
+    onPressed: Services.NightLight.toggle()
   }
 }

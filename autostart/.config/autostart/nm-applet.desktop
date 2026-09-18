@@ -1,0 +1,24 @@
+# Override for /etc/xdg/autostart/nm-applet.desktop.
+#
+# nm-applet conflicts with the quickshell bar in two ways:
+#
+#   1. It registers a StatusNotifierItem, which the bar's tray then shows --
+#      a second network icon next to the shell's own Network widget.
+#   2. It is a NetworkManager *secret agent*, so it opens its own GTK dialog
+#      asking for a Wi-Fi password at the same moment NetworkPanel is asking
+#      inline. Two prompts, one connection.
+#
+# Nothing is lost by hiding it. NetworkManager itself keeps running and keeps
+# autoconnecting: every saved network here has psk-flags=0, meaning the secret
+# lives in the connection profile, so no agent has to supply it. Check with
+#   nmcli -s -g 802-11-wireless-security.psk-flags connection show "<name>"
+# and if one ever reads 1 (agent-owned), store it instead:
+#   nmcli connection modify "<name>" wifi-sec.psk-flags 0
+#
+# Hidden=true is the XDG way to cancel a system-wide autostart entry for one
+# user; systemd's xdg-autostart-generator honours it.
+[Desktop Entry]
+Type=Application
+Name=NetworkManager Applet
+Exec=nm-applet
+Hidden=true

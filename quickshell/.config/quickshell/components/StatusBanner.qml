@@ -1,65 +1,26 @@
 import QtQuick
 import QtQuick.Layouts
-import "../config" as Config
 import "../core" as Core
 
 import "." as Components
 
 /**
-* StatusBanner - Displays a status message in a colored banner
-*
-* Supports multiple types: error, warning, success, info
+* StatusBanner - an error message in a red banner
 *
 * Usage:
 *   StatusBanner {
-*       visible: hasStatus
-*       type: "warning"
-*       message: statusMessage
+*       visible: hasError
+*       message: errorMessage
 *   }
 */
 Rectangle {
   id: root
 
-  // Type can be: "error", "warning", "success", "info"
-  property string type: "error"
   property string message: ""
-  property string icon: _defaultIcon
-
-  // Internal: resolve color based on type
-  readonly property color _statusColor: {
-    switch (type) {
-    case "success":
-      return Config.Theme.success;
-    case "warning":
-      return Config.Theme.warning;
-    case "info":
-      return Config.Theme.accentAlt;
-    case "error":
-      return Config.Theme.error;
-    default:
-      return Config.Theme.overlay;
-    }
-  }
-
-  // Internal: default icon based on type
-  readonly property string _defaultIcon: {
-    switch (type) {
-    case "success":
-      return "check";
-    case "warning":
-      return "warning";
-    case "info":
-      return "info";
-    case "error":
-      return "error";
-    default:
-      return "question";
-    }
-  }
 
   implicitHeight: visible ? content.height + Core.Style.spaceS * 2 : 0
   radius: Core.Style.radiusS
-  color: Config.Theme.alpha(_statusColor, 0.2)
+  color: Core.Theme.alpha(Core.Theme.error, Core.Style.opacityTintStrong)
 
   RowLayout {
     id: content
@@ -72,16 +33,16 @@ Rectangle {
     spacing: Core.Style.spaceS
 
     Components.Icon {
-      icon: root.icon
+      icon: "error"
       size: Core.Style.fontL
-      color: root._statusColor
+      color: Core.Theme.error
       Layout.alignment: Qt.AlignCenter
     }
 
     Components.Text {
       Layout.fillWidth: true
       text: root.message
-      color: root._statusColor
+      color: Core.Theme.error
       size: Core.Style.fontM
       wrapMode: Text.Wrap
     }

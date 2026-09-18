@@ -1,6 +1,5 @@
 import QtQuick
 import QtQuick.Layouts
-import "../config" as Config
 import "../core" as Core
 
 import "." as Components
@@ -47,16 +46,13 @@ Components.Card {
     Components.Text {
       visible: root.valueText !== ""
       text: root.valueText
-      color: Config.Theme.textDim
+      color: Core.Theme.textDim
     }
 
     Components.Toggle {
       visible: root.hasToggle
       checked: root.toggleChecked
-      onToggled: checked => {
-        root.toggleChecked = checked;
-        root.toggled(checked);
-      }
+      onToggled: checked => root.toggled(checked)
     }
   }
 }

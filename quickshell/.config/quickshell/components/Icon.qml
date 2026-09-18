@@ -1,6 +1,5 @@
 import QtQuick
 
-import "../config" as Config
 import "../core" as Core
 
 /**
@@ -24,8 +23,7 @@ import "../core" as Core
 *   // With background padding
 *   Icon { icon: "bell"; padding: 8; backgroundColor: Theme.surface; radius: Style.radiusM }
 *
-*   // With spinning animation (for loading states)
-*   Icon { icon: "refresh"; spinning: true }
+* For a loading state use Spinner, not a turning glyph.
 */
 Item {
   id: root
@@ -40,10 +38,6 @@ Item {
   property alias backgroundColor: background.color
   property real padding: 0
   property alias radius: background.radius
-
-  // === Animation ===
-  property bool spinning: false
-  property int spinDuration: Core.Style.spinDuration
 
   // === Internal: Determine icon type ===
   readonly property bool _isFilePath: {
@@ -64,7 +58,7 @@ Item {
     }
 
     // Try to look up in Icons registry
-    return Config.Icons.get(root.icon);
+    return Core.Icons.get(root.icon);
   }
 
   // === Dimensions ===
@@ -75,7 +69,7 @@ Item {
   Rectangle {
     id: background
     anchors.fill: parent
-    color: Config.Theme.transparent
+    color: Core.Theme.transparent
     radius: 0
     Behavior on color {
       ColorAnimation {
@@ -105,18 +99,10 @@ Item {
     id: iconText
     visible: !root._isFilePath && root._source !== ""
     text: root._source
-    font.family: Config.Icons.fontFamily
+    font.family: Core.Icons.fontFamily
     font.pixelSize: root.size
-    color: Config.Theme.text
+    color: Core.Theme.text
     anchors.centerIn: parent
-
-    RotationAnimation on rotation {
-      running: root.spinning && Core.Style.motionEnabled
-      from: 0
-      to: 360
-      duration: root.spinDuration
-      loops: Animation.Infinite
-    }
 
     Behavior on color {
       ColorAnimation {

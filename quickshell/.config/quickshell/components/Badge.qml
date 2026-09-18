@@ -1,6 +1,5 @@
 import QtQuick
 
-import "../config" as Config
 import "../core" as Core
 
 /**
@@ -38,28 +37,24 @@ Rectangle {
 
   // === Text Variant Properties ===
   property string text: ""
-  property color textColor: Config.Theme.accent
-  property real fontSize: Core.Style.fontS
+  property color textColor: Core.Theme.accent
 
   // === Count Variant Properties ===
   property int count: 0
-  property int maxCount: 99
 
   // === Shared Properties ===
   property color backgroundColor: {
     if (variant === "count")
-      return Config.Theme.error;
-    return Config.Theme.alpha(textColor, 0.2);
+      return Core.Theme.error;
+    return Core.Theme.alpha(textColor, Core.Style.opacityTintStrong);
   }
-  property color borderColor: Config.Theme.transparent
-  property int borderWidth: 0
 
   // === Computed Properties ===
   readonly property bool isTextVariant: variant === "text"
   readonly property bool isCountVariant: variant === "count"
   readonly property string displayText: {
     if (isCountVariant)
-      return count > maxCount ? maxCount + "+" : count.toString();
+      return count > 99 ? "99+" : count.toString();
     return text;
   }
 
@@ -69,13 +64,13 @@ Rectangle {
   // === Dimensions ===
   implicitWidth: {
     if (isCountVariant) {
-      return count > 0 ? Math.max(14, badgeText.implicitWidth + 6) : 8;
+      return count > 0 ? Math.max(Core.Style.px(14), badgeText.implicitWidth + Core.Style.px(6)) : Core.Style.px(8);
     }
     return badgeText.width + Core.Style.spaceM;
   }
   implicitHeight: {
     if (isCountVariant) {
-      return count > 0 ? 14 : 8;
+      return count > 0 ? Core.Style.px(14) : Core.Style.px(8);
     }
     return badgeText.height + Core.Style.spaceXS;
   }
@@ -83,8 +78,6 @@ Rectangle {
   // === Appearance ===
   radius: Core.Style.radiusFull
   color: backgroundColor
-  border.color: borderColor
-  border.width: borderWidth
 
   Behavior on implicitWidth {
     NumberAnimation {
@@ -101,13 +94,15 @@ Rectangle {
   }
 
   // === Text Content ===
+  // QtQuick's Text, so the family is set explicitly - see Button.qml.
   Text {
     id: badgeText
     anchors.centerIn: parent
     text: root.displayText
-    font.pixelSize: root.fontSize
+    font.family: Core.Style.fontFamily
+    font.pixelSize: Core.Style.fontS
     font.weight: root.isCountVariant ? Font.Bold : Font.Normal
-    color: root.isCountVariant ? Config.Theme.bg : root.textColor
+    color: root.isCountVariant ? Core.Theme.bg : root.textColor
     visible: root.isTextVariant || root.count > 0
   }
 }

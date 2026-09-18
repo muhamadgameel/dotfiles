@@ -16,10 +16,10 @@ Components.SlidingPanel {
   id: root
 
   panelId: "notifications"
-  panelWidth: Math.round(420 * Core.Style.uiScale)
+  panelWidth: Core.Style.panelWidthWide
 
   headerIcon: Services.Notification.doNotDisturb ? "bell-off" : "bell"
-  headerIconColor: Services.Notification.doNotDisturb ? Config.Theme.warning : Config.Theme.accent
+  headerIconColor: Services.Notification.doNotDisturb ? Core.Theme.warning : Core.Theme.accent
   headerTitle: "Notifications"
   headerSubtitle: {
     const n = Services.Notification.historyList.count;
@@ -32,6 +32,8 @@ Components.SlidingPanel {
   // by deleting entries one at a time.
   onOpened: Services.Notification.markAllRead()
 
+  signal clearRequested
+
   // === Toolbar ===
   // Pinned, so DND and Clear stay in reach however far the list is scrolled.
   pinned: RowLayout {
@@ -43,7 +45,7 @@ Components.SlidingPanel {
       icon: Services.Notification.doNotDisturb ? "bell-off" : "bell"
       text: Services.Notification.doNotDisturb ? "DND on" : "DND off"
       textSize: Core.Style.fontS
-      iconColor: Services.Notification.doNotDisturb ? Config.Theme.warning : Config.Theme.text
+      iconColor: Services.Notification.doNotDisturb ? Core.Theme.warning : Core.Theme.text
       tooltipText: "Suppress notification popups"
       onClicked: Config.Config.toggleDoNotDisturb()
     }
@@ -57,7 +59,7 @@ Components.SlidingPanel {
       textSize: Core.Style.fontS
       enabled: Services.Notification.historyList.count > 0
       tooltipText: "Clear all notifications"
-      onClicked: Services.Notification.clearHistory()
+      onClicked: root.clearRequested()
     }
   }
 
@@ -67,7 +69,7 @@ Components.SlidingPanel {
     Layout.preferredHeight: Core.Style.controlHeightL * 4
     visible: Services.Notification.historyList.count === 0
     icon: "bell-off"
-    iconSize: Core.Style.fontXXXL * 2
+    iconSize: Core.Style.emptyIconSizeLarge
     message: "No notifications"
     hint: "Your notifications will appear here"
   }
@@ -106,7 +108,6 @@ Components.SlidingPanel {
 
           width: parent.width
           compact: true
-          showProgress: false
           notificationData: historyRow.model
 
           // A Repeater destroys its delegate the instant the model row goes,
@@ -135,6 +136,14 @@ Components.SlidingPanel {
             to: 0
             duration: Core.Style.duration(Core.Style.slideHideDuration)
             easing.type: Core.Style.easeExit
+          }
+        }
+
+        Connections {
+          target: root
+
+          function onClearRequested() {
+            exitAnim.start();
           }
         }
       }

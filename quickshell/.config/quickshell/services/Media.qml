@@ -4,7 +4,6 @@ import QtQuick
 import Quickshell
 import Quickshell.Services.Mpris
 
-import "../config" as Config
 import "../core" as Core
 import "../services" as Services
 
@@ -158,10 +157,6 @@ Singleton {
     }
   }
 
-  function stop() {
-    active?.stop();
-  }
-
   function seek(seconds) {
     if (active?.canSeek)
       active.position = Core.Utils.clamp(seconds, 0, root.length);
@@ -200,13 +195,13 @@ Singleton {
   }
 
   function _showVolumeOSD(value) {
-    Services.OSD.show("progressRow", {
+    Services.OSD.show({
       icon: value <= 0 ? "volume-mute" : (value < 0.5 ? "volume-low" : "volume-high"),
       value: value,
       maxValue: 1.0,
-      iconColor: Config.Theme.text,
-      progressColor: Config.Theme.accent
-    }, "media-volume");
+      iconColor: Core.Theme.text,
+      progressColor: Core.Theme.accent
+    });
   }
 
   function toggleShuffle() {
@@ -238,11 +233,6 @@ Singleton {
     preferredId = id ?? "";
   }
 
-  function raise() {
-    if (active?.canRaise)
-      active.raise();
-  }
-
   // Drop a pin whose player has gone away, so the heuristic takes over again.
   onPlayersChanged: {
     if (preferredId !== "" && !players.some(p => p.uniqueId === preferredId))
@@ -253,11 +243,14 @@ Singleton {
   // is playing and a view is interested. Reading it is computed locally from the
   // last known position and the time since, so a short interval costs no D-Bus
   // round trip - and moves the seek bar smoothly rather than in 1s steps.
+  // triggeredOnStart reads it as soon as a view starts watching; otherwise the
+  // panel opens showing where playback was when it was last closed.
   property bool positionWatched: false
 
   Timer {
     interval: 250
     repeat: true
+    triggeredOnStart: true
     running: root.positionWatched && root.isPlaying && root.canSeek
     onTriggered: {
       if (root.active)

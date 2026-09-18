@@ -35,20 +35,6 @@ Singleton {
     return text.replace(/<[^>]*>?/gm, '');
   }
 
-  /**
-  * Shorten to maxLength characters, ellipsis included in the budget.
-  *
-  * A missing or nonsensical maxLength returns the text untouched rather than
-  * an empty string, which is what the unguarded comparison used to produce.
-  */
-  function truncate(text, maxLength) {
-    if (!text)
-      return "";
-    if (!(maxLength > 0) || text.length <= maxLength)
-      return text;
-    return text.substring(0, maxLength - 1) + "…";
-  }
-
   function capitalize(text) {
     if (!text)
       return "";
@@ -115,12 +101,6 @@ Singleton {
     return true;
   }
 
-  // === JSON Utilities ===
-
-  /**
-  * Parse, or return the fallback. Command output is the usual caller, and a
-  * process that failed hands back an empty string or a diagnostic.
-  */
   /**
   * Bring a ListModel into step with a list of stable keys, in place.
   *
@@ -168,6 +148,12 @@ Singleton {
     }
   }
 
+  // === JSON Utilities ===
+
+  /**
+  * Parse, or return the fallback. Command output is the usual caller, and a
+  * process that failed hands back an empty string or a diagnostic.
+  */
   function parseJson(jsonString, fallback) {
     try {
       return jsonString ? JSON.parse(jsonString) : (fallback !== undefined ? fallback : []);
@@ -180,25 +166,6 @@ Singleton {
 
   function clamp(value, min, max) {
     return Math.max(min, Math.min(max, value));
-  }
-
-  /**
-  * Map a value onto 0..1 given its range. Returns 0 for a degenerate range
-  * rather than NaN, which would silently poison a width or an opacity.
-  */
-  function normalize(value, min, max) {
-    if (!(max > min))
-      return 0;
-    return clamp((value - min) / (max - min), 0, 1);
-  }
-
-  /**
-  * Round to `decimals` places. JS rounding on a bare number gives integers,
-  * and toFixed gives a string; this gives a number.
-  */
-  function round(value, decimals) {
-    const factor = Math.pow(10, decimals || 0);
-    return Math.round(value * factor) / factor;
   }
 
   // === Size Formatting ===
@@ -220,21 +187,11 @@ Singleton {
   * As formatBytes, per second.
   */
   function formatSpeed(bytesPerSecond, decimals) {
-    if (!bytesPerSecond || bytesPerSecond < 1)
-      return "0 B/s";
-    const k = 1024;
-    const dm = decimals !== undefined ? decimals : 1;
-    const sizes = ["B/s", "KB/s", "MB/s", "GB/s", "TB/s"];
-    const i = Math.min(sizes.length - 1, Math.floor(Math.log(bytesPerSecond) / Math.log(k)));
-    return parseFloat((bytesPerSecond / Math.pow(k, i)).toFixed(dm)) + " " + sizes[i];
+    return formatBytes(bytesPerSecond, decimals) + "/s";
   }
 
   function formatTemp(celsius) {
     return Math.round(celsius) + "°C";
-  }
-
-  function formatPercent(fraction, decimals) {
-    return round(fraction * 100, decimals || 0) + "%";
   }
 
   // === Time Formatting ===
@@ -251,6 +208,27 @@ Singleton {
       return hours > 0 ? hours + "h " + minutes + "m" : minutes + "m";
     }
     return hours > 0 ? hours + "h " + minutes + "m" : minutes + " min";
+  }
+
+  /**
+  * A clock speed given in MHz: "3.2 GHz", or "938 MHz" below a gigahertz.
+  */
+  function formatFrequency(mhz) {
+    if (!mhz || mhz <= 0)
+      return "";
+    return mhz >= 1000 ? (mhz / 1000).toFixed(1) + " GHz" : Math.round(mhz) + " MHz";
+  }
+
+  /**
+  * How long something has been up, at day resolution: "3d 4h", "5h 12m".
+  */
+  function formatUptime(seconds) {
+    if (seconds <= 0)
+      return "";
+    const days = Math.floor(seconds / 86400);
+    if (days > 0)
+      return `${days}d ${Math.floor((seconds % 86400) / 3600)}h`;
+    return formatDuration(seconds, true);
   }
 
   /**

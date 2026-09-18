@@ -1,6 +1,5 @@
 import QtQuick
 
-import "../config" as Config
 import "../core" as Core
 import "../services" as Services
 
@@ -12,7 +11,6 @@ import "../services" as Services
 * - "primary": Accent colored background
 * - "secondary": Surface colored background
 * - "danger": Error colored, for destructive actions
-* - "ghost": No background, subtle hover
 *
 * Usage:
 *   // Icon-only button
@@ -35,13 +33,6 @@ import "../services" as Services
 *       text: "Delete"
 *       onClicked: delete()
 *   }
-*
-*   // Ghost button
-*   Button {
-*       variant: "ghost"
-*       icon: "close"
-*       onClicked: close()
-*   }
 */
 Rectangle {
   id: root
@@ -49,7 +40,7 @@ Rectangle {
   activeFocusOnTab: root.enabled
 
   // === Variant ===
-  property string variant: "default"  // "default", "primary", "secondary", "danger", "ghost"
+  property string variant: "default"  // "default", "primary", "secondary", "danger"
 
   // === Content Properties ===
   property string icon: ""
@@ -59,14 +50,13 @@ Rectangle {
   property string text: ""
   property real textSize: Core.Style.fontM
 
-  // property real padding: Core.Style.spaceS
   property real padding: Core.Style.spaceS
 
   // === Color Properties (for easy customization) ===
-  property color iconColor: Config.Theme.transparent
-  property color textColor: Config.Theme.transparent
-  property color backgroundColor: Config.Theme.transparent
-  property color hoverColor: Config.Theme.transparent
+  property color iconColor: Core.Theme.transparent
+  property color textColor: Core.Theme.transparent
+  property color backgroundColor: Core.Theme.transparent
+  property color hoverColor: Core.Theme.transparent
 
   // === Tooltip Properties ===
   property string tooltipText: ""
@@ -75,73 +65,53 @@ Rectangle {
   // === Signals ===
   signal clicked(int button)
   signal wheel(var wheel)
-  signal entered
-  signal exited
 
   // === State (readonly) ===
   readonly property bool hovered: mouseArea.containsMouse
-  readonly property bool pressed: mouseArea.pressed
 
   // === Computed Colors Based on Variant ===
   readonly property color _backgroundColor: {
-    if (backgroundColor !== Config.Theme.transparent)
+    if (!Qt.colorEqual(backgroundColor, Core.Theme.transparent))
       return backgroundColor;
     switch (variant) {
     case "primary":
-      return Config.Theme.accent;
+      return Core.Theme.accent;
     case "secondary":
-      return Config.Theme.surface;
-    case "danger":
-      return Config.Theme.transparent;
-    case "ghost":
-      return Config.Theme.transparent;
+      return Core.Theme.surface;
     default:
-      return Config.Theme.transparent;
+      return Core.Theme.transparent;
     }
   }
 
   readonly property color _hoverColor: {
-    if (hoverColor !== Config.Theme.transparent)
+    if (!Qt.colorEqual(hoverColor, Core.Theme.transparent))
       return hoverColor;
     switch (variant) {
     case "primary":
-      return Config.Theme.lighten(Config.Theme.accent, 0.1);
+      return Core.Theme.accentHover;
     case "secondary":
-      return Config.Theme.surfaceHover;
+      return Core.Theme.surfaceHover;
     case "danger":
-      return Config.Theme.error;
-    case "ghost":
-      return Config.Theme.alpha(Config.Theme.text, 0.1);
+      return Core.Theme.error;
     default:
-      return Config.Theme.surfaceHover;
+      return Core.Theme.surfaceHover;
     }
   }
 
-  readonly property color _iconColor: {
-    if (iconColor !== Config.Theme.transparent)
-      return iconColor;
+  // Icon and label share this unless iconColor or textColor is set.
+  readonly property color _contentColor: {
     switch (variant) {
     case "primary":
-      return Config.Theme.bg;
+      return Core.Theme.bg;
     case "danger":
-      return hovered ? Config.Theme.bg : Config.Theme.text;
+      return hovered ? Core.Theme.bg : Core.Theme.text;
     default:
-      return Config.Theme.text;
+      return Core.Theme.text;
     }
   }
 
-  readonly property color _textColor: {
-    if (textColor !== Config.Theme.transparent)
-      return textColor;
-    switch (variant) {
-    case "primary":
-      return Config.Theme.bg;
-    case "danger":
-      return hovered ? Config.Theme.bg : Config.Theme.text;
-    default:
-      return Config.Theme.text;
-    }
-  }
+  readonly property color _iconColor: Qt.colorEqual(iconColor, Core.Theme.transparent) ? _contentColor : iconColor
+  readonly property color _textColor: Qt.colorEqual(textColor, Core.Theme.transparent) ? _contentColor : textColor
 
   // === Internal ===
   readonly property bool hasText: text !== ""
@@ -158,17 +128,20 @@ Rectangle {
   Behavior on opacity {
     NumberAnimation {
       duration: Core.Style.duration(Core.Style.animFast)
+      easing.type: Core.Style.easeStandard
     }
   }
 
-  // Use hoverColor's RGB with 0 alpha when transparent to prevent black flash during animation
-  readonly property color _effectiveBackground: _backgroundColor == Config.Theme.transparent ? Qt.rgba(_hoverColor.r, _hoverColor.g, _hoverColor.b, 0) : _backgroundColor
+  // Fades from the hover colour at zero alpha rather than from `transparent`,
+  // which would run the channels through black mid-fade. See Theme.transparentOf.
+  readonly property color _effectiveBackground: Qt.colorEqual(_backgroundColor, Core.Theme.transparent) ? Core.Theme.transparentOf(_hoverColor) : _backgroundColor
 
   color: hovered ? _hoverColor : _effectiveBackground
 
   Behavior on color {
     ColorAnimation {
       duration: Core.Style.duration(Core.Style.animFast)
+      easing.type: Core.Style.easeStandard
     }
   }
 
@@ -179,21 +152,38 @@ Rectangle {
 
     Icon {
       anchors.verticalCenter: parent.verticalCenter
-      visible: root.icon !== ""
+      visible: root.icon !== "" && !root.iconSpinning
       icon: root.icon
       size: root.iconSize
-      spinning: root.iconSpinning
+      color: root._iconColor
+    }
+
+    // Same size as the icon it stands in for, so the button does not resize.
+    Spinner {
+      anchors.verticalCenter: parent.verticalCenter
+      visible: root.icon !== "" && root.iconSpinning
+      size: root.iconSize
       color: root._iconColor
     }
 
     Text {
       id: textLabel
+      // QtQuick's Text, so the family is set here; without it the label falls
+      // back to the system sans (Noto Sans).
       anchors.verticalCenter: parent.verticalCenter
       visible: root.text !== ""
       text: root.text
+      font.family: Core.Style.fontFamily
       font.pixelSize: root.textSize
       font.weight: Core.Style.weightMedium
       color: root._textColor
+
+      Behavior on color {
+        ColorAnimation {
+          duration: Core.Style.duration(Core.Style.animFast)
+          easing.type: Core.Style.easeStandard
+        }
+      }
     }
   }
 
@@ -206,9 +196,9 @@ Rectangle {
     z: -1
 
     visible: root.activeFocus
-    color: Config.Theme.transparent
+    color: Core.Theme.transparent
     radius: parent.radius + Core.Style.focusRingOffset
-    border.color: Config.Theme.focusRing
+    border.color: Core.Theme.focusRing
     border.width: Core.Style.focusRingWidth
   }
 
@@ -225,16 +215,12 @@ Rectangle {
     onWheel: wheel => root.wheel(wheel)
 
     onEntered: {
-      root.entered();
       if (root.tooltipText !== "") {
         Services.Tooltip.show(root, root.tooltipText, root.tooltipDirection);
       }
     }
 
-    onExited: {
-      root.exited();
-      Services.Tooltip.hide();
-    }
+    onExited: Services.Tooltip.hide()
   }
 
   // Repeater and Variants delegates get destroyed while still hovered, which

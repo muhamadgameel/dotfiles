@@ -1,6 +1,5 @@
 import QtQuick
 
-import "../config" as Config
 import "../core" as Core
 
 /**
@@ -10,7 +9,7 @@ import "../core" as Core
 * - Border, radius, and background color
 * - Hover state with color transition
 * - Click handling with mouse button support
-* - Optional padding and content slot
+* - A content slot
 *
 * Usage:
 *   // Basic card
@@ -37,49 +36,33 @@ Rectangle {
   // === Content ===
   default property alias content: contentItem.data
 
-  // === Variant ===
-  //
-  // Most Cards defaulted to a transparent background, which meant a Card was
-  // invisible until hovered - list rows read as loose text on a flat plane, and
-  // a Collapsible header looked identical to a plain heading. `filled` gives a
-  // container you can actually see; the other two are opt-in for the cases that
-  // genuinely want no surface of their own.
-  //
-  //   filled    a visible surface, the default
-  //   outlined  hairline border, transparent fill
-  //   ghost     invisible until hovered (the old behaviour)
-  property string variant: "filled"
-
-  readonly property bool _filled: variant === "filled"
-  readonly property bool _outlined: variant === "outlined"
-
   // === Styling Properties ===
-  // Each defaults from the variant but stays overridable per instance.
-  property color backgroundColor: root._filled ? Config.Theme.alpha(Config.Theme.surface, 0.5) : Config.Theme.transparent
-  property color hoverColor: root._filled ? Config.Theme.surface : Config.Theme.stateLayer(Config.Theme.surface, Core.Style.opacityHover)
-  property color activeColor: Config.Theme.surfaceActive
-  property color borderColor: root._outlined ? Config.Theme.surfaceHover : Config.Theme.transparent
-  property int borderWidth: root._outlined ? Core.Style.borderThin : 0
-  property int padding: 0
+  // Filled by default: a transparent card was invisible until hovered, so list
+  // rows read as loose text and a Collapsible header as a plain heading.
+  property color backgroundColor: Core.Theme.cardBg
+  property color hoverColor: Core.Theme.surface
+  property color activeColor: Core.Theme.surfaceActive
+  property color borderColor: Core.Theme.transparent
+  property int borderWidth: 0
 
   // === Behavior Properties ===
   property bool interactive: false
   property bool hoverEnabled: true
 
   // === State (readonly) ===
-  readonly property bool hovered: mouseArea.containsMouse
+  // From a HoverHandler rather than the MouseArea, which stops containing the
+  // mouse as soon as the pointer moves onto a button inside the card. A row
+  // that shows its buttons on hover then hid them again, in a loop.
+  readonly property bool hovered: hoverHandler.hovered
   readonly property bool pressed: mouseArea.pressed
 
   // === Signals ===
   signal clicked(var button)
-  signal doubleClicked(var button)
-  signal entered
-  signal exited
 
   // === Appearance ===
   radius: Core.Style.radiusS
 
-  readonly property color _effectiveBackground: backgroundColor == Config.Theme.transparent ? Config.Theme.transparentOf(hoverColor) : backgroundColor
+  readonly property color _effectiveBackground: Qt.colorEqual(backgroundColor, Core.Theme.transparent) ? Core.Theme.transparentOf(hoverColor) : backgroundColor
 
   color: {
     if (!hoverEnabled)
@@ -97,6 +80,7 @@ Rectangle {
   Behavior on color {
     ColorAnimation {
       duration: Core.Style.duration(Core.Style.animFast)
+      easing.type: Core.Style.easeStandard
     }
   }
 
@@ -111,15 +95,19 @@ Rectangle {
     acceptedButtons: root.interactive ? (Qt.LeftButton | Qt.RightButton | Qt.MiddleButton) : Qt.NoButton
 
     onClicked: mouse => root.clicked(mouse.button)
-    onDoubleClicked: mouse => root.doubleClicked(mouse.button)
-    onEntered: root.entered()
-    onExited: root.exited()
+    // Must stay: with a doubleClicked handler, MouseArea does not emit clicked
+    // for the second click, which otherwise armed and confirmed a Power action.
+    onDoubleClicked: mouse => mouse.accepted = true
+  }
+
+  HoverHandler {
+    id: hoverHandler
+    enabled: root.hoverEnabled
   }
 
   // === Content Container ===
   Item {
     id: contentItem
     anchors.fill: parent
-    anchors.margins: root.padding
   }
 }

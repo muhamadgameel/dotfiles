@@ -2,7 +2,6 @@ pragma ComponentBehavior: Bound
 
 import QtQuick
 import QtQuick.Layouts
-import "../config" as Config
 import "../core" as Core
 import "../services" as Services
 
@@ -21,7 +20,6 @@ import "." as Components
 * Usage:
 *   NotificationCard {
 *       notificationData: model
-*       showProgress: true
 *       onCloseClicked: dismiss()
 *       onActionClicked: handleAction(actionId)
 *   }
@@ -31,13 +29,7 @@ Components.Card {
 
   // === Properties ===
   property var notificationData: null
-  property bool showProgress: true
-  property bool showCloseButton: true
-  property bool showUrgencyDot: true
   property bool compact: false
-
-  // Progress value (0.0 to 1.0)
-  property real progressValue: notificationData?.progress ?? 1.0
 
   // Extracted data (with fallbacks)
   readonly property string summary: notificationData?.summary ?? "No summary"
@@ -51,33 +43,17 @@ Components.Card {
   // === Signals ===
   signal closeClicked
   signal actionClicked(string actionId)
-  signal hoverChanged(bool isHovered)
-
-  // Forward hover changes
-  onHoveredChanged: hoverChanged(hovered)
 
   // === Card Configuration ===
   radius: Core.Style.radiusL
-  borderColor: root.compact ? Config.Theme.alpha(Config.Theme.overlay, 0.5) : Config.Theme.overlay
+  borderColor: root.compact ? Core.Theme.alpha(Core.Theme.overlay, 0.5) : Core.Theme.overlay
   borderWidth: Core.Style.borderThin
-  backgroundColor: root.compact ? Config.Theme.surface : Config.Theme.bg
-  hoverColor: Config.Theme.surfaceHover
+  backgroundColor: root.compact ? Core.Theme.surface : Core.Theme.bg
+  hoverColor: Core.Theme.surfaceHover
 
   implicitHeight: contentColumn.implicitHeight + Core.Style.spaceM * 2
 
   interactive: true
-
-  // === Progress Bar ===
-  Components.ProgressBar {
-    visible: root.showProgress
-    value: root.progressValue
-    trackColor: Config.Theme.transparent
-    progressColor: Config.Theme.urgencyColor(root.urgency)
-    height: Core.Style.px(2)
-    width: root.width - (2 * root.radius)
-    anchors.horizontalCenter: parent.horizontalCenter
-    reversed: true
-  }
 
   // === Content ===
   ColumnLayout {
@@ -96,11 +72,11 @@ Components.Card {
       Components.Icon {
         Layout.alignment: Qt.AlignTop
         icon: root.image || "bell"
-        size: root.compact ? 32 : 40
-        padding: root.compact ? 4 : 8
+        size: Core.Style.px(root.compact ? 32 : 40)
+        padding: Core.Style.px(root.compact ? 4 : 8)
         radius: Core.Style.radiusM
-        backgroundColor: root.compact ? Config.Theme.bgAlt : Config.Theme.surface
-        color: Config.Theme.text
+        backgroundColor: root.compact ? Core.Theme.bgAlt : Core.Theme.surface
+        color: Core.Theme.text
       }
 
       ColumnLayout {
@@ -115,22 +91,21 @@ Components.Card {
           // Urgency dot
           Components.StatusDot {
             Layout.alignment: Qt.AlignVCenter
-            visible: root.showUrgencyDot
             size: Core.Style.px(6)
-            color: Config.Theme.urgencyColor(root.urgency)
+            color: Core.Theme.urgencyColor(root.urgency)
           }
 
           Components.Text {
             text: root.appName
             size: root.compact ? Core.Style.fontXS : Core.Style.fontS
             font.weight: Font.Bold
-            color: Config.Theme.accent
+            color: Core.Theme.accent
           }
 
           Components.Text {
             text: root.timestamp ? (" · " + Services.Time.formatRelativeTime(root.timestamp)) : ""
             size: Core.Style.fontXS
-            color: Config.Theme.textMuted
+            color: Core.Theme.textMuted
             visible: text.length > 0
           }
         }
@@ -140,7 +115,7 @@ Components.Card {
           text: root.summary
           size: root.compact ? Core.Style.fontM : Core.Style.fontL
           font.weight: Font.Medium
-          color: Config.Theme.text
+          color: Core.Theme.text
           wrapMode: Text.WrapAtWordBoundaryOrAnywhere
           maximumLineCount: root.compact ? 1 : 2
           visible: text.length > 0
@@ -151,7 +126,7 @@ Components.Card {
         Components.Text {
           text: root.body
           size: root.compact ? Core.Style.fontS : Core.Style.fontM
-          color: Config.Theme.textDim
+          color: Core.Theme.textDim
           wrapMode: Text.WrapAtWordBoundaryOrAnywhere
           maximumLineCount: root.compact ? 2 : 4
           visible: text.length > 0
@@ -186,7 +161,7 @@ Components.Card {
       Components.Button {
         id: trashButton
         Layout.alignment: Qt.AlignCenter
-        visible: root.showCloseButton && root.compact
+        visible: root.compact
         icon: "trash"
         variant: "danger"
         onClicked: root.closeClicked()
@@ -201,7 +176,7 @@ Components.Card {
     anchors.topMargin: Core.Style.spaceM
     anchors.right: parent.right
     anchors.rightMargin: Core.Style.spaceM
-    visible: root.showCloseButton && !root.compact
+    visible: !root.compact
     icon: "close"
     variant: "danger"
     onClicked: root.closeClicked()

@@ -6,7 +6,6 @@ import Quickshell
 import Quickshell.Services.Mpris
 
 import "../../components" as Components
-import "../../config" as Config
 import "../../core" as Core
 import "../../services" as Services
 
@@ -24,7 +23,7 @@ Components.SlidingPanel {
   panelId: "media"
 
   headerIcon: "music"
-  headerIconColor: Services.Media.isPlaying ? root.tint : Config.Theme.textDim
+  headerIconColor: Services.Media.isPlaying ? root.artColor : Core.Theme.textDim
   headerTitle: "Media"
   headerSubtitle: Services.Media.identity || "Nothing playing"
 
@@ -44,7 +43,7 @@ Components.SlidingPanel {
   // The most vivid quantized colour, not the most common: that is often the
   // cover's near-black background, which would tint nothing.
   readonly property color artColor: {
-    let best = Config.Theme.accent;
+    let best = Core.Theme.accent;
     let bestScore = 0;
     for (const c of artColors.colors) {
       const score = c.hsvSaturation * c.hsvValue;
@@ -53,7 +52,7 @@ Components.SlidingPanel {
         bestScore = score;
       }
     }
-    return bestScore > 0.15 ? best : Config.Theme.accent;
+    return bestScore > 0.15 ? best : Core.Theme.accent;
   }
 
   property color tint: root.artColor
@@ -81,17 +80,17 @@ Components.SlidingPanel {
 
     radius: Core.Style.radiusL
     border.width: Core.Style.borderThin
-    border.color: Config.Theme.alpha(root.tint, 0.3)
+    border.color: Core.Theme.alpha(root.tint, 0.3)
 
     gradient: Gradient {
       GradientStop {
         position: 0.0
-        color: Config.Theme.alpha(root.tint, 0.3)
+        color: Core.Theme.alpha(root.tint, 0.3)
       }
 
       GradientStop {
         position: 1.0
-        color: Config.Theme.alpha(root.tint, 0.05)
+        color: Core.Theme.alpha(root.tint, 0.05)
       }
     }
 
@@ -115,7 +114,7 @@ Components.SlidingPanel {
         Rectangle {
           anchors.fill: parent
           radius: Core.Style.radiusM
-          color: Config.Theme.surface
+          color: Core.Theme.surface
         }
 
         // Placeholder while there is no art (or it failed to load)
@@ -124,7 +123,7 @@ Components.SlidingPanel {
           opacity: art.opacity > 0 ? 0 : 1
           icon: "music"
           size: Core.Style.fontXXXL
-          color: Config.Theme.overlay
+          color: Core.Theme.overlay
 
           Behavior on opacity {
             NumberAnimation {
@@ -166,7 +165,6 @@ Components.SlidingPanel {
           text: Services.Media.trackTitle || "Unknown track"
           size: Core.Style.fontL
           weight: Core.Style.weightBold
-          elide: Text.ElideRight
         }
 
         Components.Text {
@@ -174,8 +172,7 @@ Components.SlidingPanel {
           visible: Services.Media.trackArtist !== ""
           text: Services.Media.trackArtist
           size: Core.Style.fontM
-          color: Config.Theme.textDim
-          elide: Text.ElideRight
+          color: Core.Theme.textDim
         }
 
         Components.Text {
@@ -183,8 +180,7 @@ Components.SlidingPanel {
           visible: Services.Media.trackAlbum !== ""
           text: Services.Media.trackAlbum
           size: Core.Style.fontS
-          color: Config.Theme.textMuted
-          elide: Text.ElideRight
+          color: Core.Theme.textMuted
         }
       }
 
@@ -204,8 +200,9 @@ Components.SlidingPanel {
           enabled: Services.Media.canSeek
           value: Services.Media.progress
           liveUpdate: false
+          animateValue: false
           progressColor: root.tint
-          handleDragColor: root.tint
+          handleDragColor: root.artColor
           trackHeight: Core.Style.px(6)
           handleSize: Core.Style.px(12)
           onValueUpdated: v => Services.Media.seekFraction(v)
@@ -219,7 +216,7 @@ Components.SlidingPanel {
           Components.Text {
             text: Core.Utils.formatClock(seekBar.displayValue * Services.Media.length)
             size: Core.Style.fontXS
-            color: seekBar.dragging ? root.tint : Config.Theme.textMuted
+            color: seekBar.dragging ? root.artColor : Core.Theme.textMuted
           }
 
           Components.Spacer {}
@@ -227,7 +224,7 @@ Components.SlidingPanel {
           Components.Text {
             text: Core.Utils.formatClock(Services.Media.length)
             size: Core.Style.fontXS
-            color: Config.Theme.textMuted
+            color: Core.Theme.textMuted
           }
         }
       }
@@ -242,7 +239,7 @@ Components.SlidingPanel {
           icon: "shuffle"
           iconSize: Core.Style.fontM
           visible: Services.Media.shuffleSupported
-          iconColor: Services.Media.active?.shuffle ? root.tint : Config.Theme.textDim
+          iconColor: Services.Media.active?.shuffle ? root.artColor : Core.Theme.textDim
           tooltipText: "Shuffle"
           onClicked: Services.Media.toggleShuffle()
         }
@@ -262,8 +259,8 @@ Components.SlidingPanel {
           icon: Services.Media.statusIcon
           iconSize: Core.Style.fontXL
           padding: Core.Style.spaceM
-          backgroundColor: root.tint
-          hoverColor: Qt.lighter(root.tint, 1.15)
+          backgroundColor: root.artColor
+          hoverColor: Qt.lighter(root.artColor, 1.15)
           tooltipText: Services.Media.isPlaying ? "Pause" : "Play"
           enabled: Services.Media.isPlaying ? Services.Media.canPause : Services.Media.canPlay
           onClicked: Services.Media.playPause()
@@ -287,7 +284,7 @@ Components.SlidingPanel {
           }
           iconSize: Core.Style.fontM
           visible: Services.Media.loopSupported
-          iconColor: (Services.Media.active?.loopState ?? MprisLoopState.None) !== MprisLoopState.None ? root.tint : Config.Theme.textDim
+          iconColor: (Services.Media.active?.loopState ?? MprisLoopState.None) !== MprisLoopState.None ? root.artColor : Core.Theme.textDim
           tooltipText: "Repeat"
           onClicked: Services.Media.cycleLoop()
         }
@@ -307,7 +304,7 @@ Components.SlidingPanel {
     Components.Button {
       icon: Services.Media.volumeMuted ? "volume-mute" : "volume-high"
       iconSize: Core.Style.fontM
-      iconColor: Services.Media.volumeMuted ? Config.Theme.error : Config.Theme.text
+      iconColor: Services.Media.volumeMuted ? Core.Theme.error : Core.Theme.text
       tooltipText: Services.Media.volumeMuted ? "Unmute this player" : "Mute this player"
       enabled: Services.Media.stream !== null
       onClicked: Services.Media.toggleVolumeMute()
@@ -317,7 +314,7 @@ Components.SlidingPanel {
       Layout.fillWidth: true
       value: Services.Media.volume
       maxValue: 1.0
-      progressColor: Services.Media.volumeMuted ? Config.Theme.error : root.tint
+      progressColor: Services.Media.volumeMuted ? Core.Theme.error : root.tint
       onValueUpdated: newValue => Services.Media.setVolume(newValue)
     }
   }
@@ -327,7 +324,6 @@ Components.SlidingPanel {
     Layout.fillWidth: true
     title: "Players"
     icon: "playlist"
-    expanded: false
     visible: Services.Media.players.length > 1
 
     Repeater {
@@ -342,11 +338,12 @@ Components.SlidingPanel {
 
         Layout.fillWidth: true
         implicitHeight: Core.Style.controlHeightM
-        interactive: true
+        interactive: !isActive
+        hoverEnabled: !isActive
 
-        backgroundColor: isActive ? Config.Theme.alpha(Config.Theme.accent, 0.15) : Config.Theme.transparent
-        borderColor: isActive ? Config.Theme.accent : Config.Theme.transparent
-        borderWidth: isActive ? 1 : 0
+        backgroundColor: isActive ? Core.Theme.alpha(Core.Theme.accent, Core.Style.opacityTint) : Core.Theme.transparent
+        borderColor: isActive ? Core.Theme.accent : Core.Theme.transparent
+        borderWidth: isActive ? Core.Style.borderThin : 0
 
         onClicked: Services.Media.selectPlayer(playerCard.modelData.uniqueId)
 
@@ -359,21 +356,20 @@ Components.SlidingPanel {
           Components.Icon {
             icon: playerCard.modelData.isPlaying ? "play" : "pause"
             size: Core.Style.fontM
-            color: playerCard.isActive ? Config.Theme.accent : Config.Theme.textDim
+            color: playerCard.isActive ? Core.Theme.accent : Core.Theme.textDim
           }
 
           Components.Text {
             Layout.fillWidth: true
             text: playerCard.modelData.identity || playerCard.modelData.dbusName
-            color: playerCard.isActive ? Config.Theme.accent : Config.Theme.text
-            elide: Text.ElideRight
+            color: playerCard.isActive ? Core.Theme.accent : Core.Theme.text
           }
 
           Components.Icon {
             visible: playerCard.isActive
             icon: "check"
             size: Core.Style.fontM
-            color: Config.Theme.accent
+            color: Core.Theme.accent
           }
         }
       }

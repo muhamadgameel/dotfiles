@@ -1,12 +1,14 @@
 import QtQuick
 
 import "../../../components" as Components
-import "../../../config" as Config
 import "../../../core" as Core
 import "../../../services" as Services
 
 /**
 * Microphone - Bar widget for the default audio input
+*
+* Just the icon, red while muted, as in the mic OSD; the level is in the
+* tooltip.
 *
 * Reads Audio.hasSource rather than sourceReady. Connecting a Bluetooth headset
 * swaps the default source, and binding to the raw flag made the widget flash
@@ -19,22 +21,18 @@ Components.Button {
 
   icon: Services.Audio.getMicIcon()
 
-  iconColor: Services.Audio.micMuted ? Config.Theme.textMuted : Config.Theme.text
-  iconSize: Core.Style.fontL
-
-  text: {
+  iconColor: {
     if (!Services.Audio.hasSource)
-      return "--";
-    if (Services.Audio.micMuted)
-      return "";
-    return Math.round(Services.Audio.micVolume * 100) + "%";
+      return Core.Theme.textMuted;
+    return Services.Audio.micMuted ? Core.Theme.error : Core.Theme.text;
   }
 
-  textColor: Services.Audio.micMuted ? Config.Theme.textMuted : Config.Theme.text
-
   tooltipText: {
+    if (!Services.Audio.hasSource)
+      return "No microphone";
     const name = Services.Audio.deviceName(Services.Audio.source);
-    const lines = [Services.Audio.micMuted ? `${name} (muted)` : name];
+    const level = Math.round(Services.Audio.micVolume * 100);
+    const lines = [Services.Audio.micMuted ? `${name} (muted)` : `${name}: ${level}%`];
     lines.push("");
     lines.push("Scroll: Adjust level");
     lines.push("Left click: Open sound panel");
@@ -44,6 +42,9 @@ Components.Button {
 
   // Scroll to change mic volume
   onWheel: function (wheel) {
+    // A sideways touchpad swipe has no vertical delta; it used to count as down.
+    if (wheel.angleDelta.y === 0)
+      return;
     const delta = wheel.angleDelta.y > 0 ? 0.05 : -0.05;
     Services.Audio.setMicVolume(Services.Audio.micVolume + delta);
   }

@@ -7,7 +7,6 @@ import Quickshell.Services.SystemTray
 import Quickshell.Widgets
 
 import "../../../components" as Components
-import "../../../config" as Config
 import "../../../core" as Core
 import "../../../services" as Services
 
@@ -27,8 +26,6 @@ RowLayout {
   // Passive items are ones the app has explicitly said need no attention.
   readonly property var shownItems: SystemTray.items.values.filter(i => i && i.status !== Status.Passive)
 
-  visible: shownItems.length > 0
-
   Repeater {
     model: root.shownItems
 
@@ -45,11 +42,14 @@ RowLayout {
       Rectangle {
         anchors.fill: parent
         radius: Core.Style.radiusS
-        color: mouse.containsMouse ? Config.Theme.surfaceHover : Config.Theme.transparent
+        // Fades from surfaceHover at zero alpha, not from transparent black,
+        // which darkened mid-fade. See Theme.transparentOf.
+        color: mouse.containsMouse ? Core.Theme.surfaceHover : Core.Theme.transparentOf(Core.Theme.surfaceHover)
 
         Behavior on color {
           ColorAnimation {
             duration: Core.Style.duration(Core.Style.animFast)
+            easing.type: Core.Style.easeStandard
           }
         }
       }
@@ -66,11 +66,11 @@ RowLayout {
       Components.StatusDot {
         anchors.bottom: parent.bottom
         anchors.horizontalCenter: parent.horizontalCenter
-        anchors.bottomMargin: 1
+        anchors.bottomMargin: Core.Style.spaceXXS
         size: Core.Style.px(4)
         visible: entry.item?.status === Status.NeedsAttention
         pulse: true
-        color: Config.Theme.warning
+        color: Core.Theme.warning
       }
 
       MouseArea {

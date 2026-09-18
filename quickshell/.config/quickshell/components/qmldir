@@ -13,6 +13,7 @@ Icon 1.0 Icon.qml
 InfoList 1.0 InfoList.qml
 NotificationCard 1.0 NotificationCard.qml
 PanelHeader 1.0 PanelHeader.qml
+PositionedPanelWindow 1.0 PositionedPanelWindow.qml
 ProgressBar 1.0 ProgressBar.qml
 ProgressRow 1.0 ProgressRow.qml
 QuickToggle 1.0 QuickToggle.qml
@@ -23,6 +24,7 @@ SectionHeader 1.0 SectionHeader.qml
 Slider 1.0 Slider.qml
 SlidingPanel 1.0 SlidingPanel.qml
 Spacer 1.0 Spacer.qml
+Sparkline 1.0 Sparkline.qml
 Spinner 1.0 Spinner.qml
 StatusBanner 1.0 StatusBanner.qml
 StatusDot 1.0 StatusDot.qml

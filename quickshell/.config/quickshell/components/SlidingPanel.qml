@@ -1,9 +1,7 @@
 import QtQuick
 import QtQuick.Layouts
 import Quickshell
-import Quickshell.Hyprland
 import Quickshell.Wayland
-import "../config" as Config
 import "../core" as Core
 import "../services" as Services
 
@@ -16,15 +14,18 @@ import "." as Components
 * - A PanelWindow that slides in from the right edge
 * - Optional header with icon, title, subtitle and close button
 * - Optional scrollable content area
-* - Escape to close, and click-outside to close via HyprlandFocusGrab
+* - Escape, the close button or the toggle to close
 *
 * Open/closed state lives in Services.Panels, not here, so only one panel is
 * open at a time and IPC/shortcuts can drive them. Set `panelId` to one of
 * Services.Panels.ids.
 *
-* Dismissal is a focus grab rather than a full-screen dimmed backdrop window.
-* The backdrop doubled the window count (one extra PanelWindow per panel, per
-* screen) and vanished instantly on close while the panel was still sliding out.
+* Dismissal deliberately grabs nothing. A full-screen backdrop window doubled
+* the window count and vanished instantly on close while the panel was still
+* sliding out; a Hyprland focus grab swallowed the very click that dismissed
+* it, so the first click on another window was lost. The panel's input region
+* is its own surface and nothing else, so every other click still lands where
+* it was aimed.
 *
 * Usage:
 *   SlidingPanel {
@@ -54,7 +55,7 @@ Item {
   property string headerIcon: ""
   property string headerTitle: ""
   property string headerSubtitle: ""
-  property color headerIconColor: Config.Theme.text
+  property color headerIconColor: Core.Theme.text
 
   // === Content Configuration ===
   property bool scrollable: true
@@ -134,6 +135,22 @@ Item {
 
   property int frameHeight: 0
 
+  // Whether the content's height is already being animated by the content
+  // itself - a Collapsible opening, say - judged by changes arriving on
+  // back-to-back frames. The surface then follows it frame for frame: easing
+  // the edge on top meant restarting a 250 ms animation every frame to chase a
+  // moving target, so a section finished collapsing while the edge was still
+  // 40% of the way from its final height, and crept the rest over another
+  // 200 ms. A change that arrives on its own still eases.
+  property bool _contentAnimating: false
+  property real _lastFrameChange: 0
+
+  onFrameHeightChanged: {
+    const now = Date.now();
+    root._contentAnimating = now - root._lastFrameChange < Core.Style.animFaster;
+    root._lastFrameChange = now;
+  }
+
   readonly property int surfaceHeight: root.fillHeight ? root.maxSurfaceHeight : Core.Utils.clamp(root.frameHeight, root.minSurfaceHeight, root.maxSurfaceHeight)
 
   // Content that reports no height is almost always a Layout.fillHeight child
@@ -154,16 +171,8 @@ Item {
   }
 
   // === Public API ===
-  function open() {
-    Services.Panels.open(root.panelId, root.screen);
-  }
-
   function close() {
     Services.Panels.close();
-  }
-
-  function toggle() {
-    Services.Panels.toggle(root.panelId, root.screen);
   }
 
   onIsOpenChanged: {
@@ -184,7 +193,7 @@ Item {
 
     screen: root.screen
     visible: root.isOpen || root.revealed || slideAnim.running
-    color: Config.Theme.transparent
+    color: Core.Theme.transparent
 
     // Hidden means the slide-out is over, so the loader may tear this down.
     // Deferred a tick: releasing destroys this object, which must not happen
@@ -230,15 +239,10 @@ Item {
 
     WlrLayershell.namespace: root.namespace
     WlrLayershell.layer: WlrLayer.Overlay
+    // Reserve nothing: a panel floats over the desktop, and anything else
+    // retiles every window on the output each time one opens.
     WlrLayershell.exclusionMode: ExclusionMode.Ignore
     WlrLayershell.keyboardFocus: root.isOpen ? WlrKeyboardFocus.OnDemand : WlrKeyboardFocus.None
-
-    // Click anywhere outside the panel to dismiss it.
-    HyprlandFocusGrab {
-      active: root.isOpen
-      windows: [panelWindow]
-      onCleared: root.close()
-    }
 
     // === Sliding Container ===
     Item {
@@ -281,9 +285,11 @@ Item {
 
         // The edge glides to the new height while the content underneath is
         // already laid out at it. Off until the slide-in has finished, so the
-        // panel arrives at its size instead of growing on the way in.
+        // panel arrives at its size instead of growing on the way in, and off
+        // while the content animates its own height (see _contentAnimating).
+        // Disabling mid-animation is safe: the next write stops the running one.
         Behavior on height {
-          enabled: root.revealed && !slideAnim.running
+          enabled: root.revealed && !slideAnim.running && !root._contentAnimating
 
           NumberAnimation {
             duration: Core.Style.duration(Core.Style.animNormal)
@@ -296,16 +302,24 @@ Item {
         clip: true
 
         radius: Core.Style.radiusL
-        color: Config.Theme.panelBg
+        color: Core.Theme.panelBg
 
         border {
-          color: Config.Theme.surfaceHover
+          color: Core.Theme.surfaceHover
           width: Core.Style.borderThin
         }
 
         focus: root.isOpen
 
         Keys.onEscapePressed: root.close()
+
+        // Whether a click belongs to the panel, for Panels.dismiss(). On the
+        // surface rather than on the input region beside it: hover events go to
+        // the deepest item, and only an ancestor of the rows stays hovered
+        // while the pointer is over a card or a button inside them.
+        HoverHandler {
+          onHoveredChanged: Services.Panels.pointerOverPanel = hovered
+        }
 
         MouseArea {
           anchors.fill: parent
@@ -362,7 +376,7 @@ Item {
             Layout.topMargin: root._pinnedGap
             Layout.preferredHeight: Core.Style.borderThin
             visible: root.hasPinned
-            color: Config.Theme.surfaceHover
+            color: Core.Theme.surfaceHover
             opacity: scrollArea.contentY > 0 ? 1 : 0
 
             Behavior on opacity {
@@ -387,10 +401,6 @@ Item {
 
             // So it can still be squeezed once the content exceeds the cap.
             Layout.minimumHeight: 0
-
-            // The column places itself inside the padding, so no Flickable margins.
-            leftMargin: 0
-            rightMargin: 0
 
             interactive: root.scrollable
             showScrollbar: root.scrollable

@@ -19,31 +19,12 @@ Singleton {
 
   readonly property string directoryExpr: '"$(xdg-user-dir PICTURES)/Screenshots"'
 
-  // Display-only resolved form; the capture itself uses directoryExpr.
-  property string directory: `${Quickshell.env("HOME")}/Pictures/Screenshots`
-
-  Process {
-    running: true
-    command: ["xdg-user-dir", "PICTURES"]
-
-    stdout: StdioCollector {
-      onStreamFinished: {
-        const dir = text.trim();
-        if (dir !== "")
-          root.directory = `${dir}/Screenshots`;
-      }
-    }
-  }
-
   // Set while a capture is running, so the UI can show progress and the menu
   // can hide itself out of the shot.
   property bool capturing: false
 
   // Path of the most recent capture, "" if none this session.
   property string lastPath: ""
-
-  signal captured(string path)
-  signal failed(string message)
 
   function _filename() {
     return `${root.directoryExpr}/"$(date +%Y-%m-%d_%H-%M-%S)".png`;
@@ -200,13 +181,9 @@ Singleton {
     stdout: StdioCollector {
       onStreamFinished: {
         const out = text.trim();
-        if (out === "" || out === "CLIPBOARD") {
-          if (out === "CLIPBOARD")
-            root.captured("");
+        if (out === "" || out === "CLIPBOARD")
           return;
-        }
         root.lastPath = out;
-        root.captured(out);
         Core.Logger.i("Screenshot", `Saved ${out}`);
       }
     }
@@ -220,7 +197,6 @@ Singleton {
         if (err === "" || err.includes("selection cancelled"))
           return;
         Core.Logger.w("Screenshot", err);
-        root.failed(err.split("\n")[0]);
       }
     }
 

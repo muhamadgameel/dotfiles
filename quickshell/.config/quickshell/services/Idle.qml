@@ -16,6 +16,11 @@ import "../core" as Core
 *
 * A systemd-inhibit lock is held alongside it for anything else that honours
 * logind idle inhibitors, since hypridle does not itself take one.
+*
+* The lock follows hypridle's state rather than the toggle. It lives in a child
+* process, so a shell reload used to kill it while the state - read back from
+* hypridle - still said "inhibited": staying awake as far as the bar showed, with
+* no logind lock held.
 */
 Singleton {
   id: root
@@ -29,7 +34,6 @@ Singleton {
   property bool busy: false
 
   readonly property string statusIcon: inhibited ? "eye" : "eye-off"
-  readonly property string statusText: inhibited ? "Staying awake" : "Idle timeout active"
 
   // === Public API ===
 
@@ -39,17 +43,10 @@ Singleton {
 
     busy = true;
 
-    // Stopping hypridle is what actually prevents the lock/blank.
+    // Stopping hypridle is what actually prevents the lock/blank. The logind
+    // lock is brought in line once the new state is read back (_syncLock).
     _unitProc.command = ["systemctl", "--user", enabled ? "stop" : "start", root.unit];
     _unitProc.running = true;
-
-    if (enabled) {
-      _lockProc.running = true;
-    } else {
-      // Killing the systemd-inhibit process releases its lock.
-      _lockProc.signal(15);
-      _lockProc.running = false;
-    }
   }
 
   function toggle() {
@@ -58,6 +55,15 @@ Singleton {
 
   function refresh() {
     _stateProc.running = true;
+  }
+
+  // Hold the logind lock exactly while inhibited. Stopping the process is what
+  // releases it.
+  function _syncLock() {
+    if (root.inhibited && !_lockProc.running)
+      _lockProc.running = true;
+    else if (!root.inhibited && _lockProc.running)
+      _lockProc.running = false;
   }
 
   // === Processes ===
@@ -76,10 +82,17 @@ Singleton {
 
   // Held open for as long as the inhibit lasts; logind releases the lock when
   // the process goes away.
+  //
+  // It waits on the shell's own pid (`tail --pid`), not `sleep infinity`, so the
+  // lock dies with the shell however the shell dies. Quickshell does not kill
+  // its children when it is terminated: with `sleep infinity`, every `pkill qs`
+  // left a lock behind that blocked system sleep with nothing to release it.
+  // One such orphan was found holding sleep off for over a day. `exec` makes
+  // systemd-inhibit replace the shell, so $PPID is still the quickshell pid.
   Process {
     id: _lockProc
     running: false
-    command: ["systemd-inhibit", "--what=idle:sleep", "--who=quickshell", "--why=Idle inhibitor enabled from the bar", "--mode=block", "sleep", "infinity"]
+    command: ["sh", "-c", "exec systemd-inhibit --what=idle:sleep --who=quickshell --why='Idle inhibitor enabled from the bar' --mode=block tail --pid=\"$PPID\" -f /dev/null"]
   }
 
   // hypridle's unit state is the truth; never assume our own flag is right.
@@ -91,8 +104,16 @@ Singleton {
     stdout: StdioCollector {
       onStreamFinished: {
         const state = text.trim();
-        // "inactive" means we (or the user) stopped it, so idling is inhibited.
-        root.inhibited = state !== "active";
+
+        // Only a cleanly stopped unit means someone chose to stay awake. This
+        // was `state !== "active"`, which also read a crashed ("failed") or
+        // missing unit as "Staying awake" - a choice nobody made.
+        root.inhibited = state === "inactive";
+
+        if (state !== "active" && state !== "inactive")
+          Core.Logger.w("Idle", `${root.unit} is ${state || "not found"}: screen dim and lock are not running`);
+
+        root._syncLock();
       }
     }
   }

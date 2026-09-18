@@ -1,12 +1,14 @@
 import QtQuick
 
 import "../../../components" as Components
-import "../../../config" as Config
 import "../../../core" as Core
 import "../../../services" as Services
 
 /**
 * Bluetooth - Bar widget showing Bluetooth status
+*
+* Just the icon, in the accent colour while a device is connected; the device
+* name is in the tooltip.
 *
 * - Left click: Open panel
 * - Middle click: Toggle Bluetooth
@@ -18,30 +20,16 @@ Components.Button {
   signal panelRequested
 
   icon: Services.Bluetooth.statusIcon
-  iconSize: Core.Style.fontL
   iconColor: root.statusColor
-
-  text: _displayText
-  textColor: root.statusColor
 
   tooltipText: _tooltip
 
   readonly property color statusColor: {
     if (!Services.Bluetooth.available || Services.Bluetooth.blocked || !Services.Bluetooth.enabled)
-      return Config.Theme.textMuted;
+      return Core.Theme.textMuted;
     if (Services.Bluetooth.hasConnectedDevices)
-      return Config.Theme.accentAlt;
-    return Config.Theme.text;
-  }
-
-  readonly property string _displayText: {
-    if (!Services.Bluetooth.enabled)
-      return "";
-    if (Services.Bluetooth.connectedCount === 1)
-      return Services.Bluetooth.firstConnectedName;
-    if (Services.Bluetooth.connectedCount > 1)
-      return Services.Bluetooth.connectedCount.toString();
-    return "";
+      return Core.Theme.accentAlt;
+    return Core.Theme.text;
   }
 
   readonly property string _tooltip: {
@@ -88,6 +76,6 @@ Components.Button {
     anchors.bottomMargin: Core.Style.spaceXXS
     visible: Services.Bluetooth.discovering
     pulse: true
-    color: Config.Theme.accentAlt
+    color: Core.Theme.accentAlt
   }
 }

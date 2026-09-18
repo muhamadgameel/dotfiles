@@ -1,6 +1,5 @@
 import QtQuick
 import QtQuick.Layouts
-import "../config" as Config
 import "../core" as Core
 
 import "." as Components
@@ -11,7 +10,6 @@ import "." as Components
 * Usage:
 *   Collapsible {
 *       title: "Advanced Settings"
-*       expanded: false
 *
 *       FormRow { label: "Option 1" }
 *       FormRow { label: "Option 2" }
@@ -21,12 +19,14 @@ ColumnLayout {
   id: root
 
   property string title: "Section"
-  property bool expanded: true
+  property bool expanded: false
   property string icon: ""
 
   default property alias content: contentColumn.data
 
-  spacing: Core.Style.spaceS
+  // The gap under the header belongs to the content below (see its height), so
+  // it animates away with it instead of vanishing in one frame at the end.
+  spacing: 0
 
   // Header
   Components.Card {
@@ -47,7 +47,7 @@ ColumnLayout {
         visible: root.icon !== ""
         icon: root.icon
         size: Core.Style.fontL
-        color: Config.Theme.text
+        color: Core.Theme.text
       }
 
       Components.Text {
@@ -59,7 +59,7 @@ ColumnLayout {
       Components.Icon {
         icon: "chevron-right"
         size: Core.Style.fontS
-        color: Config.Theme.textDim
+        color: Core.Theme.textDim
         rotation: root.expanded ? 90 : 0
 
         Behavior on rotation {
@@ -76,7 +76,7 @@ ColumnLayout {
   Item {
     Layout.fillWidth: true
     Layout.leftMargin: Core.Style.spaceS
-    Layout.preferredHeight: root.expanded ? contentColumn.implicitHeight : 0
+    Layout.preferredHeight: root.expanded ? contentColumn.implicitHeight + Core.Style.spaceS : 0
 
     clip: true
 
@@ -104,6 +104,7 @@ ColumnLayout {
     ColumnLayout {
       id: contentColumn
 
+      y: Core.Style.spaceS
       width: parent.width
       spacing: Core.Style.spaceXS
     }

@@ -4,7 +4,6 @@ import QtQuick
 import Quickshell
 import Quickshell.Services.Pipewire
 
-import "../config" as Config
 import "../core" as Core
 import "../services" as Services
 
@@ -26,7 +25,6 @@ Singleton {
   property PwNode sink: Pipewire.defaultAudioSink
   property PwNode source: Pipewire.defaultAudioSource
 
-  property bool ready: Pipewire.ready
   readonly property bool sinkReady: sink?.ready ?? false
   readonly property bool sourceReady: source?.ready ?? false
 
@@ -149,14 +147,14 @@ Singleton {
     const value = audio?.volume ?? root.volume;
     const isMuted = audio?.muted ?? root.muted;
 
-    Services.OSD.show("progressRow", {
+    Services.OSD.show({
       icon: getVolumeIcon(value, isMuted),
       value: value,
       maxValue: root.maxVolume,
-      iconColor: isMuted ? Config.Theme.error : Config.Theme.text,
-      progressColor: isMuted ? Config.Theme.error : (value > 1.0 ? Config.Theme.warning : Config.Theme.accent),
+      iconColor: isMuted ? Core.Theme.error : Core.Theme.text,
+      progressColor: isMuted ? Core.Theme.error : (value > 1.0 ? Core.Theme.warning : Core.Theme.accent),
       valueText: Math.round(value * 100) + "%"
-    }, "volume");
+    });
   }
 
   // Same reasoning as _showVolumeOSD().
@@ -168,14 +166,14 @@ Singleton {
     const value = audio?.volume ?? root.micVolume;
     const isMuted = audio?.muted ?? root.micMuted;
 
-    Services.OSD.show("progressRow", {
+    Services.OSD.show({
       icon: getMicIcon(value, isMuted),
       value: value,
       maxValue: 1.0,
-      iconColor: isMuted ? Config.Theme.error : Config.Theme.text,
-      progressColor: isMuted ? Config.Theme.error : Config.Theme.accent,
+      iconColor: isMuted ? Core.Theme.error : Core.Theme.text,
+      progressColor: isMuted ? Core.Theme.error : Core.Theme.accent,
       valueText: Math.round(value * 100) + "%"
-    }, "mic");
+    });
   }
 
   // === Icons ===

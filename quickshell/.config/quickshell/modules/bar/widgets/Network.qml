@@ -1,7 +1,6 @@
 import QtQuick
 
 import "../../../components" as Components
-import "../../../config" as Config
 import "../../../core" as Core
 import "../../../services" as Services
 
@@ -18,10 +17,10 @@ Components.Button {
   icon: Services.Network.connectionIcon
   iconColor: {
     if (!Services.Network.isConnected)
-      return Config.Theme.textMuted;
+      return Core.Theme.textMuted;
     if (!Services.Network.hasInternet)
-      return Config.Theme.warning;
-    return Config.Theme.text;
+      return Core.Theme.warning;
+    return Core.Theme.text;
   }
 
   text: {
@@ -35,7 +34,7 @@ Components.Button {
 
   tooltipText: {
     if (!Services.Network.isConnected)
-      return "No network connection";
+      return Services.Network.searching ? "Searching for networks..." : "No network connection";
 
     let tip = Services.Network.connectionStatusText;
     if (Services.Network.activeIP) {
@@ -63,8 +62,9 @@ Components.Button {
     anchors.bottom: parent.bottom
     anchors.horizontalCenter: parent.horizontalCenter
     anchors.bottomMargin: Core.Style.spaceXXS
-    visible: Services.Network.connecting || Services.Network.scanning
+    visible: Services.Network.connecting || Services.Network.searching
     pulse: true
-    color: Config.Theme.accent
+    pulseLoops: Animation.Infinite
+    color: Core.Theme.accent
   }
 }

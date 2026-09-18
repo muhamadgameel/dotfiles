@@ -4,7 +4,6 @@ import QtQuick
 import QtQuick.Layouts
 
 import "../../components" as Components
-import "../../config" as Config
 import "../../core" as Core
 import "../../services" as Services
 
@@ -25,7 +24,7 @@ Components.SlidingPanel {
   contentSpacing: Core.Style.spaceM
 
   headerIcon: Services.Bluetooth.statusIcon
-  headerIconColor: Services.Bluetooth.enabled ? Config.Theme.accentAlt : Config.Theme.textMuted
+  headerIconColor: Services.Bluetooth.enabled ? Core.Theme.accentAlt : Core.Theme.textMuted
   headerTitle: "Bluetooth"
   headerSubtitle: Services.Bluetooth.statusText
 
@@ -40,7 +39,6 @@ Components.SlidingPanel {
   pinned: [
     // Bluetooth Toggle
     Components.FormRow {
-      Layout.fillWidth: true
       label: "Bluetooth"
       hasToggle: true
       toggleChecked: Services.Bluetooth.enabled
@@ -69,23 +67,14 @@ Components.SlidingPanel {
         },
       ]
     },
-
-    // List heading with scan button
-    RowLayout {
-      Layout.fillWidth: true
-      spacing: Core.Style.spaceS
+    Components.SectionHeader {
+      title: "Devices"
       visible: Services.Bluetooth.enabled
-
-      Components.Text {
-        text: "Devices"
-        weight: Core.Style.weightBold
-        Layout.fillWidth: true
-      }
 
       Components.Text {
         visible: Services.Bluetooth.discovering
         text: "Scanning..."
-        color: Config.Theme.textDim
+        color: Core.Theme.textDim
         size: Core.Style.fontS
       }
 
@@ -155,7 +144,7 @@ Components.SlidingPanel {
     Layout.topMargin: Core.Style.spaceXL
     visible: !Services.Bluetooth.enabled && Services.Bluetooth.available
     icon: "bluetooth-off"
-    iconSize: Core.Style.fontXXL * 2
+    iconSize: Core.Style.emptyIconSizeLarge
     message: "Bluetooth is disabled"
     hint: "Enable Bluetooth to connect devices"
   }
@@ -166,7 +155,7 @@ Components.SlidingPanel {
     Layout.topMargin: Core.Style.spaceXL
     visible: !Services.Bluetooth.available
     icon: "bluetooth-off"
-    iconSize: Core.Style.fontXXL * 2
+    iconSize: Core.Style.emptyIconSizeLarge
     message: "No Bluetooth adapter"
     hint: "Check if your device has Bluetooth hardware"
   }
@@ -200,7 +189,7 @@ Components.SlidingPanel {
     Components.Text {
       text: section.title
       size: Core.Style.fontS
-      color: Config.Theme.textDim
+      color: Core.Theme.textDim
       weight: Core.Style.weightMedium
     }
 
@@ -251,7 +240,7 @@ Components.SlidingPanel {
       Components.Icon {
         icon: devItem.deviceIcon
         size: Core.Style.fontL
-        color: devItem.isConnected ? Config.Theme.accentAlt : Config.Theme.text
+        color: devItem.isConnected ? Core.Theme.accentAlt : Core.Theme.text
       }
 
       // Device Info
@@ -261,19 +250,18 @@ Components.SlidingPanel {
 
         Components.Text {
           text: devItem.deviceName
-          color: devItem.isConnected ? Config.Theme.accentAlt : Config.Theme.text
+          color: devItem.isConnected ? Core.Theme.accentAlt : Core.Theme.text
           weight: devItem.isConnected ? Core.Style.weightBold : Core.Style.weightNormal
-          elide: Text.ElideRight
           Layout.fillWidth: true
         }
 
         RowLayout {
           spacing: Core.Style.spaceXS
-          
+
           Components.Text {
             text: devItem.device?.address ?? ""
             size: Core.Style.fontXS
-            color: Config.Theme.textMuted
+            color: Core.Theme.textMuted
             font.family: Core.Style.fontMono
           }
 
@@ -282,7 +270,7 @@ Components.SlidingPanel {
             visible: devItem.statusText !== "" && devItem.statusText !== "Connected" && devItem.statusText !== "Paired"
             text: devItem.statusText
             size: Core.Style.fontS
-            color: Config.Theme.textDim
+            color: Core.Theme.textDim
           }
 
           // Battery info
@@ -293,13 +281,13 @@ Components.SlidingPanel {
             Components.Icon {
               icon: "battery"
               size: Core.Style.fontS
-              color: Config.Theme.textDim
+              color: Core.Theme.textDim
             }
 
             Components.Text {
               text: devItem.batteryText
               size: Core.Style.fontS
-              color: Config.Theme.textDim
+              color: Core.Theme.textDim
             }
           }
 
@@ -308,7 +296,7 @@ Components.SlidingPanel {
             visible: devItem.isPaired && !devItem.isConnected && !devItem.batteryText && !devItem.isBusy
             text: "Tap to connect"
             size: Core.Style.fontS
-            color: Config.Theme.textMuted
+            color: Core.Theme.textMuted
           }
         }
       }
@@ -316,9 +304,8 @@ Components.SlidingPanel {
       // Loading Spinner
       Components.Spinner {
         visible: devItem.isBusy
-        running: devItem.isBusy
         size: Core.Style.fontM
-        color: Config.Theme.accentAlt
+        color: Core.Theme.accentAlt
       }
 
       // Action Buttons
@@ -352,7 +339,7 @@ Components.SlidingPanel {
         visible: !devItem.isConnected && !devItem.isPaired && !devItem.isBusy && devItem.hovered
         icon: "chevron-right"
         size: Core.Style.fontM
-        color: Config.Theme.textDim
+        color: Core.Theme.textDim
       }
     }
   }

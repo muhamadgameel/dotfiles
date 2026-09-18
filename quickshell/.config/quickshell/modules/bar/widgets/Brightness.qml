@@ -1,7 +1,6 @@
 import QtQuick
 
 import "../../../components" as Components
-import "../../../config" as Config
 import "../../../core" as Core
 import "../../../services" as Services
 
@@ -18,11 +17,7 @@ import "../../../services" as Services
 Components.Button {
   id: root
 
-  // Hide when no backlight device is available (desktops without backlight)
-  visible: Services.Brightness.ready
-
   icon: Services.Brightness.getIcon()
-  iconSize: Core.Style.fontL
 
   text: Services.Brightness.ready ? Math.round(Services.Brightness.brightness * 100) + "%" : "--"
 
@@ -34,7 +29,7 @@ Components.Button {
     lines.push("Brightness: " + Math.round(Services.Brightness.brightness * 100) + "%");
 
     if (Services.Brightness.device) {
-      lines.push(Config.Icons.get("monitor") + "  " + Services.Brightness.device);
+      lines.push(Core.Icons.get("monitor") + "  " + Services.Brightness.device);
     }
 
     lines.push("");
@@ -47,6 +42,9 @@ Components.Button {
 
   // Scroll to adjust brightness
   onWheel: function (wheel) {
+    // A sideways touchpad swipe has no vertical delta; it used to count as down.
+    if (wheel.angleDelta.y === 0)
+      return;
     if (wheel.angleDelta.y > 0) {
       Services.Brightness.increase();
     } else {

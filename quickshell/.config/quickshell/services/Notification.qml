@@ -6,6 +6,7 @@ import Quickshell.Services.Notifications
 
 import "../config" as Config
 import "../core" as Core
+import "../services" as Services
 
 /**
 * Notification Service
@@ -26,7 +27,9 @@ Singleton {
   property var urgencyDurations: [3000, 5000, 10000]
 
   // === State ===
-  readonly property bool doNotDisturb: Config.Config.doNotDisturb
+  // The saved setting, or game mode holding popups back. Game mode never writes
+  // the setting, so turning it off leaves your own choice exactly as it was.
+  readonly property bool doNotDisturb: Config.Config.doNotDisturb || Services.GameMode.active
   property int unreadCount: 0
 
   // Active notifications with no room on screen. Derived, so the popup stack's
@@ -86,13 +89,17 @@ Singleton {
     }
   }
 
-  // === Progress Timer ===
+  // === Timeout Timer ===
   Timer {
     interval: 100
     repeat: true
     running: root.activeList.count > 0
-    onTriggered: root._updateProgress()
+    onTriggered: root._expireDue()
+    // A fresh start, so the first tick does not count the time spent idle.
+    onRunningChanged: root._lastTick = Date.now()
   }
+
+  property real _lastTick: 0
 
   // === Signals ===
   signal animateAndRemove(string notificationId)
@@ -170,21 +177,25 @@ Singleton {
   }
 
   function _createData(n) {
-    const urgency = (n.urgency >= 0 && n.urgency <= 2) ? n.urgency : 1;
+    return Object.assign({
+      id: Core.Utils.generateId("notif"),
+      expireTimeout: n.expireTimeout,
+      timestamp: new Date()
+    }, _content(n));
+  }
+
+  // The fields an app can change by updating a notification in place.
+  function _content(n) {
     const actions = (n.actions || []).map(a => ({
           text: a.text || "Action",
           identifier: a.identifier || ""
         }));
 
     return {
-      id: Core.Utils.generateId("notif"),
       summary: n.summary || "",
       body: Core.Utils.stripTags(n.body || ""),
       appName: Core.Utils.formatAppName(n.appName || n.desktopEntry || ""),
-      urgency: urgency,
-      expireTimeout: n.expireTimeout,
-      timestamp: new Date(),
-      progress: 1.0,
+      urgency: (n.urgency >= 0 && n.urgency <= 2) ? n.urgency : 1,
       image: _resolveImage(n),
       actionsJson: JSON.stringify(actions)
     };
@@ -210,11 +221,11 @@ Singleton {
     for (const name of lookupNames) {
       const entry = DesktopEntries.heuristicLookup(name);
       if (entry && entry.icon) {
-        let resolved = Quickshell.iconPath(entry.icon, true);
-        if (resolved && resolved !== "") {
+        const resolved = Quickshell.iconPath(entry.icon, true);
+        if (resolved && resolved !== "")
           return resolved;
-        }
-        return resolved;
+        // No icon on disk for this entry: keep going. An unconditional return
+        // here meant only the first candidate name was ever tried.
       }
     }
 
@@ -253,10 +264,16 @@ Singleton {
 
     // Only the backstop is enforced here. Everything between maxVisible and
     // maxActive stays in the model and is counted by hiddenCount.
-    while (activeList.count > maxActive) {
-      const last = activeList.get(activeList.count - 1);
-      dismiss(last.id);  // closed signal handles _remove() and cleanup
-    }
+    //
+    // The ids are collected first. This used to be `while (count > maxActive)
+    // dismiss(last)`, which only terminates because dismiss() shrinks the model
+    // synchronously through the closed signal - true today, but the loop would
+    // spin forever the day that signal is queued instead.
+    const overflow = [];
+    for (let i = maxActive; i < activeList.count; i++)
+      overflow.push(activeList.get(i).id);
+    for (const id of overflow)
+      dismiss(id);
   }
 
   function _calculateDuration(data) {
@@ -273,24 +290,16 @@ Singleton {
       return;
 
     const n = entry.notification;
-    const urgency = (n.urgency >= 0 && n.urgency <= 2) ? n.urgency : 1;
-    const actions = (n.actions || []).map(a => ({
-          text: a.text || "Action",
-          identifier: a.identifier || ""
-        }));
+    const content = _content(n);
 
-    Core.Utils.updateModelItem(activeList, "id", id, {
-      summary: n.summary || "",
-      body: Core.Utils.stripTags(n.body || ""),
-      appName: Core.Utils.formatAppName(n.appName || n.desktopEntry || ""),
-      urgency: urgency,
-      image: _resolveImage(n),
-      actionsJson: JSON.stringify(actions)
-    });
+    // The history row is a separate copy of the same data. Updating only the
+    // popup left the notification center showing the first version.
+    Core.Utils.updateModelItem(activeList, "id", id, content);
+    Core.Utils.updateModelItem(historyList, "id", id, content);
 
     // Update duration if urgency changed
     entry.meta.duration = _calculateDuration({
-      urgency: urgency,
+      urgency: content.urgency,
       expireTimeout: n.expireTimeout
     });
   }
@@ -319,10 +328,12 @@ Singleton {
     delete _active[id];
   }
 
-  // === Progress ===
+  // === Timeouts ===
 
-  function _updateProgress() {
+  function _expireDue() {
     const now = Date.now();
+    const tick = now - root._lastTick;
+    root._lastTick = now;
     const expired = [];
 
     for (var i = 0; i < activeList.count; i++) {
@@ -332,21 +343,26 @@ Singleton {
         continue;
 
       const meta = entry.meta;
-      if (meta.duration < 0 || meta.paused)
-        continue;
 
-      const elapsed = now - meta.startTime;
-      const progress = Math.max(1.0 - elapsed / meta.duration, 0);
-
-      if (progress <= 0) {
-        // Collected rather than dispatched here: emitting mutates activeList
-        // underneath this loop.
-        expired.push(item.id);
+      // Queued below the visible stack: the clock stands still until the card
+      // has a slot, by pushing its start forward by this tick. Without this a
+      // burst of eight low-urgency notifications all expired together at 3 s,
+      // and the three that were queued only flashed on screen as they went.
+      // One pushed down mid-countdown keeps the time it had left.
+      if (i >= maxVisible) {
+        meta.startTime += tick;
         continue;
       }
 
-      if (Math.abs(item.progress - progress) > 0.01) {
-        activeList.setProperty(i, "progress", progress);
+      if (meta.duration < 0 || meta.paused || meta.expired)
+        continue;
+
+      if (now - meta.startTime >= meta.duration) {
+        // Collected rather than dispatched here: emitting mutates activeList
+        // underneath this loop. Marked so the next ticks, which run while the
+        // card animates out, do not send it again.
+        meta.expired = true;
+        expired.push(item.id);
       }
     }
 

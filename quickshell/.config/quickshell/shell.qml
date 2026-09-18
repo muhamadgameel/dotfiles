@@ -12,6 +12,7 @@ import "core" as Core
 import "modules/bar" as Bar
 import "modules/ipc" as Ipc
 import "modules/popups" as Popups
+import "services" as Services
 
 /**
 * shell.qml - entry point
@@ -36,7 +37,14 @@ ShellRoot {
     value: Config.Config.debugMode ? Core.Logger.levelDebug : Core.Logger.levelInfo
   }
 
-  Component.onCompleted: Core.Logger.i("Shell", `started, log level '${Core.Logger.levelName}'`)
+  Component.onCompleted: {
+    Core.Logger.i("Shell", `started, log level '${Core.Logger.levelName}'`);
+    // Nothing else reads it, and a singleton only exists once something does.
+    Services.ThemeSync.sync();
+    Services.Display.apply();
+    Services.NightLight.apply();
+    Services.Wallpaper.apply();
+  }
 
   // === Bar (one per screen), which owns the sliding panels ===
   Bar.BarWindow {}
@@ -46,6 +54,19 @@ ShellRoot {
 
   // === Transient notification popups ===
   Popups.NotificationPopups {}
+
+  // === The shared tooltip ===
+  // Built here and handed to Services.Tooltip, so that service never has to
+  // import the view layer to create it.
+  Popups.TooltipWindow {
+    id: tooltipWindow
+  }
+
+  Binding {
+    target: Services.Tooltip
+    property: "window"
+    value: tooltipWindow
+  }
 
   // === External control: `qs ipc call ...` and Hyprland global shortcuts ===
   Ipc.Ipc {}

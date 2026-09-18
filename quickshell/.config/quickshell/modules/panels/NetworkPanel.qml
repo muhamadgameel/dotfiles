@@ -4,7 +4,6 @@ import QtQuick
 import QtQuick.Layouts
 
 import "../../components" as Components
-import "../../config" as Config
 import "../../core" as Core
 import "../../services" as Services
 
@@ -19,23 +18,17 @@ Components.SlidingPanel {
 
   // Header configuration
   headerIcon: Services.Network.connectionIcon
-  headerIconColor: Services.Network.isConnected ? Config.Theme.accent : Config.Theme.textMuted
+  headerIconColor: Services.Network.isConnected ? Core.Theme.accent : Core.Theme.textMuted
   headerTitle: "Network"
   headerSubtitle: Services.Network.connectionStatusText
 
-  // panelOpen gates active rescans in the service; see Network.scan().
-  onOpened: {
-    Services.Network.panelOpen = true;
-    Services.Network.scan(true);
-  }
-  onClosed: Services.Network.panelOpen = false
+  onOpened: Services.Network.scan(true)
 
   // === Pinned: the toggle, connection details and the list's heading ===
   // The network list below scrolls under these with the panel's own scrollbar.
   pinned: [
     // WiFi Toggle
     Components.FormRow {
-      Layout.fillWidth: true
       label: "Wi-Fi"
       hasToggle: true
       toggleChecked: Services.Network.wifiEnabled
@@ -95,26 +88,18 @@ Components.SlidingPanel {
         return rows;
       }
     },
-
-    // List heading with scan button
-    RowLayout {
-      Layout.fillWidth: true
-      spacing: Core.Style.spaceS
+    Components.SectionHeader {
+      title: "Available Networks"
       visible: Services.Network.wifiEnabled
 
       Components.Text {
-        text: "Available Networks"
-        weight: Core.Style.weightBold
-        Layout.fillWidth: true
-      }
-
-      Components.Text {
-        text: Services.Network.scanning ? "Scanning..." : `${Object.keys(Services.Network.networks).length} networks`
-        color: Config.Theme.textDim
+        text: Services.Network.searching ? "Searching..." : Services.Network.scanning ? "Scanning..." : `${Object.keys(Services.Network.networks).length} networks`
+        color: Core.Theme.textDim
         size: Core.Style.fontS
       }
 
       Components.ScanButton {
+        visible: Services.Network.canScan
         scanning: Services.Network.scanning
         tooltipText: "Scan for networks"
         onClicked: Services.Network.scan()
@@ -147,7 +132,7 @@ Components.SlidingPanel {
     // Empty state
     Components.EmptyState {
       width: networkList.width
-      visible: Object.keys(Services.Network.networks).length === 0 && !Services.Network.scanning
+      visible: Object.keys(Services.Network.networks).length === 0 && !Services.Network.scanning && !Services.Network.searching
       icon: "wifi-off"
       message: "No networks found"
     }
@@ -158,7 +143,7 @@ Components.SlidingPanel {
     Layout.topMargin: Core.Style.spaceXL
     visible: !Services.Network.wifiEnabled
     icon: "wifi-off"
-    iconSize: Core.Style.fontXXL * 2
+    iconSize: Core.Style.emptyIconSizeLarge
     message: "Wi-Fi is disabled"
     hint: "Enable Wi-Fi to see available networks"
   }
@@ -193,6 +178,7 @@ Components.SlidingPanel {
     readonly property bool secured: network?.secured ?? false
     readonly property bool connected: network?.connected ?? false
     readonly property string security: network?.security ?? ""
+    readonly property bool known: network?.known ?? false
 
     // Busy states
     readonly property bool isConnecting: Services.Network.connectingTo === ssid
@@ -233,7 +219,7 @@ Components.SlidingPanel {
         Components.Icon {
           icon: Services.Network.getSignalIcon(netItem.signalStrength)
           size: Core.Style.fontL
-          color: netItem.connected ? Config.Theme.accent : Config.Theme.text
+          color: netItem.connected ? Core.Theme.accent : Core.Theme.text
         }
 
         // Network info
@@ -247,7 +233,7 @@ Components.SlidingPanel {
 
             Components.Text {
               text: netItem.ssid
-              color: netItem.connected ? Config.Theme.accent : Config.Theme.text
+              color: netItem.connected ? Core.Theme.accent : Core.Theme.text
               weight: netItem.connected ? Core.Style.weightBold : Core.Style.weightNormal
               Layout.fillWidth: true
             }
@@ -266,14 +252,14 @@ Components.SlidingPanel {
             Components.Text {
               text: netItem.signalStrength + "%"
               size: Core.Style.fontS
-              color: Config.Theme.textDim
+              color: Core.Theme.textDim
             }
 
             Components.Icon {
               visible: netItem.secured
               icon: "lock"
               size: Core.Style.fontS
-              color: Config.Theme.textDim
+              color: Core.Theme.textDim
             }
 
             Components.Text {
@@ -281,16 +267,16 @@ Components.SlidingPanel {
               visible: netItem.security && netItem.security !== "--"
               text: netItem.security
               size: Core.Style.fontXS
-              color: Config.Theme.textMuted
+              color: Core.Theme.textMuted
             }
           }
         }
 
         // Loading spinner
         Components.Spinner {
-          running: netItem.isBusy
+          visible: netItem.isBusy
           size: Core.Style.fontM
-          color: Config.Theme.accent
+          color: Core.Theme.accent
         }
 
         // Action buttons
@@ -308,10 +294,10 @@ Components.SlidingPanel {
             onClicked: Services.Network.disconnect(netItem.ssid)
           }
 
-          // Forget button. Offered on hover for any network, not only the
-          // connected one - it sat inside a row that was itself visible only
-          // when connected, so a saved network could never be removed.
+          // Forget button, for saved networks: there is nothing to forget on
+          // the others.
           Components.Button {
+            visible: netItem.known
             icon: "trash"
             iconSize: Core.Style.fontM
             variant: "danger"
@@ -325,7 +311,7 @@ Components.SlidingPanel {
           visible: netItem.hovered && !netItem.connected && !netItem.isBusy
           icon: "chevron-right"
           size: Core.Style.fontM
-          color: Config.Theme.textDim
+          color: Core.Theme.textDim
         }
       }
 
@@ -364,7 +350,7 @@ Components.SlidingPanel {
           Layout.fillWidth: true
           text: Services.Network.lastError !== "" ? Services.Network.lastError : `Password for "${netItem.ssid}"`
           size: Core.Style.fontS
-          color: Services.Network.lastError !== "" ? Config.Theme.error : Config.Theme.textDim
+          color: Services.Network.lastError !== "" ? Core.Theme.error : Core.Theme.textDim
         }
 
         RowLayout {

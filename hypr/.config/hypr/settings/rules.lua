@@ -70,23 +70,35 @@ hl.window_rule({
 
 hl.window_rule({ match = { class = "Alacritty" }, opacity = "1.0 0.92" })
 
--- ── Idle inhibition ──────────────────────────────────────────────────
+-- ── Games && Idle inhibition ──────────────────────────
 -- hypridle dims at 5 min and locks at 20 min. Apps that speak the Wayland
 -- idle-inhibit protocol (Chromium during playback) are already honored via
 -- hypridle's `ignore_dbus_inhibit = false`; this covers the ones that aren't,
 -- and only while they are actually fullscreen.
 
-for _, class in ipairs({ "mpv", "chromium", "org.gnome.Loupe" }) do
+-- Window classes that are games. Proton titles are steam_app_<id>; gamescope
+-- nests anything run inside it. Native Linux games use their own class - add
+-- them here as they come up.
+--
+-- Keep in step with `_gameClass` in quickshell/services/GameMode.qml, which
+-- uses the same classes to spot a fullscreen game not launched via gamemoderun.
+local games = { "^steam_app_[0-9]+$", "^gamescope$" }
+
+for _, class in ipairs({ "mpv", "chromium", "org.gnome.Loupe", table.unpack(games) }) do
 	hl.window_rule({ match = { class = class }, idle_inhibit = "fullscreen" })
 end
 
 -- ── Tearing ──────────────────────────────────────────────────────────
--- `general.allow_tearing` is a master switch only: tearing is applied per
--- window via the `immediate` rule. Without a rule like this, enabling it in
--- look.lua does nothing. Uncomment and adjust per game.
+-- `general.allow_tearing` (look.lua) is only a master switch: a window tears
+-- only if it also carries `immediate`. Games get it, so a fullscreen game can
+-- put a frame on screen as soon as it is ready instead of waiting for vsync -
+-- lower input latency, at the cost of possible tear lines.
 --
--- hl.window_rule({ match = { class = "^(steam_app_%d+)$" }, immediate = true })
--- hl.window_rule({ match = { class = "gamescope" },         immediate = true })
+-- To go back to plain vsync, delete this loop; allow_tearing can stay on, it
+-- does nothing without it.
+for _, class in ipairs(games) do
+	hl.window_rule({ match = { class = class }, immediate = true })
+end
 
 -- ── Layer rules ──────────────────────────────────────────────────────
 
