@@ -162,5 +162,13 @@ Variants {
         parentWindow: barWindow
       }
     }
+
+    LazyLoader {
+      active: Services.Panels.isLoaded("settings", barWindow.modelData)
+
+      component: Panels.SettingsPanel {
+        parentWindow: barWindow
+      }
+    }
   }
 }

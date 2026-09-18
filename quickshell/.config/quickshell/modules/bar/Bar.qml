@@ -169,6 +169,7 @@ Rectangle {
     Widgets.QuickActions {
       onQuickSettingsRequested: root.panelRequested("quicksettings")
       onWallpaperRequested: root.panelRequested("wallpaper")
+      onSettingsRequested: root.panelRequested("settings")
       onScreenshotRequested: root.panelRequested("screenshot")
       onPowerRequested: root.panelRequested("power")
     }

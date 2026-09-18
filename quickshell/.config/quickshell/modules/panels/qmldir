@@ -9,5 +9,6 @@ NotificationCenter 1.0 NotificationCenter.qml
 PowerPanel 1.0 PowerPanel.qml
 QuickSettingsPanel 1.0 QuickSettingsPanel.qml
 ScreenshotPanel 1.0 ScreenshotPanel.qml
+SettingsPanel 1.0 SettingsPanel.qml
 SystemStatsPanel 1.0 SystemStatsPanel.qml
 WallpaperPanel 1.0 WallpaperPanel.qml

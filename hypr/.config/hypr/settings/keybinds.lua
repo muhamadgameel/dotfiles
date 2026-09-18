@@ -168,6 +168,7 @@ local panels = {
 	A = "panelAudio",
 	B = "panelBluetooth",
 	D = "toggleDnd",
+	E = "panelSettings",
 	G = "panelSystemStats",
 	I = "toggleIdleInhibit",
 	K = "panelCalendar",

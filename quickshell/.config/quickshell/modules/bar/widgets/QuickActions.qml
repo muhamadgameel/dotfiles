@@ -16,6 +16,7 @@ RowLayout {
   id: root
 
   signal quickSettingsRequested
+  signal settingsRequested
   signal wallpaperRequested
   signal screenshotRequested
   signal powerRequested
@@ -26,6 +27,12 @@ RowLayout {
     icon: "dashboard"
     tooltipText: "Quick settings"
     onClicked: root.quickSettingsRequested()
+  }
+
+  Components.Button {
+    icon: "settings"
+    tooltipText: "Settings"
+    onClicked: root.settingsRequested()
   }
 
   Components.Button {
