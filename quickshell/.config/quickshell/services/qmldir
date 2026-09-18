@@ -18,3 +18,4 @@ singleton SystemStats 1.0 SystemStats.qml
 singleton Time 1.0 Time.qml
 singleton ThemeSync 1.0 ThemeSync.qml
 singleton Tooltip 1.0 Tooltip.qml
+singleton Wallpaper 1.0 Wallpaper.qml

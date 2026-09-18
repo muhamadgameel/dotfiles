@@ -107,6 +107,13 @@ Scope {
     onPressed: Services.Panels.toggle("screenshot", Targets.focusedScreen)
   }
 
+  GlobalShortcut {
+    appid: "quickshell"
+    name: "panelWallpaper"
+    description: "Toggle the wallpaper picker"
+    onPressed: Services.Panels.toggle("wallpaper", Targets.focusedScreen)
+  }
+
   // --- Actions ---
 
   GlobalShortcut {

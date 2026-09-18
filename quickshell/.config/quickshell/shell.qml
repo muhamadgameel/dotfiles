@@ -43,6 +43,7 @@ ShellRoot {
     Services.ThemeSync.sync();
     Services.Display.apply();
     Services.NightLight.apply();
+    Services.Wallpaper.apply();
   }
 
   // === Bar (one per screen), which owns the sliding panels ===

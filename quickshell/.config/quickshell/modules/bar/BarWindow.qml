@@ -154,5 +154,13 @@ Variants {
         parentWindow: barWindow
       }
     }
+
+    LazyLoader {
+      active: Services.Panels.isLoaded("wallpaper", barWindow.modelData)
+
+      component: Panels.WallpaperPanel {
+        parentWindow: barWindow
+      }
+    }
   }
 }

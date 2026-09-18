@@ -16,6 +16,7 @@ RowLayout {
   id: root
 
   signal quickSettingsRequested
+  signal wallpaperRequested
   signal screenshotRequested
   signal powerRequested
 
@@ -25,6 +26,13 @@ RowLayout {
     icon: "dashboard"
     tooltipText: "Quick settings"
     onClicked: root.quickSettingsRequested()
+  }
+
+  Components.Button {
+    icon: "image"
+    visible: Config.Config.barShowWallpaper
+    tooltipText: "Change the wallpaper"
+    onClicked: root.wallpaperRequested()
   }
 
   Components.Button {

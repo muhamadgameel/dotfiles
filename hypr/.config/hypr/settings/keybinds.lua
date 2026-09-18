@@ -179,6 +179,8 @@ local panels = {
 	W = "panelNetwork",
 	-- Not Print: SUPER+SHIFT+Print is already screenshot-to-clipboard.
 	X = "panelScreenshot",
+	-- No mnemonic left: every letter in "wallpaper" is taken.
+	Y = "panelWallpaper",
 }
 
 for key, action in pairs(panels) do

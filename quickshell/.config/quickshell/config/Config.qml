@@ -44,6 +44,7 @@ Singleton {
   readonly property bool barShowIdleInhibitor: Settings.get("barShowIdleInhibitor", true)
   readonly property bool barShowWindowTitle: Settings.get("barShowWindowTitle", true)
   readonly property bool barShowScreenshot: Settings.get("barShowScreenshot", true)
+  readonly property bool barShowWallpaper: Settings.get("barShowWallpaper", true)
   readonly property bool barShowPower: Settings.get("barShowPower", true)
 
   // === Appearance ===
@@ -81,6 +82,12 @@ Singleton {
   readonly property bool nightLightAuto: Settings.get("nightLightAuto", false)
   readonly property string nightLightStart: Settings.get("nightLightStart", "20:00")
   readonly property string nightLightEnd: Settings.get("nightLightEnd", "06:30")
+
+  // === Wallpaper ===
+  // The chosen wallpaper, or "" to leave hyprpaper cycling the directory.
+  // See services/Wallpaper.qml.
+  readonly property string wallpaper: Settings.get("wallpaper", "")
+  readonly property string wallpaperDirectory: Settings.get("wallpaperDirectory", `${Quickshell.env("HOME")}/.config/hypr/wallpapers`)
 
   // === Notifications ===
   readonly property bool doNotDisturb: Settings.get("doNotDisturb", false)
@@ -155,6 +162,10 @@ Singleton {
 
   function setNetworkBackend(name) {
     Settings.set("networkBackend", name);
+  }
+
+  function setWallpaper(path) {
+    Settings.set("wallpaper", path);
   }
 
   function setNightLight(enabled) {

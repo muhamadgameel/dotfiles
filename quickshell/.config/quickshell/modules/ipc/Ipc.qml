@@ -227,6 +227,36 @@ Scope {
   }
 
   IpcHandler {
+    target: "wallpaper"
+
+    /**
+    * Set the wallpaper on every output and keep it across restarts.
+    * @param path - a file in the wallpaper directory; a comma in the name
+    *               cannot be passed to hyprpaper and is refused
+    */
+    function set(path: string): string {
+      return Services.Wallpaper.set(path) ? `set ${path}` : `refused ${path}`;
+    }
+
+    /**
+    * Hand the wallpaper back to hyprpaper's own directory rotation.
+    */
+    function shuffle(): string {
+      Services.Wallpaper.shuffle();
+      return "rotating";
+    }
+
+    function list(): string {
+      return Services.Wallpaper.wallpapers.join("\n");
+    }
+
+    function status(): string {
+      const w = Services.Wallpaper;
+      return `${w.current || "unknown"}\n${w.shuffling ? "rotating" : "pinned"}, ${w.wallpapers.length} available in ${w.directory}`;
+    }
+  }
+
+  IpcHandler {
     target: "nightlight"
 
     function toggle(): string {
