@@ -42,6 +42,10 @@ Singleton {
   // itself counted in secondsWanted, or it shows a frozen time.
   readonly property string timeLong: Qt.formatTime(secondClock.date, "hh:mm:ss AP")
 
+  // Minutes since midnight, for anything that acts at a time of day rather
+  // than displaying one.
+  readonly property int minuteOfDay: minuteClock.date.getHours() * 60 + minuteClock.date.getMinutes()
+
   // Whether anything on screen shows seconds right now.
   readonly property bool secondsWanted: Config.Config.barClockShowSeconds || Services.Panels.openPanel === "calendar"
 

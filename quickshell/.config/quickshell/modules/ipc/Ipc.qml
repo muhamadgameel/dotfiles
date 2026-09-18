@@ -227,6 +227,40 @@ Scope {
   }
 
   IpcHandler {
+    target: "nightlight"
+
+    function toggle(): string {
+      Services.NightLight.toggle();
+      return Services.NightLight.statusText;
+    }
+
+    function set(enabled: bool): string {
+      Services.NightLight.setEnabled(enabled);
+      return Services.NightLight.statusText;
+    }
+
+    /**
+    * @param kelvin - 2500 (warmest) to 6500 (daylight); clamped
+    */
+    function temperature(kelvin: int): string {
+      Services.NightLight.setTemperature(kelvin);
+      return Services.NightLight.statusText;
+    }
+
+    /**
+    * Follow the schedule in the nightLightStart/nightLightEnd settings.
+    */
+    function schedule(enabled: bool): string {
+      Services.NightLight.setSchedule(enabled);
+      return Services.NightLight.statusText;
+    }
+
+    function status(): string {
+      return Services.NightLight.statusText;
+    }
+  }
+
+  IpcHandler {
     target: "screenshot"
 
     /**

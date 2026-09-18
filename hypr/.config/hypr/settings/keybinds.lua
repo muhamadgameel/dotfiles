@@ -171,6 +171,7 @@ local panels = {
 	G = "panelSystemStats",
 	I = "toggleIdleInhibit",
 	K = "panelCalendar",
+	L = "toggleNightLight",
 	M = "panelMedia",
 	N = "panelNotifications",
 	P = "panelPower",

@@ -72,6 +72,16 @@ Singleton {
   readonly property bool lowRefreshOnBattery: Settings.get("lowRefreshOnBattery", true)
   readonly property int batteryRefreshRate: Settings.get("batteryRefreshRate", 60)
 
+  // === Night Light ===
+  // Applied by hyprsunset; see services/NightLight.qml. The schedule is off by
+  // default - a screen that turns orange on its own at 20:00 should be asked
+  // for. Times are "HH:MM", and a start after the end runs over midnight.
+  readonly property bool nightLight: Settings.get("nightLight", false)
+  readonly property int nightLightTemperature: Settings.get("nightLightTemperature", 4000)
+  readonly property bool nightLightAuto: Settings.get("nightLightAuto", false)
+  readonly property string nightLightStart: Settings.get("nightLightStart", "20:00")
+  readonly property string nightLightEnd: Settings.get("nightLightEnd", "06:30")
+
   // === Notifications ===
   readonly property bool doNotDisturb: Settings.get("doNotDisturb", false)
   readonly property int notificationHistoryLimit: Settings.get("notificationHistoryLimit", 100)
@@ -145,5 +155,17 @@ Singleton {
 
   function setNetworkBackend(name) {
     Settings.set("networkBackend", name);
+  }
+
+  function setNightLight(enabled) {
+    Settings.set("nightLight", enabled);
+  }
+
+  function setNightLightTemperature(kelvin) {
+    Settings.set("nightLightTemperature", kelvin);
+  }
+
+  function setNightLightAuto(enabled) {
+    Settings.set("nightLightAuto", enabled);
   }
 }

@@ -138,4 +138,11 @@ Scope {
     description: "Toggle do not disturb"
     onPressed: Config.Config.toggleDoNotDisturb()
   }
+
+  GlobalShortcut {
+    appid: "quickshell"
+    name: "toggleNightLight"
+    description: "Toggle the night light"
+    onPressed: Services.NightLight.toggle()
+  }
 }

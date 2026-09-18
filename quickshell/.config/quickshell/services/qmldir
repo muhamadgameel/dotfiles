@@ -8,6 +8,7 @@ singleton GameMode 1.0 GameMode.qml
 singleton Idle 1.0 Idle.qml
 singleton Media 1.0 Media.qml
 singleton Network 1.0 Network.qml
+singleton NightLight 1.0 NightLight.qml
 singleton Notification 1.0 Notification.qml
 singleton OSD 1.0 OSD.qml
 singleton Panels 1.0 Panels.qml

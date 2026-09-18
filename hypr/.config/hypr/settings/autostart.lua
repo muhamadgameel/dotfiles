@@ -2,8 +2,12 @@
 -- ║                      AUTO-START PROGRAMS                          ║
 -- ╚═══════════════════════════════════════════════════════════════════╝
 -- NOT started here (they are enabled systemd user services -- check with
--- `systemctl --user status hypridle hyprpaper quickshell`):
---     hypridle, hyprpaper, quickshell
+-- `systemctl --user status hypridle hyprpaper hyprsunset quickshell`):
+--     hypridle, hyprpaper, hyprsunset, quickshell
+--
+-- hyprsunset runs from a unit in this package rather than the packaged one, so
+-- it starts neutral; quickshell decides when the screen warms. See
+-- systemd/user/hyprsunset.service.
 --
 -- quickshell moved to a service so it restarts itself after a crash and so
 -- `systemctl --user restart quickshell` takes its child processes down with it.
