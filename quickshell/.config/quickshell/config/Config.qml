@@ -67,6 +67,11 @@ Singleton {
   readonly property int osdDuration: Settings.get("osdDuration", 2000)
   readonly property bool osdEnabled: Settings.get("osdEnabled", true)
 
+  // The panel drops to this while on battery; 240 Hz costs about 1.9 W more
+  // than 60 with the screen idle. See services/Display.qml.
+  readonly property bool lowRefreshOnBattery: Settings.get("lowRefreshOnBattery", true)
+  readonly property int batteryRefreshRate: Settings.get("batteryRefreshRate", 60)
+
   // === Notifications ===
   readonly property bool doNotDisturb: Settings.get("doNotDisturb", false)
   readonly property int notificationHistoryLimit: Settings.get("notificationHistoryLimit", 100)

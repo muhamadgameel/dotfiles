@@ -41,6 +41,7 @@ ShellRoot {
     Core.Logger.i("Shell", `started, log level '${Core.Logger.levelName}'`);
     // Nothing else reads it, and a singleton only exists once something does.
     Services.ThemeSync.sync();
+    Services.Display.apply();
   }
 
   // === Bar (one per screen), which owns the sliding panels ===

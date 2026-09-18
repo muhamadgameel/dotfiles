@@ -255,6 +255,15 @@ Scope {
   }
 
   IpcHandler {
+    target: "display"
+
+    function status(): string {
+      const d = Services.Display;
+      return `${d.output}: ${d.currentRate} Hz (full ${d.fullRate}, battery rate ${Config.Config.batteryRefreshRate}), on ${d.onBattery ? "battery" : "mains"}, follow ${d.enabled}`;
+    }
+  }
+
+  IpcHandler {
     target: "theme"
 
     function set(name: string): string {
