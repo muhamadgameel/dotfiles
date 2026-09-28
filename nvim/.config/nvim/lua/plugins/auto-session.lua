@@ -3,7 +3,7 @@ return {
   lazy = false,
   config = function()
     require('auto-session').setup {
-      allowed_dirs = { '~/Projects' },
+      allowed_dirs = { '~/Projects', '~/Projects/*', '~/Projects/dotfiles/*', '~/Projects/dotfiles/*/.config/*' },
     }
 
     local keymap = vim.keymap.set
