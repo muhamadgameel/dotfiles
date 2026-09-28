@@ -87,7 +87,7 @@ Singleton {
   // The chosen wallpaper, or "" to leave hyprpaper cycling the directory.
   // See services/Wallpaper.qml.
   readonly property string wallpaper: Settings.get("wallpaper", "")
-  readonly property string wallpaperDirectory: Settings.get("wallpaperDirectory", `${Quickshell.env("HOME")}/.config/hypr/wallpapers`)
+  readonly property string wallpaperDirectory: Settings.get("wallpaperDirectory", `${Quickshell.env("HOME")}/Pictures/Wallpapers`)
 
   // === Notifications ===
   readonly property bool doNotDisturb: Settings.get("doNotDisturb", false)
