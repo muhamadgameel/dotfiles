@@ -33,13 +33,18 @@ return {
         sh = { 'shfmt' },
         bash = { 'shfmt' },
         rust = { 'rustfmt' },
-        qml = { '/usr/lib/qt6/bin/qmlformat' }, -- Externally downloaded
+        qml = { 'qmlformat' },
         ['_'] = { 'trim_whitespace', 'trim_newlines' },
       },
       format_on_save = {
         timeout_ms = 500,
         lsp_format = 'fallback',
       },
+    }
+
+    -- /usr/bin/qmlformat is Qt 5: it ignores .qmlformat.ini and can't parse `?.`
+    conform.formatters.qmlformat = {
+      command = '/usr/lib/qt6/bin/qmlformat',
     }
 
     conform.formatters.shfmt = {

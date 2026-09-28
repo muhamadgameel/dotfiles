@@ -1,3 +1,3 @@
 return {
-  cmd = { 'qmlls', '-E' },
+  cmd = { 'qmlls6' },
 }
