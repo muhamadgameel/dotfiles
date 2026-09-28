@@ -8,7 +8,7 @@ vim.g.maplocalleader = ' '
 local opts = { noremap = true, silent = true }
 
 -- Disable the spacebar key's default behavior in Normal and Visual modes
-keymap({ 'n', 'v' }, '<Space>', '<Nop>', { silent = true })
+keymap({ 'n', 'x' }, '<Space>', '<Nop>', { silent = true })
 
 -- Allow moving the cursor through wrapped lines with j, k
 keymap('n', 'j', [[v:count ? 'j' : 'gj']], { expr = true, silent = true })
@@ -30,7 +30,7 @@ keymap('n', 'J', 'mzJ`z', opts)
 
 -- Duplicate lines
 keymap('n', '<leader>d', 'yyp', { desc = 'Duplicate line' })
-keymap('v', '<leader>d', 'y`>p', { desc = 'Duplicate selection' })
+keymap('x', '<leader>d', 'y`>p', { desc = 'Duplicate selection' })
 
 -- Reselect pasted/changed
 keymap('n', 'gV', '`[v`]', { desc = 'Select last change/paste' })
@@ -39,15 +39,15 @@ keymap('n', 'gV', '`[v`]', { desc = 'Select last change/paste' })
 keymap('n', 'U', '<C-r>', opts)
 
 -- Stay in indent mode
-keymap('v', '<', '<gv', opts)
-keymap('v', '>', '>gv', opts)
+keymap('x', '<', '<gv', opts)
+keymap('x', '>', '>gv', opts)
 
 -- Keep last yanked when pasting
-keymap({ 'x', 'v' }, 'p', '"_dP', opts)
+keymap('x', 'p', 'P', opts)
 
 -- Better line start/end (H and L are rarely used)
-keymap({ 'n', 'v' }, 'H', '^', opts)
-keymap({ 'n', 'v' }, 'L', '$', opts)
+keymap({ 'n', 'x' }, 'H', '^', opts)
+keymap({ 'n', 'x' }, 'L', '$', opts)
 
 ----------------------------------------------------------------------------------
 -- Buffers

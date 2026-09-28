@@ -255,7 +255,7 @@ return {
         Snacks.gitbrowse()
       end,
       desc = 'Open in browser',
-      mode = { 'n', 'v' },
+      mode = { 'n', 'x' },
     },
 
     -- Reference navigation (replaces vim-illuminate's motions)

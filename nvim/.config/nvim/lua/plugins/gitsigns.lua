@@ -29,10 +29,10 @@ return {
       end, 'Prev Hunk')
 
       -- Actions. stage_hunk toggles: run it on a staged sign to unstage
-      map('v', '<leader>hs', function()
+      map('x', '<leader>hs', function()
         gs.stage_hunk { vim.fn.line '.', vim.fn.line 'v' }
       end, 'Stage Hunk')
-      map('v', '<leader>hr', function()
+      map('x', '<leader>hr', function()
         gs.reset_hunk { vim.fn.line '.', vim.fn.line 'v' }
       end, 'Reset Hunk')
       map('n', '<leader>hs', gs.stage_hunk, 'Stage/unstage Hunk')
