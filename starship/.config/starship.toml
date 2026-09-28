@@ -43,7 +43,6 @@ $container\
 $direnv\
 $mise\
 $docker_context\
-$sudo\
 $cmd_duration\
 $jobs\
 $status\
@@ -214,11 +213,6 @@ disabled = false
 [docker_context]
 format = '[ $context]($style) '
 style = 'cyan'
-
-[sudo]
-disabled = false
-format = '[ ]($style)'
-style = 'bold red'
 
 [cmd_duration]
 format = '[ $duration]($style) '
