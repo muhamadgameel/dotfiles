@@ -1,2 +1,14 @@
 .DS_Store
 /hypr/.config/hypr/wallpapers/
+
+# Credentials and app state that sit next to configs this repo adopts
+**/globalStorage/
+**/workspaceStorage/
+**/History/
+**/Cookies*
+**/keyring*
+*.credentials.json
+**/user-data.json
+**/dconf/user
+**/pulse/cookie
+*.stale*.bak
