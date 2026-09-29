@@ -40,7 +40,7 @@ Variants {
 
         Qt.callLater(function () {
           if (osdLoader.item)
-            osdLoader.item.show();
+            osdLoader.item.show(); // qmllint disable missing-property
         });
       }
     }
