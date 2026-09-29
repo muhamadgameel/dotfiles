@@ -1,0 +1,230 @@
+#!/usr/bin/env bash
+# qs-fmt - format, parse-check and lint this Quickshell config.
+#
+# Tooling note. This machine has two generations of the QML tools installed:
+#
+#   /usr/bin/qmlformat        qt5-declarative, reports "qmlformat 1.0"
+#   /usr/lib/qt6/bin/qmlformat  qt6-declarative 6.11.2
+#
+# The Qt5 pair is what lands on PATH and it is unusable here: qmlformat 1.0
+# ignores .qmlformat.ini (so it reindents the whole tree to 4 spaces), cannot
+# parse optional chaining, and fails *silently* - exit 1, empty stderr - so a
+# check that reads stderr instead of the exit status reports success on files it
+# mangled. qmllint 1.0 exits 255 on every input, valid or not.
+#
+# So this script resolves the Qt 6 bin directory explicitly and takes all three
+# tools from it. qmlformat 6 honours .qmlformat.ini, handles `?.`, and reports
+# parse failures through its exit status; qmldom supplies the error text that
+# qmlformat omits; qmllint 6 catches unqualified access, dead imports and
+# missing properties.
+#
+# Usage
+#   ./qs-fmt                  check formatting, parse errors and lint warnings
+#   ./qs-fmt -w               rewrite files in place
+#   ./qs-fmt --diff           check, and print the formatting changes
+#   ./qs-fmt --no-lint        skip qmllint
+#   ./qs-fmt --lint-only      skip the formatting and parse checks
+#   ./qs-fmt --strict         make lint warnings fail the run
+#   ./qs-fmt components       limit the run to a subdirectory or a single file
+#
+# Environment: QT6_BINDIR overrides tool discovery.
+# Exit status: 0 clean, 1 something to fix, 2 tooling missing.
+
+set -euo pipefail
+
+ROOT=$(cd -P "$(dirname "${BASH_SOURCE[0]}")" && pwd)
+
+write=0
+show_diff=0
+run_lint=1
+strict=0
+targets=()
+
+while (($#)); do
+  case $1 in
+    -w | --write | -i | --inplace) write=1 ;;
+    --diff) show_diff=1 ;;
+    --no-lint) run_lint=0 ;;
+    --lint-only) run_lint=2 ;;
+    --strict) strict=1 ;;
+    -h | --help)
+      awk 'NR > 1 && /^#/ { sub(/^# ?/, ""); print; next } NR > 1 { exit }' "${BASH_SOURCE[0]}"
+      exit 0
+      ;;
+    -*)
+      echo "qs-fmt: unknown option $1 (try --help)" >&2
+      exit 2
+      ;;
+    *) targets+=("$1") ;;
+  esac
+  shift
+done
+
+# --- tool discovery -----------------------------------------------------------
+# qmldom reports its own tool version ("1.0") regardless of the Qt release, so it
+# cannot be version-checked directly. Resolve one Qt 6 bin directory by probing
+# qmlformat, then take every tool from there.
+
+find_qt6_bindir() {
+  local dir ver
+  for dir in \
+    "${QT6_BINDIR:-}" \
+    "$(command -v qmake6 >/dev/null 2>&1 && qmake6 -query QT_INSTALL_BINS 2>/dev/null || true)" \
+    /usr/lib/qt6/bin \
+    /usr/lib64/qt6/bin \
+    /usr/local/lib/qt6/bin; do
+    [[ -n $dir && -x $dir/qmlformat ]] || continue
+    ver=$("$dir/qmlformat" --version 2>/dev/null | grep -oE '[0-9]+' | head -1 || true)
+    [[ -n $ver && $ver -ge 6 ]] || continue
+    printf '%s' "$dir"
+    return 0
+  done
+  return 1
+}
+
+if ! QT6_BIN=$(find_qt6_bindir); then
+  echo "qs-fmt: no Qt 6 qmlformat found (install qt6-declarative, or set QT6_BINDIR)" >&2
+  echo "qs-fmt: note that the qmlformat on PATH is Qt 5 and must not be used here" >&2
+  exit 2
+fi
+
+QMLFORMAT="$QT6_BIN/qmlformat"
+QMLDOM="$QT6_BIN/qmldom"
+QMLLINT="$QT6_BIN/qmllint"
+
+# Where the Quickshell modules live, so qmllint can resolve `import Quickshell`.
+QT6_QML=${QT6_QMLDIR:-$(dirname "$QT6_BIN")/qml}
+[[ -d $QT6_QML ]] || QT6_QML=/usr/lib/qt6/qml
+
+# --- file set -----------------------------------------------------------------
+
+if ((${#targets[@]} == 0)); then
+  targets=("$ROOT")
+fi
+
+files=()
+for target in "${targets[@]}"; do
+  [[ -e $target ]] || target="$ROOT/$target"
+  if [[ -f $target ]]; then
+    files+=("$target")
+  elif [[ -d $target ]]; then
+    while IFS= read -r f; do files+=("$f"); done < <(find "$target" -name '*.qml' | sort)
+  else
+    echo "qs-fmt: no such file or directory: $target" >&2
+    exit 2
+  fi
+done
+
+if ((${#files[@]} == 0)); then
+  echo "qs-fmt: no .qml files found" >&2
+  exit 2
+fi
+
+rel() { printf '%s' "${1#"$ROOT"/}"; }
+
+status=0
+
+# --- format + parse -----------------------------------------------------------
+# One qmlformat run per file does double duty: a non-zero exit is a parse error
+# (qmldom is then asked for the message), and output differing from the file is
+# formatting drift.
+
+if ((run_lint != 2)); then
+  formatted=() broken=()
+
+  for file in "${files[@]}"; do
+    if ! out=$("$QMLFORMAT" "$file" 2>/dev/null); then
+      broken+=("$file")
+      continue
+    fi
+    [[ $out == "$(cat "$file")" ]] && continue
+
+    formatted+=("$file")
+    if ((write)); then
+      printf '%s\n' "$out" >"$file"
+    elif ((show_diff)); then
+      echo "=== $(rel "$file")"
+      diff -u --label "$(rel "$file")" --label "$(rel "$file") (formatted)" \
+        "$file" - <<<"$out" || true
+    fi
+  done
+
+  if ((${#broken[@]})); then
+    status=1
+    echo "qs-fmt: parse errors" >&2
+    for file in "${broken[@]}"; do
+      echo "=== $(rel "$file")" >&2
+      "$QMLDOM" -D none -d none "$file" 2>&1 |
+        grep -o '"message":"[^"]*"' |
+        sed 's/"message":"//; s/"$//' |
+        sort -u |
+        sed 's/^/    /' >&2 || echo "    (no detail from qmldom)" >&2
+    done
+  fi
+
+  if ((${#formatted[@]})); then
+    if ((write)); then
+      echo "qs-fmt: reformatted ${#formatted[@]} file(s)"
+      for file in "${formatted[@]}"; do echo "    $(rel "$file")"; done
+    else
+      status=1
+      echo "qs-fmt: ${#formatted[@]} file(s) need formatting (run with -w)"
+      for file in "${formatted[@]}"; do echo "    $(rel "$file")"; done
+    fi
+  fi
+
+  if ((${#broken[@]} == 0 && ${#formatted[@]} == 0)); then
+    echo "qs-fmt: ${#files[@]} file(s) parse cleanly and are correctly formatted"
+  fi
+fi
+
+# --- lint ---------------------------------------------------------------------
+# Quickshell's qmltypes are incomplete, and qmllint reports the gaps as findings:
+# PanelWindow is marked uncreatable, and its `margins` group, QProcess::ExitStatus
+# (every onExited handler), PopupAnchor's edges/gravity/adjustment and
+# PostReloadHook are undescribed. Two categories are switched off; the rest share
+# categories with useful findings, so they are filtered by message.
+
+# Drop whole qmllint records (a Warning/Error/Info line plus its continuation
+# lines) whose header matches the known-noise pattern.
+filter_lint_noise() {
+  awk -v noise='unknown grouped property scope margins|Type QProcess::ExitStatus of parameter|No type found for property "(edges|gravity|adjustment)"|PostReloadHook was not found' '
+    /^(Warning|Error|Info): / { keep = ($0 !~ noise) }
+    keep { print }
+  '
+}
+
+if ((run_lint)); then
+  lint_args=(
+    -I "$QT6_QML"
+    -I "$ROOT"
+    --uncreatable-type disable
+    --unresolved-type disable
+  )
+
+  lint_failed=0
+  lint_out=$("$QMLLINT" "${lint_args[@]}" "${files[@]}" 2>&1) || lint_failed=1
+  lint_out=$(filter_lint_noise <<<"$lint_out" | sed "s|$ROOT/||g")
+
+  if [[ -n $lint_out ]]; then
+    count=$(grep -cE '^(Warning|Error): ' <<<"$lint_out" || true)
+    echo
+    if ((strict)); then
+      echo "qs-fmt: qmllint reported $count warning(s)"
+    else
+      echo "qs-fmt: qmllint reported $count warning(s) (advisory; --strict makes these fail)"
+    fi
+    printf '%s\n' "$lint_out"
+    # qmllint exits 0 on warnings, so strict mode counts them instead.
+    if ((strict && count > 0)); then
+      status=1
+    fi
+  elif ((lint_failed)); then
+    echo "qs-fmt: qmllint failed without output" >&2
+    status=2
+  else
+    echo "qs-fmt: qmllint clean"
+  fi
+fi
+
+exit $status
