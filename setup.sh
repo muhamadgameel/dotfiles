@@ -289,7 +289,7 @@ mac() {
   brew_get() { run bash -c 'bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"'; }
   bundle_ok() { brew bundle check --file setup/macos/Brewfile >/dev/null 2>&1; }
   bundle_run() { run brew bundle --file setup/macos/Brewfile; }
-  local mac_packages=(aerospace ghostty gitconfig nvim starship zsh)
+  local mac_packages=(aerospace ghostty gitconfig mpv nvim starship zsh)
   mac_stowed() { [[ -z $(stow_pending "${mac_packages[@]}") ]]; }
   mac_stow() { run stow -d "$PWD" -t "$HOME" -S "${mac_packages[@]}"; }
 
