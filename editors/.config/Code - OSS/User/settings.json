@@ -1,0 +1,19 @@
+{
+  "editor.formatOnSave": true,
+  "vim.useSystemClipboard": true,
+  "vim.useCtrlKeys": false,
+  "git.blame.editorDecoration.enabled": true,
+  "diffEditor.ignoreTrimWhitespace": false,
+  "workbench.editorAssociations": {
+    "*.copilotmd": "vscode.markdown.preview.editor",
+    "{git,gitlens,chat-editing-snapshot-text-model,copilot,git-graph,git-graph-3}:/**/*.qrc": "default",
+    "*.qrc": "qt-core.qrcEditor"
+  },
+  "qt-core.additionalQtPaths": [
+    "/usr/bin/qmake6"
+  ],
+  "claudeCode.preferredLocation": "panel",
+  "[typescriptreact]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  }
+}

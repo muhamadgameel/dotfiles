@@ -125,7 +125,10 @@ aur_add() { run yay -S --needed $(noconfirm) $(aur_missing "$1"); }
 packages() { for d in */; do case $d in setup/ | aerospace/ | ghostty/) ;; *) echo "${d%/}" ;; esac done }
 stow_pending() { stow -n -v -d "$PWD" -t "$HOME" -S "$@" 2>&1 | grep -v '^WARNING: in simulation mode' || true; }
 # Real directories, so `systemctl --user enable` and apps never write into the repo.
-real_dirs=("$HOME/.config/systemd/user" "$HOME/.config/Thunar" "$HOME/.local/share/applications")
+real_dirs=(
+  "$HOME/.config/systemd/user" "$HOME/.config/Thunar" "$HOME/.config/Code - OSS/User"
+  "$HOME/.local/share/applications"
+)
 stowed() {
   local d
   for d in "${real_dirs[@]}"; do [[ -d $d && ! -L $d ]] || return 1; done
