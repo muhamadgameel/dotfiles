@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<zone>
+  <short>Home</short>
+  <description>Stock home zone plus React Native Metro and Steam Remote Play and LAN transfers.</description>
+  <service name="ssh"/>
+  <service name="mdns"/>
+  <service name="samba-client"/>
+  <service name="dhcpv6-client"/>
+  <port port="8081" protocol="tcp"/>
+  <port port="27031-27036" protocol="udp"/>
+  <port port="27036-27037" protocol="tcp"/>
+  <port port="27040" protocol="tcp"/>
+  <forward/>
+</zone>
