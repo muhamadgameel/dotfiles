@@ -1,5 +1,6 @@
 .DS_Store
 /hypr/.config/hypr/wallpapers/
+/.claude/autoharness/
 
 # Credentials and app state that sit next to configs this repo adopts
 **/globalStorage/
