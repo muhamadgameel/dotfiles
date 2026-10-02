@@ -1,3 +1,5 @@
+tap 'nikitabobko/tap'  # AeroSpace
+
 # Shell and core tools
 brew 'bash'       # Updated Bash shell
 brew 'zsh'        # Updated Z shell
@@ -63,6 +65,9 @@ cask 'reactotron'              # Inspecting React JS and React Native projects
 # Apps
 cask 'font-jetbrains-mono-nerd-font'  # Nerd Font
 cask 'alacritty'                      # Terminal Emulator
+cask 'ghostty'                        # Terminal Emulator
+cask 'nikitabobko/tap/aerospace'      # Tiling window manager, like Hyprland
+cask 'raycast'                        # Launcher and clipboard history, like fuzzel
 cask 'visual-studio-code'             # Code Editor
 cask 'zed'                            # Zed text editor
 cask 'arc'                            # Web Browser

@@ -12,6 +12,7 @@ eza
 fd
 fnm
 fzf
+nushell
 ouch                    # archive, unarchive, lsarchive
 ripgrep
 starship
