@@ -125,7 +125,7 @@ aur_add() { run yay -S --needed $(noconfirm) $(aur_missing "$1"); }
 packages() { for d in */; do case $d in setup/ | aerospace/ | ghostty/) ;; *) echo "${d%/}" ;; esac done }
 stow_pending() { stow -n -v -d "$PWD" -t "$HOME" -S "$@" 2>&1 | grep -v '^WARNING: in simulation mode' || true; }
 # Real directories, so `systemctl --user enable` and apps never write into the repo.
-real_dirs=("$HOME/.config/systemd/user" "$HOME/.local/share/applications")
+real_dirs=("$HOME/.config/systemd/user" "$HOME/.config/Thunar" "$HOME/.local/share/applications")
 stowed() {
   local d
   for d in "${real_dirs[@]}"; do [[ -d $d && ! -L $d ]] || return 1; done
@@ -183,6 +183,28 @@ zsh_ok() { [[ $(getent passwd "$USER" | cut -d: -f7) == */zsh ]]; }
 zsh_use() { run chsh -s /usr/bin/zsh; }
 gtk_ok() { ! grep -qvxFf <(dconf dump /org/gnome/desktop/interface/) setup/dconf/interface.ini; }
 gtk_set() { run sh -c 'dconf load /org/gnome/desktop/interface/ < setup/dconf/interface.ini'; }
+thunar_prefs=(
+  "thunar /misc-single-click bool true"
+  "thunar /misc-show-delete-action bool false"
+  "thunar /misc-transfer-verify-file string THUNAR_VERIFY_FILE_MODE_ALWAYS"
+  "thunar /last-show-hidden bool true"
+  "thunar-volman /automount-drives/enabled bool true"
+  "thunar-volman /automount-media/enabled bool true"
+)
+thunar_ok() {
+  local pref c p v
+  for pref in "${thunar_prefs[@]}"; do
+    read -r c p _ v <<<"$pref"
+    [[ $(xfconf-query -c "$c" -p "$p" 2>/dev/null) == "$v" ]] || return 1
+  done
+}
+thunar_set() {
+  local pref c p t v
+  for pref in "${thunar_prefs[@]}"; do
+    read -r c p t v <<<"$pref"
+    run xfconf-query -c "$c" -p "$p" -n -t "$t" -s "$v"
+  done
+}
 home_dirs=(TEMPLATES PUBLICSHARE MUSIC VIDEOS)
 dirs_ok() {
   local d p
@@ -330,6 +352,7 @@ else
     item "in the gamemode group" gamemode_ok gamemode_join
     item "zsh as login shell" zsh_ok zsh_use
     item "GTK settings" gtk_ok gtk_set
+    item "Thunar preferences" thunar_ok thunar_set
     item "Templates, Public, Music, Videos point at ~" dirs_ok dirs_set
     item "battery charge limit" charge_ok charge_cap
     item "a wallpaper in ~/Pictures/Wallpapers" walls_ok walls_seed
