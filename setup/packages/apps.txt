@@ -1,0 +1,19 @@
+# Everyday apps.
+
+bitwarden
+btop
+chromium
+fastfetch
+firefox
+gimp
+imagemagick
+libva-utils             # vainfo, to check hardware video decode
+loupe
+mpv
+mpv-mpris               # media keys and the Media panel see mpv
+papers
+proton-vpn-gtk-app
+waydroid
+yt-dlp
+aur/waydroid-image
+aur/zen-browser-bin

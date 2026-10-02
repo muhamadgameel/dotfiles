@@ -1,0 +1,6 @@
+anthropic.claude-code
+eamodio.gitlens
+esbenp.prettier-vscode
+theqtcompany.qt-core
+theqtcompany.qt-qml
+vscodevim.vim

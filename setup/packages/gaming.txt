@@ -1,0 +1,11 @@
+# Steam and Proton, with GameMode and MangoHud per game.
+
+gamemode
+gamescope
+gpu-screen-recorder
+lib32-gamemode
+lib32-mangohud
+mangohud
+protontricks
+steam
+aur/protonplus          # Proton-GE builds

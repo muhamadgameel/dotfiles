@@ -1,0 +1,63 @@
+# Hyprland under uwsm, with Quickshell as bar, panels and notification daemon.
+
+# session
+hypridle
+hyprland
+hyprlock
+hyprpaper
+hyprpicker
+hyprpolkitagent
+hyprsunset
+qt6-declarative         # Quickshell's QML runtime; qmlls6 and qmlformat for nvim and qs-fmt
+qt6-wayland
+quickshell
+sddm
+uwsm
+xdg-desktop-portal-gtk  # file chooser
+xdg-desktop-portal-hyprland
+xorg-server             # SDDM's greeter runs on X11
+
+# desktop services
+gnome-keyring           # secret store for git, browsers and Code
+libnotify
+nm-connection-editor    # network settings the Network panel doesn't cover
+xdg-user-dirs           # screenshot binds resolve ~/Pictures with it
+xdg-utils
+aur/wayland-pipewire-idle-inhibit  # no dimming while audio plays
+
+# input, clipboard, screenshots
+brightnessctl
+cliphist
+grim
+playerctl               # media keys
+slurp
+swappy
+wl-clipboard
+
+# apps the session relies on
+alacritty
+ffmpegthumbnailer
+file-roller
+fuzzel
+gvfs
+gvfs-afc                # iPhone file access in Thunar
+gvfs-mtp                # Android file access in Thunar
+pavucontrol
+thunar
+thunar-archive-plugin
+thunar-media-tags-plugin
+thunar-volman
+tumbler
+usbmuxd
+
+# look
+adwaita-cursors         # XCURSOR_THEME
+noto-fonts
+noto-fonts-cjk
+noto-fonts-emoji
+noto-fonts-extra
+papirus-icon-theme
+ttf-dejavu
+ttf-jetbrains-mono-nerd
+ttf-nerd-fonts-symbols-mono
+ttf-roboto              # Quickshell's UI font

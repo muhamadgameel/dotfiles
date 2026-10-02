@@ -1,0 +1,55 @@
+# Editors, toolchains, language servers and shell tools.
+
+# editors
+code
+neovim
+tree-sitter-cli         # nvim-treesitter builds parsers with it
+zed
+
+# shell
+bat
+eza
+fd
+fnm
+fzf
+ouch                    # archive, unarchive, lsarchive
+ripgrep
+starship
+yazi
+zoxide
+
+# git
+git-delta
+git-filter-repo
+github-cli
+lazygit
+
+# toolchains
+go
+go-tools                # goimports
+jdk17-openjdk           # Gradle JDK for React Native
+nodejs
+npm
+rustup
+
+# language servers and formatters; nvim prefers these over mason's
+bash-language-server
+eslint-language-server
+gopls
+lua-language-server
+marksman
+prettier
+shellcheck
+shfmt
+stylua
+taplo-cli
+vscode-css-languageserver
+vscode-html-languageserver
+vscode-json-languageserver
+yaml-language-server
+
+# mobile
+android-tools
+scrcpy                  # mirror a phone for React Native work
+aur/android-studio
+aur/watchman-bin        # React Native file watching

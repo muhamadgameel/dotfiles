@@ -1,0 +1,10 @@
+# This laptop: Intel CPU, RTX 4080 with the MUX set to dGPU-only, Intel HDA/SOF audio.
+
+alsa-firmware
+alsa-tools              # hdajackretask
+intel-ucode
+lib32-nvidia-utils      # Steam's 32-bit Vulkan driver, named so pacman doesn't pick a provider
+libva-nvidia-driver     # VA-API video decode on NVIDIA
+nvidia-open-dkms
+nvidia-utils            # nvidia-smi for the system stats panel
+sof-firmware

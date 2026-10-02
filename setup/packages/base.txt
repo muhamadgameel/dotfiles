@@ -1,0 +1,54 @@
+# Core system; every other group builds on it.
+# One package per line, `aur/` marks an AUR package, text after `#` is ignored.
+
+# system
+base
+base-devel
+dkms                    # rebuilds nvidia-open for each kernel
+efibootmgr
+linux
+linux-firmware
+linux-headers
+linux-lts               # fallback kernel for when an update breaks the NVIDIA build
+linux-lts-headers
+man-db
+nano
+pacman-contrib          # paccache timer, pacdiff for .pacnew files
+reflector               # https mirrors, refreshed weekly
+smartmontools           # smartd disk health
+zram-generator
+
+# network
+firewalld
+networkmanager
+openssh                 # git over SSH
+wget
+
+# audio
+alsa-utils
+gst-plugin-pipewire
+libpulse
+pipewire
+pipewire-alsa
+pipewire-jack
+pipewire-pulse
+wireplumber
+
+# bluetooth and power
+bluez
+bluez-utils
+power-profiles-daemon
+upower                  # battery widget and charge limit
+
+# core tools
+git
+gnupg                   # signs commits (commit.gpgsign)
+jq
+less
+pinentry
+stow
+unrar
+unzip
+zip
+zsh
+aur/yay                 # built by setup.sh before the other AUR packages
