@@ -16,4 +16,5 @@ proton-vpn-gtk-app
 waydroid
 yt-dlp
 aur/waydroid-image
+aur/claude-desktop
 aur/zen-browser-bin

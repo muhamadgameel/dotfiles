@@ -1,29 +1,78 @@
+# Shell and core tools
 brew 'bash'       # Updated Bash shell
 brew 'zsh'        # Updated Z shell
-brew 'git'        # Distributed revision control system
-brew 'fnm'        # Node version manager
-brew 'yarn'       # JavaScript/Node package manager
-brew 'cocoapods'  # Objective-C & Swift application dependency manager
-brew 'cmake'      # Build Tool
-brew 'fd'         # Fast find command
-brew 'bat'        # Modern cat replacement
-brew 'ripgrep'    # Fast search tool
-brew 'shellcheck' # Shell script linting tool
-brew 'shfmt'      # Shell script formatter
-brew 'starship'   # Starship shell prompt
+brew 'nushell'    # Modern shell
 brew 'stow'       # Config files symlink manager
-brew 'gnupg'      # PGP Privacy
-brew 'neovim'     # Vim text editor
+brew 'starship'   # Starship shell prompt
+brew 'fzf'        # Fuzzy finder (Ctrl+R, Ctrl+T, Alt+C)
+brew 'fd'         # Fast find command
+brew 'ripgrep'    # Fast search tool
+brew 'bat'        # Modern cat replacement
+brew 'eza'        # Modern ls replacement
+brew 'zoxide'     # Smarter cd
+brew 'yazi'       # Terminal file manager
+brew 'ouch'       # Archive, unarchive, lsarchive
+brew 'jq'         # JSON processor
+brew 'wget'       # File downloader
+brew 'btop'       # Resource monitor
+brew 'fastfetch'  # System info
+brew 'imagemagick' # Image conversion
+brew 'mpv'        # Video player
+brew 'yt-dlp'     # Video downloader for mpv
 brew 'mas'        # App Store command line interface
 
+# Git and signing
+brew 'git'             # Distributed revision control system
+brew 'git-delta'       # Syntax-highlighting pager for diffs
+brew 'git-filter-repo' # History rewriting
+brew 'gh'              # GitHub CLI
+brew 'lazygit'         # Git TUI
+brew 'gnupg'           # PGP Privacy
+brew 'pinentry-mac'    # GPG passphrase prompt for signed commits
+
+# Editors and language tooling
+brew 'neovim'                       # Vim text editor
+brew 'tree-sitter-cli'              # Builds nvim-treesitter parsers
+brew 'lua-language-server'          # Lua LSP
+brew 'bash-language-server'         # Bash LSP
+brew 'gopls'                        # Go LSP
+brew 'marksman'                     # Markdown LSP
+brew 'yaml-language-server'         # YAML LSP
+brew 'vscode-langservers-extracted' # CSS, HTML, JSON and ESLint LSPs
+brew 'taplo'                        # TOML LSP and formatter
+brew 'stylua'                       # Lua formatter
+brew 'prettier'                     # JS/TS/JSON/Markdown formatter
+brew 'shellcheck'                   # Shell script linting tool
+brew 'shfmt'                        # Shell script formatter
+
+# Toolchains
+brew 'fnm'        # Node version manager
+brew 'yarn'       # JavaScript/Node package manager
+brew 'go'         # Go toolchain
+brew 'rustup'     # Rust toolchain manager
+brew 'cmake'      # Build Tool
+brew 'cocoapods'  # Objective-C & Swift application dependency manager
+brew 'watchman'   # File watching for React Native
+brew 'scrcpy'     # Mirror an Android phone
+
+cask 'zulu@17'                 # Java JDK
+cask 'android-studio'          # Tools for building Android applications
+cask 'android-platform-tools'  # adb and fastboot
+cask 'reactotron'              # Inspecting React JS and React Native projects
+
+# Apps
 cask 'font-jetbrains-mono-nerd-font'  # Nerd Font
-cask 'zulu@17'                        # Java JDK
-cask 'arc'                            # Web Browser
+cask 'alacritty'                      # Terminal Emulator
 cask 'visual-studio-code'             # Code Editor
 cask 'zed'                            # Zed text editor
+cask 'arc'                            # Web Browser
+cask 'firefox'                        # Web Browser
+cask 'zen'                            # Web Browser
+cask 'bitwarden'                      # Password manager
+cask 'claude'                         # Claude desktop app
+cask 'protonvpn'                      # VPN
+cask 'gimp'                           # Image editor
 cask 'slack'                          # Team communication and collaboration
-cask 'reactotron'                     # Inspecting React JS and React Native projects
-cask 'android-studio'                 # Tools for building Android applications
 cask 'webex'                          # Video communication and virtual meeting platform
 
 mas 'Xcode', id: 497799835
