@@ -18,25 +18,56 @@
 
 set -Eeuo pipefail
 cd "$(dirname "$(realpath "${BASH_SOURCE[0]}")")"
-trap 'echo "setup: failed at line $LINENO" >&2' ERR
+trap 'die "failed at line $LINENO"' ERR
 
-mode=check yes=0 missing=0 reboot=0 steps=()
+mode=check yes=0 ok=0 fixed=0 missing=0 warned=0 reboot=0 steps=()
 read -ra groups <<<"${SETUP_GROUPS:-base hardware desktop dev gaming apps}"
 
+# --- output -------------------------------------------------------------------
+# Colour only on a terminal (NO_COLOR turns it off). Nerd Font icons, except on
+# the Linux console, where a fresh install first runs this and has no such font.
+
+if [[ -t 1 && -z ${NO_COLOR:-} ]]; then
+  bold=$'\e[1m' dim=$'\e[2m' red=$'\e[31m' green=$'\e[32m' yellow=$'\e[33m' blue=$'\e[34m' reset=$'\e[0m'
+else
+  bold='' dim='' red='' green='' yellow='' blue='' reset=''
+fi
+if [[ ${TERM:-} == linux ]]; then
+  nerd=0 i_ok=+ i_miss=x i_warn=! i_run='$' i_ask='?'
+else
+  nerd=1 i_ok=$'' i_miss=$'' i_warn=$'' i_run=$'' i_ask=$''
+fi
+
+step() { # step <nerd icon> <title>
+  local icon=$1
+  ((nerd)) || icon='::'
+  printf '\n%s%s %s%s\n' "$bold$blue" "$icon" "$2" "$reset"
+}
 die() {
-  echo "setup: $*" >&2
+  printf '%s%s setup: %s%s\n' "$red" "$i_miss" "$*" "$reset" >&2
   exit 1
 }
-warn() { echo "  warn     $*"; }
+warn() {
+  printf '  %s%s%s %s\n' "$yellow" "$i_warn" "$reset" "$*"
+  warned=$((warned + 1))
+}
 run() {
-  echo "    \$ $*"
+  printf '      %s%s %s%s\n' "$dim" "$i_run" "$*" "$reset"
   [[ $mode == check ]] || "$@"
 }
 confirm() {
   ((yes)) && return
   local answer
-  read -rp "  fix $1? [Y/n] " answer </dev/tty || return 1
+  read -rp "  $blue$i_ask$reset fix $1? [Y/n] " answer </dev/tty || return 1
   [[ ${answer:-y} == [Yy]* ]]
+}
+summary() {
+  local line
+  line="$green$i_ok $ok ok$reset"
+  ((fixed == 0)) || line+="   $green$i_ok $fixed fixed$reset"
+  ((missing == 0)) || line+="   $red$i_miss $missing missing$reset"
+  ((warned == 0)) || line+="   $yellow$i_warn $warned warning(s)$reset"
+  printf '\n  %s\n' "$line"
 }
 noconfirm() { if ((yes)); then echo --noconfirm; fi; }
 want() { ((${#steps[@]} == 0)) || [[ " ${steps[*]} " == *" $1 "* ]]; }
@@ -45,10 +76,11 @@ want() { ((${#steps[@]} == 0)) || [[ " ${steps[*]} " == *" $1 "* ]]; }
 # arguments. In check mode the fix only prints its commands.
 item() {
   if $2; then
-    echo "  ok       $1"
+    printf '  %s%s%s %s\n' "$green" "$i_ok" "$reset" "$1"
+    ok=$((ok + 1))
     return
   fi
-  echo "  MISSING  $1"
+  printf '  %s%s %s%s\n' "$red" "$i_miss" "$1" "$reset"
   if [[ $mode == check ]] || ! confirm "$1"; then
     [[ $mode == install ]] || $3
     missing=$((missing + 1))
@@ -56,6 +88,8 @@ item() {
   fi
   $3
   $2 || die "$1: still missing after the fix"
+  printf '  %s%s %s fixed%s\n' "$green" "$i_ok" "$1" "$reset"
+  fixed=$((fixed + 1))
 }
 
 # --- packages -----------------------------------------------------------------
@@ -165,21 +199,40 @@ unit_on() { if [[ $1 == user ]]; then run systemctl --user enable "$2"; else run
 
 # --- commands -----------------------------------------------------------------
 
+each() { # each <command> <file...>: run the command on every file
+  local cmd=$1 f rc=0
+  shift
+  for f; do $cmd "$f" || rc=1; done
+  return $rc
+}
+lint_one() { # lint_one <label> <command...>
+  local out
+  if out=$("${@:2}" 2>&1); then
+    printf '  %s%s%s %s\n' "$green" "$i_ok" "$reset" "$1"
+    ok=$((ok + 1))
+  else
+    printf '  %s%s %s%s\n' "$red" "$i_miss" "$1" "$reset"
+    printf '      %s\n' "${out//$'\n'/$'\n'      }"
+    missing=$((missing + 1))
+  fi
+}
 lint() {
-  local f rc=0 sh=(setup.sh quickshell/.config/quickshell/qs-fmt)
+  local f sh=(setup.sh quickshell/.config/quickshell/qs-fmt)
   for f in shellcheck shfmt stylua zsh; do
     command -v $f >/dev/null || {
-      echo "setup: lint needs $f" >&2
+      printf '%s%s setup: lint needs %s%s\n' "$red" "$i_miss" "$f" "$reset" >&2
       exit 2
     }
   done
-  for f in "${sh[@]}"; do bash -n "$f" || rc=1; done
-  shellcheck "${sh[@]}" || rc=1
-  shfmt -d -i 2 -ci "${sh[@]}" || rc=1
-  for f in zsh/.zshenv zsh/.config/zsh/.zshrc zsh/.config/zsh/*.zsh zsh/.config/zsh/core/*.zsh; do zsh -n "$f" || rc=1; done
-  stylua --check --search-parent-directories nvim hypr || rc=1
-  quickshell/.config/quickshell/qs-fmt --strict >/dev/null || rc=1
-  return $rc
+  step $'' lint
+  lint_one "bash -n" each "bash -n" "${sh[@]}"
+  lint_one shellcheck shellcheck "${sh[@]}"
+  lint_one shfmt shfmt -d -i 2 -ci "${sh[@]}"
+  lint_one "zsh -n" each "zsh -n" zsh/.zshenv zsh/.config/zsh/.zshrc zsh/.config/zsh/*.zsh zsh/.config/zsh/core/*.zsh
+  lint_one stylua stylua --check --search-parent-directories nvim hypr
+  lint_one "qs-fmt --strict" quickshell/.config/quickshell/qs-fmt --strict
+  summary
+  ((missing == 0))
 }
 
 mac() {
@@ -191,7 +244,7 @@ mac() {
   mac_stowed() { [[ -z $(stow_pending $(portable)) ]]; }
   mac_stow() { run stow -d "$PWD" -t "$HOME" -S $(portable); }
 
-  echo macOS
+  step $'\uf179' macOS
   item Homebrew brew_ok brew_get
   item Brewfile bundle_ok bundle_run
   item configs mac_stowed mac_stow
@@ -212,6 +265,7 @@ case ${1:-check} in
   *) die "unknown command $1 (try --help)" ;;
 esac
 
+printf '%ssetup%s %s%s · %s%s\n' "$bold" "$reset" "$dim" "$mode" "${groups[*]}" "$reset"
 if [[ $(uname -s) == Darwin ]]; then
   mac
 else
@@ -220,20 +274,20 @@ else
   [[ $mode == check ]] || sudo -v
 
   if want multilib; then
-    echo multilib
+    step $'\uf1b3' multilib
     item "[multilib] in pacman.conf" multilib_ok multilib_add
   fi
   if want packages; then
-    echo packages
+    step $'\uf1b2' packages
     for g in "${groups[@]}"; do item "$g" "repo_ok $g" "repo_add $g"; done
     item "listed packages marked explicit" reasons_ok reasons_fix
   fi
   if want stow; then
-    echo stow
+    step $'\uf0c1' stow
     item "configs stowed into ~" stowed stow_all
   fi
   if want aur; then
-    echo aur
+    step $'\uf303' aur
     item yay yay_ok yay_get
     item "yay cleans up after builds" yay_tidy_ok yay_tidy
     for g in "${groups[@]}"; do
@@ -241,12 +295,12 @@ else
     done
   fi
   if want system; then
-    echo system
+    step $'\uf013' system
     item "setup/system files in place" sys_ok sys_install
     item "boot entry for linux-lts" lts_ok lts_add
   fi
   if want user; then
-    echo user
+    step $'\uf007' user
     item "in the gamemode group" gamemode_ok gamemode_join
     item "zsh as login shell" zsh_ok zsh_use
     item "GTK settings" gtk_ok gtk_set
@@ -261,7 +315,7 @@ else
     compgen -G "$HOME/.ssh/id_*.pub" >/dev/null || warn "no SSH key in ~/.ssh; GitHub pushes go over SSH"
   fi
   if want services; then
-    echo services
+    step $'\uf233' services
     mapfile -t units < <(sed 's/#.*//' setup/services.txt | awk 'NF == 2')
     for u in "${units[@]}"; do
       read -r scope unit <<<"$u"
@@ -273,18 +327,19 @@ else
     done
   fi
 
-  echo
-  [[ -n ${SETUP_GROUPS:-} ]] || {
+  notes=()
+  if [[ -z ${SETUP_GROUPS:-} ]]; then
     extra=$(comm -23 <(pacman -Qqe | sort) <(listed) | tr '\n' ' ')
-    [[ -z $extra ]] || warn "installed but not in setup/packages: $extra"
-  }
+    [[ -z $extra ]] || notes+=("installed but not in setup/packages: $extra")
+  fi
   pacnew=$(find /etc -name '*.pacnew' 2>/dev/null | wc -l || true)
-  ((pacnew == 0)) || warn "$pacnew .pacnew file(s) in /etc; merge them with sudo pacdiff"
+  ((pacnew == 0)) || notes+=("$pacnew .pacnew file(s) in /etc; merge them with sudo pacdiff")
+  if ((${#notes[@]})); then
+    step $'\uf05a' notes
+    for n in "${notes[@]}"; do warn "$n"; done
+  fi
 fi
 
-if ((reboot)) && [[ $mode == install ]]; then echo "reboot to apply the modprobe and zram changes"; fi
-if ((missing)); then
-  echo "$missing item(s) missing"
-  exit 1
-fi
-echo "everything is in place"
+if ((reboot)) && [[ $mode == install ]]; then warn "reboot to apply the modprobe and zram changes"; fi
+summary
+((missing == 0)) || exit 1

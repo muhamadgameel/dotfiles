@@ -34,6 +34,21 @@ set -euo pipefail
 
 ROOT=$(cd -P "$(dirname "${BASH_SOURCE[0]}")" && pwd)
 
+# Colour only on a terminal (NO_COLOR turns it off); ASCII icons on the Linux console.
+if [[ -t 1 && -z ${NO_COLOR:-} ]]; then
+  red=$'\e[31m' green=$'\e[32m' yellow=$'\e[33m' reset=$'\e[0m'
+else
+  red='' green='' yellow='' reset=''
+fi
+if [[ ${TERM:-} == linux ]]; then
+  i_ok=+ i_bad=x i_warn=!
+else
+  i_ok=$'' i_bad=$'' i_warn=$''
+fi
+good() { printf '%s%s %s%s\n' "$green" "$i_ok" "$*" "$reset"; }
+bad() { printf '%s%s %s%s\n' "$red" "$i_bad" "$*" "$reset" >&2; }
+note() { printf '%s%s %s%s\n' "$yellow" "$i_warn" "$*" "$reset"; }
+
 write=0
 show_diff=0
 run_lint=1
@@ -52,7 +67,7 @@ while (($#)); do
       exit 0
       ;;
     -*)
-      echo "qs-fmt: unknown option $1 (try --help)" >&2
+      bad "qs-fmt: unknown option $1 (try --help)"
       exit 2
       ;;
     *) targets+=("$1") ;;
@@ -83,8 +98,8 @@ find_qt6_bindir() {
 }
 
 if ! QT6_BIN=$(find_qt6_bindir); then
-  echo "qs-fmt: no Qt 6 qmlformat found (install qt6-declarative, or set QT6_BINDIR)" >&2
-  echo "qs-fmt: note that the qmlformat on PATH is Qt 5 and must not be used here" >&2
+  bad "qs-fmt: no Qt 6 qmlformat found (install qt6-declarative, or set QT6_BINDIR)"
+  bad "qs-fmt: note that the qmlformat on PATH is Qt 5 and must not be used here"
   exit 2
 fi
 
@@ -110,13 +125,13 @@ for target in "${targets[@]}"; do
   elif [[ -d $target ]]; then
     while IFS= read -r f; do files+=("$f"); done < <(find "$target" -name '*.qml' | sort)
   else
-    echo "qs-fmt: no such file or directory: $target" >&2
+    bad "qs-fmt: no such file or directory: $target"
     exit 2
   fi
 done
 
 if ((${#files[@]} == 0)); then
-  echo "qs-fmt: no .qml files found" >&2
+  bad "qs-fmt: no .qml files found"
   exit 2
 fi
 
@@ -151,7 +166,7 @@ if ((run_lint != 2)); then
 
   if ((${#broken[@]})); then
     status=1
-    echo "qs-fmt: parse errors" >&2
+    bad "qs-fmt: parse errors"
     for file in "${broken[@]}"; do
       echo "=== $(rel "$file")" >&2
       "$QMLDOM" -D none -d none "$file" 2>&1 |
@@ -164,17 +179,17 @@ if ((run_lint != 2)); then
 
   if ((${#formatted[@]})); then
     if ((write)); then
-      echo "qs-fmt: reformatted ${#formatted[@]} file(s)"
+      good "qs-fmt: reformatted ${#formatted[@]} file(s)"
       for file in "${formatted[@]}"; do echo "    $(rel "$file")"; done
     else
       status=1
-      echo "qs-fmt: ${#formatted[@]} file(s) need formatting (run with -w)"
+      bad "qs-fmt: ${#formatted[@]} file(s) need formatting (run with -w)" 2>&1
       for file in "${formatted[@]}"; do echo "    $(rel "$file")"; done
     fi
   fi
 
   if ((${#broken[@]} == 0 && ${#formatted[@]} == 0)); then
-    echo "qs-fmt: ${#files[@]} file(s) parse cleanly and are correctly formatted"
+    good "qs-fmt: ${#files[@]} file(s) parse cleanly and are correctly formatted"
   fi
 fi
 
@@ -209,10 +224,12 @@ if ((run_lint)); then
   if [[ -n $lint_out ]]; then
     count=$(grep -cE '^(Warning|Error): ' <<<"$lint_out" || true)
     echo
-    if ((strict)); then
-      echo "qs-fmt: qmllint reported $count warning(s)"
+    if ((count == 0)); then
+      good "qs-fmt: qmllint reported no warnings, only notes"
+    elif ((strict)); then
+      note "qs-fmt: qmllint reported $count warning(s)"
     else
-      echo "qs-fmt: qmllint reported $count warning(s) (advisory; --strict makes these fail)"
+      note "qs-fmt: qmllint reported $count warning(s) (advisory; --strict makes these fail)"
     fi
     printf '%s\n' "$lint_out"
     # qmllint exits 0 on warnings, so strict mode counts them instead.
@@ -220,10 +237,10 @@ if ((run_lint)); then
       status=1
     fi
   elif ((lint_failed)); then
-    echo "qs-fmt: qmllint failed without output" >&2
+    bad "qs-fmt: qmllint failed without output"
     status=2
   else
-    echo "qs-fmt: qmllint clean"
+    good "qs-fmt: qmllint clean"
   fi
 fi
 
