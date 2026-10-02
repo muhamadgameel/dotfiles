@@ -2,5 +2,6 @@
 # starts, so the bar, idle lock, wallpaper and night light don't run.
 [Desktop Entry]
 Name=Hyprland
+Exec=/usr/bin/start-hyprland
 Type=Application
 NoDisplay=true
