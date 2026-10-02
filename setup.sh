@@ -124,11 +124,16 @@ aur_add() { run yay -S --needed $(noconfirm) $(aur_missing "$1"); }
 # aerospace and ghostty are the macOS desktop; see mac().
 packages() { for d in */; do case $d in setup/ | aerospace/ | ghostty/) ;; *) echo "${d%/}" ;; esac done }
 stow_pending() { stow -n -v -d "$PWD" -t "$HOME" -S "$@" 2>&1 | grep -v '^WARNING: in simulation mode' || true; }
-stowed() { [[ -z $(stow_pending $(packages)) && -d ~/.config/systemd/user && ! -L ~/.config/systemd/user ]]; }
+# Real directories, so `systemctl --user enable` and apps never write into the repo.
+real_dirs=("$HOME/.config/systemd/user" "$HOME/.local/share/applications")
+stowed() {
+  local d
+  for d in "${real_dirs[@]}"; do [[ -d $d && ! -L $d ]] || return 1; done
+  [[ -z $(stow_pending $(packages)) ]]
+}
 stow_all() {
   [[ $mode == install ]] || stow_pending $(packages) | sed 's/^/      /'
-  # A real directory, so `systemctl --user enable` never writes into the repo.
-  run mkdir -p "$HOME/.config/systemd/user"
+  run mkdir -p "${real_dirs[@]}"
   run stow -d "$PWD" -t "$HOME" -S $(packages) ||
     die "move the conflicting files aside, or stow --adopt them and review with git diff"
 }
