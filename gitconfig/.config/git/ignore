@@ -41,3 +41,4 @@ tags
 # ── Scratch files (personal convention) ──────────────────────────────────────
 scratch/
 *.local
+!.local/
