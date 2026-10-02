@@ -20,7 +20,6 @@ padding = { x = 8, y = 8 }
 dynamic_padding = true
 decorations = "None"
 decorations_theme_variant = "Dark" # GTK/CSD variant; no-op while decorations = "None"
-option_as_alt = "Both"             # macOS only: Option → Alt, for zsh word-motions
 
 # ── Scrolling ────────────────────────────────────────────────────────
 
@@ -91,7 +90,7 @@ post_processing = true
 persist = false
 mouse.enabled = true
 binding = { key = "O", mods = "Control|Shift" }
-command = "xdg-open" # macOS: "open"
+command = "xdg-open"
 
 # Ctrl+Shift+U — copy to the clipboard instead of opening. No `mouse` key, so
 # only the hint above underlines on hover.

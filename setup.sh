@@ -119,7 +119,8 @@ aur_add() { run yay -S --needed $(noconfirm) $(aur_missing "$1"); }
 
 # --- configs ------------------------------------------------------------------
 
-packages() { for d in */; do [[ $d == setup/ ]] || echo "${d%/}"; done; }
+# aerospace and ghostty are the macOS desktop; see mac().
+packages() { for d in */; do case $d in setup/ | aerospace/ | ghostty/) ;; *) echo "${d%/}" ;; esac done }
 stow_pending() { stow -n -v -d "$PWD" -t "$HOME" -S "$@" 2>&1 | grep -v '^WARNING: in simulation mode' || true; }
 stowed() { [[ -z $(stow_pending $(packages)) && -d ~/.config/systemd/user && ! -L ~/.config/systemd/user ]]; }
 stow_all() {
@@ -240,7 +241,7 @@ mac() {
   brew_get() { run bash -c 'bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"'; }
   bundle_ok() { brew bundle check --file setup/macos/Brewfile >/dev/null 2>&1; }
   bundle_run() { run brew bundle --file setup/macos/Brewfile; }
-  portable() { for p in zsh starship nvim alacritty gitconfig ghostty bat lazygit; do if [[ -d $p ]]; then echo "$p"; fi; done; }
+  portable() { for p in zsh starship nvim gitconfig ghostty aerospace bat lazygit; do if [[ -d $p ]]; then echo "$p"; fi; done; }
   mac_stowed() { [[ -z $(stow_pending $(portable)) ]]; }
   mac_stow() { run stow -d "$PWD" -t "$HOME" -S $(portable); }
 
