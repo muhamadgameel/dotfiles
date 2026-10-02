@@ -1,6 +1,5 @@
 brew 'bash'       # Updated Bash shell
 brew 'zsh'        # Updated Z shell
-brew 'nushell'    # Modern shell
 brew 'git'        # Distributed revision control system
 brew 'fnm'        # Node version manager
 brew 'yarn'       # JavaScript/Node package manager
@@ -22,7 +21,6 @@ cask 'zulu@17'                        # Java JDK
 cask 'arc'                            # Web Browser
 cask 'visual-studio-code'             # Code Editor
 cask 'zed'                            # Zed text editor
-cask 'alacritty'                      # Terminal Emulator
 cask 'slack'                          # Team communication and collaboration
 cask 'reactotron'                     # Inspecting React JS and React Native projects
 cask 'android-studio'                 # Tools for building Android applications

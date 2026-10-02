@@ -14,10 +14,8 @@ system  smartd.service
 system  systemd-boot-update.service
 system  systemd-timesyncd.service
 
-user    cliphist.service
 user    hypridle.service
 user    hyprpaper.service
-user    hyprpolkitagent.service
 user    hyprsunset.service
 user    quickshell.service
 user    wayland-pipewire-idle-inhibit.service
