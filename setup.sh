@@ -317,6 +317,8 @@ else
   fi
   if want services; then
     step $'\uf233' services
+    # pacman reloads the system manager after installing units, not yours
+    [[ $mode == check ]] || systemctl --user daemon-reload
     mapfile -t units < <(sed 's/#.*//' setup/services.txt | awk 'NF == 2')
     for u in "${units[@]}"; do
       read -r scope unit <<<"$u"
