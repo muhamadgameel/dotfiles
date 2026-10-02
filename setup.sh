@@ -9,7 +9,7 @@
 #                                    -y answers yes and passes --noconfirm on
 #   ./setup.sh lint                  syntax and style checks for the repo
 #
-# Steps, in order: multilib packages stow aur system user services
+# Steps, in order: pacman packages stow aur system user services
 # Package groups are setup/packages/*.txt; SETUP_GROUPS picks some, e.g.
 #   SETUP_GROUPS="base desktop dev" ./setup.sh install
 # Exit status: 0 nothing missing, 1 something missing, 2 tooling missing.
@@ -102,6 +102,8 @@ aur_missing() { absent $(list "$1" | sed -n 's|^aur/||p'); }
 
 multilib_ok() { grep -q '^\[multilib\]' /etc/pacman.conf; }
 multilib_add() { run sudo sed -i '/^#\[multilib\]/,/^#Include/s/^#//' /etc/pacman.conf; }
+mirrors_ok() { grep -q '^Server' /etc/pacman.d/mirrorlist; }
+mirrors_fix() { run sudo systemctl start reflector.service; }
 
 repo_ok() { [[ -z $(repo_missing "$1") ]]; }
 repo_add() { run sudo pacman -Syu --needed $(noconfirm) $(repo_missing "$1"); }
@@ -151,6 +153,13 @@ sys_install() {
   if ((firewall)) && systemctl is-active -q firewalld; then run sudo firewall-cmd --reload; fi
 }
 
+lang() { sed -n 's/^LANG=//p' /etc/locale.conf 2>/dev/null | tr -d '"'; }
+locale_ok() { [[ -z $(lang) ]] || grep -q "^$(lang) " /etc/locale.gen; }
+locale_fix() {
+  run sudo sed -i "s/^#$(lang) /$(lang) /" /etc/locale.gen
+  run sudo locale-gen
+}
+
 # systemd-boot has no entry for linux-lts until one is written; copy the
 # linux entry's options, which carry this machine's root partition.
 lts_ok() { [[ ! -e /boot/vmlinuz-linux-lts ]] || grep -qs 'vmlinuz-linux-lts' /boot/loader/entries/*.conf; }
@@ -193,6 +202,15 @@ ext_ok() { ! command -v code >/dev/null || [[ -z $(ext_missing) ]]; }
 ext_add() { for e in $(ext_missing); do run code --install-extension "$e"; done; }
 
 # --- services -----------------------------------------------------------------
+
+# Per network, not the current one: a café's Wi-Fi rightly stays public.
+home_zone_set() {
+  local c
+  for c in $(nmcli -g UUID connection show 2>/dev/null); do
+    [[ $(nmcli -g connection.zone connection show "$c") == home ]] && return 0
+  done
+  return 1
+}
 
 sc() { if [[ $1 == user ]]; then systemctl --user "${@:2}"; else systemctl "${@:2}"; fi; }
 unit_ok() { sc "$1" is-enabled -q "$2"; }
@@ -274,9 +292,10 @@ else
   ((EUID != 0)) || die "run it as your user; it uses sudo where needed"
   [[ $mode == check ]] || sudo -v
 
-  if want multilib; then
-    step $'\uf1b3' multilib
+  if want pacman; then
+    step $'\uf1b3' pacman
     item "[multilib] in pacman.conf" multilib_ok multilib_add
+    item "active mirrors in the mirrorlist" mirrors_ok mirrors_fix
   fi
   if want packages; then
     step $'\uf1b2' packages
@@ -298,6 +317,7 @@ else
   if want system; then
     step $'\uf013' system
     item "setup/system files in place" sys_ok sys_install
+    item "locale.gen enables $(lang)" locale_ok locale_fix
     item "boot entry for linux-lts" lts_ok lts_add
   fi
   if want user; then
@@ -336,7 +356,10 @@ else
     [[ -z $extra ]] || notes+=("installed but not in setup/packages: $extra")
   fi
   pacnew=$(find /etc -name '*.pacnew' 2>/dev/null | wc -l || true)
-  ((pacnew == 0)) || notes+=("$pacnew .pacnew file(s) in /etc; merge them with sudo pacdiff")
+  ((pacnew == 0)) || notes+=("$pacnew .pacnew file(s) in /etc; review each with sudo DIFFPROG='nvim -d' pacdiff, and keep your edits in pacman.conf, mirrorlist and locale.gen")
+  if command -v firewall-cmd >/dev/null && ! home_zone_set; then
+    notes+=("no saved network is in the firewall's home zone, so Metro and Steam LAN are blocked everywhere; on a network you trust: nmcli connection modify NAME connection.zone home")
+  fi
   if ((${#notes[@]})); then
     step $'\uf05a' notes
     for n in "${notes[@]}"; do warn "$n"; done
