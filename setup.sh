@@ -241,9 +241,9 @@ mac() {
   brew_get() { run bash -c 'bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"'; }
   bundle_ok() { brew bundle check --file setup/macos/Brewfile >/dev/null 2>&1; }
   bundle_run() { run brew bundle --file setup/macos/Brewfile; }
-  portable() { for p in zsh starship nvim gitconfig ghostty aerospace bat lazygit; do if [[ -d $p ]]; then echo "$p"; fi; done; }
-  mac_stowed() { [[ -z $(stow_pending $(portable)) ]]; }
-  mac_stow() { run stow -d "$PWD" -t "$HOME" -S $(portable); }
+  local mac_packages=(aerospace ghostty gitconfig nvim starship zsh)
+  mac_stowed() { [[ -z $(stow_pending "${mac_packages[@]}") ]]; }
+  mac_stow() { run stow -d "$PWD" -t "$HOME" -S "${mac_packages[@]}"; }
 
   step $'\uf179' macOS
   item Homebrew brew_ok brew_get
