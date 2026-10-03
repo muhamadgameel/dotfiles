@@ -1,23 +1,4 @@
-# Quickshell, run as a systemd user service instead of `uwsm app -- qs` from
-# Hyprland's autostart - the same way hypridle and hyprpaper already run.
-#
-# Two reasons:
-#
-# - Restart=on-failure. A crash brings the bar, notifications and OSD straight
-#   back rather than leaving the session without them until it is noticed.
-#   Quickshell.Networking in 0.3.1 has an open use-after-free (upstream #1021)
-#   that can take the whole process down.
-#
-# - The unit owns one cgroup. `systemctl --user restart quickshell` stops every
-#   child process with it. Under `uwsm app`, restarting with `pkill qs` left the
-#   children running (nmcli monitor, systemd-inhibit) inside a scope that never
-#   closed; seven had piled up by the time that was found.
-#
-# Restart the shell with:  systemctl --user restart quickshell
-# Logs:                    journalctl --user -u quickshell, or `qs log`
-#
-# Enabled once with `systemctl --user enable quickshell.service`.
-
+# Restart with `systemctl --user restart quickshell`, never pkill (quickshell/README.md).
 [Unit]
 Description=Quickshell desktop shell
 Documentation=https://quickshell.org

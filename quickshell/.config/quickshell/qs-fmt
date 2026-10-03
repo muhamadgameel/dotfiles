@@ -1,22 +1,8 @@
 #!/usr/bin/env bash
 # qs-fmt - format, parse-check and lint this Quickshell config.
 #
-# Tooling note. This machine has two generations of the QML tools installed:
-#
-#   /usr/bin/qmlformat        qt5-declarative, reports "qmlformat 1.0"
-#   /usr/lib/qt6/bin/qmlformat  qt6-declarative 6.11.2
-#
-# The Qt5 pair is what lands on PATH and it is unusable here: qmlformat 1.0
-# ignores .qmlformat.ini (so it reindents the whole tree to 4 spaces), cannot
-# parse optional chaining, and fails *silently* - exit 1, empty stderr - so a
-# check that reads stderr instead of the exit status reports success on files it
-# mangled. qmllint 1.0 exits 255 on every input, valid or not.
-#
-# So this script resolves the Qt 6 bin directory explicitly and takes all three
-# tools from it. qmlformat 6 honours .qmlformat.ini, handles `?.`, and reports
-# parse failures through its exit status; qmldom supplies the error text that
-# qmlformat omits; qmllint 6 catches unqualified access, dead imports and
-# missing properties.
+# It takes qmlformat, qmldom and qmllint from Qt 6's bin directory, which isn't
+# on PATH; a Qt 5 qmlformat would silently mangle these files.
 #
 # Usage
 #   ./qs-fmt                  check formatting, parse errors and lint warnings
