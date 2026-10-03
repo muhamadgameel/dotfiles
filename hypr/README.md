@@ -66,6 +66,7 @@ doesn't follow those.
 `autostart.lua` starts the polkit agent, the Thunar daemon and the clipboard
 watchers. Long-lived apps go through `uwsm app --`, so each runs in its own
 systemd scope and the OOM killer can pick the app instead of the session.
+fuzzel starts apps the same way, through its `launch-prefix`.
 
 SUPER+SHIFT+Escape logs out with `uwsm stop`. `hl.dsp.exit()` would pull the
 compositor out from under its clients and skip the orderly shutdown.
