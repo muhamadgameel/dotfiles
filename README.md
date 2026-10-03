@@ -179,7 +179,9 @@ gamemoderun mangohud %command%
 
 - **GameMode** tells the shell a game is running: it raises the power profile,
   holds notifications back, and keeps the screen from dimming while you play
-  with a controller. `gamemoded -s` says whether it's active. The CPU governor
+  with a controller. The game itself runs at nice -10 and, by gamemode's
+  default, only on the P-cores; `pin_cores=no` in `gamemode.ini` gives it the
+  E-cores too. `gamemoded -s` says whether it's active. The CPU governor
   stays at powersave on purpose: the platform profile is what raises this
   laptop's power limits and fan curve, and forcing the performance governor
   would only add heat.
