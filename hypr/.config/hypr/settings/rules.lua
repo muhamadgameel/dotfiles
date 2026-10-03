@@ -105,6 +105,9 @@ end
 -- fuzzel
 hl.layer_rule({ match = { namespace = "launcher" }, blur = true, animation = "slide" })
 
+-- slurp and hyprpicker: grim captures the moment they exit, and a fading overlay would be in the shot.
+hl.layer_rule({ match = { namespace = "^(selection|hyprpicker)$" }, no_anim = true })
+
 -- quickshell surfaces are larger than their bodies; the transparent margin holds the shadow.
 hl.layer_rule({
 	match = { namespace = "^quickshell-" },
