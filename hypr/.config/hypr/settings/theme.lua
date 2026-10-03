@@ -33,6 +33,6 @@ return {
 		fileManager = "thunar",
 		browser = "chromium",
 		menu = "fuzzel",
-		lock = "pidof hyprlock || hyprlock", -- same guard as hypridle's lock_cmd
+		lock = "loginctl lock-session", -- hypridle's lock_cmd then starts hyprlock
 	},
 }

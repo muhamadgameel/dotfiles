@@ -193,7 +193,7 @@ end
 -- G is the system stats panel, so game mode sits on ALT.
 hl.bind(mod .. " + ALT + G", hl.dsp.global("quickshell:toggleGameMode"), { description = "Toggle game mode" })
 
--- Dismiss whatever is open. Not SUPER+SHIFT+Escape -- that is Log out.
+-- Dismiss whatever is open.
 hl.bind(mod .. " + grave", hl.dsp.global("quickshell:panelClose"), { description = "Close any shell panel" })
 
 -- ── System ───────────────────────────────────────────────────────────
@@ -205,8 +205,8 @@ hl.bind(
 	hl.dsp.exec_cmd("hyprctl switchxkblayout all next"),
 	{ locked = true, description = "Switch keyboard layout" }
 )
--- uwsm stop, not hl.dsp.exit(), so the session shuts down in order.
-hl.bind(mod .. " + SHIFT + Escape", hl.dsp.exec_cmd("uwsm stop"), { description = "Log out" })
+-- uwsm stop, not hl.dsp.exit(), so the session shuts down in order. Three modifiers, so it isn't hit by accident.
+hl.bind(mod .. " + CTRL + SHIFT + Escape", hl.dsp.exec_cmd("uwsm stop"), { description = "Log out" })
 
 -- ── Brightness ───────────────────────────────────────────────────────
 -- Linear (no -e4), to match the shell's slider (hypr/README.md).

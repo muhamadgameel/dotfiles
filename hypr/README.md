@@ -69,8 +69,12 @@ systemd scope and the OOM killer can pick the app instead of the session.
 fuzzel does the same through its `launch-prefix`, and so does the terminal
 keybind, with the faster `uwsm-app` client.
 
-SUPER+SHIFT+Escape logs out with `uwsm stop`. `hl.dsp.exit()` would pull the
-compositor out from under its clients and skip the orderly shutdown.
+SUPER+Escape locks through logind (`loginctl lock-session`). hypridle answers
+the lock request by starting hyprlock, the same way it does after 20 idle
+minutes and before sleep, so hyprlock is only ever started from one place.
+
+SUPER+CTRL+SHIFT+Escape logs out with `uwsm stop`. `hl.dsp.exit()` would pull
+the compositor out from under its clients and skip the orderly shutdown.
 
 ## Keybinds
 
@@ -107,6 +111,7 @@ any window, and a second press puts it back where it was.
 | `SUPER + ALT + 1-0` | Send window to workspace and follow |
 | `SUPER + ALT + G` | Toggle game mode |
 | `SUPER + B` | Browser |
+| `SUPER + CTRL + SHIFT + Escape` | Log out |
 | `SUPER + CTRL + arrows` | Resize window |
 | `SUPER + C` | Center window |
 | `SUPER + D` | App launcher |
@@ -125,7 +130,6 @@ any window, and a second press puts it back where it was.
 | `SUPER + SHIFT + C` | Color picker |
 | `SUPER + SHIFT + D` | Toggle do not disturb |
 | `SUPER + SHIFT + E` | Settings panel |
-| `SUPER + SHIFT + Escape` | Log out |
 | `SUPER + SHIFT + F` | Maximize |
 | `SUPER + SHIFT + G` | System stats panel |
 | `SUPER + SHIFT + I` | Toggle stay awake |
