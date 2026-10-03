@@ -11,7 +11,7 @@ systemd user units.
 | `hyprland.lua` | The entry point. It requires each module below; an error in one module aborts only that module. |
 | `settings/theme.lua` | Shared values: colours, border size, default apps. |
 | `settings/monitors.lua` | Outputs. `hyprctl monitors all` lists them. |
-| `settings/look.lua` | Borders, gaps, decoration, and the dwindle, master and scrolling layouts. |
+| `settings/look.lua` | Borders, gaps, decoration, and the dwindle and master layouts. |
 | `settings/behavior.lua` | misc, cursor, render, XWayland and bind options. |
 | `settings/animations.lua` | Curves and animations. |
 | `settings/input.lua` | Keyboard, mouse, touchpad and gestures. |

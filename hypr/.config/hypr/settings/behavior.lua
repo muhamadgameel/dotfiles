@@ -9,14 +9,18 @@ hl.config({
 		mouse_move_enables_dpms = true,
 		key_press_enables_dpms = true,
 
-		initial_workspace_tracking = 1,
-		middle_click_paste = true,
+		-- If hyprlock dies while locked, a new one may take over instead of a dead lock screen.
+		allow_session_lock_restore = true,
+	},
+
+	ecosystem = {
+		no_update_news = true,
+		no_donation_nag = true,
 	},
 
 	cursor = {
 		inactive_timeout = 5,
 		hide_on_key_press = true,
-		hide_on_touch = true,
 	},
 
 	render = {
@@ -24,8 +28,8 @@ hl.config({
 	},
 
 	xwayland = {
-		-- Render XWayland apps at native resolution instead of letting them
-		-- scale themselves. Important on this 1.333x fractional-scale panel.
+		-- XWayland apps draw at native pixels and scale themselves; otherwise the
+		-- compositor upscales them 1.333x and they blur.
 		force_zero_scaling = true,
 	},
 

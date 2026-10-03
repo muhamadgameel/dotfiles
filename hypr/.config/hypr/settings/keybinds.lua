@@ -1,5 +1,5 @@
--- Flags (3rd arg): locked, release, repeating, non_consuming, mouse,
---                  transparent, ignore_mods, long_press, description
+-- Bind options (3rd arg): locked, repeating, non_consuming, mouse, description and more;
+-- HL.BindOptions in /usr/share/hypr/stubs/hl.meta.lua has the full list.
 
 local theme = require("settings.theme")
 local apps = theme.apps

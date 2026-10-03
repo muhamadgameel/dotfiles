@@ -7,7 +7,7 @@ hl.on("hyprland.start", function()
 	hl.exec_cmd("uwsm app -- thunar --daemon")
 
 	-- Clipboard history: keep entries after the source app exits.
-	-- These are short-lived watchers tied to the compositor, not apps.
+	-- These watch for the whole session and belong to the compositor, not to an app.
 	hl.exec_cmd("wl-paste --type text  --watch cliphist store")
 	hl.exec_cmd("wl-paste --type image --watch cliphist store")
 end)

@@ -2,10 +2,7 @@
 -- The shell's hyprland-colors.lua overrides these key by key; a bad file keeps them.
 local colors = {
 	accent = "rgb(7aa2f7)",
-	accentAlpha = "rgba(7aa2f7ee)",
 	inactive = "rgb(565f89)",
-	surface = "rgb(1a1b26)",
-	text = "rgb(c0caf5)",
 }
 
 local ok, generated = pcall(function()
