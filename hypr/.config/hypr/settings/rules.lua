@@ -27,8 +27,8 @@ hl.window_rule({
 -- ── Floating: system utilities ───────────────────────────────────────
 
 hl.window_rule({ match = { class = "nm-connection-editor" }, float = true })
-hl.window_rule({ match = { class = "blueman-manager" }, float = true })
 hl.window_rule({ match = { class = "org.kde.polkit-kde-authentication-agent-1" }, float = true })
+hl.window_rule({ match = { class = "^(protonvpn-app|proton\\.vpn\\.app\\.gtk)$" }, float = true, center = true })
 
 hl.window_rule({
 	name = "pavucontrol",
@@ -37,21 +37,34 @@ hl.window_rule({
 	size = { 800, 600 },
 })
 
--- ── Floating: file dialogs ───────────────────────────────────────────
+-- ── Floating: dialogs and prompts ────────────────────────────────────
 
-for _, title in ipairs({ "^(Open File)(.*)$", "^(Save File)(.*)$" }) do
-	hl.window_rule({ match = { title = title }, float = true, size = { 900, 600 } })
-end
+-- The portal's file dialogs have no parent window, so Hyprland doesn't float them itself.
+hl.window_rule({ match = { class = "^xdg-desktop-portal-gtk$" }, float = true })
+hl.window_rule({
+	match = { class = "^xdg-desktop-portal-gtk$", title = "^(Open|Save|Select)" },
+	size = { 900, 600 },
+})
+hl.window_rule({ match = { class = "^[Tt]hunar$", title = "^Rename" }, float = true })
 
-for _, title in ipairs({ "^(Open Folder)(.*)$", "^(Select)(.*)$", "^(Rename)(.*)$" }) do
-	hl.window_rule({ match = { title = title }, float = true })
-end
+hl.window_rule({
+	name = "password-prompts",
+	match = { class = "^(gcr-prompter|org\\.gnupg\\.pinentry-.*|pinentry-.*)$" },
+	float = true,
+	center = true,
+	stay_focused = true,
+})
+hl.window_rule({ match = { class = "^zenity$" }, float = true, center = true })
 
 -- ── Floating: desktop apps ───────────────────────────────────────────
 
-for _, class in ipairs({ "imv", "org.gnome.Loupe", "org.gnome.FileRoller" }) do
+for _, class in ipairs({ "org.gnome.Loupe", "org.gnome.FileRoller" }) do
 	hl.window_rule({ match = { class = class }, float = true })
 end
+
+-- ── Privacy ──────────────────────────────────────────────────────────
+
+hl.window_rule({ match = { class = "^(?i)bitwarden$" }, no_screen_share = true })
 
 -- ── Picture-in-picture ───────────────────────────────────────────────
 
@@ -86,19 +99,18 @@ hl.window_rule({
 
 hl.window_rule({ match = { class = "Alacritty" }, opacity = "1.0 0.92" })
 
--- ── Games && Idle inhibition ──────────────────────────
--- Keep in step with `_gameClass` in quickshell/services/GameMode.qml (hypr/README.md).
-local games = { "^steam_app_[0-9]+$", "^gamescope$" }
+-- ── Games and idle ───────────────────────────────────────────────────
+-- The same pattern as `_gameClass` in quickshell/services/GameMode.qml (hypr/README.md).
+local games = "^(steam_app_[0-9]+|gamescope)$"
 
-for _, class in ipairs({ "mpv", "chromium", "org.gnome.Loupe", table.unpack(games) }) do
+-- Fullscreen video and games keep the screen awake, whether or not the app asks.
+for _, class in ipairs({ "mpv", "chromium", "org.gnome.Loupe", games }) do
 	hl.window_rule({ match = { class = class }, idle_inhibit = "fullscreen" })
 end
 
 -- ── Tearing ──────────────────────────────────────────────────────────
--- allow_tearing (look.lua) is only the master switch; delete this loop for plain vsync.
-for _, class in ipairs(games) do
-	hl.window_rule({ match = { class = class }, immediate = true })
-end
+-- allow_tearing (look.lua) is only the master switch; delete this rule for plain vsync.
+hl.window_rule({ match = { class = games }, immediate = true })
 
 -- ── Layer rules ──────────────────────────────────────────────────────
 
