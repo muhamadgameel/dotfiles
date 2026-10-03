@@ -98,11 +98,14 @@ any window, and a second press puts it back where it was.
 
 | Keys | Action |
 |---|---|
+| `ALT + Print` | Screenshot a window to file |
 | `Print` | Screenshot region to file |
 | `SHIFT + Print` | Screenshot to file |
 | `SUPER + 1-0` | Go to workspace |
 | `SUPER + ALT + 1-0` | Send window to workspace and follow |
+| `SUPER + ALT + G` | Toggle game mode |
 | `SUPER + B` | Browser |
+| `SUPER + CTRL + arrows` | Resize window |
 | `SUPER + C` | Center window |
 | `SUPER + D` | App launcher |
 | `SUPER + E` | File manager |
@@ -213,8 +216,8 @@ their class added, and the list has to match `_gameClass` in
 [`services/GameMode.qml`](../quickshell/.config/quickshell/services/GameMode.qml).
 
 - **Idle:** games, mpv, Chromium and Loupe keep the screen awake while
-  fullscreen. Apps that use the idle-inhibit protocol, like Chromium during
-  playback, are honoured anyway; the rule covers the ones that don't.
+  fullscreen. mpv and Chromium only ask for that themselves while a video is
+  playing, so the rule is what keeps a paused one from dimming and locking.
 - **Tearing:** `general.allow_tearing` is only a master switch. Games also get
   the `immediate` rule, so a fullscreen game shows each frame as soon as it's
   ready instead of waiting for vsync: lower input latency, possible tear lines.

@@ -76,9 +76,16 @@ hl.bind(mod .. " + X", function()
 end, { description = "Picture-in-picture" })
 
 -- ── Focus / move ─────────────────────────────────────────────────────
+local resize_step = { left = { x = -40, y = 0 }, right = { x = 40, y = 0 }, up = { x = 0, y = -40 }, down = { x = 0, y = 40 } }
+
 for _, dir in ipairs({ "left", "right", "up", "down" }) do
 	hl.bind(mod .. " + " .. dir, hl.dsp.focus({ direction = dir }), { description = "Move focus" })
 	hl.bind(mod .. " + SHIFT + " .. dir, hl.dsp.window.move({ direction = dir }), { description = "Move window" })
+	hl.bind(
+		mod .. " + CTRL + " .. dir,
+		hl.dsp.window.resize({ x = resize_step[dir].x, y = resize_step[dir].y, relative = true }),
+		{ repeating = true, description = "Resize window" }
+	)
 end
 hl.bind(mod .. " + U", hl.dsp.focus({ urgent_or_last = true }), { description = "Focus urgent or last" })
 
@@ -157,6 +164,12 @@ hl.bind(
 	{ description = "Screenshot region to clipboard" }
 )
 hl.bind(mod .. " + SHIFT + Print", hl.dsp.exec_cmd("grim - | wl-copy"), { description = "Screenshot to clipboard" })
+-- The shell's window mode: click the window to capture.
+hl.bind(
+	"ALT + Print",
+	hl.dsp.exec_cmd("qs ipc call screenshot capture window"),
+	{ description = "Screenshot a window to file" }
+)
 
 
 -- ── Shell panels ─────────────────────────────────────────────────────
@@ -185,6 +198,9 @@ local panels = {
 for key, panel in pairs(panels) do
 	hl.bind(mod .. " + SHIFT + " .. key, hl.dsp.global("quickshell:" .. panel[1]), { description = panel[2] })
 end
+
+-- G is the system stats panel, so game mode sits on ALT.
+hl.bind(mod .. " + ALT + G", hl.dsp.global("quickshell:toggleGameMode"), { description = "Toggle game mode" })
 
 -- Dismiss whatever is open. Not SUPER+SHIFT+Escape -- that is Log out.
 hl.bind(mod .. " + grave", hl.dsp.global("quickshell:panelClose"), { description = "Close any shell panel" })

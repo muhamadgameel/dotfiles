@@ -103,7 +103,7 @@ hl.window_rule({ match = { class = "Alacritty" }, opacity = "1.0 0.92" })
 -- The same pattern as `_gameClass` in quickshell/services/GameMode.qml (hypr/README.md).
 local games = "^(steam_app_[0-9]+|gamescope)$"
 
--- Fullscreen video and games keep the screen awake, whether or not the app asks.
+-- Fullscreen video and games keep the screen awake even when paused; the apps only ask while playing.
 for _, class in ipairs({ "mpv", "chromium", "org.gnome.Loupe", games }) do
 	hl.window_rule({ match = { class = class }, idle_inhibit = "fullscreen" })
 end
