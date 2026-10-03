@@ -13,7 +13,7 @@ fd
 fnm
 fzf
 nushell
-ouch                    # archive, unarchive, lsarchive
+ouch                    # compress, decompress and list archives
 ripgrep
 starship
 yazi

@@ -2,8 +2,8 @@
 
 Interactive zsh with a small plugin manager (zpm), cached tool start-up and the
 starship prompt. Everything lives in `~/.config/zsh` except `~/.zshenv`. With
-warm caches a new shell starts in about 30 ms on the performance power
-profile and 60 ms on balanced.
+warm caches a new shell starts in 30 to 60 ms: about 30 on the performance
+power profile, up to 60 on balanced.
 
 ## Startup order
 
@@ -31,8 +31,8 @@ profile and 60 ms on balanced.
    last. starship comes at the very end, with its empty
    right prompt removed: rendering it cost about 5 ms per prompt for nothing.
 
-`functions/` holds autoloaded functions (`archive`, `unarchive`, `lsarchive`),
-and `completions/` their completions plus zpm's.
+`completions/` holds zpm's completion. A `functions/` directory next to it is
+autoloaded when it exists: one file per function, named after the function.
 
 ## Plugins (zpm)
 

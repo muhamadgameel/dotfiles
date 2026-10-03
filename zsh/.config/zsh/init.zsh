@@ -5,10 +5,9 @@ typeset -g ZSH_CONF_DIR=${0:a:h}
 # Load custom completions
 fpath+=$ZSH_CONF_DIR/completions
 
-# Load custom functions
+# Load custom functions. With none, skip the call: a bare `autoload` lists every function.
 fpath+=$ZSH_CONF_DIR/functions
-# (N) so an empty functions/ directory is not a startup error.
-autoload -Uz -- "$ZSH_CONF_DIR"/functions/[^_]*(N:t)
+() { (( $# )) && autoload -Uz -- "$@" } "$ZSH_CONF_DIR"/functions/[^_]*(N:t)
 
 # Load configs.
 #

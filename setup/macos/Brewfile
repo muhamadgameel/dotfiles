@@ -13,7 +13,7 @@ brew 'bat'        # Modern cat replacement
 brew 'eza'        # Modern ls replacement
 brew 'zoxide'     # Smarter cd
 brew 'yazi'       # Terminal file manager
-brew 'ouch'       # Archive, unarchive, lsarchive
+brew 'ouch'       # Compress, decompress and list archives
 brew 'jq'         # JSON processor
 brew 'wget'       # File downloader
 brew 'btop'       # Resource monitor
