@@ -1,0 +1,4 @@
+#!/bin/sh
+case $1 in -e | --) shift ;; esac
+[ $# -gt 0 ] || exec alacritty
+exec alacritty -e "$@"

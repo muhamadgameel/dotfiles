@@ -127,7 +127,7 @@ stow_pending() { stow -n -v -d "$PWD" -t "$HOME" -S "$@" 2>&1 | grep -v '^WARNIN
 # Real directories, so `systemctl --user enable` and apps never write into the repo.
 real_dirs=(
   "$HOME/.config/systemd/user" "$HOME/.config/Thunar" "$HOME/.config/Code - OSS/User"
-  "$HOME/.local/share/applications"
+  "$HOME/.local/bin" "$HOME/.local/share/applications"
 )
 stowed() {
   local d

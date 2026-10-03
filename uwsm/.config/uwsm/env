@@ -12,6 +12,9 @@
 #
 # Format is `export KEY=VAL`. Apply with a fresh session (uwsm stop, log in).
 
+# ── PATH ────────────────────────────────────────────────────────────
+export PATH="$HOME/.local/bin:$PATH"
+
 # ── Toolkit backends ────────────────────────────────────────────────
 # Both take a fallback list. Without one, an app whose Wayland plugin is
 # missing fails to start instead of falling back to X11.
