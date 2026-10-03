@@ -151,6 +151,7 @@ shell's slider by uneven amounts.
 | `SUPER + mouse_down` | Next workspace |
 | `SUPER + mouse_up` | Previous workspace |
 | `SUPER + period` | Focus next monitor |
+| `SUPER + space` | Switch keyboard layout |
 | `XF86AudioLowerVolume` | Volume down |
 | `XF86AudioMicMute` | Mute microphone |
 | `XF86AudioMute` | Mute |

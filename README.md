@@ -95,6 +95,7 @@ has the full table. The ones to know first:
 | SUPER+Q | Close window |
 | SUPER+1 … 0 | Workspace 1 to 10; with SHIFT, send the window there |
 | SUPER+V | Clipboard history |
+| SUPER+Space | Switch keyboard layout (English, Arabic) |
 | SUPER+SHIFT+Q | Quick settings |
 | Print | Screenshot a region |
 | SUPER+Escape | Lock |

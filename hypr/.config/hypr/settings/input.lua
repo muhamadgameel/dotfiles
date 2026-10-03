@@ -2,7 +2,6 @@ hl.config({
 	input = {
 		-- ── Keyboard ─────────────────────────────────────────────────
 		kb_layout = "us,ara",
-		kb_options = "grp:win_space_toggle",
 		numlock_by_default = true,
 
 		repeat_rate = 50,

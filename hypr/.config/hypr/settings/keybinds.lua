@@ -174,6 +174,12 @@ hl.bind(mod .. " + grave", hl.dsp.global("quickshell:panelClose"), { description
 -- ── System ───────────────────────────────────────────────────────────
 
 hl.bind(mod .. " + Escape", hl.dsp.exec_cmd(apps.lock), { description = "Lock screen" })
+-- Every keyboard at once; the XKB toggle only switched the one it was pressed on.
+hl.bind(
+	mod .. " + space",
+	hl.dsp.exec_cmd("hyprctl switchxkblayout all next"),
+	{ locked = true, description = "Switch keyboard layout" }
+)
 -- uwsm stop, not hl.dsp.exit(), so the session shuts down in order.
 hl.bind(mod .. " + SHIFT + Escape", hl.dsp.exec_cmd("uwsm stop"), { description = "Log out" })
 
