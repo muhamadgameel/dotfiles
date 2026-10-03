@@ -146,31 +146,22 @@ hl.bind(
 
 -- ── Screenshots ──────────────────────────────────────────────────────
 
--- mkdir -p so the bind still works if ~/Pictures/Screenshots is ever missing;
--- grim would otherwise fail silently.
-local shotDir = '"$(xdg-user-dir PICTURES)/Screenshots"'
-local shotFile = shotDir .. '/"$(date +%Y%m%d_%H%M%S)".png'
-local mkdir = "mkdir -p " .. shotDir .. " && "
+-- The shell's service names the file and tracks the last shot; plain grim only when the shell is down.
+local function screenshot(action, mode)
+	local grim = mode == "screen" and "grim " or 'g=$(slurp) && grim -g "$g" '
+	local fallback = action == "copy" and grim .. "- | wl-copy"
+		or 'd="$(xdg-user-dir PICTURES)/Screenshots" && mkdir -p "$d" && '
+			.. grim
+			.. '"$d/$(date +%Y-%m-%d_%H-%M-%S).png"'
+	return hl.dsp.exec_cmd(("qs ipc call screenshot %s %s || { %s; }"):format(action, mode, fallback))
+end
 
-hl.bind(
-	"Print",
-	hl.dsp.exec_cmd(mkdir .. 'grim -g "$(slurp)" ' .. shotFile),
-	{ description = "Screenshot region to file" }
-)
-hl.bind("SHIFT + Print", hl.dsp.exec_cmd(mkdir .. "grim " .. shotFile), { description = "Screenshot to file" })
-hl.bind(
-	mod .. " + Print",
-	hl.dsp.exec_cmd('grim -g "$(slurp)" - | wl-copy'),
-	{ description = "Screenshot region to clipboard" }
-)
-hl.bind(mod .. " + SHIFT + Print", hl.dsp.exec_cmd("grim - | wl-copy"), { description = "Screenshot to clipboard" })
--- The shell's window mode: click the window to capture.
-hl.bind(
-	"ALT + Print",
-	hl.dsp.exec_cmd("qs ipc call screenshot capture window"),
-	{ description = "Screenshot a window to file" }
-)
-
+hl.bind("Print", screenshot("capture", "region"), { description = "Screenshot region to file" })
+hl.bind("SHIFT + Print", screenshot("capture", "screen"), { description = "Screenshot to file" })
+hl.bind(mod .. " + Print", screenshot("copy", "region"), { description = "Screenshot region to clipboard" })
+hl.bind(mod .. " + SHIFT + Print", screenshot("copy", "screen"), { description = "Screenshot to clipboard" })
+-- Window mode: click the window to capture.
+hl.bind("ALT + Print", screenshot("capture", "window"), { description = "Screenshot a window to file" })
 
 -- ── Shell panels ─────────────────────────────────────────────────────
 -- Global shortcuts the running shell registers (hypr/README.md); SUPER+letter stays with apps.

@@ -87,7 +87,9 @@ it. That left-click bind is non-consuming, so the click still reaches whatever
 it was aimed at.
 
 The media keys call playerctl rather than the shell, so they keep working while
-the shell restarts. Brightness steps are linear because
+the shell restarts. The Print keys go through the shell's screenshot service,
+which names the file and tracks the last shot, and fall back to plain grim when
+the shell isn't running. Brightness steps are linear because
 [`services/Brightness.qml`](../quickshell/.config/quickshell/services/Brightness.qml)
 writes and reads a linear percentage; an exponential curve here would move the
 shell's slider by uneven amounts.
