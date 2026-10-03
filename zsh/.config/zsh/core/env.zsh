@@ -3,11 +3,8 @@
 # including the ones re-sourced by nested interactive shells.
 typeset -U path PATH fpath
 
-# Apps
-export PAGER=less
-export EDITOR=nvim
-export VISUAL=nvim
-export TERMINAL=alacritty
+# The graphical session sets the default apps (uwsm/env); this covers the console, SSH and macOS.
+export EDITOR=${EDITOR:-nvim}
 
 # Colourised man pages via bat (replaces the old LESS_TERMCAP_* block)
 if (( $+commands[bat] )); then

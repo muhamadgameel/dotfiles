@@ -20,7 +20,7 @@ shell starts in about 30 ms once its caches are warm.
    | `core/cache.zsh` | `cached-eval` (see [Cached start-up](#cached-start-up)). |
    | `core/input.zsh` | Key bindings, with sequences for both terminal key modes. |
    | `core/aliases.zsh` | Aliases, `sys-update` for each OS, and zoxide. |
-   | `core/env.zsh` | Pager, editor, terminal, man pager (bat) and `GPG_TTY`. |
+   | `core/env.zsh` | PATH, an `EDITOR` fallback for the console and SSH, the man pager (bat), `GPG_TTY`, the Android SDK and fnm. |
    | `core/fzf.zsh` | fzf defaults, previews and key bindings. |
 
    Then it loads zpm and the plugins. The order there matters:
