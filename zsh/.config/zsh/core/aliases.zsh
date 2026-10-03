@@ -1,23 +1,19 @@
-# Listing Files
-case $_os in
-  Darwin)
-    alias ls="ls -hG"
-    ;;
-  Linux)
-    alias ls="ls -h --color"
-    ;;
-esac
-alias l="ls"
-alias la="ls -A"
-alias ll="ls -l"
-alias lla="ls -lA"
-
+# Listing files. Colour and icons only on a terminal, never in a pipe or a file.
 if (( $+commands[eza] )); then
-  alias ls="eza --color=always --icons=always --smart-group"
+  alias ls="eza --icons=auto --smart-group"
   alias ll="ls --long"
   alias la="ls --all"
   alias lla="ls --long --all"
+else
+  case $_os in
+    Darwin) alias ls="ls -hG" ;;
+    Linux)  alias ls="ls -h --color=auto" ;;
+  esac
+  alias ll="ls -l"
+  alias la="ls -A"
+  alias lla="ls -lA"
 fi
+alias l="ls"
 
 # Directory navigation
 alias ..="cd .."
