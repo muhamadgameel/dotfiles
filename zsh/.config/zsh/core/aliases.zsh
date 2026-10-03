@@ -77,7 +77,12 @@ case $_os in
           alias sys-update="sudo apt update && sudo apt upgrade"
           ;;
         arch | manjaro | endeavouros | cachyos)
-          alias sys-update="sudo pacman -Syu"
+          # yay updates the repos and the AUR, and calls sudo itself.
+          if (( $+commands[yay] )); then
+            alias sys-update="yay -Syu"
+          else
+            alias sys-update="sudo pacman -Syu"
+          fi
           ;;
         fedora | rhel | centos)
           alias sys-update="sudo dnf upgrade --refresh"

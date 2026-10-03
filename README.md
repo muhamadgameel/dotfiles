@@ -197,6 +197,8 @@ Fullscreen games skip vsync and keep the screen awake; see
 
 ## Maintenance
 
+- **Updates:** `sys-update` runs `yay -Syu`, which updates the repo packages
+  and the AUR ones together.
 - **`.pacnew` files:** review them with `sudo DIFFPROG='nvim -d' pacdiff`, and
   merge rather than overwrite `pacman.conf`, `mirrorlist` and `locale.gen`.
   Overwriting them drops multilib, the mirrors and your locale. `./setup.sh`
