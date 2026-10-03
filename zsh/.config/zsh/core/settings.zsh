@@ -35,16 +35,11 @@ unsetopt bg_nice      # Do not run all background jobs at a lower priority
 unsetopt hup          # Do not kill jobs on shell exit
 
 # ===== Prompt
-setopt prompt_subst      # Enable parameter expansion, command substitution, and arithmetic expansion in the prompt
-setopt transient_rprompt # only show the rprompt on the current prompt
+# starship's init sets this too, but cached-eval sources it with local options, so it wouldn't stick.
+setopt prompt_subst
 
 # ===== Pager
 export LESS="--raw-control-chars --use-color --quit-if-one-screen --no-init"
-
-# ===== Locale
-# Only LANG is set on purpose: LC_ALL overrides every LC_* category and cannot
-# be selectively undone, which breaks per-category overrides like LC_TIME.
-export LANG=en_US.UTF-8
 
 # ===== History
 # HISTSIZE is deliberately larger than SAVEHIST: hist_expire_dups_first only has

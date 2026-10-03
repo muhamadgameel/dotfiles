@@ -10,8 +10,8 @@ power profile, up to 60 on balanced.
 1. **`~/.zshenv`** runs for every zsh, scripts included. It only sets the XDG
    base directories and `ZDOTDIR=~/.config/zsh`, so zsh looks for the rest
    there.
-2. **`.zshrc`** runs for interactive shells. It sets up the profiling hook,
-   the cache directories and starship's paths, then sources `init.zsh`.
+2. **`.zshrc`** runs for interactive shells. It sets up the profiling hook and
+   the config and cache paths, then sources `init.zsh`.
 3. **`init.zsh`** adds `completions/` and `functions/` to `fpath`, autoloads the
    functions, and sources the `core/` files in this order:
 

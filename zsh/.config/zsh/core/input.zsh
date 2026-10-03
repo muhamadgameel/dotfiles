@@ -22,14 +22,10 @@ zle -N edit-command-line
     'Control+Left'    $'^[[1;5D ^[[5D'
     'Control+Right'   $'^[[1;5C ^[[5C'
     'Alt+Up'          $'^[[1;3A ^[^[[A ^[[1;9A'
-    'Alt+Down'        $'^[[1;3B ^[^[[B ^[[1;9B'
     'Alt+Left'        $'^[[1;3D ^[^[[D ^[[1;9D'
-    'Alt+Right'       $'^[[1;3C ^[^[[C ^[[1;9C'
     'ControlPageUp'   $'^[[5;5~'
     'ControlPageDown' $'^[[6;5~'
     'Escape'          $'^['
-    'Meta'            $'\M-'
-    'Backspace'       $'^?'
     'Delete'          $'^[[3~'
     'F1'              "${terminfo[kf1]}"
     'F2'              "${terminfo[kf2]}"
@@ -49,9 +45,7 @@ zle -N edit-command-line
     'PageUp'          "${terminfo[kpp]}"
     'PageDown'        "${terminfo[knp]}"
     'Up'              "${terminfo[kcuu1]}"
-    'Left'            "${terminfo[kcub1]}"
     'Down'            "${terminfo[kcud1]}"
-    'Right'           "${terminfo[kcuf1]}"
     'BackTab'         "${terminfo[kcbt]}"
   )
 
@@ -64,7 +58,7 @@ zle -N edit-command-line
     'F9' $'^[[20~' 'F10' $'^[[21~' 'F11' $'^[[23~' 'F12' $'^[[24~'
     'Insert' $'^[[2~' 'Home' $'^[[H' 'End' $'^[[F'
     'PageUp' $'^[[5~' 'PageDown' $'^[[6~'
-    'Up' $'^[[A' 'Down' $'^[[B' 'Right' $'^[[C' 'Left' $'^[[D'
+    'Up' $'^[[A' 'Down' $'^[[B'
     'BackTab' $'^[[Z'
   )
   local k
@@ -82,7 +76,7 @@ zle -N edit-command-line
   # comparison never matches.
   typeset -gA key_alt
   key_alt=(
-    'Up' '^[[A' 'Down' '^[[B' 'Right' '^[[C' 'Left' '^[[D'
+    'Up' '^[[A' 'Down' '^[[B'
     'Home' '^[[H' 'End' '^[[F'
   )
 }
@@ -94,18 +88,6 @@ function bindkey-seq {
   shift
   for seq in "$@"; do
     [[ -n $seq ]] && bindkey -M emacs "$seq" "$widget"
-  done
-}
-
-function bindkey-all {
-  local keymap
-  for keymap in $(bindkey -l); do
-    if [[ "$#" -eq 0 ]]; then
-      print -P "%F{blue}#### %f%F{green}${keymap}%f" >&2
-      bindkey -M "${keymap}"
-    else
-      bindkey -M "${keymap}" "$@"
-    fi
   done
 }
 
@@ -194,18 +176,10 @@ zle -N _zle-noop
   bindkey-seq end-of-line       "$key_info[End]"  "$key_alt[End]"
 
   # Delete character
-  bindkey-seq delete-char          "$key_info[Delete]"
-  bindkey-seq backward-delete-char "$key_info[Backspace]"
-
-  # Move character
-  bindkey-seq backward-char "$key_info[Left]"  "$key_alt[Left]"
-  bindkey-seq forward-char  "$key_info[Right]" "$key_alt[Right]"
+  bindkey-seq delete-char "$key_info[Delete]"
 
   # Expand history on space.
   bindkey -M emacs ' ' magic-space
-
-  # Clear screen.
-  bindkey -M emacs "$key_info[Control]L" clear-screen
 
   # Duplicate the previous word.
   for key in $key_info[Escape]{M,m}; do
@@ -231,10 +205,6 @@ zle -N _zle-noop
   # Directory navigation on Alt+Up / Alt+Left.
   bindkey-seq cd-up   ${(s: :)key_info[Alt+Up]}
   bindkey-seq cd-back ${(s: :)key_info[Alt+Left]}
-
-  # Restore the emacs line-kill widgets Ctrl+K / Ctrl+U displaced above.
-  bindkey -M emacs "${key_info[Control]}K" kill-line
-  bindkey -M emacs "${key_info[Control]}U" kill-whole-line
 
   # Set Emacs mode
   bindkey -e
