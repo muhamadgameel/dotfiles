@@ -17,7 +17,7 @@ power profile, up to 60 on balanced.
 
    | File | Holds |
    |---|---|
-   | `core/settings.zsh` | Shell options and history. |
+   | `core/settings.zsh` | Shell options and history, which is kept in `~/.local/state/zsh/history`. |
    | `core/cache.zsh` | `cached-eval` (see [Cached start-up](#cached-start-up)). |
    | `core/input.zsh` | Key bindings, with sequences for both terminal key modes. |
    | `core/aliases.zsh` | Aliases and `sys-update` for each OS. |

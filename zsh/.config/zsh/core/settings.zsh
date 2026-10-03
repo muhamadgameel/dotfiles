@@ -52,7 +52,9 @@ export LANG=en_US.UTF-8
 # bigger than what gets written to disk.
 HISTSIZE=120000
 SAVEHIST=100000
-HISTFILE=$ZSH_CACHE_DIR/zsh_history
+# Under state, not cache: clearing ~/.cache must not take the history with it.
+HISTFILE=${XDG_STATE_HOME:-$HOME/.local/state}/zsh/history
+[[ -d ${HISTFILE:h} ]] || command mkdir -p ${HISTFILE:h}
 
 setopt bang_hist              # Treat the '!' character specially during expansion
 setopt extended_history       # Write the history file in the ":start:elapsed;command" format
