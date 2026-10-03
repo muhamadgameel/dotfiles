@@ -154,8 +154,6 @@ zstyle ':fzf-tab:complete:*' fzf-min-height 15
 # Preview directory contents when completing a path
 if (( $+commands[eza] )); then
   zstyle ':fzf-tab:complete:cd:*' fzf-preview 'eza --tree --level=2 --color=always --icons=always $realpath'
-  zstyle ':fzf-tab:complete:z:*'  fzf-preview 'eza --tree --level=2 --color=always --icons=always $realpath'
-  zstyle ':fzf-tab:complete:__zoxide_z:*' fzf-preview 'eza --tree --level=2 --color=always --icons=always $realpath'
 fi
 
 # Preview the environment for export/unset, and processes for kill

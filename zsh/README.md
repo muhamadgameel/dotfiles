@@ -1,8 +1,9 @@
 # zsh
 
 Interactive zsh with a small plugin manager (zpm), cached tool start-up and the
-starship prompt. Everything lives in `~/.config/zsh` except `~/.zshenv`. A new
-shell starts in about 30 ms once its caches are warm.
+starship prompt. Everything lives in `~/.config/zsh` except `~/.zshenv`. With
+warm caches a new shell starts in about 30 ms on the performance power
+profile and 60 ms on balanced.
 
 ## Startup order
 
@@ -19,14 +20,15 @@ shell starts in about 30 ms once its caches are warm.
    | `core/settings.zsh` | Shell options and history. |
    | `core/cache.zsh` | `cached-eval` (see [Cached start-up](#cached-start-up)). |
    | `core/input.zsh` | Key bindings, with sequences for both terminal key modes. |
-   | `core/aliases.zsh` | Aliases, `sys-update` for each OS, and zoxide. |
+   | `core/aliases.zsh` | Aliases and `sys-update` for each OS. |
    | `core/env.zsh` | PATH, an `EDITOR` fallback for the console and SSH, the man pager (bat), `GPG_TTY`, the Android SDK and fnm. |
    | `core/fzf.zsh` | fzf defaults, previews and key bindings. |
 
    Then it loads zpm and the plugins. The order there matters:
    zsh-completions adds to `fpath`, so it loads before `core/completion.zsh`
-   runs compinit; fzf-tab needs compinit; fast-syntax-highlighting wraps every
-   widget, so it loads last. starship comes at the very end, with its empty
+   runs compinit; zoxide and fzf-tab need compinit, zoxide to register its
+   `cd` completion; fast-syntax-highlighting wraps every widget, so it loads
+   last. starship comes at the very end, with its empty
    right prompt removed: rendering it cost about 5 ms per prompt for nothing.
 
 `functions/` holds autoloaded functions (`archive`, `unarchive`, `lsarchive`),
@@ -103,4 +105,5 @@ Alt+A selects everything. F1–F12, Page Up, Page Down and Insert do nothing
 rather than typing a `~`.
 
 `cd` itself is zoxide: `cd foo` jumps to the most-used directory matching
-`foo`, and `cdi` picks one in fzf.
+`foo`, `cd foo` then Space and Tab lists every match to pick from, and `cdi`
+picks one in fzf.

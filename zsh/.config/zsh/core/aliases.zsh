@@ -19,11 +19,6 @@ if (( $+commands[eza] )); then
   alias lla="ls --long --all"
 fi
 
-if (( $+commands[zoxide] )); then
-  # --cmd cd makes zoxide define a real `cd` function rather than aliasing it.
-  cached-eval zoxide zoxide init zsh --cmd cd
-fi
-
 # Directory navigation
 alias ..="cd .."
 alias ...="cd ../.."

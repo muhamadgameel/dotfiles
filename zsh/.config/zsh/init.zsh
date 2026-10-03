@@ -38,6 +38,9 @@ Plug "zsh-users/zsh-completions"
 # Completion system (compinit). Everything above has finished touching $fpath.
 source $ZSH_CONF_DIR/core/completion.zsh
 
+# zoxide as `cd`. After compinit, because it registers its completion through compdef.
+cached-eval zoxide zoxide init zsh --cmd cd
+
 # fzf-tab must come after compinit and before any plugin that wraps ZLE widgets.
 Plug "Aloxaf/fzf-tab"
 
