@@ -92,6 +92,10 @@ the shell restarts. Brightness steps are linear because
 writes and reads a linear percentage; an exponential curve here would move the
 shell's slider by uneven amounts.
 
+A browser's picture-in-picture window floats in the bottom-right corner at
+640x360, stays on every workspace and isn't dimmed. SUPER+X does the same to
+any window, and a second press puts it back where it was.
+
 | Keys | Action |
 |---|---|
 | `Print` | Screenshot region to file |

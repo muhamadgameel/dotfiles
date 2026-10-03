@@ -1,6 +1,8 @@
 -- Rules are evaluated top to bottom; for overlapping matches the LAST one wins.
 -- Regexes use RE2. Prefix with "negative:" to invert a match.
 
+local theme = require("settings.theme")
+
 -- ── Global ───────────────────────────────────────────────────────────
 
 hl.window_rule({
@@ -50,6 +52,23 @@ end
 for _, class in ipairs({ "imv", "org.gnome.Loupe", "org.gnome.FileRoller" }) do
 	hl.window_rule({ match = { class = class }, float = true })
 end
+
+-- ── Picture-in-picture ───────────────────────────────────────────────
+
+-- `move` sees the window's original size, not the one set here, so the corner uses the target size.
+local pip = theme.layout.pip
+local margin = theme.layout.border_size
+hl.window_rule({
+	name = "browser-pip",
+	match = { title = "^Picture[- ]in[- ][Pp]icture$" },
+	float = true,
+	pin = true,
+	keep_aspect_ratio = true,
+	size = { pip.w, pip.h },
+	move = ("monitor_w-%d monitor_h-%d"):format(pip.w + margin, pip.h + margin),
+})
+
+hl.window_rule({ name = "pinned-no-dim", match = { pin = true }, no_dim = true })
 
 -- ── Steam ────────────────────────────────────────────────────────────
 

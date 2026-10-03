@@ -30,31 +30,49 @@ hl.bind(mod .. " + T", hl.dsp.window.float({ action = "toggle" }), { description
 hl.bind(mod .. " + C", hl.dsp.window.center(), { description = "Center window" })
 hl.bind(mod .. " + J", hl.dsp.layout("togglesplit"), { description = "Toggle split (dwindle)" })
 
--- Picture-in-picture the active window.
+-- Picture-in-picture the active window; a second press puts it back.
+local pip_saved = {} -- window address -> where a floating window was
+
 hl.bind(mod .. " + X", function()
-	local monitor = hl.get_active_monitor()
-	if not monitor then
+	local window = hl.get_active_window()
+	if not window then
 		return
 	end
 
-	local raw_screen_w = monitor.width
-	local raw_screen_h = monitor.height
-	local scale = monitor.scale or 1.0 -- Falls back safely to 1.0 if scale is unset
+	if window.pinned then
+		local saved = pip_saved[window.address]
+		pip_saved[window.address] = nil
+		hl.dispatch(hl.dsp.window.pin({ action = "disable" }))
+		hl.dispatch(hl.dsp.window.fullscreen_state({ internal = 0, client = 0 }))
+		if saved then
+			hl.dispatch(hl.dsp.window.resize({ x = saved.w, y = saved.h }))
+			hl.dispatch(hl.dsp.window.move({ x = saved.x, y = saved.y }))
+		else
+			hl.dispatch(hl.dsp.window.float({ action = "disable" }))
+		end
+		return
+	end
 
-	local logical_screen_w = math.floor(raw_screen_w / scale)
-	local logical_screen_h = math.floor(raw_screen_h / scale)
+	local monitor = window.monitor
+	if not monitor then
+		return
+	end
+	if window.floating then
+		pip_saved[window.address] = { x = window.at.x, y = window.at.y, w = window.size.x, h = window.size.y }
+	end
 
-	local target_w = 640
-	local target_h = 360
+	local pip = theme.layout.pip
+	local margin = theme.layout.border_size
+	-- Rounded: the scale is stored as 1.3333334, and floor would lose a pixel.
+	local x = monitor.x + math.floor(monitor.width / monitor.scale + 0.5) - pip.w - margin
+	local y = monitor.y + math.floor(monitor.height / monitor.scale + 0.5) - pip.h - margin
 
-	local dest_x = logical_screen_w - target_w - theme.layout.border_size
-	local dest_y = logical_screen_h - target_h - theme.layout.border_size
-
-	hl.dispatch(hl.dsp.window.float({ action = "set" }))
+	-- client = 2 tells the app it is fullscreen, so a video fills the small window.
+	hl.dispatch(hl.dsp.window.float({ action = "enable" }))
 	hl.dispatch(hl.dsp.window.pin({ action = "enable" }))
 	hl.dispatch(hl.dsp.window.fullscreen_state({ internal = 0, client = 2 }))
-	hl.dispatch(hl.dsp.window.resize({ x = target_w, y = target_h }))
-	hl.dispatch(hl.dsp.window.move({ x = dest_x, y = dest_y }))
+	hl.dispatch(hl.dsp.window.resize({ x = pip.w, y = pip.h }))
+	hl.dispatch(hl.dsp.window.move({ x = x, y = y }))
 end, { description = "Picture-in-picture" })
 
 -- ── Focus / move ─────────────────────────────────────────────────────
