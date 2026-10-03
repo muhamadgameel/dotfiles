@@ -21,6 +21,7 @@ brew 'fastfetch'  # System info
 brew 'imagemagick' # Image conversion
 brew 'mpv'        # Video player
 brew 'yt-dlp'     # Video downloader for mpv
+brew 'ffmpeg'     # yt-dlp merges video and audio with it
 brew 'mas'        # App Store command line interface
 
 # Git and signing
@@ -44,6 +45,8 @@ brew 'vscode-langservers-extracted' # CSS, HTML, JSON and ESLint LSPs
 brew 'taplo'                        # TOML LSP and formatter
 brew 'stylua'                       # Lua formatter
 brew 'prettier'                     # JS/TS/JSON/Markdown formatter
+brew 'pyright'                      # Python LSP
+brew 'ruff'                         # Python linter and formatter
 brew 'shellcheck'                   # Shell script linting tool
 brew 'shfmt'                        # Shell script formatter
 
@@ -52,6 +55,7 @@ brew 'fnm'        # Node version manager
 brew 'yarn'       # JavaScript/Node package manager
 brew 'go'         # Go toolchain
 brew 'rustup'     # Rust toolchain manager
+brew 'uv'         # Python projects, venvs and versions
 brew 'cmake'      # Build Tool
 brew 'cocoapods'  # Objective-C & Swift application dependency manager
 brew 'watchman'   # File watching for React Native

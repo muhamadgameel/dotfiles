@@ -4,6 +4,7 @@ bitwarden
 btop
 chromium
 fastfetch
+ffmpeg                  # yt-dlp merges video and audio with it
 firefox
 gimp
 imagemagick

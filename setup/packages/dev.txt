@@ -31,7 +31,9 @@ go-tools                # goimports
 jdk17-openjdk           # Gradle JDK for React Native
 nodejs
 npm
+python
 rustup
+uv                      # Python projects, venvs and versions
 
 # language servers and formatters; nvim prefers these over mason's
 bash-language-server
@@ -40,6 +42,8 @@ gopls
 lua-language-server
 marksman
 prettier
+pyright
+ruff                    # Python lint and format
 shellcheck
 shfmt
 stylua
