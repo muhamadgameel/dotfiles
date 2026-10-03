@@ -1,23 +1,11 @@
-# ╔═══════════════════════════════════════════════════════════════════╗
-# ║                  UWSM ENVIRONMENT (all sessions)                  ║
-# ╚═══════════════════════════════════════════════════════════════════╝
-# Sourced by uwsm before the compositor starts, so these land in the systemd
-# and D-Bus activation environments. That is the difference that matters:
-# variables set with hl.env() in hyprland.lua only reach processes Hyprland
-# spawns itself, so portal- and D-Bus-activated apps never see them.
-#
-# Cursor variables are the exception -- uwsm re-exports those from the
-# compositor (see $UWSM_FINALIZE_VARNAMES) -- and stay in
-# .config/hypr/settings/env.lua next to the rest of the Hyprland config.
-#
-# Format is `export KEY=VAL`. Apply with a fresh session (uwsm stop, log in).
+# Sourced by uwsm before the compositor starts, so these reach systemd and D-Bus
+# activated apps too (hypr/README.md#environment). Log in again to apply.
 
 # ── PATH ────────────────────────────────────────────────────────────
 export PATH="$HOME/.local/bin:$PATH"
 
 # ── Toolkit backends ────────────────────────────────────────────────
-# Both take a fallback list. Without one, an app whose Wayland plugin is
-# missing fails to start instead of falling back to X11.
+# Fallback lists, so an app missing its Wayland plugin uses X11 instead of failing.
 export GDK_BACKEND=wayland,x11,*
 export QT_QPA_PLATFORM='wayland;xcb'
 export SDL_VIDEODRIVER=wayland
@@ -29,9 +17,6 @@ export ELECTRON_OZONE_PLATFORM_HINT=auto
 # Hyprland draws the decorations, so Qt should not.
 export QT_WAYLAND_DISABLE_WINDOWDECORATION=1
 
-# Deliberately NOT set: QT_AUTO_SCREEN_SCALE_FACTOR.
-# It is an X11-era knob; under Wayland Qt takes the scale from the compositor,
-# and on a fractional-scale panel (this one is 1.333x) setting it risks
-# double-scaling XWayland Qt apps.
+# QT_AUTO_SCREEN_SCALE_FACTOR stays unset: on 1.333x it double-scales XWayland Qt apps.
 
 # uwsm sets the XDG_* session variables itself -- do not duplicate them here.
