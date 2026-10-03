@@ -17,12 +17,12 @@ systemd user units.
 | `settings/input.lua` | Keyboard, mouse, touchpad and gestures. |
 | `settings/rules.lua` | Window, layer and workspace rules. |
 | `settings/keybinds.lua` | Every keybind, each with a description. |
-| `settings/autostart.lua` | The few programs that start with the compositor. |
+| `settings/autostart.lua` | The Thunar daemon, the only program started with the compositor. |
 | `hypridle.conf` | Dim after 5 minutes, lock after 20, screen off a minute into any lock. |
 | `hyprlock.conf` | The lock screen. |
 | `hyprpaper.conf` | Wallpaper rotation. |
 | `.luarc.json` | Points lua-language-server at Hyprland's API stubs. |
-| `../systemd/user/hyprsunset.service` | See [Services](#services). |
+| `../systemd/user/hyprsunset.service`, `cliphist@.service` | See [Services](#services). |
 
 ## Day to day
 
@@ -49,10 +49,12 @@ processes Hyprland starts itself, so the config doesn't use it.
 ## Services
 
 These systemd user units start with the graphical session, not from
-`autostart.lua`: hypridle, hyprpaper, hyprsunset, quickshell and
-wayland-pipewire-idle-inhibit. `systemctl --user status hypridle hyprpaper
-hyprsunset quickshell` shows them, and `systemctl --user restart quickshell`
-restarts the shell together with its child processes.
+`autostart.lua`: hypridle, hyprpaper, hyprpolkitagent, hyprsunset, quickshell,
+wayland-pipewire-idle-inhibit and the clipboard watchers `cliphist@text` and
+`cliphist@image`. systemd restarts any of them that crashes.
+`systemctl --user status hypridle hyprpaper hyprsunset quickshell` shows them,
+and `systemctl --user restart quickshell` restarts the shell together with its
+child processes.
 
 hyprsunset runs from this package's unit instead of the packaged one, only to
 start it with `--identity`. Without that flag the daemon starts at 6000 K and
@@ -63,11 +65,18 @@ without the shell stays neutral. The unit is a replacement rather than a
 drop-in because a drop-in directory would be a stow symlink, and systemd
 doesn't follow those.
 
-`autostart.lua` starts the polkit agent, the Thunar daemon and the clipboard
-watchers. Long-lived apps go through `uwsm app --`, so each runs in its own
-systemd scope and the OOM killer can pick the app instead of the session.
-fuzzel does the same through its `launch-prefix`, and so does the terminal
-keybind, with the faster `uwsm-app` client.
+The clipboard watchers come from this package's `cliphist@.service`, one
+instance per type, and SUPER+V reads what they store. The packaged
+`cliphist.service` runs a single untyped watcher instead. When a copy offers
+both text and an image, as a browser's "Copy image" does, that watcher keeps
+only the text.
+
+`autostart.lua` starts only the Thunar daemon, which is what mounts drives as
+they're plugged in. Thunar's own unit can't be enabled, only started over
+D-Bus. The daemon goes through `uwsm app --`, so it runs in its own systemd
+scope and the OOM killer can pick the app instead of the session. fuzzel does
+the same through its `launch-prefix`, and so does the terminal keybind, with
+the faster `uwsm-app` client.
 
 SUPER+Escape locks through logind (`loginctl lock-session`). hypridle answers
 the lock request by starting hyprlock, the same way it does after 20 idle

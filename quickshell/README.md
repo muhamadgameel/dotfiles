@@ -29,6 +29,9 @@ The network service has two backends, nmcli and Quickshell.Networking
   `pkill qs`: Quickshell doesn't stop its child processes on SIGTERM, but the
   unit's cgroup does. Before the unit existed, pkill restarts left orphaned
   `nmcli monitor` processes and a `systemd-inhibit` that blocked sleep.
+- The unit runs in `session.slice` with the compositor, the slice systemd
+  keeps for the session's own parts. Apps live in `app.slice`, so a limit or
+  an OOM policy set there never lands on the shell.
 - The unit restarts the shell if it exits with an error. Quickshell 0.3.1's
   networking module has a use-after-free (upstream issue #1021) that can crash
   it. Most crashes restart in place instead: Quickshell re-runs

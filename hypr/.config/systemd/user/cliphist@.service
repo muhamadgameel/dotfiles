@@ -1,0 +1,14 @@
+# One instance per type, text and image. The packaged unit's untyped watcher
+# keeps only the text of a copy that offers both (hypr/README.md).
+[Unit]
+Description=Clipboard history: %i
+PartOf=graphical-session.target
+After=graphical-session.target
+ConditionEnvironment=WAYLAND_DISPLAY
+
+[Service]
+ExecStart=/usr/bin/wl-paste --type %i --watch cliphist store
+Restart=on-failure
+
+[Install]
+WantedBy=graphical-session.target

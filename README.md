@@ -16,7 +16,6 @@ enables services.
 |---|---|---|
 | `aerospace` | AeroSpace, the tiling window manager, laid out like the Hyprland binds | only |
 | `alacritty` | Alacritty, plus `xdg-terminal-exec` so apps opened from Thunar find it | |
-| `autostart` | Hides nm-applet's autostart entry | |
 | `bat` | bat, in the terminal's colours | yes |
 | `btop` | btop, in the terminal's colours, with the GPU | yes |
 | `desktop` | Default apps, Chromium's video decoding flags, hidden launcher entries | |
@@ -26,7 +25,7 @@ enables services.
 | `gamemode` | GameMode | |
 | `ghostty` | Ghostty, the terminal on macOS | only |
 | `gitconfig` | git settings and aliases ([README](gitconfig/README.md)) | yes |
-| `hypr` | Hyprland, hypridle, hyprlock, hyprpaper, hyprsunset ([README](hypr/README.md)) | |
+| `hypr` | Hyprland, hypridle, hyprlock, hyprpaper, hyprsunset, the clipboard watchers ([README](hypr/README.md)) | |
 | `mangohud` | The MangoHud overlay | |
 | `mpv` | mpv | yes |
 | `nvim` | Neovim | yes |
@@ -226,6 +225,7 @@ Hyprland uses SUPER, Ghostty is the terminal, and Raycast is the launcher.
 | atuin | zsh history with fzf on Ctrl+R covers it. |
 | udiskie | Thunar and thunar-volman already mount drives. |
 | hyprshot | The shell's screenshot service covers it. |
+| network-manager-applet | Its tray icon and Wi-Fi password prompt duplicate the shell's. Saved networks keep their password in the profile, so no agent has to supply it. |
 | nvtop | btop shows the GPU. |
 | Heroic, Lutris | Steam is the only game store in use. |
 | Jellyfin, Kodi | mpv and the browser cover playback. |

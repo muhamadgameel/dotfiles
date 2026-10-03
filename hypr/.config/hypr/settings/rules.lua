@@ -27,7 +27,6 @@ hl.window_rule({
 -- ── Floating: system utilities ───────────────────────────────────────
 
 hl.window_rule({ match = { class = "nm-connection-editor" }, float = true })
-hl.window_rule({ match = { class = "org.kde.polkit-kde-authentication-agent-1" }, float = true })
 hl.window_rule({ match = { class = "^(protonvpn-app|proton\\.vpn\\.app\\.gtk)$" }, float = true, center = true })
 
 hl.window_rule({
@@ -49,7 +48,7 @@ hl.window_rule({ match = { class = "^[Tt]hunar$", title = "^Rename" }, float = t
 
 hl.window_rule({
 	name = "password-prompts",
-	match = { class = "^(gcr-prompter|org\\.gnupg\\.pinentry-.*|pinentry-.*)$" },
+	match = { class = "^(gcr-prompter|hyprpolkitagent|org\\.gnupg\\.pinentry-.*|pinentry-.*)$" },
 	float = true,
 	center = true,
 	stay_focused = true,
