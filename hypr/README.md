@@ -18,7 +18,7 @@ systemd user units.
 | `settings/rules.lua` | Window, layer and workspace rules. |
 | `settings/keybinds.lua` | Every keybind, each with a description. |
 | `settings/autostart.lua` | The few programs that start with the compositor. |
-| `hypridle.conf` | Dim after 5 minutes, lock after 20, screen off after 30. |
+| `hypridle.conf` | Dim after 5 minutes, lock after 20, screen off a minute into any lock. |
 | `hyprlock.conf` | The lock screen. |
 | `hyprpaper.conf` | Wallpaper rotation. |
 | `.luarc.json` | Points lua-language-server at Hyprland's API stubs. |
@@ -72,6 +72,13 @@ keybind, with the faster `uwsm-app` client.
 SUPER+Escape locks through logind (`loginctl lock-session`). hypridle answers
 the lock request by starting hyprlock, the same way it does after 20 idle
 minutes and before sleep, so hyprlock is only ever started from one place.
+
+Playing audio holds the dim and the idle lock off
+(wayland-pipewire-idle-inhibit), and so do the shell's Stay Awake toggle and
+the fullscreen rules under [Games](#games). A locked screen ignores all of
+them: it turns off after a minute without input, and a key or the mouse
+brings it back. If the screen never dims, look for a stream still marked
+`[active]` in `wpctl status`, or for Stay Awake in `systemd-inhibit --list`.
 
 SUPER+CTRL+SHIFT+Escape logs out with `uwsm stop`. `hl.dsp.exit()` would pull
 the compositor out from under its clients and skip the orderly shutdown.
