@@ -9,7 +9,7 @@ import "../core" as Core
 * Power - session and power actions
 *
 * Commands mirror the ones already bound in hypr/settings/keybinds.lua, so the
-* menu and the keybinds do the same thing: hyprlock to lock, `uwsm stop` to log
+* menu and the keybinds do the same thing: logind to lock, `uwsm stop` to log
 * out (the session is uwsm-managed), systemctl for the rest.
 *
 * Actions run detached - the shell is about to go away in most of these cases,
@@ -25,10 +25,8 @@ Singleton {
       icon: "lock",
       description: "Lock the screen",
       destructive: false,
-      // Guarded like hypridle's lock_cmd, so a second lock request cannot
-      // start a second hyprlock. Not `loginctl lock-session`: Stay Awake stops
-      // hypridle, and with it the only thing that answers that request.
-      command: ["sh", "-c", "pidof hyprlock || exec hyprlock"]
+      // hypridle answers with its lock_cmd, so hyprlock never runs inside the shell's unit.
+      command: ["loginctl", "lock-session"]
     },
     {
       id: "logout",
