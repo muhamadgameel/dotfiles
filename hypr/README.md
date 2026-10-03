@@ -10,7 +10,6 @@ systemd user units.
 |---|---|
 | `hyprland.lua` | The entry point. It requires each module below; an error in one module aborts only that module. |
 | `settings/theme.lua` | Shared values: colours, border size, default apps. |
-| `settings/env.lua` | The cursor variables (see [Environment](#environment)). |
 | `settings/monitors.lua` | Outputs. `hyprctl monitors all` lists them. |
 | `settings/look.lua` | Borders, gaps, decoration, and the dwindle, master and scrolling layouts. |
 | `settings/behavior.lua` | misc, cursor, render, XWayland and bind options. |
@@ -40,16 +39,12 @@ systemd user units.
 
 ## Environment
 
-Variables live in two places:
-
-- [`~/.config/uwsm/env`](../uwsm/.config/uwsm/env) is sourced before the
-  compositor starts, so its variables reach the systemd and D-Bus activation
-  environment, where apps started by a portal or by D-Bus see them. Toolkit
-  settings and PATH go here.
-- `hl.env()` in `settings/env.lua` only reaches processes Hyprland starts
-  itself. The exception is the cursor variables, which uwsm copies into the
-  activation environment after the compositor starts (they are listed in
-  `$UWSM_FINALIZE_VARNAMES`), so only those live here.
+Every session variable lives in
+[`~/.config/uwsm/env`](../uwsm/.config/uwsm/env): PATH, the default apps, the
+cursor and the toolkit settings. uwsm sources it before the compositor starts,
+so the variables reach the systemd and D-Bus activation environment, where
+apps started by a portal or by D-Bus see them. `hl.env()` would only reach
+processes Hyprland starts itself, so the config doesn't use it.
 
 ## Services
 

@@ -1,15 +1,23 @@
 # Sourced by uwsm before the compositor starts, so these reach systemd and D-Bus
 # activated apps too (hypr/README.md#environment). Log in again to apply.
 
-# ── PATH ────────────────────────────────────────────────────────────
-export PATH="$HOME/.local/bin:$PATH"
+# ── PATH and default apps ───────────────────────────────────────────
+export PATH="$HOME/.local/bin:$HOME/.cargo/bin:$PATH"
+export EDITOR=nvim
+export VISUAL=nvim
+export TERMINAL=alacritty
+export PAGER=less
+
+# ── Cursor ──────────────────────────────────────────────────────────
+export XCURSOR_THEME=Adwaita
+export XCURSOR_SIZE=24
+export HYPRCURSOR_THEME=Adwaita
+export HYPRCURSOR_SIZE=24
 
 # ── Toolkit backends ────────────────────────────────────────────────
 # Fallback lists, so an app missing its Wayland plugin uses X11 instead of failing.
 export GDK_BACKEND=wayland,x11,*
 export QT_QPA_PLATFORM='wayland;xcb'
-export SDL_VIDEODRIVER=wayland
-export CLUTTER_BACKEND=wayland
 
 # Electron/Chromium: pick Wayland when the session is Wayland.
 export ELECTRON_OZONE_PLATFORM_HINT=auto
