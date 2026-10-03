@@ -66,14 +66,14 @@ end, { description = "Picture-in-picture" })
 
 -- ── Focus / move ─────────────────────────────────────────────────────
 for _, dir in ipairs({ "left", "right", "up", "down" }) do
-	hl.bind(mod .. " + " .. dir, hl.dsp.focus({ direction = dir }))
-	hl.bind(mod .. " + SHIFT + " .. dir, hl.dsp.window.move({ direction = dir }))
+	hl.bind(mod .. " + " .. dir, hl.dsp.focus({ direction = dir }), { description = "Move focus" })
+	hl.bind(mod .. " + SHIFT + " .. dir, hl.dsp.window.move({ direction = dir }), { description = "Move window" })
 end
 hl.bind(mod .. " + U", hl.dsp.focus({ urgent_or_last = true }), { description = "Focus urgent or last" })
 
 -- ── Mouse ────────────────────────────────────────────────────────────
-hl.bind(mod .. " + mouse:272", hl.dsp.window.drag(), { mouse = true })
-hl.bind(mod .. " + mouse:273", hl.dsp.window.resize(), { mouse = true })
+hl.bind(mod .. " + mouse:272", hl.dsp.window.drag(), { mouse = true, description = "Drag window" })
+hl.bind(mod .. " + mouse:273", hl.dsp.window.resize(), { mouse = true, description = "Resize window" })
 
 -- Clicking away from an open shell panel closes it. non_consuming so the click
 -- still reaches whatever it was aimed at: the shell used to take a compositor
@@ -93,16 +93,24 @@ hl.bind("mouse:272", hl.dsp.global("quickshell:panelDismiss"), {
 
 for i = 1, 10 do
 	local key = i % 10 -- workspace 10 lives on key 0
-	hl.bind(mod .. " + " .. key, hl.dsp.focus({ workspace = i }))
-	hl.bind(mod .. " + SHIFT + " .. key, hl.dsp.window.move({ workspace = i, follow = false }))
-	hl.bind(mod .. " + ALT + " .. key, hl.dsp.window.move({ workspace = i, follow = true }))
+	hl.bind(mod .. " + " .. key, hl.dsp.focus({ workspace = i }), { description = "Go to workspace" })
+	hl.bind(
+		mod .. " + SHIFT + " .. key,
+		hl.dsp.window.move({ workspace = i, follow = false }),
+		{ description = "Send window to workspace" }
+	)
+	hl.bind(
+		mod .. " + ALT + " .. key,
+		hl.dsp.window.move({ workspace = i, follow = true }),
+		{ description = "Send window to workspace and follow" }
+	)
 end
 
 -- Cycle through open workspaces.
-hl.bind(mod .. " + mouse_down", hl.dsp.focus({ workspace = "e+1" }))
-hl.bind(mod .. " + mouse_up", hl.dsp.focus({ workspace = "e-1" }))
-hl.bind(mod .. " + bracketright", hl.dsp.focus({ workspace = "e+1" }))
-hl.bind(mod .. " + bracketleft", hl.dsp.focus({ workspace = "e-1" }))
+hl.bind(mod .. " + mouse_down", hl.dsp.focus({ workspace = "e+1" }), { description = "Next workspace" })
+hl.bind(mod .. " + mouse_up", hl.dsp.focus({ workspace = "e-1" }), { description = "Previous workspace" })
+hl.bind(mod .. " + bracketright", hl.dsp.focus({ workspace = "e+1" }), { description = "Next workspace" })
+hl.bind(mod .. " + bracketleft", hl.dsp.focus({ workspace = "e-1" }), { description = "Previous workspace" })
 
 -- Scratchpad.
 hl.bind(mod .. " + S", hl.dsp.workspace.toggle_special("magic"), { description = "Toggle scratchpad" })
@@ -165,27 +173,27 @@ hl.bind(mod .. " + SHIFT + Print", hl.dsp.exec_cmd("grim - | wl-copy"), { descri
 -- apps and window management above.
 
 local panels = {
-	A = "panelAudio",
-	B = "panelBluetooth",
-	D = "toggleDnd",
-	E = "panelSettings",
-	G = "panelSystemStats",
-	I = "toggleIdleInhibit",
-	K = "panelCalendar",
-	L = "toggleNightLight",
-	M = "panelMedia",
-	N = "panelNotifications",
-	P = "panelPower",
-	Q = "panelQuickSettings",
-	W = "panelNetwork",
+	A = { "panelAudio", "Audio panel" },
+	B = { "panelBluetooth", "Bluetooth panel" },
+	D = { "toggleDnd", "Toggle do not disturb" },
+	E = { "panelSettings", "Settings panel" },
+	G = { "panelSystemStats", "System stats panel" },
+	I = { "toggleIdleInhibit", "Toggle stay awake" },
+	K = { "panelCalendar", "Calendar panel" },
+	L = { "toggleNightLight", "Toggle night light" },
+	M = { "panelMedia", "Media panel" },
+	N = { "panelNotifications", "Notifications panel" },
+	P = { "panelPower", "Power panel" },
+	Q = { "panelQuickSettings", "Quick settings panel" },
+	W = { "panelNetwork", "Network panel" },
 	-- Not Print: SUPER+SHIFT+Print is already screenshot-to-clipboard.
-	X = "panelScreenshot",
+	X = { "panelScreenshot", "Screenshot panel" },
 	-- No mnemonic left: every letter in "wallpaper" is taken.
-	Y = "panelWallpaper",
+	Y = { "panelWallpaper", "Wallpaper panel" },
 }
 
-for key, action in pairs(panels) do
-	hl.bind(mod .. " + SHIFT + " .. key, hl.dsp.global("quickshell:" .. action), { description = action })
+for key, panel in pairs(panels) do
+	hl.bind(mod .. " + SHIFT + " .. key, hl.dsp.global("quickshell:" .. panel[1]), { description = panel[2] })
 end
 
 -- Dismiss whatever is open. Not SUPER+SHIFT+Escape -- that is Log out.
@@ -214,38 +222,72 @@ hl.bind(mod .. " + SHIFT + Escape", hl.dsp.exec_cmd("uwsm stop"), { description 
 -- end. Reinstating it means applying it in the service too, and inverting it
 -- on read so the slider still tracks; that belongs with the service work, not
 -- here.
-hl.bind("XF86MonBrightnessUp", hl.dsp.exec_cmd("brightnessctl -n2 set 5%+"), { locked = true, repeating = true })
-hl.bind("XF86MonBrightnessDown", hl.dsp.exec_cmd("brightnessctl -n2 set 5%-"), { locked = true, repeating = true })
+hl.bind(
+	"XF86MonBrightnessUp",
+	hl.dsp.exec_cmd("brightnessctl -n2 set 5%+"),
+	{ locked = true, repeating = true, description = "Brightness up" }
+)
+hl.bind(
+	"XF86MonBrightnessDown",
+	hl.dsp.exec_cmd("brightnessctl -n2 set 5%-"),
+	{ locked = true, repeating = true, description = "Brightness down" }
+)
 
 -- ── Volume ───────────────────────────────────────────────────────────
 hl.bind(
 	"XF86AudioRaiseVolume",
 	hl.dsp.exec_cmd("wpctl set-volume -l 1.0 @DEFAULT_AUDIO_SINK@ 5%+"),
-	{ locked = true, repeating = true }
+	{ locked = true, repeating = true, description = "Volume up" }
 )
 hl.bind(
 	"XF86AudioLowerVolume",
 	hl.dsp.exec_cmd("wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%-"),
-	{ locked = true, repeating = true }
+	{ locked = true, repeating = true, description = "Volume down" }
 )
-hl.bind("XF86AudioMute", hl.dsp.exec_cmd("wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle"), { locked = true })
-hl.bind("XF86AudioMicMute", hl.dsp.exec_cmd("wpctl set-mute @DEFAULT_AUDIO_SOURCE@ toggle"), { locked = true })
+hl.bind(
+	"XF86AudioMute",
+	hl.dsp.exec_cmd("wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle"),
+	{ locked = true, description = "Mute" }
+)
+hl.bind(
+	"XF86AudioMicMute",
+	hl.dsp.exec_cmd("wpctl set-mute @DEFAULT_AUDIO_SOURCE@ toggle"),
+	{ locked = true, description = "Mute microphone" }
+)
 
 -- ── Media ────────────────────────────────────────────────────────────
-hl.bind("XF86AudioPlay", hl.dsp.exec_cmd("playerctl play-pause"), { locked = true })
-hl.bind("XF86AudioPause", hl.dsp.exec_cmd("playerctl play-pause"), { locked = true })
-hl.bind("XF86AudioNext", hl.dsp.exec_cmd("playerctl next"), { locked = true })
-hl.bind("XF86AudioPrev", hl.dsp.exec_cmd("playerctl previous"), { locked = true })
-hl.bind("XF86AudioStop", hl.dsp.exec_cmd("playerctl stop"), { locked = true })
+hl.bind("XF86AudioPlay", hl.dsp.exec_cmd("playerctl play-pause"), { locked = true, description = "Play/pause" })
+hl.bind("XF86AudioPause", hl.dsp.exec_cmd("playerctl play-pause"), { locked = true, description = "Play/pause" })
+hl.bind("XF86AudioNext", hl.dsp.exec_cmd("playerctl next"), { locked = true, description = "Next track" })
+hl.bind("XF86AudioPrev", hl.dsp.exec_cmd("playerctl previous"), { locked = true, description = "Previous track" })
+hl.bind("XF86AudioStop", hl.dsp.exec_cmd("playerctl stop"), { locked = true, description = "Stop playback" })
 
-hl.bind(mod .. " + XF86AudioNext", hl.dsp.exec_cmd("playerctl position 5+"), { locked = true })
-hl.bind(mod .. " + XF86AudioPrev", hl.dsp.exec_cmd("playerctl position 5-"), { locked = true })
+hl.bind(
+	mod .. " + XF86AudioNext",
+	hl.dsp.exec_cmd("playerctl position 5+"),
+	{ locked = true, description = "Seek forward 5 s" }
+)
+hl.bind(
+	mod .. " + XF86AudioPrev",
+	hl.dsp.exec_cmd("playerctl position 5-"),
+	{ locked = true, description = "Seek back 5 s" }
+)
 
 -- ╔═══════════════════════════════════════════════════════════════════╗
 -- ║                          UTILITY                                  ║
 -- ╚═══════════════════════════════════════════════════════════════════╝
 
 hl.bind(mod .. " + SHIFT + C", hl.dsp.exec_cmd("hyprpicker -a"), { description = "Color picker" })
+
+-- Every described bind, searchable; the digit and arrow rows fold into one line each.
+local cheatsheet = [=[hyprctl binds -j | jq -r '
+	def m($bit; $name): if (.modmask / $bit | floor) % 2 == 1 then $name else empty end;
+	[.[] | select(.has_description)
+		| .key |= (if test("^[0-9]$") then "1-0" elif test("^(left|right|up|down)$") then "arrows" else . end)
+		| ([m(64; "SUPER"), m(4; "CTRL"), m(8; "ALT"), m(1; "SHIFT"), .key] | join(" + ")) + "\t" + .description]
+	| unique[]' | column -t -s "$(printf '\t')" | ]=] .. apps.menu .. " -d --placeholder='Keybinds…'"
+
+hl.bind(mod .. " + F1", hl.dsp.exec_cmd(cheatsheet), { description = "Keybind cheat sheet" })
 
 -- Cycle the tiling layout.
 local layouts = { "dwindle", "master", "scrolling" }
