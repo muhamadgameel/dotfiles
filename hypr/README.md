@@ -118,6 +118,12 @@ A browser's picture-in-picture window floats in the bottom-right corner at
 640x360, stays on every workspace and isn't dimmed. SUPER+X does the same to
 any window, and a second press puts it back where it was.
 
+On the touchpad, a three-finger horizontal swipe switches workspace, and
+SUPER + two-finger pinch toggles a 3x zoom at the cursor. Hyprland acts on a
+gesture without taking it from the app under the pointer, so the zoom needs
+SUPER: a plain pinch is the app's own zoom. With SUPER held, a browser page
+under the pointer still zooms along.
+
 | Keys | Action |
 |---|---|
 | `ALT + Print` | Screenshot a window to file |
