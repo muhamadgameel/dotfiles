@@ -28,7 +28,7 @@ return {
 
 	-- ── Default applications ─────────────────────────────────────────
 	apps = {
-		terminal = "alacritty",
+		terminal = "uwsm-app -- alacritty", -- its own systemd scope, not the compositor's
 		fileManager = "thunar",
 		browser = "chromium",
 		menu = "fuzzel",
