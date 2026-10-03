@@ -1,8 +1,3 @@
--- ╔═══════════════════════════════════════════════════════════════════╗
--- ║                       LOOK AND FEEL                               ║
--- ╚═══════════════════════════════════════════════════════════════════╝
--- Borders, gaps, decoration, groupbar and the two tiling layouts.
-
 local theme = require("settings.theme")
 local colors = theme.colors
 

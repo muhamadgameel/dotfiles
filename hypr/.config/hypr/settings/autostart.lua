@@ -1,23 +1,4 @@
--- ╔═══════════════════════════════════════════════════════════════════╗
--- ║                      AUTO-START PROGRAMS                          ║
--- ╚═══════════════════════════════════════════════════════════════════╝
--- NOT started here (they are enabled systemd user services -- check with
--- `systemctl --user status hypridle hyprpaper hyprsunset quickshell`):
---     hypridle, hyprpaper, hyprsunset, quickshell
---
--- hyprsunset runs from a unit in this package rather than the packaged one, so
--- it starts neutral; quickshell decides when the screen warms. See
--- systemd/user/hyprsunset.service.
---
--- quickshell moved to a service so it restarts itself after a crash and so
--- `systemctl --user restart quickshell` takes its child processes down with it.
--- See quickshell/.config/systemd/user/quickshell.service.
---
--- Long-lived apps are launched via `uwsm app --` so each lands in its own
--- systemd scope instead of being a bare child of the compositor. That gives
--- correct cgroup accounting and lets the OOM killer pick the app rather than
--- the whole session.
-
+-- The daemons and the shell are systemd user units (hypr/README.md), not started here.
 hl.on("hyprland.start", function()
 	-- Polkit agent (GUI privilege prompts)
 	hl.exec_cmd("uwsm app -- /usr/lib/polkit-kde-authentication-agent-1")

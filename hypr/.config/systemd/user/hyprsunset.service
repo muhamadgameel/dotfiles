@@ -1,18 +1,4 @@
-# hyprsunset, the blue-light filter, kept neutral until the shell asks for it.
-#
-# This replaces the packaged unit rather than dropping in beside it: a drop-in
-# would have to be ~/.config/systemd/user/hyprsunset.service.d/, and systemd
-# does not follow that directory when it is a symlink - which is exactly what
-# stow makes of it.
-#
-# The only change is --identity. Without it the daemon starts at its own
-# default of 6000K, so the screen would be tinted from login before anything
-# had asked. quickshell owns when the filter applies and at what temperature
-# (services/NightLight.qml); the daemon just holds the transform, and a session
-# without the shell running stays neutral.
-#
-# Enabled once with `systemctl --user enable --now hyprsunset.service`.
-
+# The packaged unit plus --identity, so the screen stays neutral until the shell asks (hypr/README.md).
 [Unit]
 Description=Hyprland's blue-light filter
 Documentation=https://wiki.hyprland.org/Hypr-Ecosystem/hyprsunset/

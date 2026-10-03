@@ -1,6 +1,3 @@
--- ╔═══════════════════════════════════════════════════════════════════╗
--- ║                          KEYBINDINGS                              ║
--- ╚═══════════════════════════════════════════════════════════════════╝
 -- Flags (3rd arg): locked, release, repeating, non_consuming, mouse,
 --                  transparent, ignore_mods, long_press, description
 
@@ -9,9 +6,7 @@ local apps = theme.apps
 
 local mod = "SUPER"
 
--- ╔═══════════════════════════════════════════════════════════════════╗
--- ║                    APPLICATION LAUNCHERS                          ║
--- ╚═══════════════════════════════════════════════════════════════════╝
+-- ── Apps ─────────────────────────────────────────────────────────────
 
 hl.bind(mod .. " + Return", hl.dsp.exec_cmd(apps.terminal), { description = "Terminal" })
 hl.bind(mod .. " + E", hl.dsp.exec_cmd(apps.fileManager), { description = "File manager" })
@@ -26,9 +21,7 @@ hl.bind(
 	{ description = "Clipboard history" }
 )
 
--- ╔═══════════════════════════════════════════════════════════════════╗
--- ║                     WINDOW MANAGEMENT                             ║
--- ╚═══════════════════════════════════════════════════════════════════╝
+-- ── Windows ──────────────────────────────────────────────────────────
 
 hl.bind(mod .. " + Q", hl.dsp.window.close(), { description = "Close window" })
 hl.bind(mod .. " + F", hl.dsp.window.fullscreen({ mode = "fullscreen" }), { description = "Fullscreen" })
@@ -75,21 +68,13 @@ hl.bind(mod .. " + U", hl.dsp.focus({ urgent_or_last = true }), { description = 
 hl.bind(mod .. " + mouse:272", hl.dsp.window.drag(), { mouse = true, description = "Drag window" })
 hl.bind(mod .. " + mouse:273", hl.dsp.window.resize(), { mouse = true, description = "Resize window" })
 
--- Clicking away from an open shell panel closes it. non_consuming so the click
--- still reaches whatever it was aimed at: the shell used to take a compositor
--- focus grab for this, which swallowed that first click. The shell ignores the
--- ones that land on the panel itself.
+-- Clicking outside an open shell panel closes it; non_consuming, so the click still lands.
 hl.bind("mouse:272", hl.dsp.global("quickshell:panelDismiss"), {
 	non_consuming = true,
 	description = "Dismiss an open shell panel",
 })
 
--- ╔═══════════════════════════════════════════════════════════════════╗
--- ║                          WORKSPACES                               ║
--- ╚═══════════════════════════════════════════════════════════════════╝
--- SUPER+N        switch to workspace N
--- SUPER+SHIFT+N  send window to N, stay here  (was movetoworkspacesilent)
--- SUPER+ALT+N    send window to N and follow  (was movetoworkspace)
+-- ── Workspaces ───────────────────────────────────────────────────────
 
 for i = 1, 10 do
 	local key = i % 10 -- workspace 10 lives on key 0
@@ -134,9 +119,7 @@ hl.bind(
 	{ description = "Move window to next monitor" }
 )
 
--- ╔═══════════════════════════════════════════════════════════════════╗
--- ║                         SCREENSHOTS                               ║
--- ╚═══════════════════════════════════════════════════════════════════╝
+-- ── Screenshots ──────────────────────────────────────────────────────
 
 -- mkdir -p so the bind still works if ~/Pictures/Screenshots is ever missing;
 -- grim would otherwise fail silently.
@@ -158,19 +141,8 @@ hl.bind(
 hl.bind(mod .. " + SHIFT + Print", hl.dsp.exec_cmd("grim - | wl-copy"), { description = "Screenshot to clipboard" })
 
 
--- ╔═══════════════════════════════════════════════════════════════════╗
--- ║                          SHELL PANELS                             ║
--- ╚═══════════════════════════════════════════════════════════════════╝
--- Quickshell registers these with the global-shortcuts protocol
--- (quickshell/modules/ipc/Shortcuts.qml); `hl.dsp.global` reaches the running
--- shell directly, with no `qs` process spawn, and the shell answers with its
--- own state -- so the same key toggles a panel shut again.
---
--- Nothing happens if the shell is not running: an unclaimed global shortcut is
--- simply not bound. Check what is registered with `hyprctl globalshortcuts`.
---
--- Panels live on SUPER+SHIFT so the whole SUPER+<letter> row stays with the
--- apps and window management above.
+-- ── Shell panels ─────────────────────────────────────────────────────
+-- Global shortcuts the running shell registers (hypr/README.md); SUPER+letter stays with apps.
 
 local panels = {
 	A = { "panelAudio", "Audio panel" },
@@ -199,29 +171,14 @@ end
 -- Dismiss whatever is open. Not SUPER+SHIFT+Escape -- that is Log out.
 hl.bind(mod .. " + grave", hl.dsp.global("quickshell:panelClose"), { description = "Close any shell panel" })
 
--- `quickshell:mediaPlayPause` is deliberately left unbound: XF86AudioPlay below
--- already covers it through playerctl, and that keeps working while the shell
--- is restarting.
-
--- ╔═══════════════════════════════════════════════════════════════════╗
--- ║                       SYSTEM CONTROLS                             ║
--- ╚═══════════════════════════════════════════════════════════════════╝
+-- ── System ───────────────────────────────────────────────────────────
 
 hl.bind(mod .. " + Escape", hl.dsp.exec_cmd(apps.lock), { description = "Lock screen" })
--- uwsm stop, not hl.dsp.exit() -- exiting Hyprland directly yanks the
--- compositor out from under its clients and breaks the shutdown sequence.
+-- uwsm stop, not hl.dsp.exit(), so the session shuts down in order.
 hl.bind(mod .. " + SHIFT + Escape", hl.dsp.exec_cmd("uwsm stop"), { description = "Log out" })
 
 -- ── Brightness ───────────────────────────────────────────────────────
--- Linear (no `-e4`), to match the shell. services/Brightness.qml writes a
--- plain percentage and reads the raw sysfs value back, so it is linear on both
--- ends; with the exponential curve here the same 5% step moved the shell's
--- slider by a different amount depending on where it started.
---
--- Perceptually, exponential is the nicer curve -- steps stay fine at the dim
--- end. Reinstating it means applying it in the service too, and inverting it
--- on read so the slider still tracks; that belongs with the service work, not
--- here.
+-- Linear (no -e4), to match the shell's slider (hypr/README.md).
 hl.bind(
 	"XF86MonBrightnessUp",
 	hl.dsp.exec_cmd("brightnessctl -n2 set 5%+"),
@@ -273,9 +230,7 @@ hl.bind(
 	{ locked = true, description = "Seek back 5 s" }
 )
 
--- ╔═══════════════════════════════════════════════════════════════════╗
--- ║                          UTILITY                                  ║
--- ╚═══════════════════════════════════════════════════════════════════╝
+-- ── Utility ──────────────────────────────────────────────────────────
 
 hl.bind(mod .. " + SHIFT + C", hl.dsp.exec_cmd("hyprpicker -a"), { description = "Color picker" })
 

@@ -1,16 +1,5 @@
--- ╔═══════════════════════════════════════════════════════════════════╗
--- ║                      THEME / SHARED VALUES                        ║
--- ╚═══════════════════════════════════════════════════════════════════╝
--- A plain Lua module. Other files pull it in with:
---     local theme = require("settings.theme")
--- Unlike hyprlang's `$vars` (global text substitution), this is a real table:
--- scoped, introspectable, and usable in expressions.
-
 -- ── Colors (Tokyo Night) ─────────────────────────────────────────
--- Used as-is until the shell has run. quickshell writes the active theme's
--- colours to hyprland-colors.lua (services/ThemeSync.qml), which overrides
--- these key by key. Guarded, so a missing or broken file keeps the defaults
--- rather than failing the whole config.
+-- The shell's hyprland-colors.lua overrides these key by key; a bad file keeps them.
 local colors = {
 	accent = "rgb(7aa2f7)",
 	accentAlpha = "rgba(7aa2f7ee)",

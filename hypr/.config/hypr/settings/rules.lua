@@ -1,6 +1,3 @@
--- ╔═══════════════════════════════════════════════════════════════════╗
--- ║                  WINDOW / LAYER / WORKSPACE RULES                 ║
--- ╚═══════════════════════════════════════════════════════════════════╝
 -- Rules are evaluated top to bottom; for overlapping matches the LAST one wins.
 -- Regexes use RE2. Prefix with "negative:" to invert a match.
 
@@ -71,17 +68,7 @@ hl.window_rule({
 hl.window_rule({ match = { class = "Alacritty" }, opacity = "1.0 0.92" })
 
 -- ── Games && Idle inhibition ──────────────────────────
--- hypridle dims at 5 min and locks at 20 min. Apps that speak the Wayland
--- idle-inhibit protocol (Chromium during playback) are already honored via
--- hypridle's `ignore_dbus_inhibit = false`; this covers the ones that aren't,
--- and only while they are actually fullscreen.
-
--- Window classes that are games. Proton titles are steam_app_<id>; gamescope
--- nests anything run inside it. Native Linux games use their own class - add
--- them here as they come up.
---
--- Keep in step with `_gameClass` in quickshell/services/GameMode.qml, which
--- uses the same classes to spot a fullscreen game not launched via gamemoderun.
+-- Keep in step with `_gameClass` in quickshell/services/GameMode.qml (hypr/README.md).
 local games = { "^steam_app_[0-9]+$", "^gamescope$" }
 
 for _, class in ipairs({ "mpv", "chromium", "org.gnome.Loupe", table.unpack(games) }) do
@@ -89,13 +76,7 @@ for _, class in ipairs({ "mpv", "chromium", "org.gnome.Loupe", table.unpack(game
 end
 
 -- ── Tearing ──────────────────────────────────────────────────────────
--- `general.allow_tearing` (look.lua) is only a master switch: a window tears
--- only if it also carries `immediate`. Games get it, so a fullscreen game can
--- put a frame on screen as soon as it is ready instead of waiting for vsync -
--- lower input latency, at the cost of possible tear lines.
---
--- To go back to plain vsync, delete this loop; allow_tearing can stay on, it
--- does nothing without it.
+-- allow_tearing (look.lua) is only the master switch; delete this loop for plain vsync.
 for _, class in ipairs(games) do
 	hl.window_rule({ match = { class = class }, immediate = true })
 end
@@ -105,9 +86,7 @@ end
 -- fuzzel
 hl.layer_rule({ match = { namespace = "launcher" }, blur = true, animation = "slide" })
 
--- quickshell: the bar, the OSD, the notification popups and the sliding panels
--- all draw a translucent rounded body inside a slightly larger transparent
--- window - that extra room is where their drop shadows land.
+-- quickshell surfaces are larger than their bodies; the transparent margin holds the shadow.
 hl.layer_rule({
 	match = { namespace = "^quickshell-" },
 	blur = true,

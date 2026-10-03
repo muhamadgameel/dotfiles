@@ -1,9 +1,3 @@
--- ╔═══════════════════════════════════════════════════════════════════╗
--- ║                          BEHAVIOR                                 ║
--- ╚═══════════════════════════════════════════════════════════════════╝
--- Compositor behavior that isn't visual: misc, cursor, rendering,
--- XWayland and bind handling.
-
 hl.config({
 	misc = {
 		disable_hyprland_logo = true,
