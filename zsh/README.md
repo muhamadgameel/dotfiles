@@ -62,10 +62,11 @@ zsh-history-substring-search and fast-syntax-highlighting.
 
 `eval "$(tool init zsh)"` starts the tool on every new shell just to print the
 same code again. `cached-eval <name> <command...>` saves that output to
-`~/.cache/zsh/init/<name>.zsh`, compiles it and sources the file instead. It
-regenerates the file when the tool's binary is newer than the cache or the
-command changes. starship, zoxide and fzf start this way. `zsh-cache-clear`
-deletes the cache, and the next shell rebuilds it.
+`~/.cache/zsh/init/<name>.zsh`, compiles it and sources the file instead. The
+file's first line records the command and the binary's modification time,
+and the file is regenerated when either one changes. starship, zoxide and fzf
+start this way. `zsh-cache-clear` deletes the cache, and the next shell
+rebuilds it.
 
 Don't cache output that depends on the session: `fnm env` embeds a per-shell
 directory under `/run/user`, so it runs live.
