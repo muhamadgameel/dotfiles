@@ -36,12 +36,19 @@ from.
   nvimdiff is the diff and merge tool.
 - GitHub remotes cloned over HTTPS push over SSH. HTTPS credentials come from
   the keyring (libsecret).
-- fsmonitor and the untracked cache keep `git status` fast in large repos.
+- The untracked cache speeds up `git status` everywhere. The file watcher
+  (fsmonitor) is on only for repos under `~/Projects`, through
+  `projects.config`: set globally, git starts a watcher daemon for every repo
+  it touches. For a large repo elsewhere, run `git config core.fsmonitor true`
+  in it.
 - Branch lists sort by last commit, tag lists by version.
 - `attributes` puts function names in diff hunk headers for C, Go, Python,
-  Rust, TypeScript, Lua and more, and collapses lockfiles in diffs.
+  Rust, Kotlin, TypeScript, Lua, QML and more, and collapses lockfiles and
+  `go.sum` in diffs. Shell files keep git's default: its bash driver doesn't
+  recognise function names with a hyphen, which the zsh config uses.
 - `ignore` covers OS and editor clutter, local environment files, caches and
-  logs, and scratch files (`scratch/`, `*.local`).
+  logs, and scratch files (`scratch/`, `*.local`). A ctags `tags` file is
+  ignored only at a repo's root, so a folder named `tags` is not.
 
 ## Aliases
 

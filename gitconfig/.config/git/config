@@ -6,15 +6,17 @@
 # ─────────────────────────────────────────────────────────────────────────────
 [core]
   editor = nvim
-  whitespace = trailing-space,space-before-tab
   autocrlf = input
-  # Filesystem monitor + untracked cache: makes `git status` near-instant on
-  # large repos by avoiding a full worktree scan.
-  fsmonitor = true
+  # Remember which directories hold no untracked files, so `git status` scans less.
   untrackedCache = true
   # -F quits immediately when output fits one screen, -R keeps colour,
   # -X leaves the output in scrollback instead of wiping it.
   pager = less -FRX
+
+# The file watcher, only for repos under ~/Projects. Set globally, git starts a
+# daemon for every repo it touches, throwaway clones and build folders included.
+[includeIf "gitdir:~/Projects/"]
+  path = projects.config
 
 [init]
   defaultBranch = main
@@ -26,18 +28,9 @@
   # Skip the trailing SHA-1 of the index file; pure write-speed win.
   skipHash = true
 
-[pack]
-  # 0 = use all available cores.
-  threads = 0
-  useSparse = true
-
 [checkout]
   # Parallel checkout workers (0 = auto).
   workers = 0
-
-[gc]
-  # Keep the commit-graph fresh so `git log --graph` and merge-base stay fast.
-  writeCommitGraph = true
 
 # ─────────────────────────────────────────────────────────────────────────────
 # Transfer: push / pull / fetch
@@ -74,7 +67,7 @@
   conflictstyle = zdiff3
   autoStash = true
   tool = nvimdiff
-  # Reference the branch names in conflict markers rather than "theirs".
+  # List the merged commits' subjects in the merge commit message.
   log = true
 
 [mergetool]
@@ -116,6 +109,9 @@
 [diff "typescript"]
   xfuncname = "^[[:space:]]*((export[[:space:]]+)?(default[[:space:]]+)?(abstract[[:space:]]+)?(async[[:space:]]+)?(function|class|interface|type|enum|namespace|const|let|var)[[:space:]]+[A-Za-z_$][A-Za-z0-9_$]*.*)$"
 
+[diff "qml"]
+  xfuncname = "^[[:space:]]*((function|signal|component)[[:space:]]+[A-Za-z_].*|[A-Z][A-Za-z0-9_.]*([[:space:]]+on[[:space:]]+[A-Za-z0-9_.]+)?[[:space:]]*\\{.*|([A-Za-z_][A-Za-z0-9_.<>]*[[:space:]]+)*[A-Za-z_][A-Za-z0-9_.]*:[^;]*\\{[[:space:]]*)$"
+
 [diff "lua"]
   xfuncname = "^[[:space:]]*((local[[:space:]]+)?function[[:space:]].*|[A-Za-z_][A-Za-z0-9_.:]*[[:space:]]*=[[:space:]]*function.*)$"
 
@@ -124,8 +120,6 @@
 # ─────────────────────────────────────────────────────────────────────────────
 [log]
   date = human
-  # Respect .mailmap when showing authors.
-  mailmap = true
 
 [blame]
   date = short
@@ -143,8 +137,6 @@
 [status]
   showStash = true
   submoduleSummary = true
-  # Show renames in status output.
-  renames = copies
 
 [stash]
   showPatch = true
@@ -155,7 +147,7 @@
 # ─────────────────────────────────────────────────────────────────────────────
 [branch]
   sort = -committerdate
-  # Track the upstream without making it a merge base for `git pull`.
+  # Set an upstream only when the new branch has the remote branch's name.
   autoSetupMerge = simple
 
 [tag]
@@ -175,9 +167,6 @@
 # ─────────────────────────────────────────────────────────────────────────────
 # Signing
 # ─────────────────────────────────────────────────────────────────────────────
-[gpg]
-  program = gpg
-
 [commit]
   gpgsign = true
   # Show the full staged diff in the commit message editor.
@@ -187,10 +176,8 @@
 # Integrity
 # ─────────────────────────────────────────────────────────────────────────────
 [transfer]
+  # Check objects on fetch and on receive.
   fsckobjects = true
-
-[receive]
-  fsckObjects = true
 
 # ─────────────────────────────────────────────────────────────────────────────
 # Convenience

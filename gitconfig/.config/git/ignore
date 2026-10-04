@@ -20,7 +20,7 @@ Desktop.ini
 *.swo
 *~
 .netrwhist
-tags
+/tags
 .idea/
 *.iml
 .vscode/*

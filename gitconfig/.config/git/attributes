@@ -13,11 +13,14 @@
 *.go     diff=golang
 *.html   diff=html
 *.java   diff=java
+*.kt     diff=kotlin
+*.kts    diff=kotlin
 *.lua    diff=lua
 *.md     diff=markdown
 *.php    diff=php
 *.pl     diff=perl
 *.py     diff=python
+*.qml    diff=qml
 *.rb     diff=ruby
 *.rs     diff=rust
 *.tex    diff=tex
@@ -44,9 +47,7 @@
 *.otf    binary
 
 # ── Lockfiles: collapse in diffs and never merge by hand ─────────────────────
-*.lock       -diff
+*.lock             -diff
 package-lock.json  -diff
 pnpm-lock.yaml     -diff
-yarn.lock          -diff
-Cargo.lock         -diff
-uv.lock            -diff
+go.sum             -diff
