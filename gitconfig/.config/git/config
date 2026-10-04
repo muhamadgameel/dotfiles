@@ -1,10 +1,5 @@
-# ─────────────────────────────────────────────────────────────────────────────
-# Identity
-# ─────────────────────────────────────────────────────────────────────────────
-[user]
-  email = mgameel@pm.me
-  name = Muhamad Gameel
-  signingkey = 62BA848F76AF27B5
+# Shared settings. Your identity and anything for this machine only live in
+# ~/.gitconfig, which git reads after this file (gitconfig/README.md).
 
 # ─────────────────────────────────────────────────────────────────────────────
 # Core behaviour
@@ -339,10 +334,3 @@
   gone = "!git for-each-ref --format='%(refname:short) %(upstream:track)' refs/heads | awk '$2 == \"[gone]\" {print $1}'"
   prune-gone = "!git gone | xargs -r -n1 git branch -D"
   aliases = config --get-regexp ^alias
-
-# ─────────────────────────────────────────────────────────────────────────────
-# Machine-local overrides (work identity, proxies, etc.).
-# Missing files are ignored silently, so this is safe to commit.
-# ─────────────────────────────────────────────────────────────────────────────
-[include]
-  path = ~/.gitconfig.local

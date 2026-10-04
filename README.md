@@ -60,7 +60,9 @@ files (`system/`), GTK settings (`dconf/`) and the Brewfile (`macos/`).
 3. Reboot, so zram, the new initramfs and the audio settings apply. In SDDM pick
    **Hyprland (uwsm-managed)**; the plain Hyprland entry is hidden, because
    without uwsm the bar, idle lock, wallpaper and night light never start.
-4. Restore your SSH and GPG keys. `./setup.sh` reports whether they're there.
+4. Restore your SSH and GPG keys, and set your git identity
+   ([gitconfig/README.md](gitconfig/README.md)). `./setup.sh` reports what is
+   still missing.
 
 ## Day to day
 

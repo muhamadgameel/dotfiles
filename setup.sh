@@ -141,6 +141,18 @@ stow_all() {
     die "move the conflicting files aside, or stow --adopt them and review with git diff"
 }
 
+# A real ~/.gitconfig holds your identity, and `git config --global` writes there
+# instead of through the stowed ~/.config/git into the repo.
+gitlocal_ok() { [[ -f $HOME/.gitconfig && ! -L $HOME/.gitconfig ]]; }
+gitlocal_fix() {
+  [[ ! -L $HOME/.gitconfig ]] || run rm "$HOME/.gitconfig"
+  if [[ -e $HOME/.gitconfig.local ]]; then run mv "$HOME/.gitconfig.local" "$HOME/.gitconfig"; else run touch "$HOME/.gitconfig"; fi
+}
+git_identity() {
+  [[ -n $(git config --get user.name || true) && -n $(git config --get user.email || true) ]] ||
+    warn "git has no identity: git config --global user.name 'Your Name' && git config --global user.email you@example.com"
+}
+
 # --- system -------------------------------------------------------------------
 
 sys_stale() { for f in $(find setup/system -type f | sort); do cmp -s "$f" "/${f#setup/system/}" || echo "$f"; done; }
@@ -297,6 +309,8 @@ mac() {
   item Homebrew brew_ok brew_get
   item Brewfile bundle_ok bundle_run
   item configs mac_stowed mac_stow
+  item "a local ~/.gitconfig for the git identity" gitlocal_ok gitlocal_fix
+  git_identity
 }
 
 case ${1:-check} in
@@ -335,6 +349,7 @@ else
   if want stow; then
     step $'\uf0c1' stow
     item "configs stowed into ~" stowed stow_all
+    item "a local ~/.gitconfig for the git identity" gitlocal_ok gitlocal_fix
   fi
   if want aur; then
     step $'\uf303' aur
@@ -361,6 +376,7 @@ else
     item "a wallpaper in ~/Pictures/Wallpapers" walls_ok walls_seed
     item "rust toolchain" rust_ok rust_set
     item "Code - OSS extensions" ext_ok ext_add
+    git_identity
     key=$(git config --get user.signingkey || true)
     [[ -z $key ]] || gpg --list-secret-keys "$key" >/dev/null 2>&1 ||
       warn "signing key $key is not in gpg; commits are signed, so import it"

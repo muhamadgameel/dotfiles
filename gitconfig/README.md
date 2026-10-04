@@ -1,9 +1,25 @@
 # git
 
-The global git config: settings and aliases in `.gitconfig`, plus
-`~/.config/git/attributes` and `~/.config/git/ignore`. Settings for one machine,
-such as a work identity or a proxy, go in `~/.gitconfig.local`, which
-`.gitconfig` includes when it exists.
+The global git config: shared settings and aliases in `~/.config/git/config`,
+plus `~/.config/git/attributes` and `~/.config/git/ignore`.
+
+Your identity and anything for one machine only live in `~/.gitconfig`, a
+plain file outside this repo. git reads it after the shared file, so it wins
+where both set the same key. `git config --global` writes there, and so do
+tools such as `gh auth setup-git`, so nothing edits the repo behind your back.
+To add a setting on every machine, edit `.config/git/config` here.
+
+`./setup.sh` creates `~/.gitconfig` and warns while the identity is missing:
+
+```bash
+git config --global user.name 'Your Name'
+git config --global user.email you@example.com
+git config --global user.signingkey <key id>
+```
+
+`git config --global --list` shows only that local file.
+`git config --list --show-origin` shows every setting and the file it comes
+from.
 
 ## What it changes
 
