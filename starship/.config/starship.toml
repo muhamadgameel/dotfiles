@@ -32,11 +32,7 @@ $cpp\
 $zig\
 $php\
 $ruby\
-$nix_shell\
 $container\
-$direnv\
-$mise\
-$docker_context\
 $cmd_duration\
 $jobs\
 $status\
@@ -172,27 +168,9 @@ style = 'purple'
 format = '[ $version]($style) '
 style = 'red'
 
-[nix_shell]
-format = '[󱄅 $state( \($name\))]($style) '
-style = 'blue'
-
 [container]
 format = '[󰡨 $name]($style) '
 style = 'orange'
-
-[direnv]
-format = '[ $loaded/$allowed]($style) '
-style = 'yellow'
-disabled = false
-
-[mise]
-format = '[ $health]($style) '
-style = 'purple'
-disabled = false
-
-[docker_context]
-format = '[ $context]($style) '
-style = 'cyan'
 
 [cmd_duration]
 format = '[ $duration]($style) '
