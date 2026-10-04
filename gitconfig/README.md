@@ -34,6 +34,10 @@ from.
   resolutions you have made before.
 - Diffs use the histogram algorithm, colour moved lines and detect copies.
   nvimdiff is the diff and merge tool.
+- On a terminal, diffs render through [delta](https://github.com/dandavison/delta):
+  syntax colours from the terminal palette, no `+`/`-` column, and `n` and `N`
+  jump between files. `git add -p` and lazygit use it too. Piped output stays
+  plain, and without delta installed git falls back to no pager.
 - GitHub remotes cloned over HTTPS push over SSH. HTTPS credentials come from
   the keyring (libsecret).
 - The untracked cache speeds up `git status` everywhere. The file watcher

@@ -26,6 +26,7 @@ enables services.
 | `ghostty` | Ghostty, the terminal on macOS | only |
 | `gitconfig` | git settings and aliases ([README](gitconfig/README.md)) | yes |
 | `hypr` | Hyprland, hypridle, hyprlock, hyprpaper, hyprsunset, the clipboard watchers ([README](hypr/README.md)) | |
+| `lazygit` | lazygit, with diffs rendered through delta | yes |
 | `mangohud` | The MangoHud overlay | |
 | `mpv` | mpv | yes |
 | `nvim` | Neovim | yes |
@@ -218,7 +219,7 @@ Fullscreen games skip vsync and keep the screen awake; see
 
 On macOS, `./setup.sh install` installs Homebrew if it's missing, runs
 `brew bundle --file setup/macos/Brewfile`, and stows aerospace, bat, btop,
-ghostty, gitconfig, mpv, nvim, starship and zsh. AeroSpace uses Alt where
+ghostty, gitconfig, lazygit, mpv, nvim, starship and zsh. AeroSpace uses Alt where
 Hyprland uses SUPER, Ghostty is the terminal, and Raycast is the launcher.
 
 ## Considered and not installed

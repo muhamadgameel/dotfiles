@@ -9,9 +9,8 @@
   autocrlf = input
   # Remember which directories hold no untracked files, so `git status` scans less.
   untrackedCache = true
-  # -F quits immediately when output fits one screen, -R keeps colour,
-  # -X leaves the output in scrollback instead of wiping it.
-  pager = less -FRX
+  # delta highlights diffs, then pages through less.
+  pager = delta
 
 # The file watcher, only for repos under ~/Projects. Set globally, git starts a
 # daemon for every repo it touches, throwaway clones and build folders included.
@@ -99,6 +98,16 @@
 
 [apply]
   whitespace = fix
+
+[interactive]
+  # The same colours for the hunks of `git add -p`.
+  diffFilter = delta --color-only
+
+[delta]
+  # n and N jump between files in a long diff.
+  navigate = true
+  # Syntax colours from the terminal palette, as bat does.
+  syntax-theme = base16
 
 # ─────────────────────────────────────────────────────────────────────────────
 # Custom diff drivers

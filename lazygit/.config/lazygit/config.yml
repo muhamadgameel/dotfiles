@@ -1,0 +1,4 @@
+# Diffs render through delta, as they do on the command line.
+git:
+  diffRenderers:
+    - command: delta --paging=never
