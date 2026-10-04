@@ -5,12 +5,6 @@
 # statusline, where it costs a whole row.
 add_newline = false
 
-# Worst-case prompt lag. Every toolchain probe here is far under this (java 7ms,
-# rustc 58ms cold), so it acts purely as a safety valve: on a pathological repo
-# `git diff --shortstat` can take 100ms+, and a module that trips this renders
-# nothing rather than stalling the prompt. Leave it at the default.
-command_timeout = 500
-
 palette = 'tokyonight'
 
 format = """
@@ -61,10 +55,6 @@ orange  = '#ff9e64'
 fg      = '#c0caf5'
 comment = '#565f89'
 
-[character]
-success_symbol = '[❯](bold green)'
-error_symbol = '[❯](bold red)'
-
 # username, hostname and localip are all SSH-gated, so they render as a group or
 # not at all -- which is why hostname carries no trailing space of its own.
 [username]
@@ -76,11 +66,9 @@ style_root = 'bold red'
 format = '[$ssh_symbol$hostname]($style)'
 ssh_symbol = ' '
 style = 'bold purple'
-ssh_only = true
 
 [localip]
 format = '[@$localipv4](bold red) '
-ssh_only = true
 disabled = false
 
 [directory]
@@ -92,29 +80,21 @@ style = 'blue'
 repo_root_style = 'bold blue'
 before_repo_root_style = 'comment'
 read_only = ' '
-read_only_style = 'red'
-truncate_to_repo = true
 truncation_symbol = '…/'
-truncation_length = 3
 
 [git_branch]
 format = '[ $branch(:$remote_branch)]($style) '
 style = 'purple'
 
 [git_commit]
-format = '[\($hash$tag\)]($style) '
 style = 'comment'
-commit_hash_length = 7
 tag_symbol = '  '
-only_detached = true
 
 [git_state]
-format = '\([$state( $progress_current/$progress_total)]($style)\) '
 style = 'yellow'
 
 [git_metrics]
 disabled = false
-format = '([+$added]($added_style) )([-$deleted]($deleted_style) )'
 added_style = 'green'
 deleted_style = 'red'
 
@@ -220,10 +200,8 @@ style = 'yellow'
 min_time = 1_000
 
 [jobs]
-format = '[$symbol$number]($style) '
 symbol = ' '
 style = 'cyan'
-symbol_threshold = 1
 number_threshold = 1
 
 [status]
@@ -237,7 +215,6 @@ sigint_symbol = ''
 signal_symbol = ''
 style = 'red'
 map_symbol = true
-recognize_signal_code = true
 # Shows which stage of a pipeline actually failed, not just the last one.
 pipestatus = true
 pipestatus_separator = '[|](comment)'
@@ -251,12 +228,10 @@ pipestatus_format = '\[$pipestatus\] => [$symbol $common_meaning$signal_name$may
 claude-code = '$claude_model$directory$git_branch$git_status$claude_context$claude_cost'
 
 [claude_model]
-format = '[$symbol$model]($style) '
 symbol = '󱜙 '
 style = 'bold purple'
 
 [claude_context]
-format = '[$gauge $percentage]($style) '
 gauge_width = 8
 
 [[claude_context.display]]
@@ -275,7 +250,6 @@ style = 'bold red'
 hidden = false
 
 [claude_cost]
-format = '[$symbol(\$$cost)]($style) '
 symbol = ' '
 
 [[claude_cost.display]]
