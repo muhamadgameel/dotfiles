@@ -29,6 +29,11 @@ Desktop.ini
 .nvim.lua
 .exrc
 
+# ── Tools ────────────────────────────────────────────────────────────────────
+# Session locks that Claude Code's autoharness plugin leaves in whatever folder
+# a shell ran in, at any depth.
+**/.claude/autoharness/
+
 # ── Direnv / local env ───────────────────────────────────────────────────────
 .direnv/
 .envrc.local
