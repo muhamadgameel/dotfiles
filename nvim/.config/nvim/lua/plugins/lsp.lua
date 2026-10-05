@@ -36,12 +36,6 @@ return {
   dependencies = {
     { 'mason-org/mason.nvim', version = '^2', opts = {} },
     {
-      'mason-org/mason-lspconfig.nvim',
-      version = '^2',
-      -- Servers are enabled explicitly below so that non-mason servers work too.
-      opts = { ensure_installed = {}, automatic_enable = false },
-    },
-    {
       'WhoIsSethDaniel/mason-tool-installer.nvim',
       opts = { ensure_installed = mason_ensure, run_on_start = true },
     },

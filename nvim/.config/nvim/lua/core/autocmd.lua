@@ -17,13 +17,6 @@ vim.api.nvim_create_autocmd('FileType', {
   desc = 'Enable spell check',
 })
 
--- Set cursor back to blinking beam when leaving Neovim
-vim.api.nvim_create_autocmd('ExitPre', {
-  group = vim.api.nvim_create_augroup('RestoreCursor', { clear = true }),
-  command = 'set guicursor=a:ver100,a:blinkwait0,a:blinkon500,a:blinkoff500',
-  desc = 'Set cursor back to blinking beam when leaving Neovim',
-})
-
 -- Restore cursor position when reopening a file
 vim.api.nvim_create_autocmd('BufReadPost', {
   group = vim.api.nvim_create_augroup('RestoreCursorPosition', { clear = true }),
@@ -40,7 +33,7 @@ vim.api.nvim_create_autocmd('BufReadPost', {
 -- Close special buffers with q
 vim.api.nvim_create_autocmd('FileType', {
   group = vim.api.nvim_create_augroup('CloseWithQ', { clear = true }),
-  pattern = { 'help', 'man', 'qf', 'checkhealth', 'notify', 'query', 'startuptime' },
+  pattern = { 'help', 'man', 'qf', 'checkhealth', 'query' },
   callback = function(ev)
     vim.bo[ev.buf].buflisted = false
     vim.keymap.set('n', 'q', '<cmd>close<cr>', { buffer = ev.buf, silent = true })
