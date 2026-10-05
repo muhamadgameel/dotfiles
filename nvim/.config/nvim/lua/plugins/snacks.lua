@@ -19,12 +19,55 @@ local function dim_indent_guides()
   vim.api.nvim_set_hl(0, 'SnacksIndentScope', { fg = blend(scope_fg, bg, SCOPE_ALPHA) })
 end
 
--- The shell terminal. snacks keeps a terminal open, with an error, when its
--- command exits non-zero. Right for a tool, wrong for a shell: `exit` after a
--- failed command should still close it. So auto_close is off here, and the
--- TermClose autocmd in `init` closes shell terminals whatever the status.
+-- Shell terminals, toggled the way toggleterm did it: backslash opens and
+-- closes the one used last, and a count picks another (2\). They are kept here
+-- because Snacks.terminal() looks its terminals up by working directory, so a
+-- `:cd` would start a new one.
+local terminals, last_terminal = {}, 1
+
 local function terminal()
-  Snacks.terminal(nil, { auto_close = false })
+  if vim.v.count > 0 then
+    last_terminal = vim.v.count
+  end
+  local id = last_terminal
+  local term = terminals[id]
+  if term and term:buf_valid() then
+    return term:toggle()
+  end
+
+  term = Snacks.terminal.open(nil, {
+    count = id,
+    -- snacks keeps a terminal open, with an error, when its command exits
+    -- non-zero. Right for a tool, wrong for a shell, so TermClose closes it below.
+    auto_close = false,
+    win = {
+      keys = {
+        -- Backslash closes it too, so Alt+\ is how to type one in here.
+        hide_backslash = {
+          '\\',
+          function(self)
+            last_terminal = id
+            self:hide()
+          end,
+          mode = 't',
+          desc = 'Hide Terminal',
+        },
+        type_backslash = {
+          '<M-\\>',
+          function()
+            vim.api.nvim_chan_send(vim.b.terminal_job_id, '\\')
+          end,
+          mode = 't',
+          desc = 'Type a backslash',
+        },
+      },
+    },
+  })
+  term:on('TermClose', function()
+    term:close()
+    vim.cmd.checktime()
+  end, { buf = true })
+  terminals[id] = term
 end
 
 return {
@@ -110,13 +153,7 @@ return {
     },
   },
   keys = {
-    -- Terminal. A count picks another one: 2\ is a second terminal.
     { '\\', terminal, desc = 'Toggle Terminal' },
-    { '<C-/>', terminal, desc = 'Toggle Terminal' },
-    { '<C-/>', '<Cmd>close<CR>', mode = 't', desc = 'Hide Terminal' },
-    -- What Ctrl+/ arrives as in terminals without the kitty keyboard protocol
-    { '<C-_>', terminal, desc = 'which_key_ignore' },
-    { '<C-_>', '<Cmd>close<CR>', mode = 't', desc = 'which_key_ignore' },
 
     -- General (ported 1:1 from the old telescope <leader>o* maps)
     {
@@ -308,18 +345,6 @@ return {
     })
   end,
   init = function()
-    -- Close a shell terminal when its shell exits (see terminal() above).
-    vim.api.nvim_create_autocmd('TermClose', {
-      callback = function(ev)
-        local term = vim.b[ev.buf].snacks_terminal
-        if term and not term.cmd then
-          vim.schedule(function()
-            pcall(vim.api.nvim_buf_delete, ev.buf, { force = true })
-          end)
-        end
-      end,
-    })
-
     vim.api.nvim_create_autocmd('User', {
       pattern = 'VeryLazy',
       callback = function()
