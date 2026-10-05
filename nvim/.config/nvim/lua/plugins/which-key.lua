@@ -7,10 +7,10 @@ return {
     spec = {
       { '<leader>b', group = 'buffer' },
       { '<leader>c', group = 'code' },
+      { '<leader>cp', group = 'npm package' },
       { '<leader>h', group = 'git hunk' },
       { '<leader>o', group = 'open/search' },
       { '<leader>og', group = 'git' },
-      { '<leader>n', group = 'npm package' },
       { '<leader>r', group = 'rename/replace/rust' },
       { '<leader>s', group = 'split/session' },
       { '<leader>t', group = 'toggle' },

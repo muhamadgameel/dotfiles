@@ -323,7 +323,6 @@ return {
         Snacks.words.jump(vim.v.count1)
       end,
       desc = 'Next reference',
-      mode = { 'n', 't' },
     },
     {
       '[[',
@@ -331,7 +330,6 @@ return {
         Snacks.words.jump(-vim.v.count1)
       end,
       desc = 'Prev reference',
-      mode = { 'n', 't' },
     },
   },
   config = function(_, opts)

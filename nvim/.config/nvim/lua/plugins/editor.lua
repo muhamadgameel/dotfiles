@@ -34,7 +34,7 @@ return {
           require('flash').treesitter()
         end,
         desc = 'Flash Treesitter',
-        mode = { 'n', 'x', 'o' },
+        mode = { 'n', 'o' }, -- visual S is nvim-surround's
       },
       {
         'r',
@@ -84,25 +84,28 @@ return {
     opts = { package_manager = 'npm', hide_up_to_date = true },
     keys = {
       {
-        '<leader>ns',
+        '<leader>cps',
         function()
           require('package-info').show()
         end,
         desc = 'Show package versions',
+        ft = 'json',
       },
       {
-        '<leader>nu',
+        '<leader>cpu',
         function()
           require('package-info').update()
         end,
         desc = 'Update package',
+        ft = 'json',
       },
       {
-        '<leader>nc',
+        '<leader>cpc',
         function()
           require('package-info').change_version()
         end,
         desc = 'Change package version',
+        ft = 'json',
       },
     },
   },
