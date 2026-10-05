@@ -56,7 +56,9 @@ return {
       animate = { enabled = false },
     },
 
-    terminal = { win = { position = 'float' } }, -- A shell would open as a bottom split otherwise
+    -- A shell opens as a bottom split by default. As a float it needs a border to
+    -- stand out from the editor behind it; `true` follows 'winborder' (rounded).
+    terminal = { win = { position = 'float', border = true } },
 
     styles = {
       notification = { wo = { wrap = true } },
