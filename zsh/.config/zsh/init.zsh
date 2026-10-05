@@ -70,4 +70,5 @@ cached-eval starship starship init zsh
 RPROMPT=''
 
 # Startup profiling: ZSH_PROFILE=1 zsh -i -c exit
-(( ${+ZSH_PROFILE} )) && zprof
+# An `if`, not `&&`: as the file's last line, a false test left every new shell at status 1.
+if (( ${+ZSH_PROFILE} )); then zprof; fi
