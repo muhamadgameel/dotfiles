@@ -1,5 +1,5 @@
--- Server settings live in the native `lsp/<name>.lua` directory (Neovim 0.11+).
--- Those files are merged on top of nvim-lspconfig's defaults, and enabled by the
+-- Server settings live in `after/lsp/<name>.lua`. Neovim merges them on top of
+-- nvim-lspconfig's defaults (`after/` loads last), and they are enabled by the
 -- explicit vim.lsp.enable call below.
 local servers = {
   'lua_ls',
@@ -103,9 +103,9 @@ return {
           vim.lsp.codelens.enable(true, { bufnr = ev.buf })
         end
 
-        -- Fix-on-save for eslint. This lives here rather than in lsp/eslint.lua
-        -- because nvim-lspconfig defines its own on_attach for this server and
-        -- would override a user one (see the vim.lsp.config re-apply below).
+        -- Fix-on-save for eslint. It lives here because an on_attach in
+        -- after/lsp/eslint.lua would replace nvim-lspconfig's own, which creates
+        -- the LspEslintFixAll command.
         if client.name == 'eslint' then
           vim.api.nvim_create_autocmd('BufWritePre', {
             group = vim.api.nvim_create_augroup('eslint-fix-all-' .. ev.buf, { clear = true }),
@@ -144,22 +144,6 @@ return {
         vim.diagnostic.config { virtual_lines = { current_line = true }, virtual_text = false }
       end
     end, { desc = 'Toggle diagnostic virtual lines' })
-
-    -- nvim-lspconfig ships its own lsp/<name>.lua files. Neovim merges every
-    -- copy found on the runtimepath, and the plugin sits *later* in that list,
-    -- so for any key both define the plugin silently wins
-    local config_dir = vim.fn.stdpath 'config' .. '/lsp/'
-    for _, name in ipairs(servers) do
-      local file = config_dir .. name .. '.lua'
-      if vim.uv.fs_stat(file) then
-        local ok, user_cfg = pcall(dofile, file)
-        if ok and type(user_cfg) == 'table' then
-          vim.lsp.config(name, user_cfg)
-        elseif not ok then
-          vim.notify(('lsp: failed to load %s.lua: %s'):format(name, user_cfg), vim.log.levels.WARN)
-        end
-      end
-    end
 
     vim.lsp.enable(servers)
   end,
