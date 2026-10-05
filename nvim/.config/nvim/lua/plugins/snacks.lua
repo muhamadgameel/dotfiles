@@ -18,6 +18,15 @@ local function dim_indent_guides()
   vim.api.nvim_set_hl(0, 'SnacksIndent', { fg = blend(indent_fg, bg, INDENT_ALPHA) })
   vim.api.nvim_set_hl(0, 'SnacksIndentScope', { fg = blend(scope_fg, bg, SCOPE_ALPHA) })
 end
+
+-- The shell terminal. snacks keeps a terminal open, with an error, when its
+-- command exits non-zero. Right for a tool, wrong for a shell: `exit` after a
+-- failed command should still close it. So auto_close is off here, and the
+-- TermClose autocmd in `init` closes shell terminals whatever the status.
+local function terminal()
+  Snacks.terminal(nil, { auto_close = false })
+end
+
 return {
   'folke/snacks.nvim',
   priority = 1000,
@@ -46,6 +55,8 @@ return {
       chunk = { enabled = false },
       animate = { enabled = false },
     },
+
+    terminal = { win = { position = 'float' } }, -- A shell would open as a bottom split otherwise
 
     styles = {
       notification = { wo = { wrap = true } },
@@ -97,6 +108,14 @@ return {
     },
   },
   keys = {
+    -- Terminal. A count picks another one: 2\ is a second terminal.
+    { '\\', terminal, desc = 'Toggle Terminal' },
+    { '<C-/>', terminal, desc = 'Toggle Terminal' },
+    { '<C-/>', '<Cmd>close<CR>', mode = 't', desc = 'Hide Terminal' },
+    -- What Ctrl+/ arrives as in terminals without the kitty keyboard protocol
+    { '<C-_>', terminal, desc = 'which_key_ignore' },
+    { '<C-_>', '<Cmd>close<CR>', mode = 't', desc = 'which_key_ignore' },
+
     -- General (ported 1:1 from the old telescope <leader>o* maps)
     {
       '<leader>oo',
@@ -287,6 +306,18 @@ return {
     })
   end,
   init = function()
+    -- Close a shell terminal when its shell exits (see terminal() above).
+    vim.api.nvim_create_autocmd('TermClose', {
+      callback = function(ev)
+        local term = vim.b[ev.buf].snacks_terminal
+        if term and not term.cmd then
+          vim.schedule(function()
+            pcall(vim.api.nvim_buf_delete, ev.buf, { force = true })
+          end)
+        end
+      end,
+    })
+
     vim.api.nvim_create_autocmd('User', {
       pattern = 'VeryLazy',
       callback = function()

@@ -40,7 +40,6 @@ return {
       },
       extensions = {
         'oil',
-        'toggleterm',
         'quickfix',
         'trouble',
         'man',
