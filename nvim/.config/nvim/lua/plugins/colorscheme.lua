@@ -16,12 +16,8 @@ return {
     'rebelot/kanagawa.nvim',
     lazy = false,
     priority = 1000,
-    build = function()
-      vim.cmd 'KanagawaCompile'
-    end,
     config = function()
       require('kanagawa').setup {
-        compile = true,
         dimInactive = true,
         overrides = function(colors)
           local theme = colors.theme

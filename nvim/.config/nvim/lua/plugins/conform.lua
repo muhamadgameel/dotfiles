@@ -46,9 +46,5 @@ return {
     conform.formatters.qmlformat = {
       command = '/usr/lib/qt6/bin/qmlformat',
     }
-
-    conform.formatters.shfmt = {
-      append_args = { '-i', '2' },
-    }
   end,
 }

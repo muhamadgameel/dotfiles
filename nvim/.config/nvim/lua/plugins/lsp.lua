@@ -92,12 +92,6 @@ return {
           end, 'Toggle Inlay Hints')
         end
 
-        -- Inline colour swatches (0.12). Applies to cssls; vtsls reports
-        -- colorProvider=false, so TSX/StyleSheet values are not covered.
-        if supports(vim.lsp.protocol.Methods.textDocument_documentColor) then
-          vim.lsp.document_color.enable(true, { bufnr = ev.buf })
-        end
-
         -- 0.12's codelens capability refreshes itself on document changes
         if supports(vim.lsp.protocol.Methods.textDocument_codeLens) then
           vim.lsp.codelens.enable(true, { bufnr = ev.buf })
@@ -121,7 +115,11 @@ return {
       severity_sort = true,
       underline = { severity = vim.diagnostic.severity.ERROR },
       float = { source = true },
-      jump = { float = true },
+      jump = {
+        on_jump = function(_, bufnr)
+          vim.diagnostic.open_float { bufnr = bufnr, scope = 'cursor', focus = false }
+        end,
+      },
       signs = {
         text = {
           [vim.diagnostic.severity.ERROR] = '󰅚 ',

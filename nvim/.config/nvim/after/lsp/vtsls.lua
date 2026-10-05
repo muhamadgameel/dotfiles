@@ -11,14 +11,6 @@ local inlay_hints = {
 }
 
 return {
-  filetypes = {
-    'javascript',
-    'javascriptreact',
-    'javascript.jsx',
-    'typescript',
-    'typescriptreact',
-    'typescript.tsx',
-  },
   settings = {
     vtsls = {
       autoUseWorkspaceTsdk = true, -- Use the project's TS, not the bundled one
