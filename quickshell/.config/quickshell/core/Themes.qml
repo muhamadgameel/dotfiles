@@ -39,6 +39,7 @@ Singleton {
         error: "#f38ba8",
         overlay: "#6c7086",
         overlayLight: "#7f849c",
+        selection: "#585b70",
         term: ["#45475a", "#f38ba8", "#a6e3a1", "#f9e2af", "#89b4fa", "#f5c2e7", "#94e2d5", "#bac2de", "#585b70", "#f38ba8", "#a6e3a1", "#f9e2af", "#89b4fa", "#f5c2e7", "#94e2d5", "#a6adc8"]
       },
       "catppuccin-macchiato": {
@@ -59,6 +60,7 @@ Singleton {
         error: "#ed8796",
         overlay: "#6e738d",
         overlayLight: "#8087a2",
+        selection: "#5b6078",
         term: ["#494d64", "#ed8796", "#a6da95", "#eed49f", "#8aadf4", "#f5bde6", "#8bd5ca", "#b8c0e0", "#5b6078", "#ed8796", "#a6da95", "#eed49f", "#8aadf4", "#f5bde6", "#8bd5ca", "#a5adcb"]
       },
       "catppuccin-latte": {
@@ -79,6 +81,7 @@ Singleton {
         error: "#d20f39",
         overlay: "#9ca0b0",
         overlayLight: "#8c8fa1",
+        selection: "#acb0be",
         term: ["#bcc0cc", "#d20f39", "#40a02b", "#df8e1d", "#1e66f5", "#ea76cb", "#179299", "#5c5f77", "#acb0be", "#d20f39", "#40a02b", "#df8e1d", "#1e66f5", "#ea76cb", "#179299", "#6c6f85"]
       },
       // Tokyo Night, from folke/tokyonight.nvim. `night` is the darker of the
@@ -101,6 +104,7 @@ Singleton {
         error: "#f7768e",
         overlay: "#414868",
         overlayLight: "#565f89",
+        selection: "#283457",
         term: ["#15161e", "#f7768e", "#9ece6a", "#e0af68", "#7aa2f7", "#bb9af7", "#7dcfff", "#a9b1d6", "#414868", "#ff899d", "#9fe044", "#faba4a", "#8db0ff", "#c7a9ff", "#a4daff", "#c0caf5"]
       },
       "tokyo-night-storm": {
@@ -121,6 +125,7 @@ Singleton {
         error: "#f7768e",
         overlay: "#414868",
         overlayLight: "#565f89",
+        selection: "#2e3c64",
         term: ["#1d202f", "#f7768e", "#9ece6a", "#e0af68", "#7aa2f7", "#bb9af7", "#7dcfff", "#a9b1d6", "#414868", "#ff899d", "#9fe044", "#faba4a", "#8db0ff", "#c7a9ff", "#a4daff", "#c0caf5"]
       }
     })
