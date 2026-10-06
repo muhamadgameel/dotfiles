@@ -237,6 +237,10 @@ charge_cap() { run busctl call org.freedesktop.UPower "$battery" org.freedesktop
 
 walls_ok() { compgen -G "$HOME/Pictures/Wallpapers/*" >/dev/null; }
 walls_seed() { run install -Dm644 hypr/.config/hypr/wallpaper.jpg "$HOME/Pictures/Wallpapers/wallpaper.jpg"; }
+# fuzzel won't start while a file it includes is missing; the shell fills this one in.
+fuzzel_colors=$HOME/.local/state/quickshell/fuzzel-colors.ini
+fuzzel_ok() { [[ -e $fuzzel_colors ]]; }
+fuzzel_seed() { run install -Dm644 /dev/null "$fuzzel_colors"; }
 rust_ok() { ! command -v rustup >/dev/null || rustup default >/dev/null 2>&1; }
 rust_set() { run rustup default stable; }
 ext_missing() { comm -23 <(sort setup/packages/code-extensions.txt) <(code --list-extensions 2>/dev/null | sort); }
@@ -374,6 +378,7 @@ else
     item "Templates, Public, Music, Videos point at ~" dirs_ok dirs_set
     item "battery charge limit" charge_ok charge_cap
     item "a wallpaper in ~/Pictures/Wallpapers" walls_ok walls_seed
+    item "the launcher's colour file" fuzzel_ok fuzzel_seed
     item "rust toolchain" rust_ok rust_set
     item "Code - OSS extensions" ext_ok ext_add
     git_identity

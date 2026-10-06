@@ -89,6 +89,11 @@ when the Qt 6 tools are missing.
 - `hyprland-colors.lua` and `hyprlock-colors.conf`: the active theme's colours,
   written by `services/ThemeSync.qml` for Hyprland and hyprlock (see
   [hypr/README.md](../hypr/README.md#theme-colours)).
+- `alacritty-colors.toml` and `fuzzel-colors.ini`: the same colours for the
+  terminal and the launcher. `alacritty.toml` imports the first, and open
+  terminals recolour on a theme switch; `fuzzel.ini` includes the second.
+  fuzzel won't start while its file is missing, so `./setup.sh install` creates
+  an empty one and the shell fills it in.
 
 ## Controlling it
 

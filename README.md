@@ -15,13 +15,13 @@ enables services.
 | Package | Configures | macOS |
 |---|---|---|
 | `aerospace` | AeroSpace, the tiling window manager, laid out like the Hyprland binds | only |
-| `alacritty` | Alacritty, plus `xdg-terminal-exec` so apps opened from Thunar find it | |
+| `alacritty` | Alacritty, in the shell's theme, plus `xdg-terminal-exec` so apps opened from Thunar find it | |
 | `bat` | bat, in the terminal's colours | yes |
 | `btop` | btop, in the terminal's colours, with the GPU | yes |
 | `desktop` | Default apps, Chromium's video decoding flags, hidden launcher entries | |
 | `editors` | Code - OSS settings | |
 | `fontconfig` | Noto fonts for Arabic, Japanese and Chinese | |
-| `fuzzel` | The app launcher | |
+| `fuzzel` | The app launcher, in the shell's theme | |
 | `gamemode` | GameMode | |
 | `ghostty` | Ghostty, the terminal on macOS | only |
 | `gitconfig` | git settings and aliases ([README](gitconfig/README.md)) | yes |
