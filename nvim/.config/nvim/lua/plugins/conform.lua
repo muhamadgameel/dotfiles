@@ -33,6 +33,8 @@ return {
         sh = { 'shfmt' },
         bash = { 'shfmt' },
         rust = { 'rustfmt' },
+        go = { lsp_format = 'prefer' }, -- gopls, which applies gofumpt
+        python = { 'ruff_organize_imports', 'ruff_format' },
         qml = { 'qmlformat' },
         ['_'] = { 'trim_whitespace', 'trim_newlines' },
       },

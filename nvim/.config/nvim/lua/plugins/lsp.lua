@@ -11,6 +11,11 @@ local servers = {
   'bashls',
   'taplo',
   'qmlls',
+  'gopls',
+  'yamlls',
+  'marksman',
+  'pyright',
+  'ruff',
 }
 
 -- rust_analyzer is deliberately absent: rustaceanvim owns it (see plugins/rust.lua).
