@@ -57,6 +57,10 @@ Singleton {
   readonly property color overlay: _pick("overlay")
   readonly property color overlayLight: _pick("overlayLight")
 
+  // === Terminal and Launcher Colors ===
+  readonly property color selection: _pick("selection")
+  readonly property var term: _pick("term")
+
   // === Absolute Colors ===
   readonly property color transparent: "transparent"
   readonly property color black: "#000000"
