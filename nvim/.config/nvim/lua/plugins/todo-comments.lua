@@ -6,7 +6,10 @@ return {
   config = function()
     local todo_comments = require 'todo-comments'
 
-    todo_comments.setup()
+    todo_comments.setup {
+      -- Only after a comment leader: the default also matches 'WARNING:' in a string
+      search = { pattern = [[(#|//|--|/\*|\*|<!--)\s*(KEYWORDS):]] },
+    }
 
     vim.keymap.set('n', '<leader>ot', function()
       Snacks.picker.todo_comments()

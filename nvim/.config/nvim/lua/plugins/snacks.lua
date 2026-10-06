@@ -115,6 +115,7 @@ return {
       sources = {
         files = { hidden = true }, -- Hidden files included, .git excluded via exclude below
         grep = { hidden = true },
+        todo_comments = { hidden = true },
         explorer = { hidden = true },
         buffers = {
           layout = 'select',
