@@ -37,6 +37,16 @@ ShellRoot {
     value: Config.Config.debugMode ? Core.Logger.levelDebug : Core.Logger.levelInfo
   }
 
+  // Quickshell's "Config reloaded" popup blocks `qs ipc` while it is up, and it
+  // stays up for as long as the pointer is on it. A failed reload keeps its popup.
+  Connections {
+    target: Quickshell
+
+    function onReloadCompleted() {
+      Quickshell.inhibitReloadPopup();
+    }
+  }
+
   Component.onCompleted: {
     Core.Logger.i("Shell", `started, log level '${Core.Logger.levelName}'`);
     // Nothing else reads it, and a singleton only exists once something does.
