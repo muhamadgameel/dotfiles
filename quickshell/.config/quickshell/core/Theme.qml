@@ -47,7 +47,6 @@ Singleton {
   // === Accent Colors ===
   readonly property color accent: _pick("accent")
   readonly property color accentAlt: _pick("accentAlt")
-  readonly property color accentPink: _pick("accentPink")
 
   // === Semantic Colors ===
   readonly property color success: _pick("success")
@@ -57,7 +56,6 @@ Singleton {
   // === Overlay Colors ===
   readonly property color overlay: _pick("overlay")
   readonly property color overlayLight: _pick("overlayLight")
-  readonly property color overlayLighter: _pick("overlayLighter")
 
   // === Absolute Colors ===
   readonly property color transparent: "transparent"
