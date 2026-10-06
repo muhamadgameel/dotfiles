@@ -8,6 +8,7 @@ return {
       { '<leader>b', group = 'buffer' },
       { '<leader>c', group = 'code' },
       { '<leader>cp', group = 'npm package' },
+      { '<leader>g', group = 'git' },
       { '<leader>h', group = 'git hunk' },
       { '<leader>o', group = 'open/search' },
       { '<leader>og', group = 'git' },

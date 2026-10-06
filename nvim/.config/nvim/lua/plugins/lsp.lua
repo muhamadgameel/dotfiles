@@ -101,7 +101,11 @@ return {
           vim.api.nvim_create_autocmd('BufWritePre', {
             group = vim.api.nvim_create_augroup('eslint-fix-all-' .. ev.buf, { clear = true }),
             buffer = ev.buf,
-            command = 'LspEslintFixAll',
+            callback = function(args)
+              if not (vim.g.disable_autoformat or vim.b[args.buf].disable_autoformat) then
+                vim.cmd 'LspEslintFixAll'
+              end
+            end,
             desc = 'Apply eslint fixes on save',
           })
         end

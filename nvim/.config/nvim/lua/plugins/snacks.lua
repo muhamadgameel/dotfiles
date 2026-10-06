@@ -316,6 +316,27 @@ return {
       desc = 'Open in browser',
       mode = { 'n', 'x' },
     },
+    {
+      '<leader>gg',
+      function()
+        Snacks.lazygit()
+      end,
+      desc = 'Lazygit',
+    },
+    {
+      '<leader>gl',
+      function()
+        Snacks.lazygit.log()
+      end,
+      desc = 'Lazygit log',
+    },
+    {
+      '<leader>gf',
+      function()
+        Snacks.lazygit.log_file()
+      end,
+      desc = 'Lazygit file history',
+    },
 
     -- Reference navigation (replaces vim-illuminate's motions)
     {
