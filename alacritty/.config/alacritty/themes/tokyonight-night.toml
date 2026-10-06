@@ -22,6 +22,11 @@ focused_match = { foreground = "#1a1b26", background = "#ff9e64" }
 start = { foreground = "#1a1b26", background = "#e0af68" }
 end   = { foreground = "#1a1b26", background = "#a9b1d6" }
 
+# The visual bell's flash: blue, like the window border. It is here, not in
+# alacritty.toml, so that the shell's theme can override it.
+[bell]
+color = "#7aa2f7"
+
 # ── Terminal palette ─────────────────────────────────────────────────
 
 [colors.primary]
