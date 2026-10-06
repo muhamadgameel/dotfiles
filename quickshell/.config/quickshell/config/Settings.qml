@@ -31,6 +31,9 @@ Singleton {
   readonly property string directory: `${Quickshell.env("XDG_STATE_HOME") || (Quickshell.env("HOME") + "/.local/state")}/quickshell`
   readonly property string path: `${directory}/settings.json`
 
+  // Set once the directory exists, for whatever else writes next to settings.json.
+  property bool directoryReady: false
+
   /**
   * The settings object.
   */
@@ -153,5 +156,6 @@ Singleton {
   Process {
     running: true
     command: ["mkdir", "-p", root.directory]
+    onExited: root.directoryReady = true
   }
 }
