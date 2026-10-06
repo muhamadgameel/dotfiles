@@ -4,7 +4,7 @@ return {
     -- so Rust files had no LSP at all. rustaceanvim starts and owns the server
     -- itself, which is why rust_analyzer is absent from plugins/lsp.lua.
     'mrcjkb/rustaceanvim',
-    version = '^6',
+    version = '^9',
     lazy = false, -- Plugin sets up its own ft handling; do not call setup()
     init = function()
       vim.g.rustaceanvim = {
