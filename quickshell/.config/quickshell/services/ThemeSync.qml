@@ -8,17 +8,19 @@ import "../config" as Config
 import "../core" as Core
 
 /**
-* ThemeSync - carries the shell's theme to Hyprland and hyprlock
+* ThemeSync - carries the shell's theme to Hyprland, hyprlock, Alacritty and fuzzel
 *
 * The shell owns the palettes and which one is active. Hyprland's borders and
 * the lock screen kept their own hardcoded copies, so switching theme recoloured
 * the shell and nothing else. This writes the active colours where each can
 * read them, into the shell's state directory:
 *
-*   hyprlock-colors.conf   sourced by hyprlock.conf, read at every lock
-*   hyprland-colors.lua    merged by settings/theme.lua at startup
+*   hyprlock-colors.conf    sourced by hyprlock.conf, read at every lock
+*   hyprland-colors.lua     merged by settings/theme.lua at startup
+*   alacritty-colors.toml   for alacritty.toml to import; Alacritty reloads it live
+*   fuzzel-colors.ini       for fuzzel.ini to include; read at every launch
 *
-* Both only override: each config defines its own colours first, so a missing
+* All only override: each config defines its own colours first, so a missing
 * file - a fresh install, the shell not running - changes nothing. A switch
 * also recolours Hyprland's borders straight away rather than waiting for its
 * next start, through a partial hl.config that leaves every other option alone.
@@ -28,6 +30,8 @@ Singleton {
 
   readonly property string hyprlockPath: `${Config.Settings.directory}/hyprlock-colors.conf`
   readonly property string hyprlandPath: `${Config.Settings.directory}/hyprland-colors.lua`
+  readonly property string alacrittyPath: `${Config.Settings.directory}/alacritty-colors.toml`
+  readonly property string fuzzelPath: `${Config.Settings.directory}/fuzzel-colors.ini`
 
   // "rrggbb", or "rrggbbaa" with an alpha. hyprlang and Hyprland's Lua config
   // both take rgb(...) / rgba(...) around these.
@@ -62,16 +66,71 @@ return {
 }
 `
 
-  // The state directory may not exist yet on a first run: Settings creates it
-  // too, but asynchronously, so a write here could race it.
+  // Eight "name = colour" lines of the terminal palette, from index `from`.
+  function _ansi(from) {
+    const names = ["black", "red", "green", "yellow", "blue", "magenta", "cyan", "white"];
+    return names.map((name, i) => `${name} = "${Core.Theme.term[from + i]}"`).join("\n");
+  }
+
+  readonly property string _alacrittyText: `# Written by quickshell (services/ThemeSync.qml) from the active theme.
+[colors.primary]
+background = "#${_hex(Core.Theme.bg)}"
+foreground = "#${_hex(Core.Theme.text)}"
+
+[colors.cursor]
+text = "#${_hex(Core.Theme.bg)}"
+cursor = "#${_hex(Core.Theme.text)}"
+
+[colors.vi_mode_cursor]
+text = "#${_hex(Core.Theme.bg)}"
+cursor = "#${_hex(Core.Theme.accentAlt)}"
+
+[colors.selection]
+text = "CellForeground"
+background = "#${_hex(Core.Theme.selection)}"
+
+[colors.normal]
+${_ansi(0)}
+
+[colors.bright]
+${_ansi(8)}
+
+[bell]
+color = "#${_hex(Core.Theme.accent)}"
+`
+
+  readonly property string _fuzzelText: `# Written by quickshell (services/ThemeSync.qml) from the active theme.
+[colors]
+background=${_hex(Core.Theme.bg, 0.8)}
+text=${_hex(Core.Theme.text, 1)}
+input=${_hex(Core.Theme.text, 1)}
+prompt=${_hex(Core.Theme.accent, 1)}
+placeholder=${_hex(Core.Theme.overlayLight, 1)}
+counter=${_hex(Core.Theme.overlayLight, 1)}
+selection=${_hex(Core.Theme.selection, 1)}
+selection-text=${_hex(Core.Theme.accent, 1)}
+selection-match=${_hex(Core.Theme.accentAlt, 1)}
+match=${_hex(Core.Theme.accentAlt, 1)}
+border=${_hex(Core.Theme.overlayLight, 1)}
+`
+
+  // The state directory does not exist on a first run. Settings creates it and
+  // says when; until then there is nowhere to write.
   function sync() {
-    _ensureDirectory.running = true;
+    if (Config.Settings.directoryReady)
+      _write();
   }
 
   // Only writes what differs, so an ordinary shell start touches nothing.
   function _write() {
     if (hyprlockFile.text() !== root._hyprlockText)
       hyprlockFile.setText(root._hyprlockText);
+
+    if (alacrittyFile.text() !== root._alacrittyText)
+      alacrittyFile.setText(root._alacrittyText);
+
+    if (fuzzelFile.text() !== root._fuzzelText)
+      fuzzelFile.setText(root._fuzzelText);
 
     if (hyprlandFile.text() === root._hyprlandText)
       return;
@@ -84,6 +143,16 @@ return {
 
   on_HyprlockTextChanged: Qt.callLater(root.sync)
   on_HyprlandTextChanged: Qt.callLater(root.sync)
+  on_AlacrittyTextChanged: Qt.callLater(root.sync)
+  on_FuzzelTextChanged: Qt.callLater(root.sync)
+
+  Connections {
+    target: Config.Settings
+
+    function onDirectoryReadyChanged() {
+      root.sync();
+    }
+  }
 
   FileView {
     id: hyprlockFile
@@ -99,13 +168,18 @@ return {
     printErrors: false
   }
 
-  Process {
-    id: _ensureDirectory
-    command: ["mkdir", "-p", Config.Settings.directory]
-    onRunningChanged: {
-      if (!running)
-        root._write();
-    }
+  FileView {
+    id: alacrittyFile
+    path: root.alacrittyPath
+    blockLoading: true
+    printErrors: false
+  }
+
+  FileView {
+    id: fuzzelFile
+    path: root.fuzzelPath
+    blockLoading: true
+    printErrors: false
   }
 
   Process {
