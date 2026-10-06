@@ -20,26 +20,18 @@ local servers = {
 
 -- rust_analyzer is deliberately absent: rustaceanvim owns it (see plugins/rust.lua).
 -- Enabling it here too would start two competing clients.
+
+-- Only what the system packages lack; the rest is listed under setup/.
 local mason_ensure = {
-  'lua-language-server',
   'vtsls',
-  'eslint-lsp',
-  'json-lsp',
-  'html-lsp',
-  'css-lsp',
-  'bash-language-server',
-  'taplo',
-  'shellcheck', -- consumed by bashls, not by a separate linter
   'prettierd',
-  'stylua',
-  'shfmt',
 }
 
 return {
   'neovim/nvim-lspconfig',
   event = { 'BufReadPre', 'BufNewFile' },
   dependencies = {
-    { 'mason-org/mason.nvim', version = '^2', opts = {} },
+    { 'mason-org/mason.nvim', version = '^2', opts = { PATH = 'append' } }, -- system binaries win
     {
       'WhoIsSethDaniel/mason-tool-installer.nvim',
       opts = { ensure_installed = mason_ensure, run_on_start = true },
