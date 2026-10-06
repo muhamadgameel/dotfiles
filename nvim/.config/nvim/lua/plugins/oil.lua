@@ -11,6 +11,8 @@ return {
     columns = { 'icon' },
     keymaps = {
       ['<C-j>'] = 'actions.select',
+      ['<C-h>'] = false, -- left to window navigation
+      ['<C-l>'] = false,
       ['q'] = 'actions.close',
       ['gd'] = {
         desc = 'Toggle file detail view',

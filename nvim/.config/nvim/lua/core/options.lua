@@ -108,6 +108,7 @@ opt.sessionoptions =
 -- Editing Behavior
 ----------------------------------------------------------------------------------
 opt.mouse = 'a'
+opt.mousemoveevent = true -- bufferline's hover needs it
 -- Sync clipboard between OS and Neovim.
 vim.schedule(function()
   opt.clipboard = 'unnamedplus'

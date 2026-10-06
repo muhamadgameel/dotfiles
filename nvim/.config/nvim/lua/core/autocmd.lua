@@ -21,6 +21,12 @@ vim.api.nvim_create_autocmd('FileType', {
 vim.api.nvim_create_autocmd('BufReadPost', {
   group = vim.api.nvim_create_augroup('RestoreCursorPosition', { clear = true }),
   callback = function(args)
+    -- 'filetype' isn't set yet here. A commit or rebase message is a new one
+    -- each time, and a diff starts at the top.
+    local ft = vim.filetype.match { buf = args.buf } or ''
+    if vim.wo.diff or ft:find 'commit' or ft == 'gitrebase' then
+      return
+    end
     local mark = vim.api.nvim_buf_get_mark(args.buf, '"')
     local line_count = vim.api.nvim_buf_line_count(args.buf)
     if mark[1] > 0 and mark[1] <= line_count then
