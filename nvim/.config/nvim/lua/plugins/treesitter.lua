@@ -29,6 +29,16 @@ local languages = {
   'dockerfile',
   'qmldir',
   'qmljs',
+  'zsh',
+  'hyprlang',
+  'diff',
+  'git_rebase',
+  'printf',
+  'gomod',
+  'gosum',
+  'gowork',
+  'kotlin',
+  'groovy',
 }
 
 return {
@@ -56,8 +66,10 @@ return {
         -- highlight
         vim.treesitter.start(buf, language)
 
-        -- indentation
-        vim.bo[buf].indentexpr = "v:lua.require'nvim-treesitter'.indentexpr()"
+        -- indentation, where the parser ships indent rules; the rest keep Vim's own
+        if vim.treesitter.query.get(language, 'indents') then
+          vim.bo[buf].indentexpr = "v:lua.require'nvim-treesitter'.indentexpr()"
+        end
       end,
     })
   end,
