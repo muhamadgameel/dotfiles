@@ -34,6 +34,12 @@ Singleton {
     root.window.showFor(target, text, direction);
   }
 
+  // Change the text of the tooltip `target` is showing. Anyone else's is left alone.
+  function refresh(target, text) {
+    if (root._target === target)
+      root.window.text = text;
+  }
+
   function hide() {
     root._target = null;
     if (root.window)
