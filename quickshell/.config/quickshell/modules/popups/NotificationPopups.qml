@@ -53,13 +53,17 @@ Variants {
       readonly property int shadowRoom: Math.max(Core.Style.spaceXS, Core.Style.elevationRoom(2))
 
       // While a panel is open on this screen the stack sits to its left, a
-      // spaceM gap from the panel's surface (SlidingPanel's default width and
-      // inset). The window is sized for both positions and never moves; only
-      // the stack slides inside it, which needs no compositor round trip.
+      // spaceM gap from the panel's surface (SlidingPanel's width and inset).
+      // The window is sized for the widest panel and never moves; only the
+      // stack slides inside it, which needs no compositor round trip.
       readonly property bool besidePanel: Services.Panels.openPanel !== "" && Services.Panels.isOpen(Services.Panels.openPanel, root.modelData)
-      readonly property int panelShift: Core.Style.panelWidth + Math.max(Core.Style.spaceS, Core.Style.elevationRoom(2)) - 2 * Core.Style.spaceS + Core.Style.spaceM - margin - shadowRoom
+      readonly property int panelShift: shiftFor(Services.Panels.openPanelWidth)
 
-      implicitWidth: notifWidth + (shadowRoom - Core.Style.spaceXS) * 2 + panelShift
+      function shiftFor(panelWidth) {
+        return panelWidth + Math.max(Core.Style.spaceS, Core.Style.elevationRoom(2)) - 2 * Core.Style.spaceS + Core.Style.spaceM - margin - shadowRoom;
+      }
+
+      implicitWidth: notifWidth + (shadowRoom - Core.Style.spaceXS) * 2 + shiftFor(Core.Style.panelWidthWide)
 
       Components.AnimatedColumn {
         id: notificationStack
