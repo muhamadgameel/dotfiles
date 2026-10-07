@@ -24,6 +24,9 @@ import "../core" as Core
 * file - a fresh install, the shell not running - changes nothing. A switch
 * also recolours Hyprland's borders straight away rather than waiting for its
 * next start, through a partial hl.config that leaves every other option alone.
+*
+* GTK apps, browsers and other toolkits only need to know dark or light. That
+* goes into GTK's own settings, which they read live.
 */
 Singleton {
   id: root
@@ -114,6 +117,14 @@ match=${_hex(Core.Theme.accentAlt, 1)}
 border=${_hex(Core.Theme.overlayLight, 1)}
 `
 
+  // Dark or light for everything outside the shell: GTK 4 and browsers read the
+  // colour scheme, GTK 3 goes by the theme's name, and Papirus has a set for each.
+  readonly property var _gtk: Core.Theme.isDark ? ["prefer-dark", "Adwaita-dark", "Papirus-Dark"] : ["prefer-light", "Adwaita", "Papirus-Light"]
+
+  function _syncGtk() {
+    _applyGtk.running = true;
+  }
+
   // The state directory does not exist on a first run. Settings creates it and
   // says when; until then there is nowhere to write.
   function sync() {
@@ -145,6 +156,7 @@ border=${_hex(Core.Theme.overlayLight, 1)}
   on_HyprlandTextChanged: Qt.callLater(root.sync)
   on_AlacrittyTextChanged: Qt.callLater(root.sync)
   on_FuzzelTextChanged: Qt.callLater(root.sync)
+  on_GtkChanged: Qt.callLater(root._syncGtk)
 
   Connections {
     target: Config.Settings
@@ -180,6 +192,21 @@ border=${_hex(Core.Theme.overlayLight, 1)}
     path: root.fuzzelPath
     blockLoading: true
     printErrors: false
+  }
+
+  // Runs at every start too: setting a key to the value it has changes nothing.
+  Process {
+    id: _applyGtk
+    running: true
+    command: ["sh", "-c", "s=org.gnome.desktop.interface; gsettings set $s color-scheme \"$1\" && gsettings set $s gtk-theme \"$2\" && gsettings set $s icon-theme \"$3\"", "sh"].concat(root._gtk)
+
+    stderr: StdioCollector {
+      onStreamFinished: {
+        const msg = text.trim();
+        if (msg)
+          Core.Logger.w("ThemeSync", `gsettings: ${msg}`);
+      }
+    }
   }
 
   Process {
