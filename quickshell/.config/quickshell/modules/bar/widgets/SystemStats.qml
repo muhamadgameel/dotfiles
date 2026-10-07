@@ -23,16 +23,7 @@ Components.Button {
   // === Icon ===
   icon: Services.SystemStats.healthIcon
 
-  iconColor: {
-    switch (Services.SystemStats.healthStatus) {
-    case "critical":
-      return Core.Theme.error;
-    case "warning":
-      return Core.Theme.warning;
-    default:
-      return Core.Theme.text;
-    }
-  }
+  iconColor: Core.Theme.statusColor(Services.SystemStats.healthStatus, Core.Theme.text)
 
   // === Primary Metric (CPU) ===
   text: Math.round(Services.SystemStats.cpuUsage) + "%"
@@ -44,18 +35,17 @@ Components.Button {
     let lines = [];
 
     // Header
-    lines.push("󰓅  System Monitor");
+    lines.push(Core.Icons.get("gauge") + "  System Monitor");
     lines.push("─────────────────");
 
     // CPU
-    const cpuIcon = stats.cpuUsage > 70 ? "󰈸" : "";
+    const cpuIcon = stats.cpuUsageStatus !== "normal" ? Core.Icons.get("fire") : "";
     lines.push(cpuIcon + " CPU: " + Math.round(stats.cpuUsage) + "%");
 
     // Memory
-    const memIcon = "";
     const memUsed = Core.Utils.formatBytes(stats.memUsed, 1);
     const memTotal = Core.Utils.formatBytes(stats.memTotal, 1);
-    lines.push(memIcon + " RAM: " + memUsed + " / " + memTotal + " (" + stats.memPercent + "%)");
+    lines.push(" RAM: " + memUsed + " / " + memTotal + " (" + stats.memPercent + "%)");
 
     // Swap (only if in use)
     if (stats.hasSwap) {
@@ -68,27 +58,24 @@ Components.Button {
     if (stats.hasCpuTemp || stats.hasGpuTemp) {
       lines.push("");
       if (stats.hasCpuTemp) {
-        const tempIcon = stats.cpuTemp > 70 ? "󰔐" : "󰔏";
+        const tempIcon = Core.Icons.get(stats.cpuTempStatus !== "normal" ? "thermometer-high" : "thermometer");
         lines.push(tempIcon + "  CPU: " + Core.Utils.formatTemp(stats.cpuTemp));
       }
-      if (stats.hasGpuTemp) {
-        const gpuIcon = stats.gpuTemp > 70 ? "󰢮" : "󰢮";
-        lines.push(gpuIcon + "  GPU: " + Core.Utils.formatTemp(stats.gpuTemp));
-      }
+      if (stats.hasGpuTemp)
+        lines.push(Core.Icons.get("gpu") + "  GPU: " + Core.Utils.formatTemp(stats.gpuTemp));
     }
 
     // Network
     lines.push("");
-    lines.push("󰛳 Network:");
+    lines.push(Core.Icons.get("network") + " Network:");
     lines.push("↓ " + Core.Utils.formatSpeed(stats.netDownSpeed));
     lines.push("↑ " + Core.Utils.formatSpeed(stats.netUpSpeed));
 
     // Disk
     lines.push("");
-    const diskIcon = stats.diskPercent > 85 ? "󰋊" : "󰋊";
     const diskUsed = Core.Utils.formatBytes(stats.diskUsed, 1);
     const diskTotal = Core.Utils.formatBytes(stats.diskTotal, 1);
-    lines.push(diskIcon + "  Disk (/): " + diskUsed + " / " + diskTotal + " (" + stats.diskPercent + "%)");
+    lines.push(Core.Icons.get("disk") + "  Disk (/): " + diskUsed + " / " + diskTotal + " (" + stats.diskPercent + "%)");
 
     // Footer hint
     lines.push("");
