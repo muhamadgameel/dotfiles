@@ -95,6 +95,10 @@ when the Qt 6 tools are missing.
   fuzzel won't start while its file is missing, so `./setup.sh install` creates
   an empty one and the shell fills it in.
 
+GTK apps and browsers only follow dark or light. The shell sets GTK's colour
+scheme, theme and icon theme to match the active theme, at start and on a
+switch. GTK 3 apps take their dark look from the `gnome-themes-extra` package.
+
 ## Controlling it
 
 `qs ipc show` lists every target and function. A few examples:

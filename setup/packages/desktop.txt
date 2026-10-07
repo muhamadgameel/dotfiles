@@ -52,6 +52,7 @@ usbmuxd
 
 # look
 adwaita-cursors         # XCURSOR_THEME
+gnome-themes-extra      # Adwaita-dark, the dark theme for GTK 3 apps
 noto-fonts
 noto-fonts-cjk
 noto-fonts-emoji
