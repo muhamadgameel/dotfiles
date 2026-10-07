@@ -47,6 +47,8 @@ Plug "Aloxaf/fzf-tab"
 Plug "zsh-users/zsh-autosuggestions"
 Plug "zsh-users/zsh-history-substring-search"
 Plug "zdharma-continuum/fast-syntax-highlighting"
+# Its default for comments is bold black, which is invisible on a dark background.
+FAST_HIGHLIGHT_STYLES[comment]='fg=8'
 
 # History substring search. Bind both the normal and application-mode cursor
 # sequences so this works regardless of terminfo/smkx state.
