@@ -39,19 +39,20 @@ Components.Button {
     lines.push("─────────────────");
 
     // CPU
-    const cpuIcon = stats.cpuUsageStatus !== "normal" ? Core.Icons.get("fire") : "";
-    lines.push(cpuIcon + " CPU: " + Math.round(stats.cpuUsage) + "%");
+    const cpuIcon = Core.Icons.get(stats.cpuUsageStatus !== "normal" ? "fire" : "cpu");
+    lines.push(cpuIcon + "  CPU: " + Math.round(stats.cpuUsage) + "%");
 
     // Memory
+    const memIcon = Core.Icons.get("ram");
     const memUsed = Core.Utils.formatBytes(stats.memUsed, 1);
     const memTotal = Core.Utils.formatBytes(stats.memTotal, 1);
-    lines.push(" RAM: " + memUsed + " / " + memTotal + " (" + stats.memPercent + "%)");
+    lines.push(memIcon + "  RAM: " + memUsed + " / " + memTotal + " (" + stats.memPercent + "%)");
 
     // Swap (only if in use)
     if (stats.hasSwap) {
       const swapUsed = Core.Utils.formatBytes(stats.swapUsed, 1);
       const swapTotal = Core.Utils.formatBytes(stats.swapTotal, 1);
-      lines.push(" Swap: " + swapUsed + " / " + swapTotal + " (" + stats.swapPercent + "%)");
+      lines.push(memIcon + "  Swap: " + swapUsed + " / " + swapTotal + " (" + stats.swapPercent + "%)");
     }
 
     // Temperatures
