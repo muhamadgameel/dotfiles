@@ -116,7 +116,7 @@ Item {
 
   // Normal range marker (100%)
   Rectangle {
-    visible: root.maxValue > 1.0
+    visible: root.minValue === 0 && root.maxValue > 1.0
     anchors.verticalCenter: track.verticalCenter
     width: Core.Style.px(2)
     x: track.width * (1.0 / root.maxValue) - width / 2
