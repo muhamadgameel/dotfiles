@@ -110,8 +110,19 @@ Item {
 
   // === Computed Properties ===
   property int panelWidth: Core.Style.panelWidth
+  // The content's share of it, from tokens so it is known before layout has run.
+  readonly property int bodyWidth: root.panelWidth - Core.Style.spaceS * 2 - Core.Style.panelPadding * 2
   readonly property int topOffset: Core.Style.barHeight + Core.Style.spaceM
   readonly property bool hasHeader: headerTitle !== ""
+
+  // RestoreNone: a closing panel must not write over the one that just opened.
+  Binding {
+    target: Services.Panels
+    property: "openPanelWidth"
+    value: root.panelWidth
+    when: root.isOpen
+    restoreMode: Binding.RestoreNone
+  }
 
   // === Sizing ===
   property bool fillHeight: !root.scrollable
