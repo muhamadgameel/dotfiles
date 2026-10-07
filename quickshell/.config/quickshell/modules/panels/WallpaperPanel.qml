@@ -28,8 +28,7 @@ Components.SlidingPanel {
   onOpened: Services.Wallpaper.refresh()
 
   readonly property int columns: 3
-  readonly property int _bodyWidth: root.panelWidth - Core.Style.spaceS * 2 - Core.Style.panelPadding * 2
-  readonly property int _cellWidth: Math.floor((root._bodyWidth - Core.Style.spaceS * (root.columns - 1)) / root.columns)
+  readonly property int _cellWidth: Math.floor((root.bodyWidth - Core.Style.spaceS * (root.columns - 1)) / root.columns)
   // Match the screen, so the thumbnail shows the crop fit_mode = cover will make.
   readonly property real _aspect: root.screen && root.screen.height > 0 ? root.screen.width / root.screen.height : 1.6
   readonly property int _cellHeight: Math.round(root._cellWidth / root._aspect)
