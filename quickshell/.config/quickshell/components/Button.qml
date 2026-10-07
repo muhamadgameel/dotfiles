@@ -62,6 +62,8 @@ Rectangle {
   property string tooltipText: ""
   property string tooltipDirection: "auto"
 
+  onTooltipTextChanged: Services.Tooltip.refresh(root, root.tooltipText)
+
   // === Signals ===
   signal clicked(int button)
   signal wheel(var wheel)
