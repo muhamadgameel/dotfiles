@@ -92,6 +92,15 @@ Rectangle {
     border.width: Core.Style.focusRingWidth
   }
 
+  // Space and Enter on the focused toggle: flip it, once per press.
+  Keys.onPressed: event => {
+    if (event.key !== Qt.Key_Space && event.key !== Qt.Key_Return && event.key !== Qt.Key_Enter)
+      return;
+    event.accepted = true;
+    if (!event.isAutoRepeat)
+      root.toggled(!root.checked);
+  }
+
   MouseArea {
     id: mouse
 
