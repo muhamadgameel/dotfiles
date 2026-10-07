@@ -66,17 +66,37 @@ Singleton {
     return root._gameClass.test(window.appId ?? "");
   }
 
-  readonly property bool active: gamemodeActive || manual || fullscreenGame
-
-  // Why it is on, for display.
-  readonly property string reason: {
+  // What the two automatic signals say right now.
+  readonly property string _detected: {
     if (gamemodeActive)
       return "Game running";
     if (fullscreenGame)
       return "Fullscreen game";
-    if (manual)
-      return "On";
-    return "Off";
+    return "";
+  }
+
+  // _detected, kept this long after it clears: both signals flap while a game starts.
+  readonly property int exitGraceMs: 2000
+  property string _game: ""
+
+  readonly property bool active: manual || _game !== ""
+
+  // Why it is on, for display.
+  readonly property string reason: _game || (manual ? "On" : "Off")
+
+  on_DetectedChanged: {
+    if (_detected) {
+      gameGoneTimer.stop();
+      _game = _detected;
+    } else {
+      gameGoneTimer.restart();
+    }
+  }
+
+  Timer {
+    id: gameGoneTimer
+    interval: root.exitGraceMs
+    onTriggered: root._game = ""
   }
 
   // Proton titles are steam_app_<id>; gamescope nests anything. Keep in step
@@ -104,7 +124,7 @@ Singleton {
   property int _profileBefore: -1
 
   onActiveChanged: {
-    Core.Logger.i("GameMode", active ? `on (${reason})` : "off");
+    Core.Logger.i("GameMode", active ? `on (${_game || "manual"})` : "off");
 
     if (active) {
       if (!PowerProfiles.hasPerformanceProfile)
