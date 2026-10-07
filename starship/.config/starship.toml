@@ -5,7 +5,8 @@
 # statusline, where it costs a whole row.
 add_newline = false
 
-palette = 'tokyonight'
+# Colours are named, not given as values: they are the terminal's own 16, so
+# the prompt follows whatever theme the terminal has.
 
 format = """
 
@@ -38,19 +39,6 @@ $jobs\
 $status\
 $character"""
 
-# TokyoNight Night. Everything below refers to these by name, so retheming the
-# prompt is an edit to this table alone.
-[palettes.tokyonight]
-blue    = '#7aa2f7'
-purple  = '#bb9af7'
-cyan    = '#7dcfff'
-green   = '#9ece6a'
-yellow  = '#e0af68'
-red     = '#f7768e'
-orange  = '#ff9e64'
-fg      = '#c0caf5'
-comment = '#565f89'
-
 # username, hostname and localip are all SSH-gated, so they render as a group or
 # not at all -- which is why hostname carries no trailing space of its own.
 [username]
@@ -74,7 +62,7 @@ format = '[ ](bold blue)[$path]($style)[$read_only]($read_only_style) '
 repo_root_format = '[ ](bold blue)[$before_root_path]($before_repo_root_style)[$repo_root]($repo_root_style)[$path]($style)[$read_only]($read_only_style) '
 style = 'blue'
 repo_root_style = 'bold blue'
-before_repo_root_style = 'comment'
+before_repo_root_style = 'bright-black'
 read_only = ' '
 truncation_symbol = '…/'
 
@@ -83,7 +71,7 @@ format = '[ $branch(:$remote_branch)]($style) '
 style = 'purple'
 
 [git_commit]
-style = 'comment'
+style = 'bright-black'
 tag_symbol = '  '
 
 [git_state]
@@ -158,7 +146,7 @@ disabled = false
 
 [zig]
 format = '[ $version]($style) '
-style = 'orange'
+style = 'bright-yellow'
 
 [php]
 format = '[ $version]($style) '
@@ -170,7 +158,7 @@ style = 'red'
 
 [container]
 format = '[󰡨 $name]($style) '
-style = 'orange'
+style = 'bright-yellow'
 
 [cmd_duration]
 format = '[ $duration]($style) '
@@ -195,8 +183,8 @@ style = 'red'
 map_symbol = true
 # Shows which stage of a pipeline actually failed, not just the last one.
 pipestatus = true
-pipestatus_separator = '[|](comment)'
-pipestatus_segment_format = '[$status](comment)'
+pipestatus_separator = '[|](bright-black)'
+pipestatus_segment_format = '[$status](bright-black)'
 pipestatus_format = '\[$pipestatus\] => [$symbol $common_meaning$signal_name$maybe_int]($style) '
 
 # --- Claude Code statusline (starship >= 1.26) -----------------------------
