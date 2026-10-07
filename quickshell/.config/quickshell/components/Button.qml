@@ -204,6 +204,15 @@ Rectangle {
     border.width: Core.Style.focusRingWidth
   }
 
+  // Space and Enter on the focused button: a left click, once per press.
+  Keys.onPressed: event => {
+    if (event.key !== Qt.Key_Space && event.key !== Qt.Key_Return && event.key !== Qt.Key_Enter)
+      return;
+    event.accepted = true;
+    if (!event.isAutoRepeat)
+      root.clicked(Qt.LeftButton);
+  }
+
   // === Mouse Handling ===
   MouseArea {
     id: mouseArea
