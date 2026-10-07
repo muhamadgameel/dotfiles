@@ -33,6 +33,9 @@ Singleton {
   // The screen the open panel belongs to.
   property var targetScreen: null
 
+  // The open panel's width. SlidingPanel sets it.
+  property int openPanelWidth: Core.Style.panelWidth
+
   // Panel id whose window should still exist. Lags openPanel until the panel
   // reports that its close animation has finished (release()), so it is not
   // torn down mid-slide.
