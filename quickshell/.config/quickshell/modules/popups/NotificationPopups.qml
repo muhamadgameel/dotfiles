@@ -187,10 +187,12 @@ Variants {
               }
 
               acceptedButtons: Qt.LeftButton | Qt.RightButton
+              // "default" is the action the notification spec ties to a click on the body.
               onClicked: button => {
-                if (button === Qt.RightButton) {
+                if (button === Qt.RightButton)
                   slideAnimator.hide();
-                }
+                else
+                  Services.Notification.invokeAction(card.notificationId, "default");
               }
 
               onCloseClicked: {
