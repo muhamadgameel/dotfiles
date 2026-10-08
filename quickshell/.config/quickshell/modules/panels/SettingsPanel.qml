@@ -113,38 +113,14 @@ Components.SlidingPanel {
     }
   }
 
-  Components.Card {
-    Layout.fillWidth: true
-    implicitHeight: Core.Style.controlHeightM
-    radius: Core.Style.radiusM
-    hoverEnabled: false
-
-    RowLayout {
-      anchors.fill: parent
-      anchors.leftMargin: Core.Style.spaceM
-      anchors.rightMargin: Core.Style.spaceS
-      spacing: Core.Style.spaceS
-
-      Components.Text {
-        text: "Scale"
-      }
-
-      Repeater {
-        model: root.scales
-
-        delegate: Components.Button {
-          id: scaleButton
-
-          required property real modelData
-
-          Layout.fillWidth: true
-          variant: Math.abs(Config.Config.uiScale - scaleButton.modelData) < 0.01 ? "primary" : "secondary"
-          text: `${Math.round(scaleButton.modelData * 100)}%`
-          textSize: Core.Style.fontS
-          onClicked: Config.Config.setUiScale(scaleButton.modelData)
-        }
-      }
-    }
+  ChoiceRow {
+    label: "Scale"
+    choices: root.scales.map(scale => ({
+          value: scale,
+          text: `${Math.round(scale * 100)}%`
+        }))
+    current: Config.Config.uiScale
+    onChosen: value => Config.Config.setUiScale(value)
   }
 
   Components.FormRow {
@@ -243,10 +219,107 @@ Components.SlidingPanel {
 
   Components.FormRow {
     Layout.fillWidth: true
+    enabled: Services.NightLight.available
+    label: "Night light schedule"
+    valueText: `${Config.Config.nightLightStart} - ${Config.Config.nightLightEnd}`
+    hasToggle: true
+    toggleChecked: Config.Config.nightLightAuto
+    onToggled: on => Services.NightLight.setSchedule(on)
+  }
+
+  Components.FormRow {
+    Layout.fillWidth: true
     label: "Lower refresh on battery"
     valueText: `${Config.Config.batteryRefreshRate} Hz`
     hasToggle: true
     toggleChecked: Config.Config.lowRefreshOnBattery
     onToggled: on => Config.Config.setFlag("lowRefreshOnBattery", on)
+  }
+
+  // === System ===
+  Components.SectionHeader {
+    Layout.fillWidth: true
+    title: "System"
+    icon: "chip"
+  }
+
+  ChoiceRow {
+    label: "Week starts"
+    choices: [
+      {
+        value: 6,
+        text: "Sat"
+      },
+      {
+        value: 0,
+        text: "Sun"
+      },
+      {
+        value: 1,
+        text: "Mon"
+      }
+    ]
+    current: Config.Config.calendarWeekStart
+    onChosen: value => Config.Config.setCalendarWeekStart(value)
+  }
+
+  ChoiceRow {
+    label: "Network backend"
+    choices: [
+      {
+        value: "native",
+        text: "Native"
+      },
+      {
+        value: "nmcli",
+        text: "nmcli"
+      }
+    ]
+    current: Config.Config.networkBackend
+    onChosen: value => Config.Config.setNetworkBackend(value)
+  }
+
+  // A label and a row of buttons, the current choice filled in.
+  component ChoiceRow: Components.Card {
+    id: choiceRow
+
+    property string label: ""
+    // [{ value, text }]
+    property var choices: []
+    property var current
+
+    signal chosen(var value)
+
+    Layout.fillWidth: true
+    implicitHeight: Core.Style.controlHeightM
+    radius: Core.Style.radiusM
+    hoverEnabled: false
+
+    RowLayout {
+      anchors.fill: parent
+      anchors.leftMargin: Core.Style.spaceM
+      anchors.rightMargin: Core.Style.spaceS
+      spacing: Core.Style.spaceS
+
+      Components.Text {
+        text: choiceRow.label
+      }
+
+      Repeater {
+        model: choiceRow.choices
+
+        delegate: Components.Button {
+          id: choice
+
+          required property var modelData
+
+          Layout.fillWidth: true
+          variant: choiceRow.current === choice.modelData.value ? "primary" : "secondary"
+          text: choice.modelData.text
+          textSize: Core.Style.fontS
+          onClicked: choiceRow.chosen(choice.modelData.value)
+        }
+      }
+    }
   }
 }

@@ -79,7 +79,7 @@ Singleton {
   // for. Times are "HH:MM", and a start after the end runs over midnight.
   readonly property bool nightLight: Settings.get("nightLight", false)
   readonly property int nightLightTemperature: Settings.get("nightLightTemperature", 4000)
-  readonly property bool nightLightAuto: Settings.get("nightLightAuto", false)
+  readonly property bool nightLightAuto: Settings.get("nightLightAuto", true)
   readonly property string nightLightStart: Settings.get("nightLightStart", "20:00")
   readonly property string nightLightEnd: Settings.get("nightLightEnd", "06:30")
 
