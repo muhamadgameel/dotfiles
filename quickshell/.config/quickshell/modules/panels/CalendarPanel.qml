@@ -4,6 +4,7 @@ import QtQuick
 import QtQuick.Layouts
 
 import "../../components" as Components
+import "../../config" as Config
 import "../../core" as Core
 import "../../services" as Services
 
@@ -45,9 +46,8 @@ Components.SlidingPanel {
   readonly property int viewYear: viewMonth.getFullYear()
   readonly property int viewMonthIndex: viewMonth.getMonth()
 
-  // First column of the grid, as a JS weekday (0 = Sunday). 6 is Saturday, the
-  // convention here; 1 would be a Monday-first calendar.
-  readonly property int weekStart: 6
+  // First column of the grid, as a JS weekday (0 = Sunday).
+  readonly property int weekStart: Config.Config.calendarWeekStart
 
   readonly property var _weekdayNames: ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"]
 
