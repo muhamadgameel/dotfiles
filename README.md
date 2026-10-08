@@ -129,7 +129,8 @@ network, not the Wi-Fi card.
 Lenovo's conservation mode: the battery stops charging before full, which
 slows its wear on a laptop that mostly stays plugged in. Before a trip, charge
 to full by switching it off, and back on afterwards (`./setup.sh` reports it as
-missing until then):
+missing until then). The Battery Protect tile in quick settings does that; from
+a terminal:
 
 ```bash
 busctl call org.freedesktop.UPower /org/freedesktop/UPower/devices/battery_BAT0 \

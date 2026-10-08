@@ -2,6 +2,7 @@ pragma ComponentBehavior: Bound
 
 import QtQuick
 import QtQuick.Layouts
+import Quickshell.Io
 import Quickshell.Services.UPower
 
 import "../../components" as Components
@@ -32,6 +33,42 @@ Components.SlidingPanel {
 
   function _openPanel(id) {
     Services.Panels.open(id, root.screen);
+  }
+
+  // === Battery charge limit ===
+  // UPower's charge limit, Lenovo's conservation mode on this laptop. Through
+  // busctl, as in setup.sh: Quickshell's UPower module does not expose it.
+  readonly property var _chargeLimitBus: ["org.freedesktop.UPower", "/org/freedesktop/UPower/devices/battery_BAT0", "org.freedesktop.UPower.Device"]
+  property bool _chargeLimitSupported: false
+  property bool _chargeLimit: false
+
+  Process {
+    id: chargeLimitRead
+
+    running: true
+    command: ["busctl", "get-property"].concat(root._chargeLimitBus, ["ChargeThresholdSupported", "ChargeThresholdEnabled"])
+
+    stdout: StdioCollector {
+      onStreamFinished: {
+        const values = text.trim().split("\n");
+        root._chargeLimitSupported = values[0] === "b true";
+        root._chargeLimit = values[1] === "b true";
+      }
+    }
+  }
+
+  Process {
+    id: chargeLimitWrite
+
+    onExited: chargeLimitRead.running = true
+
+    stderr: StdioCollector {
+      onStreamFinished: {
+        const msg = text.trim();
+        if (msg)
+          Core.Logger.w("QuickSettings", `charge limit: ${msg}`);
+      }
+    }
   }
 
   // === Toggles ===
@@ -134,6 +171,23 @@ Components.SlidingPanel {
       active: Services.GameMode.active
 
       onToggled: Services.GameMode.toggle()
+    }
+
+    Components.QuickToggle {
+      Layout.fillWidth: true
+      Layout.columnSpan: 2
+      visible: root._chargeLimitSupported
+
+      icon: "shield"
+      label: "Battery Protect"
+      subtitle: root._chargeLimit ? "Charging stops before full" : "Off - charges to full"
+      active: root._chargeLimit
+      busy: chargeLimitWrite.running
+
+      onToggled: {
+        chargeLimitWrite.command = ["busctl", "call"].concat(root._chargeLimitBus, ["EnableChargeThreshold", "b", String(!root._chargeLimit)]);
+        chargeLimitWrite.running = true;
+      }
     }
   }
 
