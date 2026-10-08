@@ -64,6 +64,9 @@ Rectangle {
 
   onTooltipTextChanged: Services.Tooltip.refresh(root, root.tooltipText)
 
+  // === Behavior Properties ===
+  property int acceptedButtons: Qt.LeftButton | Qt.RightButton | Qt.MiddleButton
+
   // === Signals ===
   signal clicked(int button)
   signal wheel(var wheel)
@@ -220,7 +223,7 @@ Rectangle {
     enabled: root.enabled
     hoverEnabled: true
     cursorShape: root.enabled ? Qt.PointingHandCursor : Qt.ArrowCursor
-    acceptedButtons: Qt.LeftButton | Qt.RightButton | Qt.MiddleButton
+    acceptedButtons: root.acceptedButtons
 
     onClicked: mouse => root.clicked(mouse.button)
     onWheel: wheel => root.wheel(wheel)
