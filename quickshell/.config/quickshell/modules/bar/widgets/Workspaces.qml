@@ -25,6 +25,7 @@ import "../../ipc" as Ipc
 *
 * - Click:        switch to the workspace
 * - Middle click: move the focused window there
+* - Wheel:        the next workspace in the row, or the previous
 */
 Item {
   id: root
@@ -95,14 +96,17 @@ Item {
   onVisibleIdsChanged: root._syncSlots()
   Component.onCompleted: root._syncSlots()
 
-  // Dispatch dialect (Lua vs classic string) is handled in Ipc.Targets, so the
-  // bar and `qs ipc call workspace focus` go through exactly one code path.
-  function _focusWorkspace(id) {
-    Ipc.Targets.focusWorkspace(id);
-  }
-
-  function _moveToWorkspace(id) {
-    Ipc.Targets.moveToWorkspace(id);
+  WheelHandler {
+    // Qt's Wayland platform reports every wheel event as a touchpad's.
+    acceptedDevices: PointerDevice.AllDevices
+    onWheel: event => {
+      // Wheel notches only: a swipe is dozens of events, each with a scroll phase.
+      if (event.phase !== Qt.NoScrollPhase || event.angleDelta.y === 0)
+        return;
+      const next = root.visibleIds[root.visibleIds.indexOf(root.focusedId) - Math.sign(event.angleDelta.y)];
+      if (next !== undefined)
+        Ipc.Targets.focusWorkspace(next);
+    }
   }
 
   // The row's width changes when a slot appears or goes; without this every
@@ -193,9 +197,9 @@ Item {
         acceptedButtons: Qt.LeftButton | Qt.MiddleButton
         onClicked: button => {
           if (button === Qt.MiddleButton)
-            root._moveToWorkspace(slot.workspaceId);
+            Ipc.Targets.moveToWorkspace(slot.workspaceId);
           else
-            root._focusWorkspace(slot.workspaceId);
+            Ipc.Targets.focusWorkspace(slot.workspaceId);
         }
 
         Components.Text {
