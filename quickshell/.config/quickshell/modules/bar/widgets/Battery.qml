@@ -16,6 +16,8 @@ import "../../../core" as Core
 Components.Button {
   id: root
 
+  signal panelRequested
+
   // === Configuration ===
   readonly property real lowThreshold: 30
   readonly property real criticalThreshold: 15
@@ -100,8 +102,14 @@ Components.Button {
       lines.push(Core.Icons.get("heart") + "   " + "Health: " + Math.round(battery.healthPercentage) + "%");
     }
 
+    lines.push("");
+    lines.push("Click for details");
+
     return lines.join("\n");
   }
+
+  // === Click to open panel ===
+  onClicked: root.panelRequested()
 
   // === Visual Indicators ===
 
