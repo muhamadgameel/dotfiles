@@ -48,6 +48,7 @@ Rectangle {
   // === Behavior Properties ===
   property bool interactive: false
   property bool hoverEnabled: true
+  property int acceptedButtons: Qt.LeftButton | Qt.RightButton | Qt.MiddleButton
 
   // === State (readonly) ===
   // From a HoverHandler rather than the MouseArea, which stops containing the
@@ -92,7 +93,7 @@ Rectangle {
     anchors.fill: parent
     hoverEnabled: root.hoverEnabled
     cursorShape: root.interactive ? Qt.PointingHandCursor : Qt.ArrowCursor
-    acceptedButtons: root.interactive ? (Qt.LeftButton | Qt.RightButton | Qt.MiddleButton) : Qt.NoButton
+    acceptedButtons: root.interactive ? root.acceptedButtons : Qt.NoButton
 
     onClicked: mouse => root.clicked(mouse.button)
     // Must stay: with a doubleClicked handler, MouseArea does not emit clicked
