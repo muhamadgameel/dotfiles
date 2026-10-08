@@ -25,6 +25,7 @@ Item {
     iconColor: Services.Notification.doNotDisturb ? Core.Theme.warning : Core.Theme.text
     tooltipText: Services.Notification.doNotDisturb ? (Services.GameMode.active && !Config.Config.doNotDisturb ? "Do Not Disturb (game mode)" : "Do Not Disturb") : "Notifications" + (root.unreadCount > 0 ? " (" + root.unreadCount + " unread)" : "")
 
+    acceptedButtons: Qt.LeftButton | Qt.RightButton
     onClicked: function (button) {
       if (button === Qt.RightButton) {
         Config.Config.toggleDoNotDisturb();

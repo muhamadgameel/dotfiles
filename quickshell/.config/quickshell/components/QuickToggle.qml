@@ -55,6 +55,7 @@ Components.Card {
   hoverColor: root.active ? Core.Theme.accentHover : Core.Theme.surface
   activeColor: root.active ? Core.Theme.accentPressed : Core.Theme.surfaceActive
 
+  acceptedButtons: Qt.LeftButton | Qt.RightButton
   onClicked: button => {
     if (button === Qt.RightButton && root.hasDetails)
       root.detailsRequested();

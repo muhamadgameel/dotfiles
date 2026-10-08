@@ -190,6 +190,7 @@ Item {
 
         hoverColor: isFocused ? Core.Theme.accent : (isUrgent ? Core.Theme.error : Core.Theme.surfaceHover)
 
+        acceptedButtons: Qt.LeftButton | Qt.MiddleButton
         onClicked: button => {
           if (button === Qt.MiddleButton)
             root._moveToWorkspace(slot.workspaceId);

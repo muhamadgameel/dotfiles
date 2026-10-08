@@ -49,6 +49,7 @@ Components.Button {
     Services.Audio.setMicVolume(Services.Audio.micVolume + delta);
   }
 
+  acceptedButtons: Qt.LeftButton | Qt.MiddleButton
   onClicked: function (button) {
     if (button === Qt.LeftButton) {
       root.panelRequested();

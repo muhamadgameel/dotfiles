@@ -65,7 +65,8 @@ Rectangle {
   onTooltipTextChanged: Services.Tooltip.refresh(root, root.tooltipText)
 
   // === Behavior Properties ===
-  property int acceptedButtons: Qt.LeftButton | Qt.RightButton | Qt.MiddleButton
+  // Left only unless a button says otherwise: most handlers never look at the button.
+  property int acceptedButtons: Qt.LeftButton
 
   // === Signals ===
   signal clicked(int button)

@@ -38,6 +38,7 @@ Components.Button {
     return lines.join("\n");
   }
 
+  acceptedButtons: Qt.LeftButton | Qt.RightButton | Qt.MiddleButton
   onClicked: function (button) {
     if (button === Qt.MiddleButton)
       Services.Media.playPause();

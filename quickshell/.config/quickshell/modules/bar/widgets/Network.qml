@@ -47,6 +47,7 @@ Components.Button {
   }
 
   // Click to toggle network panel
+  acceptedButtons: Qt.LeftButton | Qt.RightButton | Qt.MiddleButton
   onClicked: function (button) {
     if (button === Qt.LeftButton) {
       root.panelRequested();

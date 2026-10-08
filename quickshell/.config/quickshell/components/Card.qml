@@ -48,7 +48,8 @@ Rectangle {
   // === Behavior Properties ===
   property bool interactive: false
   property bool hoverEnabled: true
-  property int acceptedButtons: Qt.LeftButton | Qt.RightButton | Qt.MiddleButton
+  // Left only unless a card says otherwise: most handlers never look at the button.
+  property int acceptedButtons: Qt.LeftButton
 
   // === State (readonly) ===
   // From a HoverHandler rather than the MouseArea, which stops containing the

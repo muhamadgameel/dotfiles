@@ -53,6 +53,7 @@ Components.Button {
   }
 
   // Click handlers
+  acceptedButtons: Qt.LeftButton | Qt.RightButton
   onClicked: function (button) {
     if (button === Qt.RightButton) {
       // Toggle between low (10%) and high (100%)

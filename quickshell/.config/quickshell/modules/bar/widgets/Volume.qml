@@ -52,6 +52,7 @@ Components.Button {
     Services.Audio.setVolume(Services.Audio.volume + delta);
   }
 
+  acceptedButtons: Qt.LeftButton | Qt.RightButton
   onClicked: function (button) {
     if (button === Qt.LeftButton) {
       root.panelRequested();

@@ -186,6 +186,7 @@ Variants {
                 }
               }
 
+              acceptedButtons: Qt.LeftButton | Qt.RightButton
               onClicked: button => {
                 if (button === Qt.RightButton) {
                   slideAnimator.hide();
