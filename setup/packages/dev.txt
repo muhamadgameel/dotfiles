@@ -34,6 +34,7 @@ npm
 python
 rustup
 uv                      # Python projects, venvs and versions
+vulkan-validation-layers # debug layers for Vulkan apps
 
 # language servers and formatters; nvim prefers these over mason's
 bash-language-server
