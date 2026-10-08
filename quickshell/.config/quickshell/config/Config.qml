@@ -135,10 +135,14 @@ Singleton {
   // Slot count for the fixed row above; ignored unless workspaceShowEmpty.
   readonly property int workspaceCount: Settings.get("workspaceCount", 5)
 
+  // === Calendar ===
+  // The day a week starts on, as JavaScript counts them: 0 is Sunday, 6 Saturday.
+  readonly property int calendarWeekStart: Settings.get("calendarWeekStart", 6)
+
   // === Network ===
-  // How the shell talks to NetworkManager: "nmcli", or "native" for the
-  // Quickshell.Networking preview. See services/Network.qml.
-  readonly property string networkBackend: Settings.get("networkBackend", "nmcli")
+  // How the shell talks to NetworkManager: "native" for Quickshell.Networking,
+  // or "nmcli". See services/Network.qml.
+  readonly property string networkBackend: Settings.get("networkBackend", "native")
 
   // === Setters ===
   // Assigning to the readonly properties above is not possible by design -
@@ -181,6 +185,10 @@ Singleton {
 
   function setNetworkBackend(name) {
     Settings.set("networkBackend", name);
+  }
+
+  function setCalendarWeekStart(day) {
+    Settings.set("calendarWeekStart", day);
   }
 
   function setWallpaper(path) {

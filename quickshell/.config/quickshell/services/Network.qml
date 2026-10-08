@@ -14,10 +14,10 @@ import "network" as Backends
 * UI derives from that state - icons, labels, sorting - lives here.
 *
 * The networkBackend setting picks the backend, and only that one is created:
-* - "nmcli" (default): NmcliBackend
-* - "native": NativeBackend, on Quickshell.Networking. A preview.
+* - "native" (default): NativeBackend, on Quickshell.Networking
+* - "nmcli": NmcliBackend
 *
-* Switch with `qs ipc call network backend native` (or `nmcli`).
+* Switch with `qs ipc call network backend nmcli` (or `native`).
 */
 Singleton {
   id: root
