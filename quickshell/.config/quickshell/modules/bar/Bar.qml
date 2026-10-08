@@ -147,6 +147,7 @@ Rectangle {
         id: battery
 
         visible: Config.Config.barShowBattery && battery.hasBattery
+        onPanelRequested: root.panelRequested("systemstats")
       }
     }
 
