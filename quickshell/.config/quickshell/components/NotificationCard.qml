@@ -166,19 +166,17 @@ Components.Card {
         variant: "danger"
         onClicked: root.closeClicked()
       }
-    }
-  }
 
-  // === Close Button ===
-  Components.Button {
-    id: closeButton
-    anchors.top: parent.top
-    anchors.topMargin: Core.Style.spaceM
-    anchors.right: parent.right
-    anchors.rightMargin: Core.Style.spaceM
-    visible: !root.compact
-    icon: "close"
-    variant: "danger"
-    onClicked: root.closeClicked()
+      // === Close Button ===
+      Components.Button {
+        id: closeButton
+        Layout.alignment: Qt.AlignTop
+        Layout.rightMargin: Core.Style.spaceXS
+        visible: !root.compact
+        icon: "close"
+        variant: "danger"
+        onClicked: root.closeClicked()
+      }
+    }
   }
 }
