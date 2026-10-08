@@ -251,8 +251,8 @@ Components.SlidingPanel {
             }
 
             Components.Text {
-              visible: deviceCard.modelData.description && deviceCard.modelData.description !== deviceCard.modelData.nickname
-              text: deviceCard.modelData.name || ""
+              visible: text !== "" && text !== Services.Audio.deviceName(deviceCard.modelData)
+              text: deviceCard.modelData.description || ""
               size: Core.Style.fontXS
               color: Core.Theme.textMuted
               Layout.fillWidth: true
