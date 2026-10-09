@@ -34,6 +34,7 @@ enables services.
 | `pipewire`, `wireplumber` | Audio drop-ins (see [Audio](#audio)) | |
 | `quickshell` | The bar, panels, OSD and notifications ([README](quickshell/README.md)) | |
 | `starship` | The prompt | yes |
+| `swappy` | swappy, saving edited screenshots next to the originals | |
 | `thunar` | Thunar's terminal action and its F4 shortcut | |
 | `uwsm` | The session environment | |
 | `zsh` | zsh and its plugins ([README](zsh/README.md)) | yes |
