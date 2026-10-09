@@ -252,6 +252,7 @@ Singleton {
 
   readonly property var _whitespace: /\s+/
   readonly property var _meminfoLine: /^(\w+):\s+(\d+)/
+  readonly property var _batteryLine: /^POWER_SUPPLY_(\w+)=(.*)$/
   readonly property var _ppidLine: /^PPid:\s+(\d+)/m
 
   // Interfaces excluded from the totals.
@@ -479,71 +480,35 @@ done'
   // ═══════════════════════════════════════════════════════════════════════════
 
   function _reloadBattery() {
-    if (root._batteryPath === "")
-      return;
-
-    _batteryChargeFile.reload();
-    _batteryEnergyFile.reload();
-    _batteryFullFile.reload();
-    _batteryDesignFile.reload();
-    _batteryPowerFile.reload();
-    _batteryCyclesFile.reload();
-    _batteryStatusFile.reload();
+    if (root._batteryPath !== "")
+      _batteryFile.reload();
   }
 
-  // Energy and power are microwatt-hours and microwatts.
-  function _microUnits(text) {
-    const value = parseInt(text.trim(), 10);
-    return isNaN(value) ? 0 : value / 1000000;
-  }
-
+  // Every figure in one read. Energy and power are microwatt-hours and microwatts.
   FileView {
-    id: _batteryChargeFile
-    path: root._batteryPath === "" ? "" : root._batteryPath + "capacity"
+    id: _batteryFile
+    path: root._batteryPath === "" ? "" : root._batteryPath + "uevent"
     printErrors: false
-    onLoaded: root.batteryCharge = parseInt(text().trim(), 10) || 0
-  }
 
-  FileView {
-    id: _batteryEnergyFile
-    path: root._batteryPath === "" ? "" : root._batteryPath + "energy_now"
-    printErrors: false
-    onLoaded: root.batteryEnergy = root._microUnits(text())
-  }
+    onLoaded: {
+      const values = {};
 
-  FileView {
-    id: _batteryFullFile
-    path: root._batteryPath === "" ? "" : root._batteryPath + "energy_full"
-    printErrors: false
-    onLoaded: root.batteryFull = root._microUnits(text())
-  }
+      for (const line of text().split("\n")) {
+        const match = line.match(root._batteryLine);
+        if (match)
+          values[match[1]] = match[2];
+      }
 
-  FileView {
-    id: _batteryDesignFile
-    path: root._batteryPath === "" ? "" : root._batteryPath + "energy_full_design"
-    printErrors: false
-    onLoaded: root.batteryDesign = root._microUnits(text())
-  }
+      const number = name => parseInt(values[name], 10) || 0;
 
-  FileView {
-    id: _batteryPowerFile
-    path: root._batteryPath === "" ? "" : root._batteryPath + "power_now"
-    printErrors: false
-    onLoaded: root.batteryPower = root._microUnits(text())
-  }
-
-  FileView {
-    id: _batteryCyclesFile
-    path: root._batteryPath === "" ? "" : root._batteryPath + "cycle_count"
-    printErrors: false
-    onLoaded: root.batteryCycles = parseInt(text().trim(), 10) || 0
-  }
-
-  FileView {
-    id: _batteryStatusFile
-    path: root._batteryPath === "" ? "" : root._batteryPath + "status"
-    printErrors: false
-    onLoaded: root.batteryStatus = text().trim()
+      root.batteryCharge = number("CAPACITY");
+      root.batteryEnergy = number("ENERGY_NOW") / 1000000;
+      root.batteryFull = number("ENERGY_FULL") / 1000000;
+      root.batteryDesign = number("ENERGY_FULL_DESIGN") / 1000000;
+      root.batteryPower = number("POWER_NOW") / 1000000;
+      root.batteryCycles = number("CYCLE_COUNT");
+      root.batteryStatus = values["STATUS"] ?? "";
+    }
   }
 
   // Runnable tasks averaged over 1, 5 and 15 minutes, and how long the machine
