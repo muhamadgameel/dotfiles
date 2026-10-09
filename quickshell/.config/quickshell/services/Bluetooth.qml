@@ -255,71 +255,40 @@ Singleton {
     if (published !== "")
       return published;
 
-    return root._deviceKind(device);
+    return root._kind(device)[0];
   }
 
-  // BlueZ leaves Icon empty for a device that never identified itself, which is
-  // exactly the case this is for - so "Unknown device" is the common answer.
-  function _deviceKind(device) {
+  // label: [icon, what BlueZ's Icon says, what the name says], tried in order.
+  // BlueZ leaves Icon empty for a device that never identified itself.
+  readonly property var _kinds: ({
+      Headphones: ["headphones", /headset|headphone/, /headphone|airpod|buds|earbuds/],
+      Speaker: ["speaker", /audio|speaker/, /speaker/],
+      Mouse: ["mouse", /mouse|pointing/, /mouse/],
+      Keyboard: ["keyboard", /keyboard/, /keyboard/],
+      Controller: ["gamepad", /gamepad|joystick/, /controller/],
+      Phone: ["phone", /phone/, /phone|iphone|android|samsung|pixel/],
+      Computer: ["laptop", /computer|laptop/, /macbook|laptop|pc/],
+      Watch: ["clock", /watch/, /watch/],
+      Display: ["monitor", /display|video|tv/, /tv/],
+      Printer: ["bluetooth", /printer/, null],
+      "Input device": ["bluetooth", /input/, null]
+    })
+
+  function _kind(device) {
     const icon = (device?.icon ?? "").toLowerCase();
+    const name = (device?.name ?? "").toLowerCase();
 
-    if (/headset|headphone/.test(icon))
-      return "Headphones";
-    if (/audio|speaker/.test(icon))
-      return "Speaker";
-    if (icon.includes("mouse"))
-      return "Mouse";
-    if (icon.includes("keyboard"))
-      return "Keyboard";
-    if (/gamepad|joystick/.test(icon))
-      return "Controller";
-    if (icon.includes("phone"))
-      return "Phone";
-    if (/computer|laptop/.test(icon))
-      return "Computer";
-    if (icon.includes("watch"))
-      return "Watch";
-    if (/display|video|tv/.test(icon))
-      return "Display";
-    if (icon.includes("printer"))
-      return "Printer";
-    if (icon.includes("input"))
-      return "Input device";
+    for (const label in root._kinds) {
+      const [glyph, byIcon, byName] = root._kinds[label];
+      if (byIcon.test(icon) || byName?.test(name))
+        return [label, glyph];
+    }
 
-    return "Unknown device";
+    return ["Unknown device", "bluetooth"];
   }
 
   function getDeviceIcon(device) {
-    if (!device)
-      return "bluetooth";
-
-    const name = (device.name || "").toLowerCase();
-    const icon = (device.icon || "").toLowerCase();
-
-    // Audio
-    if (/headset|audio|headphone|speaker/.test(icon) || /headphone|airpod|buds|earbuds|speaker/.test(name)) {
-      return icon.includes("speaker") || name.includes("speaker") ? "speaker" : "headphones";
-    }
-
-    // Input
-    if (/mouse|pointing/.test(icon) || name.includes("mouse"))
-      return "mouse";
-    if (icon.includes("keyboard") || name.includes("keyboard"))
-      return "keyboard";
-    if (/gamepad|joystick/.test(icon) || name.includes("controller"))
-      return "gamepad";
-
-    // Devices
-    if (/phone/.test(icon) || /phone|iphone|android|samsung|pixel/.test(name))
-      return "phone";
-    if (/computer|laptop/.test(icon) || /macbook|laptop|pc/.test(name))
-      return "laptop";
-    if (icon.includes("watch") || name.includes("watch"))
-      return "clock";
-    if (/display|video/.test(icon) || name.includes("tv"))
-      return "monitor";
-
-    return "bluetooth";
+    return root._kind(device)[1];
   }
 
   function isDeviceBusy(device) {
