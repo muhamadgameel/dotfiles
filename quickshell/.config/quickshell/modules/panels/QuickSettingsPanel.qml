@@ -2,7 +2,6 @@ pragma ComponentBehavior: Bound
 
 import QtQuick
 import QtQuick.Layouts
-import Quickshell.Io
 import Quickshell.Services.UPower
 
 import "../../components" as Components
@@ -42,33 +41,25 @@ Components.SlidingPanel {
   property bool _chargeLimitSupported: false
   property bool _chargeLimit: false
 
-  Process {
+  Core.Command {
     id: chargeLimitRead
 
     running: true
     command: ["busctl", "get-property"].concat(root._chargeLimitBus, ["ChargeThresholdSupported", "ChargeThresholdEnabled"])
 
-    stdout: StdioCollector {
-      onStreamFinished: {
-        const values = text.trim().split("\n");
-        root._chargeLimitSupported = values[0] === "b true";
-        root._chargeLimit = values[1] === "b true";
-      }
+    onDone: (code, out) => {
+      const values = out.trim().split("\n");
+      root._chargeLimitSupported = values[0] === "b true";
+      root._chargeLimit = values[1] === "b true";
     }
   }
 
-  Process {
+  Core.Command {
     id: chargeLimitWrite
+    tag: "QuickSettings"
+    label: "charge limit"
 
-    onExited: chargeLimitRead.running = true
-
-    stderr: StdioCollector {
-      onStreamFinished: {
-        const msg = text.trim();
-        if (msg)
-          Core.Logger.w("QuickSettings", `charge limit: ${msg}`);
-      }
-    }
+    onDone: chargeLimitRead.running = true
   }
 
   // === Toggles ===

@@ -2,7 +2,6 @@ pragma Singleton
 
 import QtQuick
 import Quickshell
-import Quickshell.Io
 
 import "../config" as Config
 import "../core" as Core
@@ -156,11 +155,11 @@ Singleton {
     }
   }
 
-  Process {
+  Core.Command {
     id: hyprctl
 
     // 3 is hyprctl failing to reach the daemon's socket.
-    onExited: code => {
+    onDone: code => {
       const reachable = code !== 3;
       if (reachable !== root.available) {
         root.available = reachable;

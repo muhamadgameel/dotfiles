@@ -2,7 +2,6 @@ pragma Singleton
 
 import QtQuick
 import Quickshell
-import Quickshell.Io
 
 import "../core" as Core
 import "../services" as Services
@@ -172,35 +171,26 @@ Singleton {
     }
   }
 
-  Process {
+  Core.Command {
     id: _proc
 
     property string mode: ""
     running: false
 
-    stdout: StdioCollector {
-      onStreamFinished: {
-        const out = text.trim();
-        if (out === "" || out === "CLIPBOARD")
-          return;
-        root.lastPath = out;
-        Core.Logger.i("Screenshot", `Saved ${out}`);
+    onDone: (code, out, err) => {
+      const path = out.trim();
+      if (path !== "" && path !== "CLIPBOARD") {
+        root.lastPath = path;
+        Core.Logger.i("Screenshot", `Saved ${path}`);
       }
-    }
 
-    stderr: StdioCollector {
-      onStreamFinished: {
-        const err = text.trim();
-        // A cancelled selection now exits 0 from the script itself, so anything
-        // reaching here is a real problem. The explicit check stays for the
-        // cancellation paths that still write to stderr.
-        if (err === "" || err.includes("selection cancelled"))
-          return;
-        Core.Logger.w("Screenshot", err);
-      }
-    }
+      // A cancelled selection now exits 0 from the script itself, so anything
+      // reaching here is a real problem. The explicit check stays for the
+      // cancellation paths that still write to stderr.
+      const problem = err.trim();
+      if (problem !== "" && !problem.includes("selection cancelled"))
+        Core.Logger.w("Screenshot", problem);
 
-    onExited: {
       watchdog.stop();
       root.capturing = false;
     }
@@ -222,7 +212,7 @@ Singleton {
     _existsProc.running = true;
   }
 
-  Process {
+  Core.Command {
     id: _existsProc
 
     // The path this check was started for. A capture can finish while the check
@@ -231,7 +221,7 @@ Singleton {
 
     running: false
 
-    onExited: code => {
+    onDone: code => {
       if (code === 0 || root.lastPath !== _existsProc.candidate)
         return;
 

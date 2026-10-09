@@ -2,7 +2,6 @@ pragma Singleton
 
 import QtQuick
 import Quickshell
-import Quickshell.Io
 
 import "../core" as Core
 
@@ -44,17 +43,11 @@ Singleton {
     property bool inhibited: false
   }
 
-  Process {
+  Core.Command {
+    tag: "Idle"
+    label: "systemd-inhibit"
     running: root.inhibited
     command: ["sh", "-c", "exec systemd-inhibit --what=idle --who=quickshell --why='Stay Awake is on' --mode=block tail --pid=\"$PPID\" -f /dev/null"]
-
-    stderr: StdioCollector {
-      onStreamFinished: {
-        const msg = text.trim();
-        if (msg)
-          Core.Logger.w("Idle", `systemd-inhibit: ${msg}`);
-      }
-    }
   }
 
   Component.onCompleted: Core.Logger.d("Idle", "Service started")

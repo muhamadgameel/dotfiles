@@ -153,9 +153,9 @@ Singleton {
   Component.onCompleted: root.values = _parse(file.text())
 
   // FileView will not create the directory, and it does not exist on first run.
-  Process {
+  Core.Command {
     running: true
     command: ["mkdir", "-p", root.directory]
-    onExited: root.directoryReady = true
+    onDone: root.directoryReady = true
   }
 }

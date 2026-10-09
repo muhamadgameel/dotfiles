@@ -1,5 +1,4 @@
 import QtQuick
-import Quickshell.Io
 
 import "../../../components" as Components
 import "../../../core" as Core
@@ -18,10 +17,10 @@ Components.Button {
   tooltipText: "Applications"
 
   // Closes a launcher that is open, wherever it was started; otherwise becomes it.
-  Process {
+  Core.Command {
     id: fuzzelProcess
     command: ["sh", "-c", "pkill -x fuzzel || exec fuzzel"]
-    onExited: (exitCode, exitStatus) => {
+    onDone: exitCode => {
       Core.Logger.d("Launcher", `Fuzzel exited with code ${exitCode}`);
     }
   }

@@ -2,7 +2,6 @@ pragma Singleton
 
 import QtQuick
 import Quickshell
-import Quickshell.Io
 
 import "../config" as Config
 import "../core" as Core
@@ -165,11 +164,11 @@ Singleton {
     }
   }
 
-  Process {
+  Core.Command {
     id: _restart
 
     command: ["systemctl", "--user", "restart", "hyprpaper"]
-    onExited: _settle.restart()
+    onDone: _settle.restart()
   }
 
   // hyprpaper binds its socket a moment after the unit reports started.

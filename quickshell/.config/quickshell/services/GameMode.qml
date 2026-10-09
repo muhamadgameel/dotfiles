@@ -3,7 +3,6 @@ pragma Singleton
 import QtQuick
 import Quickshell
 import Quickshell.Hyprland
-import Quickshell.Io
 import Quickshell.Services.UPower
 
 import "../core" as Core
@@ -144,15 +143,13 @@ Singleton {
   // A shell restarted mid-game would otherwise stay off until the game quit.
   // Asks only when gamemoded is already running: a status query goes over
   // D-Bus, which would start the daemon just to hear "inactive".
-  Process {
+  Core.Command {
     running: true
     command: ["sh", "-c", "systemctl --user -q is-active gamemoded && gamemoded -s"]
 
-    stdout: StdioCollector {
-      onStreamFinished: {
-        if (text.includes("gamemode is active"))
-          root.gamemodeActive = true;
-      }
+    onDone: (code, out) => {
+      if (out.includes("gamemode is active"))
+        root.gamemodeActive = true;
     }
   }
 }

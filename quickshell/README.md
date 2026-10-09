@@ -10,7 +10,7 @@ Hyprland reaches it through global shortcuts, and scripts through `qs ipc`.
 |---|---|
 | `shell.qml` | The entry point: the bar (one window per screen, which owns the panels), the OSD, the notification popups, the shared tooltip, and the IPC and shortcut surfaces. |
 | `config/` | `Config.qml` declares every setting with its default inline; `Settings.qml` is the JSON file behind it. |
-| `core/` | Singletons that don't touch the system: the active theme and its palettes, design tokens (`Style`), icons, logging and helpers. |
+| `core/` | Singletons that don't touch the system: the active theme and its palettes, design tokens (`Style`), icons, logging and helpers. Also `Command`, which the services run one-shot programs through. |
 | `services/` | One singleton per system concern: audio, network, Bluetooth, brightness, display, media, notifications, night light, wallpaper, theme sync, game mode, idle, power, screenshots and system stats. |
 | `services/scripts/` | The shell and awk programs the system stats service runs. |
 | `components/` | Reusable controls: buttons, toggles, sliders, cards and the sliding panel frame. |
