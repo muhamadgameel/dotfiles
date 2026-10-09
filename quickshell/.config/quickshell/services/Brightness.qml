@@ -155,10 +155,7 @@ Singleton {
 
     Services.OSD.show({
       icon: getIcon(brightness),
-      value: brightness,
-      maxValue: 1.0,
-      iconColor: Core.Theme.text,
-      progressColor: Core.Theme.accent
+      value: brightness
     });
   }
 

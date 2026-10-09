@@ -169,7 +169,6 @@ Singleton {
     Services.OSD.show({
       icon: getMicIcon(value, isMuted),
       value: value,
-      maxValue: 1.0,
       iconColor: isMuted ? Core.Theme.error : Core.Theme.text,
       progressColor: isMuted ? Core.Theme.error : Core.Theme.accent,
       valueText: Math.round(value * 100) + "%"
