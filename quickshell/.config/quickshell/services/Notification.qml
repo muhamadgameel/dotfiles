@@ -30,7 +30,7 @@ Singleton {
   // The saved setting, or game mode holding popups back. Game mode never writes
   // the setting, so turning it off leaves your own choice exactly as it was.
   readonly property bool doNotDisturb: Config.Config.doNotDisturb || Services.GameMode.active
-  property int unreadCount: 0
+  property alias unreadCount: saved.unread
 
   // Active notifications with no room on screen. Derived, so the popup stack's
   // counter can never drift out of step with what is actually queued.
@@ -42,6 +42,24 @@ Singleton {
 
   // === Internal ===
   property var _active: ({})  // id -> {notification, watcher, meta}
+
+  // History and the unread count survive a hot reload. As JSON: a reload carries
+  // values over to the new engine, not objects. A restart starts empty.
+  PersistentProperties {
+    id: saved
+
+    reloadableId: "notifications"
+
+    property string history: "[]"
+    property int unread: 0
+
+    onReloaded: {
+      for (const row of JSON.parse(history))
+        root.historyList.append(Object.assign(row, {
+          timestamp: new Date(row.timestamp)
+        }));
+    }
+  }
 
   // === Notification Server ===
   NotificationServer {
@@ -153,12 +171,14 @@ Singleton {
   function removeFromHistory(id) {
     if (Core.Utils.removeFromModel(historyList, "id", id)) {
       unreadCount = Math.max(0, unreadCount - 1);
+      Qt.callLater(root._saveHistory);
     }
   }
 
   function clearHistory() {
     historyList.clear();
     unreadCount = 0;
+    Qt.callLater(root._saveHistory);
   }
 
   function markAllRead() {
@@ -296,6 +316,7 @@ Singleton {
     // popup left the notification center showing the first version.
     Core.Utils.updateModelItem(activeList, "id", id, content);
     Core.Utils.updateModelItem(historyList, "id", id, content);
+    Qt.callLater(root._saveHistory);
 
     // Update duration if urgency changed
     entry.meta.duration = _calculateDuration({
@@ -382,5 +403,13 @@ Singleton {
     while (historyList.count > maxHistory) {
       historyList.remove(historyList.count - 1);
     }
+    Qt.callLater(root._saveHistory);
+  }
+
+  function _saveHistory() {
+    const rows = [];
+    for (let i = 0; i < historyList.count; i++)
+      rows.push(historyList.get(i));
+    saved.history = JSON.stringify(rows);
   }
 }
