@@ -22,8 +22,8 @@ Components.SlidingPanel {
   headerTitle: "Screenshot"
   headerSubtitle: Services.Screenshot.capturing ? "Capturing…" : "~/Pictures/Screenshots"
 
-  // The last capture may have been moved or deleted since it was taken, so the
-  // Open/Copy buttons are re-validated each time the panel comes up.
+  // The last capture may have been moved or deleted since it was taken, so its
+  // buttons are re-validated each time the panel comes up.
   onOpened: Services.Screenshot.verifyLastPath()
 
   property bool toClipboard: false
@@ -192,6 +192,18 @@ Components.SlidingPanel {
         tooltipText: "Open in the default image viewer"
         onClicked: {
           Services.Screenshot.openLast();
+          root.close();
+        }
+      }
+
+      Components.Button {
+        variant: "secondary"
+        icon: "edit"
+        text: "Edit"
+        textSize: Core.Style.fontS
+        tooltipText: "Draw on it in swappy"
+        onClicked: {
+          Services.Screenshot.editLast();
           root.close();
         }
       }

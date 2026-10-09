@@ -250,6 +250,16 @@ Singleton {
   }
 
   /**
+  * Open the most recent capture in swappy, in its own unit: as a child of the
+  * shell it would be closed by a shell restart, drawing and all.
+  */
+  function editLast() {
+    if (lastPath === "")
+      return;
+    Quickshell.execDetached(["uwsm-app", "--", "swappy", "-f", lastPath]);
+  }
+
+  /**
   * Copy the most recent capture to the clipboard.
   */
   function copyLast() {
