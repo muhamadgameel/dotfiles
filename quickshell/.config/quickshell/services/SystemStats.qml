@@ -294,42 +294,40 @@ Singleton {
 
   // One shell pass resolves both the CPU and the GPU sensor path, replacing two
   // separate 16-iteration async walks over the same hwmon directories.
-  Process {
+  Core.Command {
     id: _sensorDetect
     running: true
     command: ["sh", Quickshell.shellPath("services/scripts/detect-sensors.sh")]
 
-    stdout: StdioCollector {
-      onStreamFinished: {
-        for (const line of text.split("\n")) {
-          const parts = line.trim().split(root._whitespace);
-          if (parts.length < 3)
-            continue;
+    onDone: (code, out) => {
+      for (const line of out.split("\n")) {
+        const parts = line.trim().split(root._whitespace);
+        if (parts.length < 3)
+          continue;
 
-          const kind = parts[0];
-          const type = parts[1];
-          const path = parts[2];
+        const kind = parts[0];
+        const type = parts[1];
+        const path = parts[2];
 
-          if (kind === "cpu" && root._cpuTempPath === "") {
-            root._cpuTempPath = path;
-            Core.Logger.i("SystemStats", `CPU sensor: ${type} at ${path}`);
-          } else if (kind === "gpu" && root._gpuTempPath === "") {
-            root._gpuType = type;
-            root._gpuTempPath = path;
-            Core.Logger.i("SystemStats", `GPU sensor: ${type} at ${path}`);
-          } else if (kind === "battery" && root._batteryPath === "") {
-            root._batteryPath = path;
-            Core.Logger.i("SystemStats", `Battery: ${path}`);
-          }
+        if (kind === "cpu" && root._cpuTempPath === "") {
+          root._cpuTempPath = path;
+          Core.Logger.i("SystemStats", `CPU sensor: ${type} at ${path}`);
+        } else if (kind === "gpu" && root._gpuTempPath === "") {
+          root._gpuType = type;
+          root._gpuTempPath = path;
+          Core.Logger.i("SystemStats", `GPU sensor: ${type} at ${path}`);
+        } else if (kind === "battery" && root._batteryPath === "") {
+          root._batteryPath = path;
+          Core.Logger.i("SystemStats", `Battery: ${path}`);
         }
-
-        if (root._cpuTempPath === "")
-          Core.Logger.w("SystemStats", "No supported CPU temperature sensor found");
-
-        // No hwmon GPU: probe NVIDIA once. If it answers, its slow timer starts.
-        if (root._gpuType === "")
-          _nvidiaProcess.running = true;
       }
+
+      if (root._cpuTempPath === "")
+        Core.Logger.w("SystemStats", "No supported CPU temperature sensor found");
+
+      // No hwmon GPU: probe NVIDIA once. If it answers, its slow timer starts.
+      if (root._gpuType === "")
+        _nvidiaProcess.running = true;
     }
   }
 
@@ -644,13 +642,11 @@ Singleton {
     onTriggered: _gpuProcessQuery.running = true
   }
 
-  Process {
+  Core.Command {
     id: _gpuProcessQuery
     command: ["nvidia-smi", "pmon", "-c", "1", "-s", "m"]
 
-    stdout: StdioCollector {
-      onStreamFinished: root._readGpuProcesses(text)
-    }
+    onDone: (code, out) => root._readGpuProcesses(out)
   }
 
   FileView {
@@ -979,36 +975,28 @@ Singleton {
     }
   }
 
-  Process {
+  Core.Command {
     id: _diskProcess
+    tag: "SystemStats"
+    label: "df"
     command: ["df", "-B1", "--output=size,used,target", "/"]
 
-    stdout: StdioCollector {
-      onStreamFinished: {
-        const lines = text.trim().split("\n");
-        if (lines.length < 2)
-          return;
+    onDone: (code, out) => {
+      const lines = out.trim().split("\n");
+      if (lines.length < 2)
+        return;
 
-        const parts = lines[1].trim().split(root._whitespace);
-        if (parts.length < 3)
-          return;
+      const parts = lines[1].trim().split(root._whitespace);
+      if (parts.length < 3)
+        return;
 
-        const total = parseInt(parts[0], 10) || 0;
-        const used = parseInt(parts[1], 10) || 0;
+      const total = parseInt(parts[0], 10) || 0;
+      const used = parseInt(parts[1], 10) || 0;
 
-        root.diskTotal = total;
-        root.diskUsed = used;
-        root.diskPercent = total > 0 ? Math.round((used / total) * 100) : 0;
-        root.diskMount = parts[2] || "/";
-      }
-    }
-
-    stderr: StdioCollector {
-      onStreamFinished: {
-        const msg = text.trim();
-        if (msg)
-          Core.Logger.w("SystemStats", `df: ${msg}`);
-      }
+      root.diskTotal = total;
+      root.diskUsed = used;
+      root.diskPercent = total > 0 ? Math.round((used / total) * 100) : 0;
+      root.diskMount = parts[2] || "/";
     }
   }
 
@@ -1065,16 +1053,10 @@ Singleton {
     _killProcess.running = true;
   }
 
-  Process {
+  Core.Command {
     id: _killProcess
-
-    stderr: StdioCollector {
-      onStreamFinished: {
-        const msg = text.trim();
-        if (msg)
-          Core.Logger.w("SystemStats", `kill: ${msg}`);
-      }
-    }
+    tag: "SystemStats"
+    label: "kill"
   }
 
   // ═══════════════════════════════════════════════════════════════════════════

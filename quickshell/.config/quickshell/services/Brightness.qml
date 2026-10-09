@@ -187,8 +187,9 @@ Singleton {
   // === Processes ===
 
   // Set brightness via brightnessctl. `command` is set by _applyBrightness().
-  Process {
+  Core.Command {
     id: _setProc
+    tag: "Brightness"
     running: false
 
     onRunningChanged: {
@@ -204,54 +205,44 @@ Singleton {
         brightnessWatcher.reload();
       }
     }
-
-    stderr: StdioCollector {
-      onStreamFinished: {
-        const msg = text.trim();
-        if (msg)
-          Core.Logger.w("Brightness", msg);
-      }
-    }
   }
 
   // Initialize: resolve the device and its range.
   // -c backlight restricts the search to display backlights, so a keyboard LED
   // is never picked up as "the" brightness device.
-  Process {
+  Core.Command {
     id: _initProc
     running: true
     command: ["brightnessctl", "-c", "backlight", "-m"]
 
-    stdout: StdioCollector {
-      onStreamFinished: {
-        // brightnessctl -m output: device,class,current,percentage,max
-        // Example: intel_backlight,backlight,15000,100%,15000
-        const line = text.trim().split("\n")[0] ?? "";
-        if (line === "") {
-          root.ready = false;
-          Core.Logger.w("Brightness", "No backlight device found");
-          return;
-        }
-
-        const parts = line.split(",");
-        if (parts.length < 5) {
-          Core.Logger.w("Brightness", `Unexpected brightnessctl output: ${line}`);
-          return;
-        }
-
-        const current = parseInt(parts[2], 10);
-        const max = parseInt(parts[4], 10);
-        if (isNaN(current) || isNaN(max) || max <= 0) {
-          Core.Logger.w("Brightness", `Unusable brightness range: ${line}`);
-          return;
-        }
-
-        root.device = parts[0];
-        root.maxBrightness = max;
-        root.brightness = current / max;
-        root.ready = true;
-        Core.Logger.i("Brightness", `Device '${root.device}' at ${Math.round(root.brightness * 100)}%`);
+    onDone: (code, out) => {
+      // brightnessctl -m output: device,class,current,percentage,max
+      // Example: intel_backlight,backlight,15000,100%,15000
+      const line = out.trim().split("\n")[0] ?? "";
+      if (line === "") {
+        root.ready = false;
+        Core.Logger.w("Brightness", "No backlight device found");
+        return;
       }
+
+      const parts = line.split(",");
+      if (parts.length < 5) {
+        Core.Logger.w("Brightness", `Unexpected brightnessctl output: ${line}`);
+        return;
+      }
+
+      const current = parseInt(parts[2], 10);
+      const max = parseInt(parts[4], 10);
+      if (isNaN(current) || isNaN(max) || max <= 0) {
+        Core.Logger.w("Brightness", `Unusable brightness range: ${line}`);
+        return;
+      }
+
+      root.device = parts[0];
+      root.maxBrightness = max;
+      root.brightness = current / max;
+      root.ready = true;
+      Core.Logger.i("Brightness", `Device '${root.device}' at ${Math.round(root.brightness * 100)}%`);
     }
   }
 

@@ -1,5 +1,6 @@
 module core
 
+Command 1.0 Command.qml
 singleton Enums 1.0 Enums.qml
 singleton Icons 1.0 Icons.qml
 singleton Logger 1.0 Logger.qml

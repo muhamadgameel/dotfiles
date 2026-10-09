@@ -195,29 +195,17 @@ border=${_hex(Core.Theme.overlayLight, 1)}
   }
 
   // Runs at every start too: setting a key to the value it has changes nothing.
-  Process {
+  Core.Command {
     id: _applyGtk
+    tag: "ThemeSync"
+    label: "gsettings"
     running: true
     command: ["sh", "-c", "s=org.gnome.desktop.interface; gsettings set $s color-scheme \"$1\" && gsettings set $s gtk-theme \"$2\" && gsettings set $s icon-theme \"$3\"", "sh"].concat(root._gtk)
-
-    stderr: StdioCollector {
-      onStreamFinished: {
-        const msg = text.trim();
-        if (msg)
-          Core.Logger.w("ThemeSync", `gsettings: ${msg}`);
-      }
-    }
   }
 
-  Process {
+  Core.Command {
     id: _applyBorders
-
-    stderr: StdioCollector {
-      onStreamFinished: {
-        const msg = text.trim();
-        if (msg)
-          Core.Logger.w("ThemeSync", `hyprctl: ${msg}`);
-      }
-    }
+    tag: "ThemeSync"
+    label: "hyprctl"
   }
 }

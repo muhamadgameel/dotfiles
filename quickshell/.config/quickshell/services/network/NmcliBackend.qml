@@ -418,18 +418,14 @@ Scope {
   // Wi-Fi radio state. Read at startup, after every connection event and after
   // each toggle - `nmcli monitor` prints nothing when the radio changes, so
   // this is how an rfkill key or a terminal `nmcli radio wifi off` is noticed.
-  Process {
+  Core.Command {
     id: _wifiStateProcess
     command: ["nmcli", "radio", "wifi"]
 
-    stdout: StdioCollector {
-      id: _wifiStateOut
-    }
-
-    onExited: exitCode => {
+    onDone: (exitCode, out) => {
       // A failed read is not an answer. Taking it as "disabled" turned Wi-Fi
       // off in the shell for the whole session if NetworkManager was not up yet.
-      const state = _wifiStateOut.text.trim();
+      const state = out.trim();
       if (exitCode !== 0 || (state !== "enabled" && state !== "disabled"))
         return;
 
@@ -442,12 +438,10 @@ Scope {
   }
 
   // Wi-Fi radio toggle. `command` is set by setWifiEnabled() before each run.
-  Process {
+  Core.Command {
     id: _wifiToggleProcess
-
-    stderr: StdioCollector {
-      onStreamFinished: root._logError("Wi-Fi toggle", text)
-    }
+    tag: "Network"
+    label: "Wi-Fi toggle"
 
     // Read back what actually happened. A refused toggle fails, but a radio
     // held off by rfkill reports success, so only the read-back catches both.
@@ -455,48 +449,46 @@ Scope {
   }
 
   // Active connection status
-  Process {
+  Core.Command {
     id: _connectionStatusProcess
     command: ["nmcli", "-t", "-e", "yes", "-f", "NAME,TYPE,DEVICE,STATE", "connection", "show", "--active"]
 
-    stdout: StdioCollector {
-      onStreamFinished: {
-        let wifi = false, eth = false;
-        let wifiName = "", wifiIface = "", activeIface = "";
+    onDone: (code, out) => {
+      let wifi = false, eth = false;
+      let wifiName = "", wifiIface = "", activeIface = "";
 
-        for (const line of text.split("\n")) {
-          const parts = root._parseNmcliLine(line, 4);
-          if (!parts)
-            continue;
+      for (const line of out.split("\n")) {
+        const parts = root._parseNmcliLine(line, 4);
+        if (!parts)
+          continue;
 
-          const [name, type, device, state] = parts;
+        const [name, type, device, state] = parts;
 
-          // `--active` also lists connections still activating or deactivating.
-          // Counting those showed a network as connected while it was still
-          // authenticating, including ones about to fail.
-          if (state !== "activated")
-            continue;
+        // `--active` also lists connections still activating or deactivating.
+        // Counting those showed a network as connected while it was still
+        // authenticating, including ones about to fail.
+        if (state !== "activated")
+          continue;
 
-          if (root._wifiTypes.includes(type)) {
-            wifi = true;
-            wifiName = name;
-            wifiIface = device;
-            activeIface = device;
-          } else if (root._ethernetTypes.includes(type)) {
-            eth = true;
-            activeIface = device;
-          }
+        if (root._wifiTypes.includes(type)) {
+          wifi = true;
+          wifiName = name;
+          wifiIface = device;
+          activeIface = device;
+        } else if (root._ethernetTypes.includes(type)) {
+          eth = true;
+          activeIface = device;
         }
-
-        root.wifiConnected = wifi;
-        root.wifiSSID = wifi ? wifiName : "";
-        root._wifiDevice = wifiIface;
-        root.ethernetConnected = eth;
-        root.activeInterface = activeIface;
-
-        _details.device = activeIface;
-        _details.refresh();
       }
+
+      root.wifiConnected = wifi;
+      root.wifiSSID = wifi ? wifiName : "";
+      root._wifiDevice = wifiIface;
+      root.ethernetConnected = eth;
+      root.activeInterface = activeIface;
+
+      _details.device = activeIface;
+      _details.refresh();
     }
   }
 
@@ -506,12 +498,10 @@ Scope {
   }
 
   // Connectivity check
-  Process {
+  Core.Command {
     id: _connectivityCheckProcess
     command: ["nmcli", "networking", "connectivity", "check"]
-    stdout: StdioCollector {
-      onStreamFinished: root.connectivityStatus = text.trim()
-    }
+    onDone: (code, out) => root.connectivityStatus = out.trim()
   }
 
   // WiFi scan. `command` is set by scan(), which picks the rescan mode.
@@ -519,18 +509,12 @@ Scope {
   // The processes below act on exitCode, not on what nmcli printed. `exited`
   // arrives after both streams have been read, so the collected text is
   // complete by then. Matching stdout text reported every failure as success.
-  Process {
+  Core.Command {
     id: _scanProcess
+    tag: "Network"
+    label: "Scan"
 
-    stdout: StdioCollector {
-      id: _scanOut
-    }
-
-    stderr: StdioCollector {
-      onStreamFinished: root._logError("Scan", text)
-    }
-
-    onExited: exitCode => {
+    onDone: (exitCode, out) => {
       root.scanning = false;
 
       // A failed run (NetworkManager restarting, the device not ready) keeps
@@ -544,7 +528,7 @@ Scope {
         const networksMap = Object.create(null);
         let inUseSignal = 0, inUseSecurity = "";
 
-        for (const line of _scanOut.text.split("\n")) {
+        for (const line of out.split("\n")) {
           const parts = root._parseNmcliLine(line, 4);
           if (!parts)
             continue;
@@ -596,16 +580,12 @@ Scope {
 
   // WiFi connect. `command` is set by connect(), which decides whether a
   // password is included.
-  Process {
+  Core.Command {
     id: _connectProcess
     property string ssid: ""
     property bool withPassword: false
 
-    stderr: StdioCollector {
-      id: _connectErr
-    }
-
-    onExited: exitCode => {
+    onDone: (exitCode, out, stderr) => {
       const ssid = _connectProcess.ssid;
       root.connectingTo = "";
 
@@ -615,8 +595,6 @@ Scope {
         root._updateNetworkConnection(ssid, true);
         return;
       }
-
-      const stderr = _connectErr.text;
 
       // NetworkManager wants a key. When one was supplied, this is a wrong
       // password: nmcli reports a rejected key as "Secrets were required", not
@@ -657,20 +635,16 @@ Scope {
   }
 
   // WiFi disconnect. `command` is set by disconnect().
-  Process {
+  Core.Command {
     id: _disconnectProcess
     property string ssid: ""
 
-    stderr: StdioCollector {
-      id: _disconnectErr
-    }
-
-    onExited: exitCode => {
+    onDone: (exitCode, out, err) => {
       root.disconnectingFrom = "";
 
       if (exitCode !== 0) {
-        root.lastError = root._firstError(_disconnectErr.text) || "Could not disconnect";
-        root._logError("Disconnect", _disconnectErr.text);
+        root.lastError = root._firstError(err) || "Could not disconnect";
+        root._logError("Disconnect", err);
         return;
       }
 
@@ -681,20 +655,16 @@ Scope {
   }
 
   // Forget saved network. `command` is set by forget().
-  Process {
+  Core.Command {
     id: _forgetProcess
     property string ssid: ""
 
-    stderr: StdioCollector {
-      id: _forgetErr
-    }
-
-    onExited: exitCode => {
+    onDone: (exitCode, out, err) => {
       root.forgettingNetwork = "";
 
       if (exitCode !== 0) {
-        root.lastError = root._firstError(_forgetErr.text) || "Could not forget network";
-        root._logError("Forget", _forgetErr.text);
+        root.lastError = root._firstError(err) || "Could not forget network";
+        root._logError("Forget", err);
         return;
       }
 
@@ -706,22 +676,16 @@ Scope {
   }
 
   // Saved Wi-Fi profiles. Started by scan() while the panel is open.
-  Process {
+  Core.Command {
     id: _savedProcess
+    tag: "Network"
+    label: "Saved networks"
     command: ["sh", "-c", root._savedScript]
 
-    stdout: StdioCollector {
-      id: _savedOut
-    }
-
-    stderr: StdioCollector {
-      onStreamFinished: root._logError("Saved networks", text)
-    }
-
-    onExited: exitCode => {
+    onDone: (exitCode, out) => {
       if (exitCode !== 0)
         return;
-      root._savedSsids = _savedOut.text.split("\n").filter(ssid => ssid !== "");
+      root._savedSsids = out.split("\n").filter(ssid => ssid !== "");
       root.networks = root._markSaved(root.networks);
     }
   }

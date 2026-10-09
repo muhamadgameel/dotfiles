@@ -100,83 +100,68 @@ Singleton {
 
   Component.onCompleted: root.apply()
 
-  Process {
+  Core.Command {
     id: _resolve
 
     command: ["readlink", "-f", root.directory]
-    onExited: _list.running = true
-
-    stdout: StdioCollector {
-      onStreamFinished: root._resolved = text.trim() || root.directory
+    onDone: (code, out) => {
+      root._resolved = out.trim() || root.directory;
+      _list.running = true;
     }
   }
 
-  Process {
+  Core.Command {
     id: _list
+    tag: "Wallpaper"
 
     command: ["find", root._resolved || root.directory, "-maxdepth", "1", "-type", "f"]
 
-    stdout: StdioCollector {
-      onStreamFinished: {
-        const found = text.split("\n").filter(p => /\.(jpe?g|png|webp|bmp)$/i.test(p));
-        const usable = found.filter(p => p.indexOf(",") < 0);
-        if (usable.length < found.length)
-          Core.Logger.w("Wallpaper", `${found.length - usable.length} file(s) skipped: a comma in the name cannot be passed to hyprpaper`);
-        usable.sort((a, b) => a.localeCompare(b));
+    onDone: (code, out) => {
+      const found = out.split("\n").filter(p => /\.(jpe?g|png|webp|bmp)$/i.test(p));
+      const usable = found.filter(p => p.indexOf(",") < 0);
+      if (usable.length < found.length)
+        Core.Logger.w("Wallpaper", `${found.length - usable.length} file(s) skipped: a comma in the name cannot be passed to hyprpaper`);
+      usable.sort((a, b) => a.localeCompare(b));
 
-        // Assigning an equal array still rebuilds every delegate in the grid,
-        // which re-decodes all 42 thumbnails on each panel open.
-        const same = usable.length === root.wallpapers.length && usable.every((p, i) => p === root.wallpapers[i]);
-        if (!same)
-          root.wallpapers = usable;
-      }
-    }
-
-    stderr: StdioCollector {
-      onStreamFinished: {
-        const msg = text.trim();
-        if (msg)
-          Core.Logger.w("Wallpaper", msg);
-      }
+      // Assigning an equal array still rebuilds every delegate in the grid,
+      // which re-decodes all 42 thumbnails on each panel open.
+      const same = usable.length === root.wallpapers.length && usable.every((p, i) => p === root.wallpapers[i]);
+      if (!same)
+        root.wallpapers = usable;
     }
   }
 
-  Process {
+  Core.Command {
     id: _set
 
-    onExited: _active.running = true
-
-    stdout: StdioCollector {
-      onStreamFinished: {
-        // hyprctl reports hyprpaper's refusal here and still exits 0.
-        if (text.indexOf("error") >= 0)
-          Core.Logger.w("Wallpaper", text.trim());
-      }
+    onDone: (code, out) => {
+      // hyprctl reports hyprpaper's refusal here and still exits 0.
+      if (out.indexOf("error") >= 0)
+        Core.Logger.w("Wallpaper", out.trim());
+      _active.running = true;
     }
   }
 
-  Process {
+  Core.Command {
     id: _active
 
     command: ["hyprctl", "hyprpaper", "listactive"]
 
-    stdout: StdioCollector {
-      onStreamFinished: {
-        root.busy = false;
-        const line = text.split("\n").find(l => l.indexOf(": /") > 0);
-        root.current = line ? line.slice(line.indexOf(": /") + 2) : "";
+    onDone: (code, out) => {
+      root.busy = false;
+      const line = out.split("\n").find(l => l.indexOf(": /") > 0);
+      root.current = line ? line.slice(line.indexOf(": /") + 2) : "";
 
-        if (root._requested === "")
-          return;
-        // hyprpaper answers with symlinks resolved, so a path given by name
-        // still counts as taken.
-        const asked = root._requested.split("/").pop();
-        if (root.current.endsWith(`/${asked}`))
-          Config.Config.setWallpaper(root.current);
-        else
-          Core.Logger.w("Wallpaper", `hyprpaper did not take ${root._requested}`);
-        root._requested = "";
-      }
+      if (root._requested === "")
+        return;
+      // hyprpaper answers with symlinks resolved, so a path given by name
+      // still counts as taken.
+      const asked = root._requested.split("/").pop();
+      if (root.current.endsWith(`/${asked}`))
+        Config.Config.setWallpaper(root.current);
+      else
+        Core.Logger.w("Wallpaper", `hyprpaper did not take ${root._requested}`);
+      root._requested = "";
     }
   }
 

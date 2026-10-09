@@ -3,7 +3,6 @@ pragma Singleton
 import QtQuick
 import Quickshell
 import Quickshell.Hyprland
-import Quickshell.Io
 import Quickshell.Services.UPower
 
 import "../config" as Config
@@ -78,42 +77,34 @@ Singleton {
 
   // Hyprland is the source for the panel's modes, not the config file: the
   // config asks for a mode, the compositor reports what it got.
-  Process {
+  Core.Command {
     id: _monitors
     command: ["hyprctl", "-j", "monitors"]
 
-    stdout: StdioCollector {
-      onStreamFinished: {
-        const monitors = JSON.parse(text);
-        // The internal panel, or the only screen on a desktop.
-        const panel = monitors.find(m => m.name.startsWith("eDP")) ?? monitors[0];
-        if (!panel)
-          return;
+    onDone: (code, out) => {
+      const monitors = JSON.parse(out);
+      // The internal panel, or the only screen on a desktop.
+      const panel = monitors.find(m => m.name.startsWith("eDP")) ?? monitors[0];
+      if (!panel)
+        return;
 
-        root.output = panel.name;
-        root._geometry = `${panel.width}x${panel.height}`;
-        root._position = `${panel.x}x${panel.y}`;
-        root._scale = panel.scale.toFixed(6);
-        root.currentRate = Math.round(panel.refreshRate);
+      root.output = panel.name;
+      root._geometry = `${panel.width}x${panel.height}`;
+      root._position = `${panel.x}x${panel.y}`;
+      root._scale = panel.scale.toFixed(6);
+      root.currentRate = Math.round(panel.refreshRate);
 
-        // Only rates this panel offers at the size it is running.
-        const rates = (panel.availableModes ?? []).filter(mode => mode.startsWith(root._geometry + "@")).map(mode => Math.round(parseFloat(mode.split("@")[1])));
-        root.fullRate = rates.length > 0 ? Math.max(...rates) : root.currentRate;
+      // Only rates this panel offers at the size it is running.
+      const rates = (panel.availableModes ?? []).filter(mode => mode.startsWith(root._geometry + "@")).map(mode => Math.round(parseFloat(mode.split("@")[1])));
+      root.fullRate = rates.length > 0 ? Math.max(...rates) : root.currentRate;
 
-        root.apply();
-      }
+      root.apply();
     }
   }
 
-  Process {
+  Core.Command {
     id: _setMode
-
-    stderr: StdioCollector {
-      onStreamFinished: {
-        const msg = text.trim();
-        if (msg)
-          Core.Logger.w("Display", `hyprctl: ${msg}`);
-      }
-    }
+    tag: "Display"
+    label: "hyprctl"
   }
 }
