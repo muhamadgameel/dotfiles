@@ -32,7 +32,6 @@ Singleton {
 
   // === Bar Dimensions ===
   readonly property int barHeight: Math.round(32 * uiScale)
-  readonly property int barPadding: Math.round(8 * uiScale)
 
   // === Panel Dimensions ===
   readonly property int panelWidth: Math.round(360 * uiScale)
@@ -82,7 +81,6 @@ Singleton {
   readonly property string fontFamily: Config.Config.fontFamily
   readonly property string fontMono: "JetBrainsMono Nerd Font"
 
-  readonly property real letterSpacingWide: 0.6
   // A section heading is set smaller than the rows it labels, so it needs more
   // tracking than a heading set larger would.
   readonly property real letterSpacingWider: 1.2
@@ -108,7 +106,6 @@ Singleton {
   readonly property int spaceM: Math.round(12 * uiScale)
   readonly property int spaceL: Math.round(16 * uiScale)
   readonly property int spaceXL: Math.round(24 * uiScale)
-  readonly property int spaceXXL: Math.round(32 * uiScale)
 
   // === Border Radii ===
   readonly property int radiusS: Math.round(6 * uiScale)
