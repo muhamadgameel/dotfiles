@@ -45,10 +45,13 @@ The network service has two backends, nmcli and Quickshell.Networking
 
 Quickshell reloads the config when a QML file changes. Three things to know:
 
-- **A failed reload keeps the old config running**, with nothing visible on
-  screen. After an edit, check `journalctl --user -u quickshell -n 50` for a
-  fresh `Configuration Loaded`, or `Failed to load configuration` with the
-  cause underneath.
+- **A failed reload keeps the old config running** and shows a "Config reload
+  failed" popup at the top left, with the cause and a Close button. It stays
+  while the pointer is on it, and `qs ipc` answers "Not ready to accept queries
+  yet" until it is gone. A successful reload shows nothing, so after an edit
+  check `journalctl --user -u quickshell -n 50` for a fresh
+  `Configuration Loaded`, or `Failed to load configuration` with the cause
+  underneath.
 - **A replaced file can be missed.** Editors and git write a new file and
   rename it over the old one, and Quickshell sometimes loses track of it. If no
   reload shows up, create and delete a file in the same directory:
