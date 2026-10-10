@@ -242,7 +242,7 @@ Singleton {
   // round trip - and moves the seek bar smoothly rather than in 1s steps.
   // triggeredOnStart reads it as soon as a view starts watching; otherwise the
   // panel opens showing where playback was when it was last closed.
-  property bool positionWatched: false
+  readonly property bool positionWatched: Services.Panels.openPanel === "media"
 
   Timer {
     interval: 250

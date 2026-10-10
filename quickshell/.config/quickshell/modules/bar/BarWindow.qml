@@ -4,7 +4,6 @@ import QtQuick
 import Quickshell
 import Quickshell.Wayland
 
-import "../../components" as Components
 import "../../config" as Config
 import "../../core" as Core
 import "../../services" as Services

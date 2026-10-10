@@ -17,9 +17,9 @@ import "../core" as Core
 Singleton {
   id: root
 
-  // Set by BluetoothPanel while it is visible. Discovery keeps the radio busy
-  // and costs power, so it only runs while something is displaying the results.
-  property bool panelOpen: false
+  // Discovery keeps the radio busy and costs power, so it only runs while the
+  // panel is displaying the results.
+  readonly property bool panelOpen: Panels.openPanel === "bluetooth"
 
   // === Adapter State ===
   readonly property BluetoothAdapter adapter: Bluetooth.defaultAdapter

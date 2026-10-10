@@ -28,12 +28,6 @@ Components.SlidingPanel {
   headerTitle: "Bluetooth"
   headerSubtitle: Services.Bluetooth.statusText
 
-  // The service gates discovery on this. Uses the opened/closed signals rather
-  // than onIsOpenChanged, which SlidingPanel already declares - a second
-  // declaration on the same object would override the base one.
-  onOpened: Services.Bluetooth.panelOpen = true
-  onClosed: Services.Bluetooth.panelOpen = false
-
   // === Pinned: the toggle, adapter details and the list's heading ===
   // The device list below scrolls under these with the panel's own scrollbar.
   pinned: [

@@ -27,10 +27,6 @@ Components.SlidingPanel {
   headerTitle: "Media"
   headerSubtitle: Services.Media.identity || "Nothing playing"
 
-  // Position only refreshes while something is watching it.
-  onOpened: Services.Media.positionWatched = true
-  onClosed: Services.Media.positionWatched = false
-
   // === Album-art colour ===
   ColorQuantizer {
     id: artColors
