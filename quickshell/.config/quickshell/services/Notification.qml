@@ -189,7 +189,7 @@ Singleton {
 
   function _handleNotification(n) {
     const data = _createData(n);
-    _addToHistory(data);
+    _addToHistory(_lasting(n, data));
 
     if (!doNotDisturb) {
       _addActive(n, data);
@@ -222,9 +222,20 @@ Singleton {
   }
 
   function _resolveImage(n) {
-    if (n.image && n.image !== "")
-      return n.image;
+    return n.image || _appIcon(n);
+  }
 
+  // A picture sent as pixel data is freed with its notification, so a history
+  // row takes the app's icon in its place.
+  function _lasting(n, content) {
+    if (!content.image.startsWith("image://qsimage/"))
+      return content;
+    return Object.assign({}, content, {
+      image: _appIcon(n)
+    });
+  }
+
+  function _appIcon(n) {
     // Try to resolve icon from various sources
     const iconSources = [n.appIcon, n.desktopEntry].filter(s => s && s !== "");
 
@@ -315,7 +326,7 @@ Singleton {
     // The history row is a separate copy of the same data. Updating only the
     // popup left the notification center showing the first version.
     Core.Utils.updateModelItem(activeList, "id", id, content);
-    Core.Utils.updateModelItem(historyList, "id", id, content);
+    Core.Utils.updateModelItem(historyList, "id", id, _lasting(n, content));
     Qt.callLater(root._saveHistory);
 
     // Update duration if urgency changed
