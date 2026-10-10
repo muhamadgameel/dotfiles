@@ -1,0 +1,1 @@
+{"action": "create", "reason": "Step 5.2 simplified zsh/core/env.zsh from unconditionally exporting PAGER/EDITOR/VISUAL/TERMINAL to exporting only EDITOR with a fallback, allowing session variables to take precedence while providing defaults for console and SSH.", "evidence": "references/evidence-35a27d04.md"}

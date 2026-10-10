@@ -1,0 +1,1 @@
+The popups file cannot load offscreen (it is built on a panel window), and the real notification service would claim the session's notification server. So each rig lifts the popup's delegate, text unchanged, into a standalone file that supplies the two objects the delegate reaches outside itself, and the service is a stand-in that records calls.

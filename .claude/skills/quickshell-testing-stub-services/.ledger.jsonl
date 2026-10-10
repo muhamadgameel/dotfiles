@@ -1,0 +1,1 @@
+{"action": "create", "reason": "Stub services were essential for isolating test rigs from live-shell operations (notification server ownership, wallpaper rotation). This pattern emerged across multiple tests and should be reused.", "evidence": "references/evidence-5b11c909.md"}

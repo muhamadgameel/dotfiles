@@ -1,0 +1,1 @@
+{"action": "create", "reason": "User implemented this pattern to eliminate duplicate hyprlock instances and consolidate lock logic. Journal evidence confirms hypridle's logind path works reliably over time.", "evidence": "references/evidence-2a70babd.md"}

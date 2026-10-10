@@ -1,0 +1,1 @@
+2026-10-03T14:00:34: User changed logout keybind from SUPER+SHIFT+Escape to SUPER+CTRL+SHIFT+Escape in keybinds.lua. Comment: "Three modifiers, so it isn't hit by accident."

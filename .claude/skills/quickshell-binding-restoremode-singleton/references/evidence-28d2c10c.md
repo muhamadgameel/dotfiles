@@ -1,0 +1,1 @@
+Control without `restoreMode`: opening was still right, but after the audio panel closed the registry read 420, the width it had found when it opened; so the default does write on close and only ordering kept the switches right.

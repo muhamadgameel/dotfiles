@@ -1,0 +1,1 @@
+Tested pattern across four scenarios: console/SSH (nothing set): EDITOR=nvim exported; graphical session (all vars set): session values win; session with EDITOR=zed: override respected; child process sees EDITOR=nvim. Pattern export EDITOR=${EDITOR:-nvim} works correctly; anti-pattern : ${EDITOR:=value} doesn't export.

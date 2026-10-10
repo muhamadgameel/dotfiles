@@ -1,0 +1,1 @@
+{"action": "create", "reason": "Piped and redirected ls output was carrying escape codes and icon glyphs, polluting grep commands and files. Auto-detection keeps output clean.", "evidence": "references/evidence-e1ddce30.md"}

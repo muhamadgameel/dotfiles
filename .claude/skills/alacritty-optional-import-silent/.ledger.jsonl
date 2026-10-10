@@ -1,0 +1,1 @@
+{"action": "create", "reason": "Alacritty silently skips missing imports with only INFO log; critical for safe optional config design.", "evidence": "references/evidence-cd3fb8dd.md"}

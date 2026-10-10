@@ -1,0 +1,1 @@
+2026-10-03T13:51:50–13:52:00: User tested `qs ipc call screenshot nosuchfunction` returning exit 0 while shell running, confirming shell availability can be detected. Created uinput test script to verify screenshot helper with shell up and stopped, both paths working correctly.

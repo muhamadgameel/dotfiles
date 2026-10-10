@@ -1,0 +1,1 @@
+the test rig needs a **stub `services/Notification.qml`** (empty ListModel, no server; the real service would claim `org.freedesktop.Notifications`, and afterwards the live shell still owned it) ... against a **stub `services/Wallpaper.qml`** listing three real files and making no hyprpaper call (an IPC set would stop the hourly rotation; hyprpaper logged nothing during the run).

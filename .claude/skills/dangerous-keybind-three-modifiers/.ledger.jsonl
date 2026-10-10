@@ -1,0 +1,1 @@
+{"action": "create", "reason": "User moved logout to three-modifier key combination to prevent accidental session termination. This is a safety pattern that generalizes to any dangerous keybind.", "evidence": "references/evidence-ed9d532d.md"}

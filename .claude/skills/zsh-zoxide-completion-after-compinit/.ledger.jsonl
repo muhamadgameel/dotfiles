@@ -1,0 +1,1 @@
+{"action": "create", "reason": "zoxide completion registration failed silently when initialized before compinit. Moving it after compinit (where compdef exists) and caching the init script improves both correctness and startup speed.", "evidence": "references/evidence-2199c50a.md"}

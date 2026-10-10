@@ -1,0 +1,1 @@
+{"action": "create", "reason": "Step 5.1 consolidated environment variables into uwsm/env and found that hl.env() only reaches the compositor's children, not systemd/D-Bus activation. Also discovered UWSM_FINALIZE_VARNAMES lists variables for re-export but they don't materialize unless set upstream.", "evidence": "references/evidence-1178d8c9.md"}

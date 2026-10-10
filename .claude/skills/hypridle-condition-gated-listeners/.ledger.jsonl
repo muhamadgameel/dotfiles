@@ -1,0 +1,1 @@
+{"action": "create", "reason": "Discovered hypridle 0.1.8 native condition_cmd/condition_retry support as a cleaner alternative to shell operators in on-timeout for gating listeners on states like screen lock.", "evidence": "references/evidence-10be1f2c.md"}

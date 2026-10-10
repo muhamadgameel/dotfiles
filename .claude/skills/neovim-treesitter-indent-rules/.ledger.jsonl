@@ -1,0 +1,1 @@
+{"action": "create", "reason": "Adding new parsers revealed that the FileType autocmd forced treesitter indenting for all parsers, even those without indent rules. This broke auto-indent (new lines got column 0) in lua, qml, vim script. The fix is to check for indent rules before setting indentexpr.", "evidence": "references/evidence-6f062db8.md"}

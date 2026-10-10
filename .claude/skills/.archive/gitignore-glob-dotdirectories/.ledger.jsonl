@@ -1,0 +1,1 @@
+{"action": "create", "reason": "Global gitignore pattern `*.local` was hiding the `.local/` package directory in dotfiles, preventing stowed application launcher overrides from being tracked.", "evidence": "references/evidence-a76ecf67.md"}

@@ -1,0 +1,1 @@
+{"action": "create", "reason": "Episode 7.18 wrote twelve files at once using qslive_many.py: atomic swaps within milliseconds, nudge file watcher, verify reload started after the last write and completed, check all new files are watched. Reusable for any multi-file Quickshell config update.", "evidence": "references/evidence-f87648b4.md"}

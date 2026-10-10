@@ -1,0 +1,1 @@
+{"action": "create", "reason": "Episode 7.40 built a test rig for battery reading and discovered that services accessed via property declaration do not start until first IPC use, causing the first synchronous read to return empty. Touching the service via IPC warms it before testing.", "evidence": "references/evidence-3bd100ee.md"}

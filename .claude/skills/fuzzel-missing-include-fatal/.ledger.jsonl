@@ -1,0 +1,1 @@
+{"action": "create", "reason": "Fuzzel refuses to start when an include file is missing; critical design constraint for optional config.", "evidence": "references/evidence-f51f7314.md"}

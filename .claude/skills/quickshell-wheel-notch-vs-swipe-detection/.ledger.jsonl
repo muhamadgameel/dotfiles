@@ -1,0 +1,1 @@
+{"action": "create", "reason": "Wheel and swipe events both fire the same handler on Wayland; phase gates separate discrete notches from continuous swipes.", "evidence": "references/evidence-9d1f2625.md"}

@@ -1,0 +1,1 @@
+{"action": "create", "reason": "Episode 7.18 tested twelve files with offscreen shell, eight stub services, real mouse events via IPC, before/after comparison, and real-state verification. Durable pattern for any QML change with side effects.", "evidence": "references/evidence-ba9d1ef8.md"}

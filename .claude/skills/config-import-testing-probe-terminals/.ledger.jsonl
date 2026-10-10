@@ -1,0 +1,1 @@
+{"action": "create", "reason": "Probe terminal testing pattern safely validates config imports without affecting live system; useful for testing Alacritty, Fuzzel, and other apps.", "evidence": "references/evidence-734ee20a.md"}

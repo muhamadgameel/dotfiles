@@ -1,0 +1,1 @@
+Tested in a throwaway instance under `GSETTINGS_BACKEND=keyfile` with a scratch `XDG_CONFIG_HOME` (real dconf untouched, verified): dark set on tokyo-night and mocha, light set on latte, and a GTK 3 PyGObject probe under those settings follows the theme name.
