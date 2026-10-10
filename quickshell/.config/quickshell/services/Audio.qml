@@ -217,7 +217,7 @@ Singleton {
       return "monitor";
     if (has("usb"))
       return "usb";
-    return node.isSource ? "microphone" : "speaker";
+    return node.isSink ? "speaker" : "microphone";
   }
 
   // Best guess at what kind of application a playback or recording stream is.
@@ -273,9 +273,9 @@ Singleton {
   // === Reactive device and stream lists ===
 
   readonly property var sinkDevices: Pipewire.nodes.values.filter(n => n.isSink && n.audio && !n.isStream)
-  readonly property var sourceDevices: Pipewire.nodes.values.filter(n => n.isSource && n.audio && !n.isStream)
+  readonly property var sourceDevices: Pipewire.nodes.values.filter(n => !n.isSink && n.audio && !n.isStream)
   readonly property var sinkStreams: Pipewire.nodes.values.filter(n => n.isSink && n.audio && n.isStream)
-  readonly property var sourceStreams: Pipewire.nodes.values.filter(n => n.isSource && n.audio && n.isStream)
+  readonly property var sourceStreams: Pipewire.nodes.values.filter(n => !n.isSink && n.audio && n.isStream)
 
   // Binding these keeps their audio properties live; without the tracker the
   // volume and mute values on non-default nodes never update.
