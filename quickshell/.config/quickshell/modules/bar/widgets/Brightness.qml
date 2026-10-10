@@ -40,18 +40,6 @@ Components.Button {
     return lines.join("\n");
   }
 
-  // Scroll to adjust brightness
-  onWheel: function (wheel) {
-    // A sideways touchpad swipe has no vertical delta; it used to count as down.
-    if (wheel.angleDelta.y === 0)
-      return;
-    if (wheel.angleDelta.y > 0) {
-      Services.Brightness.increase();
-    } else {
-      Services.Brightness.decrease();
-    }
-  }
-
   // Click handlers
   acceptedButtons: Qt.LeftButton | Qt.RightButton
   onClicked: function (button) {
@@ -66,5 +54,9 @@ Components.Button {
       // Set to 50%
       Services.Brightness.set(0.5);
     }
+  }
+
+  Components.WheelSteps {
+    onScrolled: steps => Services.Brightness.set(Services.Brightness.requestedBrightness + steps * Services.Brightness.stepSize)
   }
 }

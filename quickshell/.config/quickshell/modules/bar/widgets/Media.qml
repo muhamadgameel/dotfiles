@@ -48,11 +48,8 @@ Components.Button {
       root.panelRequested();
   }
 
-  onWheel: function (wheel) {
-    // A sideways touchpad swipe has no vertical delta; it used to count as down.
-    if (!Services.Media.volumeSupported || wheel.angleDelta.y === 0)
-      return;
-    const delta = wheel.angleDelta.y > 0 ? 0.05 : -0.05;
-    Services.Media.setVolume(Services.Media.volume + delta);
+  Components.WheelSteps {
+    enabled: Services.Media.volumeSupported
+    onScrolled: steps => Services.Media.setVolume(Services.Media.volume + steps * 0.05)
   }
 }

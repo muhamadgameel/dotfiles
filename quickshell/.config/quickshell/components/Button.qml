@@ -70,7 +70,6 @@ Rectangle {
 
   // === Signals ===
   signal clicked(int button)
-  signal wheel(var wheel)
 
   // === State (readonly) ===
   readonly property bool hovered: mouseArea.containsMouse
@@ -227,7 +226,6 @@ Rectangle {
     acceptedButtons: root.acceptedButtons
 
     onClicked: mouse => root.clicked(mouse.button)
-    onWheel: wheel => root.wheel(wheel)
 
     onEntered: {
       if (root.tooltipText !== "") {
