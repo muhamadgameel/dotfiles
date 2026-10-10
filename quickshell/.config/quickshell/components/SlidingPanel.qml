@@ -13,7 +13,7 @@ import "." as Components
 * Provides:
 * - A PanelWindow that slides in from the right edge
 * - Optional header with icon, title, subtitle and close button
-* - Optional scrollable content area
+* - A content area that scrolls once it outgrows the screen
 * - Escape, the close button or the toggle to close
 *
 * Open/closed state lives in Services.Panels, not here, so only one panel is
@@ -58,7 +58,6 @@ Item {
   property color headerIconColor: Core.Theme.text
 
   // === Content Configuration ===
-  property bool scrollable: true
   property int contentSpacing: Core.Style.spaceL
 
   // === Content ===
@@ -72,9 +71,8 @@ Item {
   //     RowLayout { ... }
   //   ]
   //
-  // With it, a panel whose list should scroll under a fixed top no longer needs
-  // `scrollable: false` and a ScrollArea of its own: the body scrolls, with the
-  // panel's scrollbar, and a hairline shows under the pinned part while it does.
+  // The body scrolls under it, with the panel's scrollbar, and a hairline shows
+  // under the pinned part while it does.
   property alias pinned: pinnedColumn.data
   readonly property bool hasPinned: pinnedColumn.children.length > 0
 
@@ -125,8 +123,6 @@ Item {
   }
 
   // === Sizing ===
-  property bool fillHeight: !root.scrollable
-
   // Transparent room around the surface, for a drop shadow to land in later.
   // Sized through elevationRoom() so switching shadows off returns the window
   // to exactly its old geometry rather than leaving a dead margin.
@@ -162,24 +158,7 @@ Item {
     root._lastFrameChange = now;
   }
 
-  readonly property int surfaceHeight: root.fillHeight ? root.maxSurfaceHeight : Core.Utils.clamp(root.frameHeight, root.minSurfaceHeight, root.maxSurfaceHeight)
-
-  // Content that reports no height is almost always a Layout.fillHeight child
-  // inside a content-sized panel. It fails silently - the panel just collapses -
-  // so say so rather than leaving it to be discovered visually.
-  //
-  // Checked on a timer rather than on change: frameHeight is legitimately 0 for
-  // the frame or two between construction and the first layout pass, and warning
-  // there would cry wolf on every panel that opens.
-  Timer {
-    id: heightCheck
-    interval: Core.Style.animNormal * 2
-    repeat: false
-    onTriggered: {
-      if (!root.fillHeight && root.frameHeight <= 0)
-        Core.Logger.w("SlidingPanel", `${root.panelId}: content reports no height - a Layout.fillHeight child?`);
-    }
-  }
+  readonly property int surfaceHeight: Core.Utils.clamp(root.frameHeight, root.minSurfaceHeight, root.maxSurfaceHeight)
 
   // === Public API ===
   function close() {
@@ -188,7 +167,6 @@ Item {
 
   onIsOpenChanged: {
     if (isOpen) {
-      heightCheck.restart();
       Qt.callLater(root._reveal);
       Qt.callLater(() => contentRect.forceActiveFocus());
       root.opened();
@@ -405,18 +383,15 @@ Item {
             Layout.fillWidth: true
             Layout.fillHeight: true
 
-            // What the content would like to be. -1 falls back to implicitHeight
-            // (0), which is what a fill-height panel wants; otherwise this is the
-            // number that ends up driving the whole window's height.
-            Layout.preferredHeight: root.fillHeight ? -1 : contentColumn.implicitHeight + root._bodyTopPadding + Core.Style.panelPadding
+            // What the content would like to be: the number that ends up driving
+            // the whole window's height.
+            Layout.preferredHeight: contentColumn.implicitHeight + root._bodyTopPadding + Core.Style.panelPadding
 
             // So it can still be squeezed once the content exceeds the cap.
             Layout.minimumHeight: 0
 
-            interactive: root.scrollable
-            showScrollbar: root.scrollable
             contentWidth: width
-            contentHeight: root.scrollable ? contentColumn.implicitHeight + root._bodyTopPadding + Core.Style.panelPadding : height
+            contentHeight: contentColumn.implicitHeight + root._bodyTopPadding + Core.Style.panelPadding
 
             ColumnLayout {
               id: contentColumn
@@ -424,7 +399,6 @@ Item {
               x: Core.Style.panelPadding
               y: root._bodyTopPadding
               width: scrollArea.width - Core.Style.panelPadding * 2
-              height: root.scrollable ? implicitHeight : scrollArea.height - root._bodyTopPadding - Core.Style.panelPadding
               spacing: root.contentSpacing
             }
           }

@@ -20,7 +20,6 @@ Components.SlidingPanel {
   id: root
 
   panelId: "audio"
-  scrollable: true
   contentSpacing: Core.Style.spaceM
 
   // Header configuration
