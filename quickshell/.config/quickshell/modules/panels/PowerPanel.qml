@@ -1,7 +1,6 @@
 pragma ComponentBehavior: Bound
 
 import QtQuick
-import QtQuick.Layouts
 
 import "../../components" as Components
 import "../../core" as Core
@@ -53,15 +52,13 @@ Components.SlidingPanel {
   Repeater {
     model: Services.Power.actions
 
-    delegate: Components.Card {
+    delegate: Components.ListRow {
       id: actionCard
 
       required property var modelData
 
       readonly property bool armed: root.pendingAction === modelData.id
 
-      Layout.fillWidth: true
-      implicitHeight: Core.Style.controlHeightL
       interactive: true
 
       backgroundColor: armed ? Core.Theme.alpha(Core.Theme.error, Core.Style.opacityTintStrong) : Core.Theme.transparent
@@ -69,46 +66,16 @@ Components.SlidingPanel {
       borderColor: armed ? Core.Theme.error : Core.Theme.transparent
       borderWidth: armed ? Core.Style.borderThin : 0
 
+      icon: modelData.icon
+      iconColor: modelData.destructive ? Core.Theme.error : Core.Theme.text
+      title: armed ? `Confirm ${modelData.label.toLowerCase()}?` : modelData.label
+      titleColor: armed ? Core.Theme.error : Core.Theme.text
+      subtitle: armed ? "Click again to confirm" : modelData.description
+      trailingIcon: armed ? "warning" : ""
+      trailingSize: Core.Style.fontL
+      trailingColor: Core.Theme.error
+
       onClicked: root.trigger(actionCard.modelData)
-
-      RowLayout {
-        anchors.fill: parent
-        anchors.leftMargin: Core.Style.spaceL
-        anchors.rightMargin: Core.Style.spaceL
-        spacing: Core.Style.spaceM
-
-        Components.Icon {
-          icon: actionCard.modelData.icon
-          size: Core.Style.fontXL
-          color: actionCard.modelData.destructive ? Core.Theme.error : Core.Theme.text
-        }
-
-        ColumnLayout {
-          Layout.fillWidth: true
-          spacing: 0
-
-          Components.Text {
-            Layout.fillWidth: true
-            text: actionCard.armed ? `Confirm ${actionCard.modelData.label.toLowerCase()}?` : actionCard.modelData.label
-            weight: Core.Style.weightBold
-            color: actionCard.armed ? Core.Theme.error : Core.Theme.text
-          }
-
-          Components.Text {
-            Layout.fillWidth: true
-            text: actionCard.armed ? "Click again to confirm" : actionCard.modelData.description
-            size: Core.Style.fontXS
-            color: Core.Theme.textMuted
-          }
-        }
-
-        Components.Icon {
-          visible: actionCard.armed
-          icon: "warning"
-          size: Core.Style.fontL
-          color: Core.Theme.error
-        }
-      }
     }
   }
 }

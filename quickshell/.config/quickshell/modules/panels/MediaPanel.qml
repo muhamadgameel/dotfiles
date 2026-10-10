@@ -329,15 +329,14 @@ Components.SlidingPanel {
     Repeater {
       model: Services.Media.players
 
-      delegate: Components.Card {
+      delegate: Components.ListRow {
         id: playerCard
 
         required property var modelData
 
         readonly property bool isActive: Services.Media.active?.uniqueId === modelData.uniqueId
 
-        Layout.fillWidth: true
-        implicitHeight: Core.Style.controlHeightM
+        dense: true
         interactive: !isActive
         hoverEnabled: !isActive
 
@@ -345,33 +344,14 @@ Components.SlidingPanel {
         borderColor: isActive ? Core.Theme.accent : Core.Theme.transparent
         borderWidth: isActive ? Core.Style.borderThin : 0
 
+        icon: modelData.isPlaying ? "play" : "pause"
+        iconSize: Core.Style.fontM
+        iconColor: isActive ? Core.Theme.accent : Core.Theme.textDim
+        title: modelData.identity || modelData.dbusName
+        titleColor: isActive ? Core.Theme.accent : Core.Theme.text
+        trailingIcon: isActive ? "check" : ""
+
         onClicked: Services.Media.selectPlayer(playerCard.modelData.uniqueId)
-
-        RowLayout {
-          anchors.fill: parent
-          anchors.leftMargin: Core.Style.spaceM
-          anchors.rightMargin: Core.Style.spaceM
-          spacing: Core.Style.spaceS
-
-          Components.Icon {
-            icon: playerCard.modelData.isPlaying ? "play" : "pause"
-            size: Core.Style.fontM
-            color: playerCard.isActive ? Core.Theme.accent : Core.Theme.textDim
-          }
-
-          Components.Text {
-            Layout.fillWidth: true
-            text: playerCard.modelData.identity || playerCard.modelData.dbusName
-            color: playerCard.isActive ? Core.Theme.accent : Core.Theme.text
-          }
-
-          Components.Icon {
-            visible: playerCard.isActive
-            icon: "check"
-            size: Core.Style.fontM
-            color: Core.Theme.accent
-          }
-        }
       }
     }
   }

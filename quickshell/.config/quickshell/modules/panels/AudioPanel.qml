@@ -208,15 +208,15 @@ Components.SlidingPanel {
     Repeater {
       model: deviceSelectorRoot.devices
 
-      Components.Card {
+      Components.ListRow {
         id: deviceCard
 
         required property var modelData
 
-        Layout.fillWidth: true
-        implicitHeight: Core.Style.controlHeightM
-
         readonly property bool isActive: deviceSelectorRoot.currentDevice?.id === modelData.id
+        readonly property string description: modelData.description || ""
+
+        dense: true
 
         backgroundColor: isActive ? Core.Theme.alpha(Core.Theme.accent, Core.Style.opacityTint) : Core.Theme.transparent
         borderColor: isActive ? Core.Theme.accent : Core.Theme.transparent
@@ -225,47 +225,15 @@ Components.SlidingPanel {
         interactive: !isActive
         hoverEnabled: !isActive
 
+        icon: Services.Audio.deviceIcon(modelData)
+        iconColor: isActive ? Core.Theme.accent : Core.Theme.text
+        title: Services.Audio.deviceName(modelData)
+        titleColor: isActive ? Core.Theme.accent : Core.Theme.text
+        titleWeight: isActive ? Core.Style.weightBold : Core.Style.weightNormal
+        subtitle: description !== title ? description : ""
+        trailingIcon: isActive ? "check" : ""
+
         onClicked: deviceSelectorRoot.deviceSelected(modelData)
-
-        RowLayout {
-          anchors.fill: parent
-          anchors.leftMargin: Core.Style.spaceM
-          anchors.rightMargin: Core.Style.spaceM
-          spacing: Core.Style.spaceS
-
-          Components.Icon {
-            icon: Services.Audio.deviceIcon(deviceCard.modelData)
-            size: Core.Style.fontL
-            color: deviceCard.isActive ? Core.Theme.accent : Core.Theme.text
-          }
-
-          ColumnLayout {
-            Layout.fillWidth: true
-            spacing: 0
-
-            Components.Text {
-              text: Services.Audio.deviceName(deviceCard.modelData)
-              color: deviceCard.isActive ? Core.Theme.accent : Core.Theme.text
-              weight: deviceCard.isActive ? Core.Style.weightBold : Core.Style.weightNormal
-              Layout.fillWidth: true
-            }
-
-            Components.Text {
-              visible: text !== "" && text !== Services.Audio.deviceName(deviceCard.modelData)
-              text: deviceCard.modelData.description || ""
-              size: Core.Style.fontXS
-              color: Core.Theme.textMuted
-              Layout.fillWidth: true
-            }
-          }
-
-          Components.Icon {
-            visible: deviceCard.isActive
-            icon: "check"
-            size: Core.Style.fontM
-            color: Core.Theme.accent
-          }
-        }
       }
     }
   }

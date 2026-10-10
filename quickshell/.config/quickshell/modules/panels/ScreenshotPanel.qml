@@ -102,55 +102,22 @@ Components.SlidingPanel {
   Repeater {
     model: root.modes
 
-    delegate: Components.Card {
+    delegate: Components.ListRow {
       id: modeCard
 
       required property var modelData
 
-      Layout.fillWidth: true
-      implicitHeight: Core.Style.controlHeightL
       interactive: true
       hoverColor: Core.Theme.surfaceHover
 
+      icon: modelData.icon
+      iconColor: Core.Theme.accent
+      title: modelData.label
+      subtitle: modelData.hint
+      trailingIcon: hovered ? "chevron-right" : ""
+      trailingColor: Core.Theme.textDim
+
       onClicked: root.capture(modeCard.modelData.id)
-
-      RowLayout {
-        anchors.fill: parent
-        anchors.leftMargin: Core.Style.spaceL
-        anchors.rightMargin: Core.Style.spaceL
-        spacing: Core.Style.spaceM
-
-        Components.Icon {
-          icon: modeCard.modelData.icon
-          size: Core.Style.fontXL
-          color: Core.Theme.accent
-        }
-
-        ColumnLayout {
-          Layout.fillWidth: true
-          spacing: 0
-
-          Components.Text {
-            Layout.fillWidth: true
-            text: modeCard.modelData.label
-            weight: Core.Style.weightBold
-          }
-
-          Components.Text {
-            Layout.fillWidth: true
-            text: modeCard.modelData.hint
-            size: Core.Style.fontXS
-            color: Core.Theme.textMuted
-          }
-        }
-
-        Components.Icon {
-          visible: modeCard.hovered
-          icon: "chevron-right"
-          size: Core.Style.fontM
-          color: Core.Theme.textDim
-        }
-      }
     }
   }
 
