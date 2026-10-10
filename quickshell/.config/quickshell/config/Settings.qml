@@ -23,7 +23,6 @@ import "../core" as Core
 * Usage:
 *   Config.Settings.get("barShowClock", true)
 *   Config.Settings.set("barShowClock", false)
-*   Config.Settings.toggle("doNotDisturb")
 */
 Singleton {
   id: root
@@ -71,13 +70,6 @@ Singleton {
 
     saveTimer.restart();
     return value;
-  }
-
-  /**
-  * Flip a boolean setting and return the new value.
-  */
-  function toggle(key, fallback) {
-    return set(key, !get(key, fallback ?? false));
   }
 
   // === Internals ===

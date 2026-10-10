@@ -151,10 +151,6 @@ Singleton {
   // A settings UI names a setting by its key. Reading it back through the
   // property keeps its default declared in one place, and a key that is not a
   // boolean setting is refused rather than written to a file nothing reads.
-  //
-  // Settings.toggle() is deliberately not used: it falls back to false, so on a
-  // setting that defaults to true the first click writes the value it already
-  // had and appears to do nothing.
   function flag(key) {
     return typeof root[key] === "boolean" ? root[key] : false;
   }
@@ -180,7 +176,7 @@ Singleton {
   }
 
   function toggleDoNotDisturb() {
-    return Settings.toggle("doNotDisturb");
+    return Settings.set("doNotDisturb", !root.doNotDisturb);
   }
 
   function setNetworkBackend(name) {
