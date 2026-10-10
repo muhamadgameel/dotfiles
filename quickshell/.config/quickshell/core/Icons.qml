@@ -23,31 +23,18 @@ Singleton {
 
   readonly property var _icons: ({
       // === Navigation ===
-      "chevron-down": "󰅀",
-      "chevron-up": "󰅃",
       "chevron-left": "󰅁",
       "chevron-right": "󰅂",
-      "arrow-left": "󰁍",
-      "arrow-right": "󰁔",
       "arrow-up": "󰁝",
       "arrow-down": "󰁅",
-      "menu": "󰍜",
-      "more": "󰇙",
 
       // === Actions ===
       "close": "󰅖",
       "check": "󰄬",
-      "plus": "󰐕",
-      "minus": "󰍴",
-      "search": "󰍉",
       "refresh": "󰑓",
       "edit": "󰏫",
-      "save": "󰆓",
       "copy": "󰆏",
-      "paste": "󰆒",
       "trash": "󰆴",
-      "download": "󰇚",
-      "upload": "󰕒",
       "external-link": "󰏌",
 
       // === System ===
@@ -55,16 +42,13 @@ Singleton {
       "power": "󰐥",
       "lock": "󰌾",
       "logout": "󰗼",
-      "user": "󰀄",
       "info": "󰋽",
       "warning": "󰀪",
       "error": "󰅚",
-      "question": "󰋖",
 
       // === Notifications ===
       "bell": "󰂚",
       "bell-off": "󰂛",
-      "bell-ring": "󰂞",
 
       // === Theme ===
       "moon": "󰖔",
@@ -75,12 +59,6 @@ Singleton {
       "eye": "󰈈",
       "eye-off": "󰈉",
 
-      // === Files ===
-      "folder": "󰉋",
-      "folder-open": "󰉖",
-      "file": "󰈔",
-      "file-text": "󰈙",
-
       // === Connectivity ===
       // WiFi signal strength icons
       "wifi": "󰤨",
@@ -88,16 +66,12 @@ Singleton {
       "wifi-medium": "󰤥",
       "wifi-weak": "󰤟",
       "wifi-off": "󰤭",
-      "wifi-lock": "󰤪",
-      "wifi-alert": "󰤬",
-      "wifi-outline": "󰤯",
 
       // Bluetooth
       "bluetooth": "󰂯",
       "bluetooth-off": "󰂲",
       "bluetooth-connected": "󰂱",
       "bluetooth-searching": "󰂰",
-      "bluetooth-audio": "󰂰",
 
       // === Input Devices ===
       "mouse": "󰍽",
@@ -107,8 +81,6 @@ Singleton {
       // Network
       "network": "󰛳",
       "network-off": "󰲛",
-      "ethernet": "󰈀",
-      "ethernet-off": "󰈂",
       "usb": "󰕓",
 
       // === Audio ===
@@ -125,7 +97,6 @@ Singleton {
       "speaker": "󰓃",
 
       // === Display ===
-      "brightness": "󰃟",
       "brightness-high": "󰃠",
       "brightness-medium": "󰃟",
       "brightness-low": "󰃞",
@@ -145,11 +116,8 @@ Singleton {
       // === Media ===
       "play": "󰐊",
       "pause": "󰏤",
-      "stop": "󰓛",
       "skip-next": "󰒭",
       "skip-previous": "󰒮",
-      "fast-forward": "󰒐",
-      "rewind": "󰒓",
       "shuffle": "󰒟",
       "repeat": "󰑖",
       "repeat-one": "󰑘",
@@ -159,47 +127,30 @@ Singleton {
       "image": "󰋩",
 
       // === Social/Rating ===
-      "star": "󰓎",
-      "star-off": "󰓏",
-      "star-half": "󰓐",
       "heart": "󰋑",
-      "heart-off": "󰋕",
-      "thumbs-up": "󰍵",
-      "thumbs-down": "󰍶",
 
       // === Apps/Launcher ===
       "apps": "󰀻",
       "grid": "󰕰",
-      "terminal": "󰆍",
-      "code": "󰗀",
       "browser": "󰖟",
-      "calculator": "󰃬",
       "calendar": "󰃭",
       "clock": "󰥔",
       "camera": "󰄀",
-      "mail": "󰇮",
       "message": "󰍡",
       "phone": "󰏲",
 
       // === Workspace/Window ===
       "window": "󱂬",
-      "window-maximize": "󰁌",
-      "window-minimize": "󰖰",
-      "window-restore": "󰁐",
       "layers": "󰌨",
-      "split": "󰕮",
 
       // === System Monitoring ===
       "cpu": "",
-      "cpu-temp": "󱃃",
       "gpu": "󰢮",
-      "gpu-temp": "󰢮",
       "memory": "",
       "ram": "󰘚",
       "disk": "󰋊",
       "thermometer": "󰔏",
       "thermometer-high": "󰔐",
-      "thermometer-low": "󱃃",
       "chip": "󰍛",
       "dashboard": "󰕮",
       "gauge": "󰓅",
@@ -207,28 +158,10 @@ Singleton {
 
       // === Capture ===
       "crop": "󰆞",
-      "screenshot": "󰹑",
-      "region": "󰆞",
 
       // === Misc ===
-      "loading": "󰑓",
-      "spinner": "󰑓",
-      "dot": "󰧞",
-      "circle": "󰝥",
-      "square": "󰝤",
-      "pin": "󰐃",
-      "pin-off": "󰐄",
-      "link": "󰌷",
-      "unlink": "󰌸",
-      "key": "󰌋",
       "shield": "󰒃",
-      "bug": "󰃤",
       "rocket": "󰑣",
-      "flag": "󰈿",
-      "bookmark": "󰃀",
-      "tag": "󰓹",
-      "filter": "󰈶",
-      "sort": "󰒺",
       "chart": "󱕎"
     })
 
