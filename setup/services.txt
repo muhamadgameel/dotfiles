@@ -16,6 +16,7 @@ system  systemd-timesyncd.service
 
 user    cliphist@image.service
 user    cliphist@text.service
+user    gcr-ssh-agent.socket
 user    hypridle.service
 user    hyprpaper.service
 user    hyprpolkitagent.service

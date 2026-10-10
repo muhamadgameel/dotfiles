@@ -18,7 +18,7 @@ xdg-desktop-portal-hyprland
 xorg-server             # SDDM's greeter runs on X11
 
 # desktop services
-gnome-keyring           # secret store for git, browsers and Code
+gnome-keyring           # secret store for git, SSH keys, browsers and Code
 libnotify
 nm-connection-editor    # network settings the Network panel doesn't cover
 xdg-user-dirs           # screenshot binds resolve ~/Pictures with it
