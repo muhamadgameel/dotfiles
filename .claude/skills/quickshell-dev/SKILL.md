@@ -52,6 +52,12 @@ qsrig stop  <scratch>/rig
   singleton with the same properties and functions that only records its calls.
   Never click a real bar widget against its real service: a left click on Brightness
   sets 50%, a middle click on Network turns Wi-Fi off.
+- A stand-in proves only what its author assumed about the real object. When a result
+  rests on what a real property returns, make the calls once on a real object too.
+  `dbus-run-session -- bash <script>` gives the rig and throwaway programs a private
+  session bus that the live shell never sees. Inside it, start the rig, then for
+  media players, silent and windowless:
+  `mpv --no-config --script=/etc/mpv/scripts/mpris.so --idle=yes --no-video --ao=null --force-window=no --force-media-title=P1 av://lavfi:sine=d=900 &`
 - `qs ipc call` splits an argument at commas, so pass no JSON and no expression with a
   comma. A function named `show` is never called: `qs ipc call <target> show` lists
   the target instead.
@@ -134,6 +140,9 @@ reload says `Configuration Loaded`. The argument is the edited file's directory.
   names and notification text can carry markup, and a `Text` in its default format
   would render it, an `<img>` included. `components/Text.qml` sets
   `textFormat: Text.PlainText`; a raw `Text` that shows such a string needs the same.
+- **`MprisPlayer.uniqueId` names the current track,** not the player: it counts up with
+  each track, and every player starts at the same number. A player is known by its
+  `dbusName`.
 - **Several live files written within one reload** can leave the last one unread. Compare
   the reload's start time in the journal with the files' write times, and nudge the
   directory if a write came later: a reload then means the file had been missed.

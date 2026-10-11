@@ -330,7 +330,7 @@ Components.SlidingPanel {
 
         required property var modelData
 
-        readonly property bool isActive: Services.Media.active?.uniqueId === modelData.uniqueId
+        readonly property bool isActive: Services.Media.active?.dbusName === modelData.dbusName
 
         dense: true
         interactive: !isActive
@@ -347,7 +347,7 @@ Components.SlidingPanel {
         titleColor: isActive ? Core.Theme.accent : Core.Theme.text
         trailingIcon: isActive ? "check" : ""
 
-        onClicked: Services.Media.selectPlayer(playerCard.modelData.uniqueId)
+        onClicked: Services.Media.selectPlayer(playerCard.modelData.dbusName)
       }
     }
   }

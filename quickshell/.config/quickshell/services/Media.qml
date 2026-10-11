@@ -25,7 +25,7 @@ Singleton {
   readonly property var players: Mpris.players.values.filter(p => p && p.canControl)
   readonly property bool hasPlayer: active !== null
 
-  // uniqueId of the explicitly chosen player, "" when following the heuristic.
+  // dbusName of the explicitly chosen player, "" when following the heuristic.
   property string preferredId: ""
 
   readonly property var active: {
@@ -34,7 +34,7 @@ Singleton {
 
     // An explicit pick wins for as long as that player is around.
     if (preferredId !== "") {
-      const pinned = players.find(p => p.uniqueId === preferredId);
+      const pinned = players.find(p => p.dbusName === preferredId);
       if (pinned)
         return pinned;
     }
@@ -139,20 +139,20 @@ Singleton {
     if (!active)
       return;
     // Remember whoever the user acted on, so the selection stops drifting.
-    preferredId = active.uniqueId;
+    preferredId = active.dbusName;
     active.togglePlaying();
   }
 
   function next() {
     if (active?.canGoNext) {
-      preferredId = active.uniqueId;
+      preferredId = active.dbusName;
       active.next();
     }
   }
 
   function previous() {
     if (active?.canGoPrevious) {
-      preferredId = active.uniqueId;
+      preferredId = active.dbusName;
       active.previous();
     }
   }
@@ -232,7 +232,7 @@ Singleton {
 
   // Drop a pin whose player has gone away, so the heuristic takes over again.
   onPlayersChanged: {
-    if (preferredId !== "" && !players.some(p => p.uniqueId === preferredId))
+    if (preferredId !== "" && !players.some(p => p.dbusName === preferredId))
       preferredId = "";
   }
 
