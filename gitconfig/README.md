@@ -28,8 +28,9 @@ from.
   `fixup!` commits, and moves stacked branches along with it.
 - `git push` pushes the current branch, sets its upstream the first time, and
   sends tags that point at pushed commits.
-- `git fetch` fetches every remote in parallel and prunes branches and tags
-  that were deleted upstream.
+- `git fetch` fetches every remote in parallel and prunes branches that were
+  deleted upstream. Tags are left alone: pruning them also deletes every local
+  tag that isn't pushed yet. A tag deleted upstream stays until you delete it.
 - Conflicts show the common ancestor (`zdiff3`), and rerere replays
   resolutions you have made before.
 - Diffs use the histogram algorithm, colour moved lines and detect copies.

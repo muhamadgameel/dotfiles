@@ -44,7 +44,7 @@
 
 [fetch]
   prune = true
-  pruneTags = true
+  # Not pruneTags: it deletes every local tag the remote lacks, unpushed ones included.
   all = true
   # 0 = parallelise across remotes/submodules automatically.
   parallel = 0
