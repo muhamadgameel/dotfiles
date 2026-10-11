@@ -56,6 +56,10 @@ Singleton {
   }
 
   function refresh() {
+    // hyprpaper changes the image by itself while it cycles the folder.
+    if (!root.busy)
+      _active.running = true;
+
     if (root._resolved === "")
       _resolve.running = true;
     else
@@ -81,8 +85,6 @@ Singleton {
   function apply() {
     if (root.pinned !== "")
       root._send(root.pinned);
-    else
-      _active.running = true;
     root.refresh();
   }
 
