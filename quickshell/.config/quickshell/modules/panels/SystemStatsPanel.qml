@@ -521,15 +521,21 @@ Components.SlidingPanel {
 
   // Ending an app takes a second click, as the power actions do.
   property string pendingKill: ""
+  property real _armedAt: 0
 
   onClosed: root.pendingKill = ""
 
   function endApp(app) {
     if (root.pendingKill !== app.name) {
       root.pendingKill = app.name;
+      root._armedAt = Date.now();
       killTimeout.restart();
       return;
     }
+
+    // The second click of a double-click lands here too.
+    if (Date.now() - root._armedAt < Application.styleHints.mouseDoubleClickInterval)
+      return;
 
     root.pendingKill = "";
     Services.SystemStats.endApp(app.pids);
