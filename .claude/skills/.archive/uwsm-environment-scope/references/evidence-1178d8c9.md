@@ -1,1 +1,0 @@
-What I checked first: the cursor variables aren't in the systemd/D-Bus activation environment, even though uwsm lists them for re-export. env.lua is deleted, and its require is gone from hyprland.lua. uwsm/env now sets EDITOR, VISUAL, TERMINAL, PAGER, and the cursor variables.

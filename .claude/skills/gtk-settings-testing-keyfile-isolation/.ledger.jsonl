@@ -1,1 +1,0 @@
-{"action": "create", "reason": "GTK settings testing technique verified in this episode: GSETTINGS_BACKEND=keyfile with scratch XDG keeps the real dconf database untouched, enabling safe testing of Quickshell's ThemeSync service and GTK theme switching without affecting the session.", "evidence": "references/evidence-a00663ca.md"}

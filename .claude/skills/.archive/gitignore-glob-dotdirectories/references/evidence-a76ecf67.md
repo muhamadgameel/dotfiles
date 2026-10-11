@@ -1,1 +1,0 @@
-Found it: your global gitignore has `*.local` on line 43, which also catches a `.local` directory, not just files like `.env.local`.

@@ -1,1 +1,0 @@
-With the folders created first, stow links each file individually, as intended. But `git status` doesn't list the 15 new files, so something is ignoring them.

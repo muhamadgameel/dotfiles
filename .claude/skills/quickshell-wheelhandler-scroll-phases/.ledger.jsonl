@@ -1,1 +1,0 @@
-{"action": "create", "reason": "Episode discovered that WheelHandler scroll phase semantics differ from MouseArea in ways that break naive implementations; resetting on Begin carries state into the next swipe.", "evidence": "references/evidence-e15c19ce.md"}

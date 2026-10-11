@@ -1,1 +1,0 @@
-{"action": "create", "reason": "User discovered this exit-code pattern when implementing screenshot keybinds with shell fallback. Pattern is reusable for any IPC-based keybind that needs graceful degradation when shell restarts.", "evidence": "references/evidence-8071ba16.md"}

@@ -1,1 +1,0 @@
-2026-10-03T13:52:41–13:53:00: User wrote Python uinput test script (shottest.py) emitting SHIFT+Print and Print, verified picker behavior and file output with shell up and after `systemctl --user stop quickshell`, then cleaned up test files.

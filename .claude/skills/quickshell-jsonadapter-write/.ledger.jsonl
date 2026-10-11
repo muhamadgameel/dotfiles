@@ -1,2 +1,0 @@
-{"action": "create", "reason": "Validated empirically; atomicity and single-reload semantics are foundational for config persistence refactoring.", "evidence": "references/evidence-63f56227.md"}
-{"action": "update", "reason": "The live skill generalised from a single-change probe and says there is no debounce need, no intermediate writes and no cycles, and recommends the adapter instead of change guards. A burst test contradicts all three, so the skill would steer a future session into a data-losing swap.", "evidence": "references/evidence-6e697e2d.md"}

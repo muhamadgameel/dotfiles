@@ -1,1 +1,0 @@
-{"action": "create", "reason": "Tilde paths in config imports resolve via /etc/passwd home, not $HOME; important for portable testing.", "evidence": "references/evidence-8ab9a53d.md"}

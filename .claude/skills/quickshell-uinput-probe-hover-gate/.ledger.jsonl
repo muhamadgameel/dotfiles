@@ -1,1 +1,0 @@
-{"action": "create", "reason": "Uinput pointer events route to the window under the cursor unless the probe itself is in focus; hover gating prevents accidental input to other windows.", "evidence": "references/evidence-ffa30cde.md"}

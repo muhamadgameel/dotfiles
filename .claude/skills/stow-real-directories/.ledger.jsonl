@@ -1,1 +1,0 @@
-{"action": "create", "reason": "Episode discovered stow was about to link the entire ~/.local directory into the repo when real-directory infrastructure was missing, exposing a setup risk where app writes could pollute version control.", "evidence": "references/evidence-90a1ad19.md"}

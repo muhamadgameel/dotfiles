@@ -1,1 +1,0 @@
-{"action": "create", "reason": "User created a uinput test script to verify screenshot keybind behavior with shell running and stopped, exercising both the primary IPC path and the fallback path reliably.", "evidence": "references/evidence-77f5ac4a.md"}

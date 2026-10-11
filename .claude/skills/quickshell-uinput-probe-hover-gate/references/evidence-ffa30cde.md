@@ -1,1 +1,0 @@
-Told the user at once. Fixed with a warp 3 px away and back, and a gate: nothing is injected unless the block's own HoverHandler reports the pointer.

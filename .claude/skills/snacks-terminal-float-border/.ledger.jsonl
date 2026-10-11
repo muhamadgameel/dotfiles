@@ -1,1 +1,0 @@
-{"action": "create", "reason": "User requested the snacks terminal float to have a rounded border for visual distinction, matching toggleterm's appearance; discovered snacks had no border by default.", "evidence": "references/evidence-56296dc6.md"}

@@ -1,1 +1,0 @@
-Offscreen Quickshell probe with FileView containing JsonAdapter. First property mutation: onAdapterUpdated, then onFileChanged, then idle. All properties written atomically to JSON; untouched defaults included.

@@ -1,1 +1,0 @@
-4 notification(s) recorded... app_name='Claude' app_icon='' hints: sender-pid, desktop-entry=com.anthropic.Claude, urgency, image-data image-data: 512x512, 4 channels, 1024 KiB

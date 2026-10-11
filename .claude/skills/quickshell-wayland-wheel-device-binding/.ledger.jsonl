@@ -1,1 +1,0 @@
-{"action": "create", "reason": "Qt Wayland wheel input requires explicit device acceptance; the default binding misses physical mice.", "evidence": "references/evidence-21d692bb.md"}

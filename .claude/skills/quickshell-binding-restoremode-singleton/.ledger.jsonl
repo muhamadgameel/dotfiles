@@ -1,1 +1,0 @@
-{"action": "create", "reason": "Binding behavior with shared singletons caused out-of-order value restores. This race condition will occur again when multiple components write to the same singleton.", "evidence": "references/evidence-28d2c10c.md"}

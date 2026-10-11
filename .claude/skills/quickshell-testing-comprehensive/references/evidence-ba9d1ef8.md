@@ -1,1 +1,0 @@
-12 files written; reloads: start +0.02s, loaded +0.12s; identical to candidates: True. 36 clicks against stubs (Audio, Network, Brightness, Media, Bluetooth, Notification, GameMode, modules/ipc/Targets.qml—all isStub: true). Every used click same call before/after; real state unchanged.

@@ -1,1 +1,0 @@
-A fake HOME environment does not redirect tilde paths; the override tests used scratch copies with absolute paths.

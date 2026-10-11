@@ -1,1 +1,0 @@
-Probe rv/cfg/shell.qml: 150 changes at 8 ms gave adapterUpdated=150, fileChanged=150, final n=150. Probe ja2/shell.qml (1 ms timer, 3 changes per tick, properties n and t), three runs: "sent=600 final n=598 t=4600 adapterUpdated=1200 fileChanged=200 regressions=600"; the file on disk read {"n": 598, "t": 4600}.

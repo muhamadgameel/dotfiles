@@ -1,1 +1,0 @@
-2026-10-03T14:00:19: Journal shows hypridle receiving "Got Lock from dbus" and executing lock_cmd 41 times in 14 days. User changed Hyprland keybind from `pidof hyprlock || hyprlock` to `loginctl lock-session`, aligning with hypridle's existing lock_cmd.
