@@ -143,6 +143,10 @@ reload says `Configuration Loaded`. The argument is the edited file's directory.
   names and notification text can carry markup, and a `Text` in its default format
   would render it, an `<img>` included. `components/Text.qml` sets
   `textFormat: Text.PlainText`; a raw `Text` that shows such a string needs the same.
+- **A session lock stops the shell's windows being drawn.** An animation in flight
+  freezes and finishes after unlocking: a panel sliding out was caught 80% closed.
+  hyprlock starts about 80 ms after the lock request and a slide takes 250, so what
+  must be gone before a lock is removed with `Services.Panels.closeNow()`, not slid out.
 - **`MprisPlayer.uniqueId` names the current track,** not the player: it counts up with
   each track, and every player starts at the same number. A player is known by its
   `dbusName`.

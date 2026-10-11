@@ -61,6 +61,15 @@ Scope {
     }
 
     /**
+    * Close it at once, with no slide. hypridle calls this before it locks.
+    */
+    function closeNow(): string {
+      const was = Services.Panels.retainedPanel;
+      Services.Panels.closeNow();
+      return was === "" ? "nothing was open" : `closed ${was}`;
+    }
+
+    /**
     * Report which panel is open, if any.
     */
     function status(): string {

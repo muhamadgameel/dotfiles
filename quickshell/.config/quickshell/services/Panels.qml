@@ -87,6 +87,17 @@ Singleton {
   }
 
   /**
+  * Close with no slide: the window is gone at once. A session lock stops the
+  * shell's surfaces being drawn, so a slide in flight freezes part-way and
+  * finishes after unlocking.
+  */
+  function closeNow() {
+    close();
+    retainTimer.stop();
+    retainedPanel = "";
+  }
+
+  /**
   * Close on a click that landed somewhere else.
   *
   * Hyprland reports every click through a non-consuming mouse binding, so the

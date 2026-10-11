@@ -81,8 +81,13 @@ no file.
 - Session variables go in `uwsm/.config/uwsm/env`, not `hl.env()`. Daemons are systemd
   user units, not autostart entries.
 - Locking goes through `loginctl lock-session`. hypridle's `lock_cmd` is the one place
-  that starts hyprlock, and hypridle reads its config only at start
-  (`systemctl --user restart hypridle`).
+  that starts hyprlock, after closing the shell's open panel and resetting the layout,
+  and hypridle reads its config only at start (`systemctl --user restart hypridle`).
+  A `lock_cmd` that fails to parse or run leaves the screen unlocked, so try a new one
+  without locking: run it under `/bin/sh -c` with stand-ins for its programs first on
+  PATH, then give the same text to a second `hypridle -v -c <scratch conf>` as the
+  `on-timeout` of a `listener` with `timeout = 1` and `ignore_inhibit = true`, under
+  `dbus-run-session` and the same PATH, and stop it once the stand-ins were called.
 - A game is known by its window class: `games` in `settings/rules.lua` and
   `_gameClass` in `quickshell/.config/quickshell/services/GameMode.qml` hold the same
   pattern.
