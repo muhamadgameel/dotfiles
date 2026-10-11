@@ -195,6 +195,9 @@ Singleton {
   }
 
   function _showVolumeOSD(value) {
+    if (Services.Panels.openPanel === "media")
+      return;
+
     Services.OSD.show({
       icon: value <= 0 ? "volume-mute" : (value < 0.5 ? "volume-low" : "volume-high"),
       value: value

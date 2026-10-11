@@ -51,6 +51,9 @@ Variants {
       screen: osdLoader.screen
       namespace: "quickshell-osd"
 
+      // An empty region: the OSD takes no input, and clicks reach what is under it.
+      mask: Region {}
+
       // Position configuration
       location: Config.Config.osdPosition
       margin: Core.Style.osdMargin
