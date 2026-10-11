@@ -24,6 +24,7 @@ Text {
   font.weight: root.weight
   color: Core.Theme.text
   elide: Text.ElideRight
+  textFormat: Text.PlainText
   verticalAlignment: Text.AlignVCenter
 
   Behavior on color {

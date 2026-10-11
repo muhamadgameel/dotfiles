@@ -178,6 +178,7 @@ Rectangle {
       anchors.verticalCenter: parent.verticalCenter
       visible: root.text !== ""
       text: root.text
+      textFormat: Text.PlainText
       font.family: Core.Style.fontFamily
       font.pixelSize: root.textSize
       font.weight: Core.Style.weightMedium

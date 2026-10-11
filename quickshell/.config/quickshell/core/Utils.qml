@@ -32,7 +32,8 @@ Singleton {
   function stripTags(text) {
     if (!text)
       return "";
-    return text.replace(/<[^>]*>?/gm, '');
+    // A tag starts with a letter; "I <3 you" has none.
+    return text.replace(/<\/?[a-zA-Z][^<>]*>/g, '');
   }
 
   function capitalize(text) {

@@ -70,7 +70,7 @@ qsrig stop  <scratch>/rig
 
 ```bash
 quickshell/.config/quickshell/qs-fmt -w services/Audio.qml         # format in place
-quickshell/.config/quickshell/qs-fmt --strict services/Audio.qml   # must print nothing
+quickshell/.config/quickshell/qs-fmt --strict services/Audio.qml   # must exit 0
 ```
 
 `qs-fmt` takes paths inside the shell's directory. `./setup.sh lint` runs
@@ -130,3 +130,10 @@ reload says `Configuration Loaded`. The argument is the edited file's directory.
   the old value.
 - **Icon glyphs are private-use characters** that tools drop silently. Use
   `Core.Icons.get(name)`; when a literal is needed, check its code point.
+- **Text from outside is shown as plain text.** Window titles, network and device
+  names and notification text can carry markup, and a `Text` in its default format
+  would render it, an `<img>` included. `components/Text.qml` sets
+  `textFormat: Text.PlainText`; a raw `Text` that shows such a string needs the same.
+- **Several live files written within one reload** can leave the last one unread. Compare
+  the reload's start time in the journal with the files' write times, and nudge the
+  directory if a write came later: a reload then means the file had been missed.

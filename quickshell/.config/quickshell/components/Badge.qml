@@ -99,6 +99,7 @@ Rectangle {
     id: badgeText
     anchors.centerIn: parent
     text: root.displayText
+    textFormat: Text.PlainText
     font.family: Core.Style.fontFamily
     font.pixelSize: Core.Style.fontS
     font.weight: root.isCountVariant ? Font.Bold : Font.Normal
