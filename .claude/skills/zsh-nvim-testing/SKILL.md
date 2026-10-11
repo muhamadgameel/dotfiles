@@ -31,6 +31,16 @@ As a module (`from ptyshell import Pty, isolated_env`) it sends keys (`\t`, `\r`
   `ZDOTDIR` is already exported in the tool's environment, so `~/.zshenv` is not read
   there and an `XDG_CONFIG_HOME` override does nothing. Print `$ZSH_CONF_DIR` inside
   the shell under test to prove which config ran, and run an A/A control.
+- **Proving a reorder changes nothing:** from each copy dump `alias`, `$path`,
+  `export -p`, `zstyle -L`, `functions`, `setopt` and `bindkey` to files and diff them
+  after replacing what differs at every start: fnm's multishell path,
+  `STARSHIP_SESSION_KEY`, the scratch directory and the `orig-s000-r<n>` widget names.
+  An old-against-old control must come out empty.
+- **The macOS branches cannot run here, but their order can.** In a copy, turn
+  `_os=Linux` into `Darwin` in `core/settings.zsh`, point `/opt/homebrew/bin/brew` at a
+  stand-in that prints an `export PATH=…` line, and start with `PATH` set to a
+  directory of symlinks to everything in `/usr/bin` except the tools under test, which
+  go where the stand-in brew puts them. Report it as emulated.
 - **Never let it hang.** An open fzf or fzf-tab menu swallows keys, the final `exit`
   included. Leave a menu with Ctrl+C, not Escape; run under `timeout`; `Pty.close()`
   hangs up and then kills. `starship config` opens an editor.

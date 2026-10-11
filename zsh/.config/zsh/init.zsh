@@ -12,14 +12,15 @@ fpath+=$ZSH_CONF_DIR/functions
 # Load configs.
 #
 # Order matters: settings first (options everything else assumes), then input,
-# aliases and env. Completion is deliberately loaded *after* the plugins below
+# then env before aliases, which test for commands and need the whole PATH.
+# Completion is deliberately loaded *after* the plugins below
 # so that plugins contributing to $fpath are registered before compinit runs.
 sources=(
   "settings"
   "cache"
   "input"
-  "aliases"
   "env"
+  "aliases"
   "fzf"
 )
 

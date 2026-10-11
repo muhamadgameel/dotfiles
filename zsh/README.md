@@ -20,8 +20,8 @@ power profile, up to 60 on balanced.
    | `core/settings.zsh` | Shell options and history, which is kept in `~/.local/state/zsh/history`. |
    | `core/cache.zsh` | `cached-eval` (see [Cached start-up](#cached-start-up)). |
    | `core/input.zsh` | Key bindings, with sequences for both terminal key modes. |
-   | `core/aliases.zsh` | Aliases and `sys-update` for each OS. |
    | `core/env.zsh` | PATH, an `EDITOR` fallback for the console and SSH, the man pager (bat), `GPG_TTY`, the Android SDK and fnm. |
+   | `core/aliases.zsh` | Aliases and `sys-update` for each OS. Some depend on a command being installed, so PATH is complete first. |
    | `core/fzf.zsh` | fzf defaults, previews and key bindings. |
 
    Then it loads zpm and the plugins. The order there matters:

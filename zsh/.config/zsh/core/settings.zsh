@@ -39,7 +39,7 @@ unsetopt hup          # Do not kill jobs on shell exit
 setopt prompt_subst
 
 # ===== Pager
-export LESS="--raw-control-chars --use-color --quit-if-one-screen --no-init"
+export LESS="--RAW-CONTROL-CHARS --use-color --quit-if-one-screen --no-init"
 
 # ===== History
 # HISTSIZE is deliberately larger than SAVEHIST: hist_expire_dups_first only has

@@ -6,12 +6,6 @@ typeset -U path PATH fpath
 # The graphical session sets the default apps (uwsm/env); this covers the console, SSH and macOS.
 export EDITOR=${EDITOR:-nvim}
 
-# Colourised man pages via bat (replaces the old LESS_TERMCAP_* block)
-if (( $+commands[bat] )); then
-  export MANPAGER="sh -c 'col -bx | bat --language man --plain'"
-  export MANROFFOPT="-c"
-fi
-
 # Fix GPG in terminal ($TTY is a zsh builtin parameter, so no `tty` fork)
 export GPG_TTY=$TTY
 
@@ -45,6 +39,13 @@ case $_os in
     path=($HOME/.local/bin $HOME/.cargo/bin $path)
     ;;
 esac
+
+# Colourised man pages via bat (replaces the old LESS_TERMCAP_* block). Below the
+# PATH block: on macOS bat is Homebrew's.
+if (( $+commands[bat] )); then
+  export MANPAGER="sh -c 'col -bx | bat --language man --plain'"
+  export MANROFFOPT="-c"
+fi
 
 # FNM (Node versions manager)
 if [[ $_os == Linux && -d $HOME/.local/share/fnm ]]; then
