@@ -112,7 +112,9 @@ reload says `Configuration Loaded`. The argument is the edited file's directory.
   Never `pkill qs`: Quickshell does not stop its children, the unit's cgroup does. A
   restart clears the notification history and Stay Awake, so look for "Stay Awake is
   on" in `systemd-inhibit --list` first and turn it back on with
-  `qs ipc call idle toggle`.
+  `qs ipc call idle toggle`. A config that is broken at a restart exits at once, and
+  the unit starts it again every two seconds until the file loads: fix the file, do
+  not start the unit by hand.
 - To see whether the live shell answers, use `qs ipc show`, never a call that changes
   something.
 

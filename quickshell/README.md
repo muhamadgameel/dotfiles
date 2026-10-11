@@ -33,7 +33,10 @@ The network service has two backends, nmcli and Quickshell.Networking
 - The unit runs in `session.slice` with the compositor, the slice systemd
   keeps for the session's own parts. Apps live in `app.slice`, so a limit or
   an OOM policy set there never lands on the shell.
-- The unit restarts the shell if it exits with an error. Quickshell 0.3.1's
+- The unit restarts the shell if it exits with an error, and keeps trying every
+  two seconds with no limit. A config that fails to load at start comes up by
+  itself once the file is fixed; until then the cause is in the journal, and
+  `systemctl --user stop quickshell` ends the retries. Quickshell 0.3.1's
   networking module has a use-after-free (upstream issue #1021) that can crash
   it. Most crashes restart in place instead: Quickshell re-runs
   itself and shows a "Quickshell has crashed" dialog, and systemd never notices.

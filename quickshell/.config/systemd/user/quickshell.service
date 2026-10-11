@@ -5,13 +5,15 @@ Documentation=https://quickshell.org
 PartOf=graphical-session.target
 After=graphical-session.target
 ConditionEnvironment=WAYLAND_DISPLAY
+# Retry until the config loads: the default gives up after five quick failures.
+StartLimitIntervalSec=0
 
 [Service]
 Type=simple
 ExecStart=/usr/bin/qs
 Slice=session.slice
 Restart=on-failure
-RestartSec=1
+RestartSec=2
 
 [Install]
 WantedBy=graphical-session.target
