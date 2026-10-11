@@ -207,7 +207,7 @@ Components.SlidingPanel {
     readonly property string deviceName: Services.Bluetooth.deviceLabel(device)
     readonly property string deviceIcon: Services.Bluetooth.getDeviceIcon(device)
     readonly property bool isConnected: device?.connected ?? false
-    readonly property bool isPaired: device?.paired ?? device?.trusted ?? false
+    readonly property bool isPaired: device?.paired || device?.trusted || false
     readonly property string statusText: Services.Bluetooth.getDeviceStatus(device)
     readonly property string batteryText: Services.Bluetooth.getDeviceBatteryText(device)
     readonly property bool isBusy: Services.Bluetooth.isDeviceBusy(device)

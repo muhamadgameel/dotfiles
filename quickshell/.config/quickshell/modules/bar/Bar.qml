@@ -97,6 +97,7 @@ Rectangle {
     }
 
     Components.Divider {
+      visible: tray.visible
       Layout.fillHeight: false
       Layout.preferredHeight: Core.Style.iconSize
       vertical: true

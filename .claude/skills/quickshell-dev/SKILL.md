@@ -40,8 +40,9 @@ qsrig stop  <scratch>/rig
 
 - Edit files in `<rig>/cfg/`; the instance reloads when a loaded file's content
   changes. Put what you want to look at in `cfg/Scene.qml` (real components, real
-  fonts) and Read the PNG. Describe a visible effect only after rendering it;
-  otherwise say "not measured".
+  fonts) and Read the PNG. `grab` answers before the PNG is written, so wait a second
+  before `stop`. Describe a visible effect only after rendering it; otherwise say
+  "not measured".
 - To compare, build two rigs, today's code and the candidate, and make the same calls
   on both.
 - A service starts on first use, and its first answer is often empty: call once, wait

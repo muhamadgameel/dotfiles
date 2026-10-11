@@ -265,7 +265,7 @@ Singleton {
       Speaker: ["speaker", /audio|speaker/, /speaker/],
       Mouse: ["mouse", /mouse|pointing/, /mouse/],
       Keyboard: ["keyboard", /keyboard/, /keyboard/],
-      Controller: ["gamepad", /gamepad|joystick/, /controller/],
+      Controller: ["gamepad", /gaming/, /controller/],
       Phone: ["phone", /phone/, /phone|iphone|android|samsung|pixel/],
       Computer: ["laptop", /computer|laptop/, /macbook|laptop|pc/],
       Watch: ["clock", /watch/, /watch/],
