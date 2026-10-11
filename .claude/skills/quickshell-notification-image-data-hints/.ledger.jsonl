@@ -1,0 +1,1 @@
+{"action": "create", "reason": "Episode validated that Quickshell notification handling of raw image-data hints now works; apps like Claude send icons as binary RGBA data instead of file paths, a pattern worth documenting for future notification implementation.", "evidence": "references/evidence-fd7d8147.md"}
