@@ -294,7 +294,7 @@ lint() {
   lint_one shellcheck shellcheck "${sh[@]}"
   lint_one shfmt shfmt -d -i 2 -ci "${sh[@]}"
   lint_one "zsh -n" each "zsh -n" zsh/.zshenv zsh/.config/zsh/.zshrc zsh/.config/zsh/*.zsh zsh/.config/zsh/core/*.zsh
-  lint_one stylua stylua --check --search-parent-directories nvim hypr
+  lint_one stylua stylua --check --allow-hidden --search-parent-directories nvim hypr
   lint_one "qs-fmt --strict" quickshell/.config/quickshell/qs-fmt --strict
   summary
   ((missing == 0))

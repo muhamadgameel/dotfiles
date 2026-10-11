@@ -50,9 +50,9 @@ zsh -n zsh/.config/zsh/core/aliases.zsh
 ```
 
 `qs-fmt` takes a path inside the shell's directory, and `qs-fmt -w` is how QML
-gets formatted: the Qt 6 tools it wraps aren't on PATH. The lint's stylua step
-is given `nvim` and `hypr`, and stylua skips the hidden `.config` inside them,
-so it checks no file; name the Lua file, or pass `--allow-hidden`.
+gets formatted: the Qt 6 tools it wraps aren't on PATH. Given a directory,
+stylua skips the hidden `.config` inside it unless it gets `--allow-hidden`,
+as the lint passes.
 
 After an edit, check what reloaded:
 

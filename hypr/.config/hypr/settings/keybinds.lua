@@ -17,7 +17,9 @@ hl.bind(mod .. " + D", hl.dsp.exec_cmd("pkill " .. apps.menu .. " || " .. apps.m
 
 hl.bind(
 	mod .. " + V",
-	hl.dsp.exec_cmd("cliphist list | " .. apps.menu .. " -d --placeholder='Clipboard history…' | cliphist decode | wl-copy"),
+	hl.dsp.exec_cmd(
+		"cliphist list | " .. apps.menu .. " -d --placeholder='Clipboard history…' | cliphist decode | wl-copy"
+	),
 	{ description = "Clipboard history" }
 )
 
@@ -76,7 +78,8 @@ hl.bind(mod .. " + X", function()
 end, { description = "Picture-in-picture" })
 
 -- ── Focus / move ─────────────────────────────────────────────────────
-local resize_step = { left = { x = -40, y = 0 }, right = { x = 40, y = 0 }, up = { x = 0, y = -40 }, down = { x = 0, y = 40 } }
+local resize_step =
+	{ left = { x = -40, y = 0 }, right = { x = 40, y = 0 }, up = { x = 0, y = -40 }, down = { x = 0, y = 40 } }
 
 for _, dir in ipairs({ "left", "right", "up", "down" }) do
 	hl.bind(mod .. " + " .. dir, hl.dsp.focus({ direction = dir }), { description = "Move focus" })
