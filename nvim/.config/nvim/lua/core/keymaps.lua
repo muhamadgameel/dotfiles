@@ -28,9 +28,10 @@ keymap('n', 'g#', 'g#zzzv', opts)
 -- Join lines keeping cursor position
 keymap('n', 'J', 'mzJ`z', opts)
 
--- Duplicate lines
-keymap('n', '<leader>d', 'yyp', { desc = 'Duplicate line' })
-keymap('x', '<leader>d', 'y`>p', { desc = 'Duplicate selection' })
+-- Duplicate lines. Not through the unnamed register: with clipboard=unnamedplus
+-- that is the system clipboard.
+keymap('n', '<leader>d', '<cmd>t.<cr>', { desc = 'Duplicate line' })
+keymap('x', '<leader>d', '"zy`>"zp', { desc = 'Duplicate selection' })
 
 -- Reselect pasted/changed
 keymap('n', 'gV', '`[v`]', { desc = 'Select last change/paste' })
