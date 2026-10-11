@@ -65,10 +65,18 @@ After an edit, check what reloaded:
   `pkill qs`.
 - The other daemons: `journalctl --user -u <unit>`.
 
-`.claude/skills/` has the recipes for trying a change away from the live
-session: offscreen Quickshell renders, stub services, a throwaway shell that
-loads one service, uinput for real key and pointer events, and a scratch
-`XDG_CONFIG_HOME` for Neovim.
+`.claude/skills/` has the recipes and helper scripts for trying a change away
+from the live session:
+
+- `quickshell-dev`: where a shell feature goes, a throwaway offscreen instance
+  that renders to a PNG (`qsrig`), and a check that the live shell reloaded
+  (`qs-reloaded`).
+- `hyprland-lua`: the stub file, `hyprctl eval` probes, and a virtual keyboard
+  for real key presses (`vkbd.py`).
+- `setup-and-stow`: packages, stow packages, system files, units, and what is
+  the user's to run.
+- `zsh-nvim-testing`: an isolated interactive zsh in a pty (`ptyshell.py`),
+  scratch XDG directories for Neovim, and proving a removal is a no-op.
 
 ## How the pieces fit
 

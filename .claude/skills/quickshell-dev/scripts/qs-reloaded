@@ -1,0 +1,31 @@
+#!/usr/bin/env bash
+# qs-reloaded [dir] - did the live shell take the last edit?
+#
+# Prints the reload lines the shell logged in the last 30 seconds (QS_WINDOW to
+# change). With none, and the edited file's directory given, it nudges the file
+# watcher there, since a file replaced by rename can be missed, and looks again.
+# Exit status: 0 the last reload loaded, 1 it failed or none happened.
+
+set -euo pipefail
+window=${QS_WINDOW:-30}
+
+reloads() {
+  journalctl --user -u quickshell --since "-$window seconds" --no-pager -o short-precise |
+    sed -E 's/\x1b\[[0-9;]*m//g' |
+    grep -E -A8 'Configuration Loaded|Failed to load configuration' |
+    grep -E 'Configuration Loaded|Failed to load configuration|caused by|ERROR' || true
+}
+
+out=$(reloads)
+if [[ -z $out && -n ${1:-} ]]; then
+  touch "$1/.qs-probe" && rm "$1/.qs-probe"
+  read -rt 2 <> <(:) || true
+  out=$(reloads)
+fi
+
+if [[ -z $out ]]; then
+  echo "no reload in the last $window s"
+  exit 1
+fi
+cut -c1-220 <<<"$out" | tail -12
+grep -E 'Configuration Loaded|Failed to load configuration' <<<"$out" | tail -1 | grep -q 'Configuration Loaded'

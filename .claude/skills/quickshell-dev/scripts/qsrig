@@ -1,0 +1,122 @@
+#!/usr/bin/env bash
+# qsrig - a throwaway Quickshell instance on a copy of the config, offscreen,
+# so a change can be tried without touching the live shell.
+#
+#   qsrig new   <dir>             copy the live config to <dir>/cfg with a probe shell.qml
+#   qsrig start <dir>             start it offscreen (QSRIG_PLATFORM=wayland for the real platform)
+#   qsrig call  <dir> <fn> [arg]  qs ipc call probe <fn> [arg]
+#   qsrig stop  <dir>             stop it and its children
+#
+# The probe loads no bar and no panels; a service starts when something first reads it.
+# Edit <dir>/cfg/Scene.qml to choose what `qsrig call <dir> grab <png>` renders.
+
+set -euo pipefail
+repo=$(git -C "$(dirname "$(realpath "${BASH_SOURCE[0]}")")" rev-parse --show-toplevel)
+cmd=${1:?usage: qsrig new|start|call|stop <dir> [...]} dir=$(realpath -m "${2:?missing <dir>}")
+cfg=$dir/cfg
+
+case $cmd in
+  new)
+    [[ ! -e $cfg ]] || {
+      echo "qsrig: $cfg exists" >&2
+      exit 1
+    }
+    mkdir -p "$dir/state"
+    cp -r "$repo/quickshell/.config/quickshell" "$cfg"
+    cat >"$cfg/Scene.qml" <<'EOF'
+import QtQuick
+
+Item {}
+EOF
+    cat >"$cfg/shell.qml" <<'EOF'
+//@ pragma UseQApplication
+import QtQuick
+import Quickshell
+import Quickshell.Io
+
+import "components" as Components
+import "config" as Config
+import "core" as Core
+import "services" as Services
+
+ShellRoot {
+  id: probe
+
+  Connections {
+    target: Quickshell
+
+    function onReloadCompleted() {
+      Quickshell.inhibitReloadPopup();
+    }
+  }
+
+  // Offscreen this is a real, focused window that never reaches the compositor.
+  FloatingWindow {
+    visible: Qt.platform.pluginName === "offscreen"
+    implicitWidth: 900
+    implicitHeight: 700
+    color: Core.Theme.bg
+
+    Loader {
+      id: scene
+      anchors.centerIn: parent
+      source: "Scene.qml"
+    }
+  }
+
+  IpcHandler {
+    target: "probe"
+
+    // One JavaScript expression; `qs ipc call` splits arguments at commas, so it cannot contain one.
+    function js(code: string): string {
+      try {
+        return String(eval(code));
+      } catch (e) {
+        return `error: ${e}`;
+      }
+    }
+
+    // Render Scene.qml to a PNG at three times its size.
+    function grab(path: string): string {
+      const item = scene.item;
+      if (!item || item.width <= 0 || item.height <= 0)
+        return `nothing to render (${scene.status === Loader.Error ? "Scene.qml failed to load" : "the scene has no size"})`;
+      item.grabToImage(result => result.saveToFile(path), Qt.size(item.width * 3, item.height * 3));
+      return `rendering ${item.width}x${item.height} to ${path}`;
+    }
+  }
+}
+EOF
+    echo "$cfg"
+    ;;
+  start)
+    [[ -d $cfg ]] || {
+      echo "qsrig: run 'qsrig new $dir' first" >&2
+      exit 1
+    }
+    QT_QPA_PLATFORM=${QSRIG_PLATFORM:-offscreen} XDG_STATE_HOME=$dir/state setsid qs -p "$cfg" >"$dir/log" 2>&1 &
+    echo $! >"$dir/pid"
+    for _ in {1..50}; do
+      if grep -q 'Configuration Loaded' "$dir/log"; then
+        echo "started, pid $(<"$dir/pid"), log $dir/log"
+        exit 0
+      fi
+      if grep -q 'Failed to load' "$dir/log" || ! kill -0 "$(<"$dir/pid")" 2>/dev/null; then break; fi
+      read -rt 0.1 <> <(:) || true
+    done
+    echo "qsrig: did not start" >&2
+    tail -20 "$dir/log" >&2
+    exit 1
+    ;;
+  call) qs -p "$cfg" ipc call probe "${@:3}" ;;
+  stop)
+    [[ -f $dir/pid ]] || exit 0
+    # Quickshell does not stop its children; the process group does.
+    kill -- "-$(<"$dir/pid")" 2>/dev/null || true
+    rm -f "$dir/pid"
+    ;;
+  *)
+    echo "qsrig: unknown command $cmd" >&2
+    exit 1
+    ;;
+esac

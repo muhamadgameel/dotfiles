@@ -282,7 +282,7 @@ lint_one() { # lint_one <label> <command...>
   fi
 }
 lint() {
-  local f sh=(setup.sh quickshell/.config/quickshell/qs-fmt quickshell/.config/quickshell/services/scripts/*.sh)
+  local f sh=(setup.sh quickshell/.config/quickshell/qs-fmt quickshell/.config/quickshell/services/scripts/*.sh .claude/skills/*/scripts/qs*)
   for f in shellcheck shfmt stylua zsh; do
     command -v $f >/dev/null || {
       printf '%s%s setup: lint needs %s%s\n' "$red" "$i_miss" "$f" "$reset" >&2
