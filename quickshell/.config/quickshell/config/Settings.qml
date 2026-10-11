@@ -38,6 +38,9 @@ Singleton {
   */
   property var values: ({})
 
+  // Each key's fallback, as get() last saw it.
+  readonly property var _defaults: ({})
+
   // How long after our own write to ignore the resulting file-change event, so
   // a pending in-memory change is not overwritten by the copy we just saved.
   readonly property int selfWriteGraceMs: 1000
@@ -53,6 +56,7 @@ Singleton {
   *   defaults; nothing is written to disk until it is actually changed.
   */
   function get(key, fallback) {
+    _defaults[key] = fallback;
     const v = values[key];
     return v === undefined ? fallback : v;
   }
@@ -111,7 +115,13 @@ Singleton {
 
   function _save() {
     root._lastSelfWrite = Date.now();
-    file.setText(JSON.stringify(root.values, null, 2) + "\n");
+    // A value back at its default is not a change, and would outlive a new default.
+    const changed = {};
+    for (const key in root.values) {
+      if (root.values[key] !== root._defaults[key])
+        changed[key] = root.values[key];
+    }
+    file.setText(JSON.stringify(changed, null, 2) + "\n");
   }
 
   // Coalesces bursts - a slider bound to a setting would otherwise rewrite the
