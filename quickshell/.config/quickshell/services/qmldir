@@ -6,6 +6,7 @@ singleton Brightness 1.0 Brightness.qml
 singleton Display 1.0 Display.qml
 singleton GameMode 1.0 GameMode.qml
 singleton Idle 1.0 Idle.qml
+singleton KeyboardLayout 1.0 KeyboardLayout.qml
 singleton Media 1.0 Media.qml
 singleton Network 1.0 Network.qml
 singleton NightLight 1.0 NightLight.qml

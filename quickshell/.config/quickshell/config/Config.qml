@@ -27,6 +27,7 @@ Singleton {
 
   // === Bar Configuration ===
   readonly property string barPosition: Settings.get("barPosition", "top")
+  readonly property bool barShowKeyboardLayout: Settings.get("barShowKeyboardLayout", true)
   readonly property bool barShowClock: Settings.get("barShowClock", true)
 
   readonly property bool barClockShowSeconds: Settings.get("barClockShowSeconds", false)

@@ -5,6 +5,7 @@ Bluetooth 1.0 Bluetooth.qml
 Brightness 1.0 Brightness.qml
 Clock 1.0 Clock.qml
 IdleInhibitor 1.0 IdleInhibitor.qml
+KeyboardLayout 1.0 KeyboardLayout.qml
 Launcher 1.0 Launcher.qml
 Media 1.0 Media.qml
 Microphone 1.0 Microphone.qml

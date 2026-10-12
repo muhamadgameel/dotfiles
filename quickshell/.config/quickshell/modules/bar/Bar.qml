@@ -73,6 +73,11 @@ Rectangle {
 
     // Takes up whatever the title does not, keeping the widgets left-packed.
     Components.Spacer {}
+
+    // Beside the clock; nothing to show with a single layout.
+    Widgets.KeyboardLayout {
+      visible: Config.Config.barShowKeyboardLayout && Services.KeyboardLayout.hasChoice
+    }
   }
 
   // ===================================================================
