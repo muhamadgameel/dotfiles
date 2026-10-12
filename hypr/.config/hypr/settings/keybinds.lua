@@ -15,10 +15,14 @@ hl.bind(mod .. " + B", hl.dsp.exec_cmd(apps.browser), { description = "Browser" 
 -- Toggle: second press closes the launcher.
 hl.bind(mod .. " + D", hl.dsp.exec_cmd("pkill " .. apps.menu .. " || " .. apps.menu), { description = "App launcher" })
 
+-- wl-copy with nothing to copy empties the clipboard, so it runs only after a pick.
 hl.bind(
 	mod .. " + V",
 	hl.dsp.exec_cmd(
-		"cliphist list | " .. apps.menu .. " -d --placeholder='Clipboard history…' | cliphist decode | wl-copy"
+		"sel=$(cliphist list | "
+			.. apps.menu
+			.. " -d --only-match --placeholder='Clipboard history…'); "
+			.. '[ -n "$sel" ] && printf \'%s\' "$sel" | cliphist decode | wl-copy'
 	),
 	{ description = "Clipboard history" }
 )
