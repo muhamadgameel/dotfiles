@@ -146,6 +146,10 @@ reload says `Configuration Loaded`. The argument is the edited file's directory.
   names and notification text can carry markup, and a `Text` in its default format
   would render it, an `<img>` included. `components/Text.qml` sets
   `textFormat: Text.PlainText`; a raw `Text` that shows such a string needs the same.
+- **Do not name a property `on` plus a capital letter.** In `Battery.qml`, which has a
+  `battery` property, `readonly property bool onBattery: UPower.onBattery` stayed false
+  whatever its source said; the same line named `isOnBattery` works. Neither the lint
+  nor the log mentions it, so drive a new flag both ways in a rig before using it.
 - **A session lock stops the shell's windows being drawn.** An animation in flight
   freezes and finishes after unlocking: a panel sliding out was caught 80% closed.
   hyprlock starts about 80 ms after the lock request and a slide takes 250, so what

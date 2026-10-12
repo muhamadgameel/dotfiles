@@ -29,6 +29,7 @@ Components.Button {
   readonly property real percent: isReady ? battery.percentage * 100 : 0
 
   // Battery states
+  readonly property bool isOnBattery: UPower.onBattery
   readonly property bool isCharging: isReady && battery.state === UPowerDeviceState.Charging
   readonly property bool isFullyCharged: isReady && battery.state === UPowerDeviceState.FullyCharged
   readonly property bool isDischarging: isReady && battery.state === UPowerDeviceState.Discharging

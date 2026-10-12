@@ -115,8 +115,9 @@ Rectangle {
         onPanelRequested: root.panelRequested("audio")
       }
 
+      // Only while an app records.
       Widgets.Microphone {
-        visible: Config.Config.barShowMicrophone
+        visible: Config.Config.barShowMicrophone && Services.Privacy.micInUse
         onPanelRequested: root.panelRequested("audio")
       }
 
@@ -144,10 +145,11 @@ Rectangle {
         onPanelRequested: root.panelRequested("systemstats")
       }
 
+      // Not while it sits on mains with nothing to report.
       Widgets.Battery {
         id: battery
 
-        visible: Config.Config.barShowBattery && battery.hasBattery
+        visible: Config.Config.barShowBattery && (battery.isOnBattery || battery.isCharging)
         onPanelRequested: root.panelRequested("systemstats")
       }
     }

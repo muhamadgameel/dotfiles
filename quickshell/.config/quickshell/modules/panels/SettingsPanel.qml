@@ -35,8 +35,9 @@ Components.SlidingPanel {
   readonly property var barNotes: ({
       barShowTray: "when filled",
       barShowIdleInhibitor: "when on",
+      barShowMicrophone: "when recording",
       barShowMedia: "when playing",
-      barShowBattery: "when present",
+      barShowBattery: "on battery or charging",
       barShowBrightness: "when available"
     })
 
