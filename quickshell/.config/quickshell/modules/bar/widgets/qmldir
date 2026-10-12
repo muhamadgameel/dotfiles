@@ -10,7 +10,6 @@ Media 1.0 Media.qml
 Microphone 1.0 Microphone.qml
 Network 1.0 Network.qml
 NotificationBell 1.0 NotificationBell.qml
-QuickActions 1.0 QuickActions.qml
 SystemStats 1.0 SystemStats.qml
 Tray 1.0 Tray.qml
 Volume 1.0 Volume.qml

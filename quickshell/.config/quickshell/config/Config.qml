@@ -43,9 +43,6 @@ Singleton {
   readonly property bool barShowMedia: Settings.get("barShowMedia", true)
   readonly property bool barShowIdleInhibitor: Settings.get("barShowIdleInhibitor", true)
   readonly property bool barShowWindowTitle: Settings.get("barShowWindowTitle", true)
-  readonly property bool barShowScreenshot: Settings.get("barShowScreenshot", true)
-  readonly property bool barShowWallpaper: Settings.get("barShowWallpaper", true)
-  readonly property bool barShowPower: Settings.get("barShowPower", true)
 
   // === Appearance ===
   readonly property string theme: Settings.get("theme", Core.Themes.defaultName)

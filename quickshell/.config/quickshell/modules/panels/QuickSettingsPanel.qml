@@ -62,6 +62,37 @@ Components.SlidingPanel {
     onDone: chargeLimitRead.running = true
   }
 
+  // === Panels with no bar widget of their own ===
+  RowLayout {
+    Layout.fillWidth: true
+    spacing: Core.Style.spaceXS
+
+    PanelButton {
+      panel: "settings"
+      icon: "settings"
+      tooltipText: "Settings"
+    }
+
+    PanelButton {
+      panel: "wallpaper"
+      icon: "image"
+      tooltipText: "Change the wallpaper"
+    }
+
+    PanelButton {
+      panel: "screenshot"
+      icon: "camera"
+      tooltipText: "Take a screenshot"
+    }
+
+    PanelButton {
+      panel: "power"
+      icon: "power"
+      iconColor: Core.Theme.error
+      tooltipText: "Power menu"
+    }
+  }
+
   // === Toggles ===
   GridLayout {
     Layout.fillWidth: true
@@ -383,6 +414,14 @@ Components.SlidingPanel {
         onClicked: Services.Media.next()
       }
     }
+  }
+
+  component PanelButton: Components.Button {
+    required property string panel
+
+    Layout.fillWidth: true
+    variant: "secondary"
+    onClicked: root._openPanel(panel)
   }
 
   // --- Slider Row ---

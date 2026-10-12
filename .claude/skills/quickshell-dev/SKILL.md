@@ -18,6 +18,7 @@ Paths below are under `quickshell/.config/quickshell/` unless they start with `.
 | A system concern (state, a program to run) | One singleton `services/<Name>.qml` and a line in `services/qmldir`. Services import `core/` and `config/`, never `components/` or `modules/`. Run programs through `core/Command.qml` (`onDone: (code, out, err) =>`). |
 | A bar widget | `modules/bar/widgets/<Name>.qml`, a line in its `qmldir`, its place in `modules/bar/Bar.qml`. A show/hide flag `barShow<Name>` in `config/Config.qml`, its key in `barKeys` in `modules/panels/SettingsPanel.qml`, and in `barNotes` there if the widget also hides itself. |
 | A panel | `modules/panels/<Name>Panel.qml` on `components/SlidingPanel`, a line in that `qmldir`, its id in `ids` in `services/Panels.qml`, a `LazyLoader` in `modules/bar/BarWindow.qml`. |
+| A way into a panel that has no bar widget | A `PanelButton` in the first row of `modules/panels/QuickSettingsPanel.qml`, beside Settings, Wallpaper, Screenshot and Power, and a `panel<Name>` shortcut. The bar keeps one button for Quick Settings. |
 | A setting | `config/Config.qml`: `readonly property … : Settings.get("key", default)` with the default inline, and a setter if something writes it. `~/.local/state/quickshell/settings.json` holds only the values that differ from their default, so a changed default reaches everyone who never changed that setting. |
 | A key | A name in the `shortcuts` table of `modules/ipc/Shortcuts.qml`. The bind is in Hyprland (`hl.dsp.global("quickshell:<name>")`; see the hyprland-lua skill). |
 | A `qs ipc` function | `modules/ipc/Ipc.qml`. Return a string that says what happened. `qs ipc show` lists them. |
@@ -88,7 +89,9 @@ quickshell/.config/quickshell/qs-fmt --strict services/Audio.qml   # must exit 0
   `({ name: [a, () => b()] })`, as in `modules/ipc/Shortcuts.qml`.
 - The lint catches a deleted member of a singleton that something still reads. It
   does not catch a name passed as a string (`icon: "bell"`, a setting key, a panel
-  id): grep for the literal before removing one.
+  id): grep for the literal before removing one, with `grep -o` so that a long line
+  cannot hide the match. `barKeys` in `modules/panels/SettingsPanel.qml` is one such
+  line: a key left there shows as a dead switch.
 - Comment only a trap, a quirk or an ordering dependency. The reason for a change
   goes in the commit message.
 
