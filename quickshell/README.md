@@ -122,6 +122,7 @@ qs ipc call screenshot capture region   # region, window, output or screen;
 qs ipc call nightlight toggle
 qs ipc call updates status              # packages waiting in pacman and the AUR;
                                         # `check` asks again
+qs ipc call weather city <name>         # turn the weather on, for that city
 qs ipc call wallpaper shuffle
 qs ipc call notifications toggleDnd
 ```
@@ -129,3 +130,9 @@ qs ipc call notifications toggleDnd
 Hyprland's SUPER+SHIFT keys go through global shortcuts instead
 (`modules/ipc/Shortcuts.qml`; see [hypr/README.md](../hypr/README.md#keybinds)).
 `hyprctl globalshortcuts` lists the 19 the shell registers.
+
+The weather is off until a city is set, and asks nothing until then. Setting
+one sends its name to open-meteo.com once, to find its coordinates; from then
+on the shell asks for the forecast by those coordinates every half hour. No
+key and no account. The city and its coordinates are kept in `settings.json`;
+delete the three `weather…` keys there to turn it off again.

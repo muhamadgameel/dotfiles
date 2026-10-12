@@ -88,6 +88,13 @@ Singleton {
   readonly property string wallpaper: Settings.get("wallpaper", "")
   readonly property string wallpaperDirectory: Settings.get("wallpaperDirectory", `${Quickshell.env("HOME")}/Pictures/Wallpapers`)
 
+  // === Weather ===
+  // The city services/Weather.qml asks about, and where it is. With no city
+  // nothing is asked. `qs ipc call weather city <name>` sets all three.
+  readonly property string weatherCity: Settings.get("weatherCity", "")
+  readonly property real weatherLatitude: Settings.get("weatherLatitude", 0)
+  readonly property real weatherLongitude: Settings.get("weatherLongitude", 0)
+
   // === Notifications ===
   readonly property bool doNotDisturb: Settings.get("doNotDisturb", false)
   readonly property int notificationHistoryLimit: Settings.get("notificationHistoryLimit", 100)
@@ -188,6 +195,13 @@ Singleton {
 
   function setWallpaper(path) {
     Settings.set("wallpaper", path);
+  }
+
+  // The city last, so nothing sees the new name with the old place.
+  function setWeatherPlace(city, latitude, longitude) {
+    Settings.set("weatherLatitude", latitude);
+    Settings.set("weatherLongitude", longitude);
+    Settings.set("weatherCity", city);
   }
 
   function setNightLight(enabled) {

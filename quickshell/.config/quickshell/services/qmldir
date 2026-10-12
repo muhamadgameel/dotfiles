@@ -22,3 +22,4 @@ singleton ThemeSync 1.0 ThemeSync.qml
 singleton Tooltip 1.0 Tooltip.qml
 singleton Updates 1.0 Updates.qml
 singleton Wallpaper 1.0 Wallpaper.qml
+singleton Weather 1.0 Weather.qml

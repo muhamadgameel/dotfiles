@@ -266,6 +266,23 @@ Scope {
   }
 
   IpcHandler {
+    target: "weather"
+
+    /**
+    * Set the city to show the weather for. Its name goes to open-meteo.com
+    * once, to find its coordinates.
+    */
+    function city(name: string): string {
+      Services.Weather.setCity(name);
+      return `looking up ${name}`;
+    }
+
+    function status(): string {
+      return Services.Weather.statusText;
+    }
+  }
+
+  IpcHandler {
     target: "updates"
 
     /**
