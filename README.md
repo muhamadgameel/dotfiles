@@ -57,8 +57,9 @@ files (`system/`), GTK settings (`dconf/`) and the Brewfile (`macos/`).
    ```
 
    `install` asks for sudo once, then works through its steps in order:
-   pacman (multilib, mirrors), packages, stow, AUR (it builds yay first),
-   system files, user settings, services.
+   pacman (multilib, coloured output and verbose package lists, mirrors),
+   packages, stow, AUR (it builds yay first), system files, user settings,
+   services.
 3. Reboot, so zram, the new initramfs and the audio settings apply. In SDDM pick
    **Hyprland (uwsm-managed)**; the plain Hyprland entry is hidden, because
    without uwsm the bar, idle lock, wallpaper and night light never start.
@@ -206,8 +207,8 @@ Fullscreen games skip vsync and keep the screen awake; see
   and the AUR ones together.
 - **`.pacnew` files:** review them with `sudo DIFFPROG='nvim -d' pacdiff`, and
   merge rather than overwrite `pacman.conf`, `mirrorlist` and `locale.gen`.
-  Overwriting them drops multilib, the mirrors and your locale. `./setup.sh`
-  counts pending ones.
+  Overwriting them drops multilib, pacman's output options, the mirrors and
+  your locale. `./setup.sh` counts pending ones.
 - **Package cache:** paccache.timer trims it weekly, keeping three versions of
   each package. `sudo paccache -ruk0` drops the cache of uninstalled packages.
 - **Orphans:** read `pacman -Qdtq` before removing anything, and never pipe it

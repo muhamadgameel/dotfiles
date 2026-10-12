@@ -102,6 +102,8 @@ aur_missing() { absent $(list "$1" | sed -n 's|^aur/||p'); }
 
 multilib_ok() { grep -q '^\[multilib\]' /etc/pacman.conf; }
 multilib_add() { run sudo sed -i '/^#\[multilib\]/,/^#Include/s/^#//' /etc/pacman.conf; }
+pacopts_ok() { grep -q '^Color' /etc/pacman.conf && grep -q '^VerbosePkgLists' /etc/pacman.conf; }
+pacopts_set() { run sudo sed -i 's/^#\(Color\|VerbosePkgLists\)$/\1/' /etc/pacman.conf; }
 mirrors_ok() { grep -q '^Server' /etc/pacman.d/mirrorlist; }
 mirrors_fix() { run sudo systemctl start reflector.service; }
 
@@ -241,8 +243,16 @@ walls_seed() { run install -Dm644 hypr/.config/hypr/wallpaper.jpg "$HOME/Picture
 fuzzel_colors=$HOME/.local/state/quickshell/fuzzel-colors.ini
 fuzzel_ok() { [[ -e $fuzzel_colors ]]; }
 fuzzel_seed() { run install -Dm644 /dev/null "$fuzzel_colors"; }
-rust_ok() { ! command -v rustup >/dev/null || rustup default >/dev/null 2>&1; }
-rust_set() { run rustup default stable; }
+# rustup's default profile has neither rust-analyzer nor rust-src, and Neovim's Rust setup needs both.
+rust_ok() {
+  command -v rustup >/dev/null || return 0
+  local have
+  have=$(rustup component list --installed 2>/dev/null) && [[ $have == *rust-analyzer* && $have == *rust-src* ]]
+}
+rust_set() {
+  rustup default >/dev/null 2>&1 || run rustup default stable
+  run rustup component add rust-analyzer rust-src
+}
 ext_missing() { comm -23 <(sort setup/packages/code-extensions.txt) <(code --list-extensions 2>/dev/null | sort); }
 ext_ok() { ! command -v code >/dev/null || [[ -z $(ext_missing) ]]; }
 ext_add() { for e in $(ext_missing); do run code --install-extension "$e"; done; }
@@ -343,6 +353,7 @@ else
   if want pacman; then
     step $'\uf1b3' pacman
     item "[multilib] in pacman.conf" multilib_ok multilib_add
+    item "Color and VerbosePkgLists in pacman.conf" pacopts_ok pacopts_set
     item "active mirrors in the mirrorlist" mirrors_ok mirrors_fix
   fi
   if want packages; then
@@ -379,7 +390,7 @@ else
     item "battery charge limit" charge_ok charge_cap
     item "a wallpaper in ~/Pictures/Wallpapers" walls_ok walls_seed
     item "the launcher's colour file" fuzzel_ok fuzzel_seed
-    item "rust toolchain" rust_ok rust_set
+    item "rust toolchain with rust-analyzer and rust-src" rust_ok rust_set
     item "Code - OSS extensions" ext_ok ext_add
     git_identity
     key=$(git config --get user.signingkey || true)
