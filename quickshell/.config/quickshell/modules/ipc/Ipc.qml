@@ -266,6 +266,25 @@ Scope {
   }
 
   IpcHandler {
+    target: "updates"
+
+    /**
+    * Ask pacman and the AUR again.
+    */
+    function check(): string {
+      Services.Updates.check();
+      return "checking";
+    }
+
+    function status(): string {
+      const updates = Services.Updates;
+      if (updates.checkedAt === 0)
+        return updates.checking ? "checking" : "not checked yet";
+      return `${updates.count} waiting, checked at ${Qt.formatTime(new Date(updates.checkedAt), "HH:mm")}${updates.checking ? ", checking again" : ""}`;
+    }
+  }
+
+  IpcHandler {
     target: "nightlight"
 
     function toggle(): string {

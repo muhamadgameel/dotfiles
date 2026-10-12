@@ -112,6 +112,12 @@ reload says `Configuration Loaded`. The argument is the edited file's directory.
   the next line. A popup at the top left of the screen stays while the pointer is on
   it, and `qs ipc` answers "Not ready" until it is gone. Fix the file; do not restart
   the shell to clear it.
+- **A reload that failed because a file was missing is not tried again** when the file
+  appears: Quickshell compares the contents of the files it tracks, and a new file or a
+  `qmldir` is not among them, so the nudge does nothing either. Change the content of a
+  tracked file, such as a blank line at the end of the file that names the new one, and
+  take it out again. Better, never get there: write a new file before the `qmldir` and
+  the files that name it, and chain the writes with `&&` so a failed step stops the rest.
 - **After many files at once,** restart instead: `systemctl --user restart quickshell`.
   Never `pkill qs`: Quickshell does not stop its children, the unit's cgroup does. A
   restart clears the notification history and Stay Awake, so look for "Stay Awake is

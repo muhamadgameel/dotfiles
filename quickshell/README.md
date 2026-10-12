@@ -120,6 +120,8 @@ qs ipc call theme set tokyo-night       # catppuccin-mocha, catppuccin-macchiato
 qs ipc call screenshot capture region   # region, window, output or screen;
                                         # `copy` puts it on the clipboard instead
 qs ipc call nightlight toggle
+qs ipc call updates status              # packages waiting in pacman and the AUR;
+                                        # `check` asks again
 qs ipc call wallpaper shuffle
 qs ipc call notifications toggleDnd
 ```
