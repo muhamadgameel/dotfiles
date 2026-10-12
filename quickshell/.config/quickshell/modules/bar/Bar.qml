@@ -92,6 +92,11 @@ Rectangle {
 
     spacing: Core.Style.spaceXS
 
+    // Beside the clock; nothing to show while the system is up to date.
+    Widgets.Updates {
+      visible: Config.Config.barShowUpdates && Services.Updates.count > 0
+    }
+
     // Pushes everything to the right edge.
     Components.Spacer {}
 
