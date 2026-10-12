@@ -152,6 +152,11 @@ reload says `Configuration Loaded`. The argument is the edited file's directory.
   names and notification text can carry markup, and a `Text` in its default format
   would render it, an `<img>` included. `components/Text.qml` sets
   `textFormat: Text.PlainText`; a raw `Text` that shows such a string needs the same.
+- **A layout of centred items does not grow.** A `ColumnLayout` whose children only set
+  `Layout.alignment: Qt.AlignHCenter` is as wide as its widest child at most, so
+  `Layout.fillWidth` on it does nothing and a row of such columns bunches up at the left.
+  Give the labels `Layout.fillWidth: true` with `horizontalAlignment: Text.AlignHCenter`,
+  and the row `uniformCellSizes: true` for equal columns. Only a render shows it.
 - **Do not name a property `on` plus a capital letter.** In `Battery.qml`, which has a
   `battery` property, `readonly property bool onBattery: UPower.onBattery` stayed false
   whatever its source said; the same line named `isOnBattery` works. Neither the lint

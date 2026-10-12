@@ -53,6 +53,11 @@ Singleton {
       // === Theme ===
       "moon": "󰖔",
       "sun": "󰖙",
+      "cloud": "󰖐",
+      "cloud-sun": "󰖕",
+      "rain": "󰖗",
+      "snow": "󰖘",
+      "storm": "󰖓",
       "palette": "󰏘",
 
       // === Visibility ===

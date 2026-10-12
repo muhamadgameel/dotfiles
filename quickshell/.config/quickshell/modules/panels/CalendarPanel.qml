@@ -217,27 +217,62 @@ Components.SlidingPanel {
 
   Components.Divider {
     Layout.topMargin: Core.Style.spaceS
+    visible: Services.Weather.ready
   }
 
-  // === Clock ===
-  ColumnLayout {
+  // === Weather, once a city is set ===
+  RowLayout {
     Layout.fillWidth: true
+    visible: Services.Weather.ready
     spacing: 0
+    uniformCellSizes: true
 
-    Components.Text {
-      Layout.fillWidth: true
-      horizontalAlignment: Text.AlignHCenter
-      text: Services.Time.timeLong
-      size: Core.Style.fontXXL
-      weight: Core.Style.weightBold
-    }
+    Repeater {
+      model: Services.Weather.days
 
-    Components.Text {
-      Layout.fillWidth: true
-      horizontalAlignment: Text.AlignHCenter
-      text: Services.Time.dateLong
-      size: Core.Style.fontS
-      color: Core.Theme.textDim
+      delegate: ColumnLayout {
+        id: dayColumn
+
+        required property var modelData
+        required property int index
+
+        // The date is a day, not a moment: built from its parts so no time zone moves it.
+        readonly property var parts: modelData.date.split("-")
+        readonly property date day: new Date(parts[0], parts[1] - 1, parts[2])
+
+        Layout.fillWidth: true
+        spacing: Core.Style.spaceXXS
+
+        Components.Text {
+          Layout.fillWidth: true
+          horizontalAlignment: Text.AlignHCenter
+          text: dayColumn.index === 0 ? "Today" : Qt.formatDate(dayColumn.day, "ddd")
+          size: Core.Style.fontS
+          color: Core.Theme.textDim
+        }
+
+        Components.Icon {
+          Layout.alignment: Qt.AlignHCenter
+          icon: Services.Weather.icon(dayColumn.modelData.code, false)
+          size: Core.Style.fontXL
+        }
+
+        Components.Text {
+          Layout.fillWidth: true
+          horizontalAlignment: Text.AlignHCenter
+          text: `${Math.round(dayColumn.modelData.max)}°`
+          size: Core.Style.fontS
+          weight: Core.Style.weightBold
+        }
+
+        Components.Text {
+          Layout.fillWidth: true
+          horizontalAlignment: Text.AlignHCenter
+          text: `${Math.round(dayColumn.modelData.min)}°`
+          size: Core.Style.fontS
+          color: Core.Theme.textDim
+        }
+      }
     }
   }
 }

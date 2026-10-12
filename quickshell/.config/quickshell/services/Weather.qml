@@ -22,8 +22,9 @@ Singleton {
   // Whether there is an answer, and for this city.
   readonly property bool ready: _answer !== null && _kept.city === root.city
   readonly property real temperature: ready ? _answer.current.temperature_2m : 0
-  // A WMO weather code; describe() puts it in words.
+  // A WMO weather code; describe() puts it in words and icon() names a glyph.
   readonly property int code: ready ? _answer.current.weather_code : -1
+  readonly property bool night: ready && _answer.current.is_day === 0
   // Today first: { date, code, min, max }.
   readonly property var days: !ready ? [] : _answer.daily.time.map((date, i) => ({
         date: date,
@@ -71,6 +72,24 @@ Singleton {
     return "Thunderstorm";
   }
 
+  function icon(code, night) {
+    if (code <= 1)
+      return night ? "moon" : "sun";
+    if (code === 2)
+      return "cloud-sun";
+    if (code <= 48)
+      return "cloud";
+    if (code <= 67)
+      return "rain";
+    if (code <= 77)
+      return "snow";
+    if (code <= 82)
+      return "rain";
+    if (code <= 86)
+      return "snow";
+    return "storm";
+  }
+
   function setCity(name) {
     _kept.unknown = "";
     Config.Config.setWeatherPlace(name.trim(), 0, 0);
@@ -90,7 +109,7 @@ Singleton {
       return;
     }
 
-    _fetch.command = ["curl", "-sf", "--max-time", "10", `https://api.open-meteo.com/v1/forecast?latitude=${Config.Config.weatherLatitude}&longitude=${Config.Config.weatherLongitude}&current=temperature_2m,weather_code&daily=weather_code,temperature_2m_max,temperature_2m_min&timezone=auto&forecast_days=5`];
+    _fetch.command = ["curl", "-sf", "--max-time", "10", `https://api.open-meteo.com/v1/forecast?latitude=${Config.Config.weatherLatitude}&longitude=${Config.Config.weatherLongitude}&current=temperature_2m,weather_code,is_day&daily=weather_code,temperature_2m_max,temperature_2m_min&timezone=auto&forecast_days=5`];
     _fetch.running = true;
   }
 

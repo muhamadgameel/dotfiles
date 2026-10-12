@@ -7,7 +7,7 @@ import "../../../core" as Core
 import "../../../services" as Services
 
 /**
-* Clock - time and date, and the way in to the calendar
+* Clock - time, date and the weather, and the way in to the calendar
 *
 * Left click opens the calendar panel.
 */
@@ -44,6 +44,21 @@ Item {
       color: Core.Theme.textDim
       weight: Core.Style.weightNormal
     }
+
+    // Weather, once a city is set
+    Components.Icon {
+      visible: Services.Weather.ready
+      icon: Services.Weather.icon(Services.Weather.code, Services.Weather.night)
+      size: Core.Style.fontM
+      color: Core.Theme.textDim
+    }
+
+    Components.Text {
+      visible: Services.Weather.ready
+      text: `${Math.round(Services.Weather.temperature)}°`
+      size: Core.Style.fontM
+      color: Core.Theme.textDim
+    }
   }
 
   Component.onDestruction: Services.Tooltip.forget(root)
@@ -54,7 +69,8 @@ Item {
     cursorShape: Qt.PointingHandCursor
 
     onEntered: {
-      Services.Tooltip.show(root, `${Services.Time.dateLong}\n\nClick: Calendar`, "bottom");
+      const weather = Services.Weather.ready ? `\n${Services.Weather.statusText}` : "";
+      Services.Tooltip.show(root, `${Services.Time.dateLong}${weather}\n\nClick: Calendar`, "bottom");
     }
 
     onExited: {

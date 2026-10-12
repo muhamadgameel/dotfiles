@@ -131,8 +131,10 @@ Hyprland's SUPER+SHIFT keys go through global shortcuts instead
 (`modules/ipc/Shortcuts.qml`; see [hypr/README.md](../hypr/README.md#keybinds)).
 `hyprctl globalshortcuts` lists the 19 the shell registers.
 
-The weather is off until a city is set, and asks nothing until then. Setting
-one sends its name to open-meteo.com once, to find its coordinates; from then
-on the shell asks for the forecast by those coordinates every half hour. No
-key and no account. The city and its coordinates are kept in `settings.json`;
-delete the three `weather…` keys there to turn it off again.
+The weather shows after the date in the bar's clock and as five days at the
+bottom of the calendar panel. It is off until a city is set, and asks nothing
+until then. Setting one sends its name to open-meteo.com once, to find its
+coordinates; from then on the shell asks for the forecast by those coordinates
+every half hour. No key and no account. The city and its coordinates are kept
+in `settings.json`; delete the three `weather…` keys there to turn it off
+again.
