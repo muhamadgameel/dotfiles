@@ -17,6 +17,9 @@ import "../../../services" as Services
 * - Middle click: secondary activate
 * - Right click:  the item's own menu
 * - Scroll:       forwarded to the item
+*
+* The chevron opens and closes the drawer. Closed, only an item that asks for
+* attention shows.
 */
 RowLayout {
   id: root
@@ -25,6 +28,8 @@ RowLayout {
 
   // Passive items are ones the app has explicitly said need no attention.
   readonly property var shownItems: SystemTray.items.values.filter(i => i && i.status !== Status.Passive)
+
+  property bool expanded: false
 
   Repeater {
     model: root.shownItems
@@ -36,6 +41,7 @@ RowLayout {
 
       readonly property var item: modelData
 
+      visible: root.expanded || entry.item?.status === Status.NeedsAttention
       implicitWidth: Core.Style.widgetSize
       implicitHeight: Core.Style.widgetSize
 
@@ -133,5 +139,11 @@ RowLayout {
 
       Component.onDestruction: Services.Tooltip.forget(entry)
     }
+  }
+
+  Components.Button {
+    icon: root.expanded ? "chevron-right" : "chevron-left"
+    tooltipText: root.expanded ? "Hide the tray icons" : `Show the tray icons (${root.shownItems.length})`
+    onClicked: root.expanded = !root.expanded
   }
 }
