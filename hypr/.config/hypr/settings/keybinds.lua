@@ -170,6 +170,16 @@ hl.bind(mod .. " + SHIFT + Print", screenshot("copy", "screen"), { description =
 -- Window mode: click the window to capture.
 hl.bind("ALT + Print", screenshot("capture", "window"), { description = "Screenshot a window to file" })
 
+-- ── Recording ───────────────────────────────────────────────────────
+
+-- The same key stops it. The recorder is a unit of its own, so systemctl can stop it when the shell is down.
+local function record(mode)
+	return hl.dsp.exec_cmd(("qs ipc call recorder toggle %s || systemctl --user stop quickshell-recorder"):format(mode))
+end
+
+hl.bind("CTRL + Print", record("region"), { description = "Record a region, or stop recording" })
+hl.bind("CTRL + SHIFT + Print", record("screen"), { description = "Record the screen, or stop recording" })
+
 -- ── Shell panels ─────────────────────────────────────────────────────
 -- Global shortcuts the running shell registers (hypr/README.md); SUPER+letter stays with apps.
 

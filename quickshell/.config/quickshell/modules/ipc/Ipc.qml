@@ -266,6 +266,31 @@ Scope {
   }
 
   IpcHandler {
+    target: "recorder"
+
+    /**
+    * Start a recording, or stop the one that is running.
+    * @param mode - screen or region
+    */
+    function toggle(mode: string): string {
+      if (mode !== "screen" && mode !== "region")
+        return `unknown mode "${mode}"; known: screen, region`;
+      const was = Services.Recorder.recording;
+      Services.Recorder.toggle(mode, false);
+      return was ? "stopping" : `recording the ${mode}`;
+    }
+
+    function stop(): string {
+      Services.Recorder.stop();
+      return "stopping";
+    }
+
+    function status(): string {
+      return Services.Recorder.recording ? "recording" : "idle";
+    }
+  }
+
+  IpcHandler {
     target: "weather"
 
     /**

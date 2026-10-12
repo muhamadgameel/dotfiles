@@ -102,6 +102,7 @@ has the full table. The ones to know first:
 | SUPER+Space | Switch keyboard layout (English, Arabic) |
 | SUPER+SHIFT+Q | Quick settings |
 | Print | Screenshot a region |
+| CTRL+Print | Record a region; again to stop |
 | SUPER+Escape | Lock |
 
 ## System changes

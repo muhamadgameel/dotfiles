@@ -113,7 +113,12 @@ it was aimed at.
 The media keys call playerctl rather than the shell, so they keep working while
 the shell restarts. The Print keys go through the shell's screenshot service,
 which names the file and tracks the last shot, and fall back to plain grim when
-the shell isn't running. Brightness steps are linear because
+the shell isn't running. CTRL+Print records a region and CTRL+SHIFT+Print the
+screen, with the desktop's sound, into `~/Pictures/Recordings`; the same key
+stops it, also while the shell is down, because the recorder runs in a unit of
+its own. It captures below the compositor, so the `no_screen_share` rule does
+not apply: the Bitwarden window is recorded like any other. Brightness steps
+are linear because
 [`services/Brightness.qml`](../quickshell/.config/quickshell/services/Brightness.qml)
 writes and reads a linear percentage; an exponential curve here would move the
 shell's slider by uneven amounts.
@@ -131,6 +136,8 @@ under the pointer still zooms along.
 | Keys | Action |
 |---|---|
 | `ALT + Print` | Screenshot a window to file |
+| `CTRL + Print` | Record a region, or stop recording |
+| `CTRL + SHIFT + Print` | Record the screen, or stop recording |
 | `Print` | Screenshot region to file |
 | `SHIFT + Print` | Screenshot to file |
 | `SUPER + 1-0` | Go to workspace |

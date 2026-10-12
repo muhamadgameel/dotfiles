@@ -28,6 +28,7 @@ aur/wayland-pipewire-idle-inhibit  # no dimming while audio plays
 # input, clipboard, screenshots
 brightnessctl
 cliphist
+gpu-screen-recorder     # the shell's screen recording
 grim
 playerctl               # media keys
 slurp
