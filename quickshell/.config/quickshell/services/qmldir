@@ -13,6 +13,7 @@ singleton Notification 1.0 Notification.qml
 singleton OSD 1.0 OSD.qml
 singleton Panels 1.0 Panels.qml
 singleton Power 1.0 Power.qml
+singleton Privacy 1.0 Privacy.qml
 singleton Screenshot 1.0 Screenshot.qml
 singleton SystemStats 1.0 SystemStats.qml
 singleton Time 1.0 Time.qml
