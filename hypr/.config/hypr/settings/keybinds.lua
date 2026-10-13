@@ -330,6 +330,13 @@ for _, cp, name in sorted(rows):
 
 bind(mod .. " + semicolon", hl.dsp.exec_cmd(emoji), { description = "Emoji picker" })
 
+-- Python as a calculator: sqrt(2), sin(pi / 4), and _ for the last answer. rules.lua floats the window.
+bind(
+	mod .. " + equal",
+	hl.dsp.exec_cmd(apps.terminal .. [[ --class calculator -T Calculator -e python3 -q -i -c "from math import *"]]),
+	{ description = "Calculator" }
+)
+
 -- Cycle the tiling layout.
 local layouts = { "dwindle", "master", "scrolling" }
 

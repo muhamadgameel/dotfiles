@@ -61,6 +61,15 @@ for _, class in ipairs({ "org.gnome.Loupe", "org.gnome.FileRoller" }) do
 	hl.window_rule({ match = { class = class }, float = true })
 end
 
+-- The terminal SUPER+equal opens (keybinds.lua).
+hl.window_rule({
+	name = "calculator",
+	match = { class = "^calculator$" },
+	float = true,
+	center = true,
+	size = { 620, 440 },
+})
+
 -- ── Privacy ──────────────────────────────────────────────────────────
 
 hl.window_rule({ match = { class = "^(?i)bitwarden$" }, no_screen_share = true })

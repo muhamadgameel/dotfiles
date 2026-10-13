@@ -134,6 +134,10 @@ font, under the name Python's Unicode table has for it, so the red heart is
 "heavy black heart", and flags and skin tones, which are sequences, are not
 in it.
 
+SUPER+equal opens a calculator: a small floating terminal running Python with
+the names of its `math` module loaded, so `sqrt(2)`, `sin(pi / 4)` and `2**10`
+work, and `_` is the last answer. Ctrl+D closes it.
+
 The media keys call playerctl rather than the shell, so they keep working while
 the shell restarts. The Print keys go through the shell's screenshot service,
 which names the file and tracks the last shot, and fall back to plain grim when
@@ -219,6 +223,7 @@ under the pointer still zooms along.
 | `SUPER + bracketleft` | Previous workspace |
 | `SUPER + bracketright` | Next workspace |
 | `SUPER + comma` | Focus previous monitor |
+| `SUPER + equal` | Calculator |
 | `SUPER + grave` | Close any shell panel |
 | `SUPER + mouse:272` | Drag window |
 | `SUPER + mouse:273` | Resize window |

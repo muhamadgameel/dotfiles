@@ -56,11 +56,16 @@ hyprctl eval "local f = io.open('$SCRATCH/out.txt', 'w'); f:write(tostring(hl.ge
   handlers, globals. That makes `eval` the place to try a rule or a bind first.
 - Without Lua: `hyprctl getoption <section:name>`, `hyprctl binds -j`,
   `hyprctl clients -j`, `hyprctl devices -j`, `hyprctl getprop class:foo no_dim`.
-- A real window that never shows: add
-  `hl.window_rule({ match = { class = "qsprobe" }, workspace = "special:qsprobe silent" })`
-  through `eval`, then start the app with that class. Close it by its address from
-  `hyprctl clients -j`. Do not `pkill -f <pattern>`: the pattern matches the shell
-  that runs it.
+- A real window that never shows: start it with a rule of its own,
+  `hyprctl eval "hl.dispatch(hl.dsp.exec_cmd([[<command>]], { workspace = 'special:qsprobe silent' }))"`.
+  It takes no focus, the config's own rules still apply to it, and nothing is left to
+  undo. Read it in `hyprctl clients -j` and close it by its address:
+  `hl.dispatch(hl.dsp.window.close({ window = "address:0x…" }))`. Do not
+  `pkill -f <pattern>`: the pattern matches the shell that runs it.
+- To see whether a rule added through `eval` is still in force, give it
+  `tag = "+qsprobe"`: the tag shows in `tags` in `hyprctl clients -j`.
+- A terminal's rows and columns are wrong for the first half second, before the rule's
+  size has reached it: `sh -c 'sleep 0.6; stty size > <file>'`.
 - Hyprland floats a fixed-size window by itself. Read `floating`, `size` and `at` of a
   hidden probe window before proposing a float rule.
 
