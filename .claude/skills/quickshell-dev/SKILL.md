@@ -59,6 +59,9 @@ qsrig stop  <scratch>/rig
   rig's PATH (`PATH=<dir>:$PATH qsrig start <rig>`). A stand-in `sh` that logs `$2` and
   exits shows the script a service builds without running it: make the same calls on a
   rig of today's code and `diff` the two logs to prove which modes a change left alone.
+  `systemd-run` finds the program on the caller's PATH, so a unit started that way runs
+  the stand-in too; give the stand-in a fixed log path, because the unit has the user
+  manager's environment, not yours.
 - An `IpcHandler` block copied from `modules/ipc/Ipc.qml` into `Scene.qml` answers
   `qs -p <rig>/cfg ipc call <target> …`, so a reply is read off the real block.
 - A stand-in proves only what its author assumed about the real object. When a result
@@ -206,6 +209,9 @@ reload says `Configuration Loaded`. The argument is the edited file's directory.
   has bound it. The portal's share is the video source named
   `xdg-desktop-portal-hyprland`; `xdph-streaming-<id>` is its `media.name`. A made-up
   node proves nothing about a name: read it off a real one.
+- **systemd-run expands `$` in the command's arguments.** An argument that starts with
+  `$` is taken for a variable and dropped when there is none, and `${NAME}` is filled in
+  anywhere. Pass `--expand-environment=no` when an argument is someone's text.
 - **Text from outside goes after `--`** when it is an argument. `notify-send "Text
   copied" "$text"` fails with "Missing argument for -r" when the text starts with a dash.
 - **Several live files written within one reload** can leave the last one unread. Compare

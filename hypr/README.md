@@ -120,6 +120,14 @@ config's own Lua state, so it does exactly what the key does. A bind made
 with `hl.bind` stays off the list: the mouse binds, and Log out, which one
 Enter should not reach. Restart and shut down stay behind the Power panel.
 
+SUPER+R asks for a reminder: a time, then the text, as in `10 call Ahmed`. A
+bare number is minutes; `90s`, `2h` and `1h30m` work too, and the text may be
+left out. It becomes a systemd user timer that raises a critical notification,
+which stays until you dismiss it and gets through do not disturb.
+`systemctl --user list-timers 'reminder-*'` lists the pending ones, and
+`systemctl --user stop` with a timer's name drops it. They outlive a shell
+restart, not a logout.
+
 The media keys call playerctl rather than the shell, so they keep working while
 the shell restarts. The Print keys go through the shell's screenshot service,
 which names the file and tracks the last shot, and fall back to plain grim when
@@ -169,6 +177,7 @@ under the pointer still zooms along.
 | `SUPER + P` | Command palette |
 | `SUPER + Print` | Screenshot region to clipboard |
 | `SUPER + Q` | Close window |
+| `SUPER + R` | Set a reminder |
 | `SUPER + Return` | Terminal |
 | `SUPER + SHIFT + 1-0` | Send window to workspace |
 | `SUPER + SHIFT + A` | Audio panel |

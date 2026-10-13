@@ -35,6 +35,7 @@ probed on 0.56.2:
   its release, so a hold-to-act pair belongs on a key without modifiers.
 - `hl.on("input.keyboard.key", fn)` hands `fn` a key code, a time in ms and a state
   (1 down, 0 up) for every keyboard device.
+- `hl.dsp.exec_cmd` hands its string to a shell whole: a script of several lines works.
 - `hl.dispatch(x)` runs a dispatcher object or a function, also from `hyprctl eval`. A
   dispatcher object is a plain value: the one handed to `hl.bind` can be kept in a
   table and dispatched again and again. `hl.dsp.global` dispatched this way sends a

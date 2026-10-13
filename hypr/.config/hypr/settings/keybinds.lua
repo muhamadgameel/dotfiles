@@ -292,6 +292,23 @@ bind(
 
 bind(mod .. " + SHIFT + C", hl.dsp.exec_cmd("hyprpicker -a"), { description = "Color picker" })
 
+-- "10 call Ahmed", "90s tea" or "2h": a bare number is minutes. The timer is the user manager's, so it outlives
+-- the shell but not the session. Left to itself systemd fires it up to a minute late, and takes a text that
+-- starts with $ for a variable and drops it.
+local remind = [=[set -f; set -- $(%s -d --prompt-only='Remind me in ' --placeholder='10 call Ahmed')
+[ $# -gt 0 ] || exit 0
+when=$1; shift; what=$*
+case $when in *[!0-9]*) ;; *) when=${when}m ;; esac
+if systemd-run --user --quiet --unit="reminder-$(date +%%s)" --on-active="$when" \
+	--timer-property=AccuracySec=1s --expand-environment=no \
+	notify-send -u critical -t 0 -a Reminder -- "${what:-Time is up}"; then
+	notify-send -t 3000 -a Reminder -- "Reminder in $when" "$what"
+else
+	notify-send -a Reminder -- "No reminder set" 'Start with the time: "10 call Ahmed", "90s tea" or "2h".'
+fi]=]
+
+bind(mod .. " + R", hl.dsp.exec_cmd(remind:format(apps.menu)), { description = "Set a reminder" })
+
 -- Cycle the tiling layout.
 local layouts = { "dwindle", "master", "scrolling" }
 
