@@ -31,6 +31,7 @@ cliphist
 gpu-screen-recorder     # the shell's screen recording
 grim
 playerctl               # media keys
+python                  # names for the emoji picker (SUPER+semicolon)
 slurp
 swappy
 tesseract               # reads the text in a region (SUPER+CTRL+Print)

@@ -128,6 +128,12 @@ which stays until you dismiss it and gets through do not disturb.
 `systemctl --user stop` with a timer's name drops it. They outlive a shell
 restart, not a logout.
 
+SUPER+semicolon lists the emoji; type part of a name and Enter copies the
+one picked. The list is every emoji that is a single character in the emoji
+font, under the name Python's Unicode table has for it, so the red heart is
+"heavy black heart", and flags and skin tones, which are sequences, are not
+in it.
+
 The media keys call playerctl rather than the shell, so they keep working while
 the shell restarts. The Print keys go through the shell's screenshot service,
 which names the file and tracks the last shot, and fall back to plain grim when
@@ -219,6 +225,7 @@ under the pointer still zooms along.
 | `SUPER + mouse_down` | Next workspace |
 | `SUPER + mouse_up` | Previous workspace |
 | `SUPER + period` | Focus next monitor |
+| `SUPER + semicolon` | Emoji picker |
 | `SUPER + space` | Switch keyboard layout |
 | `XF86AudioLowerVolume` | Volume down |
 | `XF86AudioMicMute` | Mute microphone |

@@ -309,6 +309,27 @@ fi]=]
 
 bind(mod .. " + R", hl.dsp.exec_cmd(remind:format(apps.menu)), { description = "Set a reminder" })
 
+-- Every emoji that is one character in the emoji font, under Python's name for it. Flags and skin tones are
+-- sequences, so they are not in the list.
+local emoji = [=[sel=$(fc-match -f '%{charset}' 'Noto Color Emoji' | python3 -c '
+import sys, unicodedata
+rows = []
+for part in sys.stdin.read().split():
+	low, _, high = part.partition("-")
+	for cp in range(int(low, 16), int(high or low, 16) + 1):
+		name = unicodedata.name(chr(cp), "")
+		# Not the letters flags are made of, the skin tones, the joiner, keycap and selector, or the tags.
+		parts = 0x1F1E6 <= cp <= 0x1F1FF or 0x1F3FB <= cp <= 0x1F3FF or cp in (0x200D, 0x20E3, 0xFE0F) or cp >= 0xE0000
+		if cp > 0xFF and name and not parts:
+			rows.append((not 0x1F600 <= cp <= 0x1F64F, cp, name.lower()))
+# Faces first. Below U+1F000 a selector follows, or the character is drawn as plain text.
+for _, cp, name in sorted(rows):
+	print(chr(cp) + ("\ufe0f" if cp < 0x1F000 else ""), name, sep="\t")
+' | ]=] .. apps.menu .. [=[ -d --only-match --accept-nth=1 --placeholder='Emoji…')
+[ -n "$sel" ] && printf %s "$sel" | wl-copy]=]
+
+bind(mod .. " + semicolon", hl.dsp.exec_cmd(emoji), { description = "Emoji picker" })
+
 -- Cycle the tiling layout.
 local layouts = { "dwindle", "master", "scrolling" }
 

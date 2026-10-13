@@ -31,7 +31,6 @@ go-tools                # goimports
 jdk17-openjdk           # Gradle JDK for React Native
 nodejs
 npm
-python
 rustup
 uv                      # Python projects, venvs and versions
 vulkan-validation-layers # debug layers for Vulkan apps
