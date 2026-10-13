@@ -103,7 +103,9 @@ units, not Hyprland autostart entries. The units this repo ships are symlinks:
 from memory. `hypridle.conf`, `hyprlock.conf` and `hyprpaper.conf` do use that
 older syntax. Every bind has a `description`, and the keybind table in
 [hypr/README.md](hypr/README.md#keybinds) is generated from them; the command
-is under the table.
+is under the table. A bind made with the local `bind()` in
+`settings/keybinds.lua` is also an entry in the command palette on SUPER+P;
+`hl.bind` makes one that is not.
 
 **Quickshell** (`quickshell/`) is the bar, the panels, the OSD and the
 notifications, in QML. `shell.qml` builds the bar (one window per screen,
@@ -124,6 +126,8 @@ loads a panel only while it is open.
   `~/.local/state/quickshell/`, and `settings/theme.lua`, `hyprlock.conf`,
   `alacritty.toml` and `fuzzel.ini` read them. fuzzel won't start while its
   file is missing, so `setup.sh` seeds an empty one.
+- Theme names: the command palette's list in `settings/keybinds.lua` repeats
+  the themes of `core/Themes.qml`.
 - Shell keys: a bind calls `hl.dsp.global("quickshell:<name>")` in
   `settings/keybinds.lua`, and `<name>` is a key of `shortcuts` in
   `modules/ipc/Shortcuts.qml`.

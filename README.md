@@ -87,13 +87,15 @@ files (`system/`), GTK settings (`dconf/`) and the Brewfile (`macos/`).
 
 ## Keys
 
-SUPER+F1 lists every keybind, and [hypr/README.md](hypr/README.md#keybinds)
-has the full table. The ones to know first:
+SUPER+P opens the command palette: every keybind, searchable, and Enter runs
+the one you pick. [hypr/README.md](hypr/README.md#keybinds) has the full
+table. The ones to know first:
 
 | Keys | Does |
 |---|---|
 | SUPER+Return | Terminal |
 | SUPER+D | App launcher |
+| SUPER+P | Command palette |
 | SUPER+E | Files |
 | SUPER+B | Browser |
 | SUPER+Q | Close window |

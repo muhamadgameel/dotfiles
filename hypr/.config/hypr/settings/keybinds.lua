@@ -6,17 +6,25 @@ local apps = theme.apps
 
 local mod = "SUPER"
 
+-- A bind made with bind() is also listed in the command palette (SUPER+P); hl.bind makes one that is not.
+local palette = {}
+
+local function bind(keys, action, opts)
+	hl.bind(keys, action, opts)
+	palette[#palette + 1] = { opts.description, keys, action }
+end
+
 -- ── Apps ─────────────────────────────────────────────────────────────
 
-hl.bind(mod .. " + Return", hl.dsp.exec_cmd(apps.terminal), { description = "Terminal" })
-hl.bind(mod .. " + E", hl.dsp.exec_cmd(apps.fileManager), { description = "File manager" })
-hl.bind(mod .. " + B", hl.dsp.exec_cmd(apps.browser), { description = "Browser" })
+bind(mod .. " + Return", hl.dsp.exec_cmd(apps.terminal), { description = "Terminal" })
+bind(mod .. " + E", hl.dsp.exec_cmd(apps.fileManager), { description = "File manager" })
+bind(mod .. " + B", hl.dsp.exec_cmd(apps.browser), { description = "Browser" })
 
 -- Toggle: second press closes the launcher.
-hl.bind(mod .. " + D", hl.dsp.exec_cmd("pkill " .. apps.menu .. " || " .. apps.menu), { description = "App launcher" })
+bind(mod .. " + D", hl.dsp.exec_cmd("pkill " .. apps.menu .. " || " .. apps.menu), { description = "App launcher" })
 
 -- wl-copy with nothing to copy empties the clipboard, so it runs only after a pick.
-hl.bind(
+bind(
 	mod .. " + V",
 	hl.dsp.exec_cmd(
 		"sel=$(cliphist list | "
@@ -29,17 +37,17 @@ hl.bind(
 
 -- ── Windows ──────────────────────────────────────────────────────────
 
-hl.bind(mod .. " + Q", hl.dsp.window.close(), { description = "Close window" })
-hl.bind(mod .. " + F", hl.dsp.window.fullscreen({ mode = "fullscreen" }), { description = "Fullscreen" })
-hl.bind(mod .. " + SHIFT + F", hl.dsp.window.fullscreen({ mode = "maximized" }), { description = "Maximize" })
-hl.bind(mod .. " + T", hl.dsp.window.float({ action = "toggle" }), { description = "Toggle floating" })
-hl.bind(mod .. " + C", hl.dsp.window.center(), { description = "Center window" })
-hl.bind(mod .. " + J", hl.dsp.layout("togglesplit"), { description = "Toggle split (dwindle)" })
+bind(mod .. " + Q", hl.dsp.window.close(), { description = "Close window" })
+bind(mod .. " + F", hl.dsp.window.fullscreen({ mode = "fullscreen" }), { description = "Fullscreen" })
+bind(mod .. " + SHIFT + F", hl.dsp.window.fullscreen({ mode = "maximized" }), { description = "Maximize" })
+bind(mod .. " + T", hl.dsp.window.float({ action = "toggle" }), { description = "Toggle floating" })
+bind(mod .. " + C", hl.dsp.window.center(), { description = "Center window" })
+bind(mod .. " + J", hl.dsp.layout("togglesplit"), { description = "Toggle split (dwindle)" })
 
 -- Picture-in-picture the active window; a second press puts it back.
 local pip_saved = {} -- window address -> where a floating window was
 
-hl.bind(mod .. " + X", function()
+bind(mod .. " + X", function()
 	local window = hl.get_active_window()
 	if not window then
 		return
@@ -86,15 +94,15 @@ local resize_step =
 	{ left = { x = -40, y = 0 }, right = { x = 40, y = 0 }, up = { x = 0, y = -40 }, down = { x = 0, y = 40 } }
 
 for _, dir in ipairs({ "left", "right", "up", "down" }) do
-	hl.bind(mod .. " + " .. dir, hl.dsp.focus({ direction = dir }), { description = "Move focus" })
-	hl.bind(mod .. " + SHIFT + " .. dir, hl.dsp.window.move({ direction = dir }), { description = "Move window" })
-	hl.bind(
+	bind(mod .. " + " .. dir, hl.dsp.focus({ direction = dir }), { description = "Move focus" })
+	bind(mod .. " + SHIFT + " .. dir, hl.dsp.window.move({ direction = dir }), { description = "Move window" })
+	bind(
 		mod .. " + CTRL + " .. dir,
 		hl.dsp.window.resize({ x = resize_step[dir].x, y = resize_step[dir].y, relative = true }),
 		{ repeating = true, description = "Resize window" }
 	)
 end
-hl.bind(mod .. " + U", hl.dsp.focus({ urgent_or_last = true }), { description = "Focus urgent or last" })
+bind(mod .. " + U", hl.dsp.focus({ urgent_or_last = true }), { description = "Focus urgent or last" })
 
 -- ── Mouse ────────────────────────────────────────────────────────────
 hl.bind(mod .. " + mouse:272", hl.dsp.window.drag(), { mouse = true, description = "Drag window" })
@@ -110,13 +118,13 @@ hl.bind("mouse:272", hl.dsp.global("quickshell:panelDismiss"), {
 
 for i = 1, 10 do
 	local key = i % 10 -- workspace 10 lives on key 0
-	hl.bind(mod .. " + " .. key, hl.dsp.focus({ workspace = i }), { description = "Go to workspace" })
-	hl.bind(
+	bind(mod .. " + " .. key, hl.dsp.focus({ workspace = i }), { description = "Go to workspace" })
+	bind(
 		mod .. " + SHIFT + " .. key,
 		hl.dsp.window.move({ workspace = i, follow = false }),
 		{ description = "Send window to workspace" }
 	)
-	hl.bind(
+	bind(
 		mod .. " + ALT + " .. key,
 		hl.dsp.window.move({ workspace = i, follow = true }),
 		{ description = "Send window to workspace and follow" }
@@ -126,26 +134,22 @@ end
 -- Cycle through open workspaces.
 hl.bind(mod .. " + mouse_down", hl.dsp.focus({ workspace = "e+1" }), { description = "Next workspace" })
 hl.bind(mod .. " + mouse_up", hl.dsp.focus({ workspace = "e-1" }), { description = "Previous workspace" })
-hl.bind(mod .. " + bracketright", hl.dsp.focus({ workspace = "e+1" }), { description = "Next workspace" })
-hl.bind(mod .. " + bracketleft", hl.dsp.focus({ workspace = "e-1" }), { description = "Previous workspace" })
+bind(mod .. " + bracketright", hl.dsp.focus({ workspace = "e+1" }), { description = "Next workspace" })
+bind(mod .. " + bracketleft", hl.dsp.focus({ workspace = "e-1" }), { description = "Previous workspace" })
 
 -- Scratchpad.
-hl.bind(mod .. " + S", hl.dsp.workspace.toggle_special("magic"), { description = "Toggle scratchpad" })
-hl.bind(
-	mod .. " + SHIFT + S",
-	hl.dsp.window.move({ workspace = "special:magic" }),
-	{ description = "Send to scratchpad" }
-)
+bind(mod .. " + S", hl.dsp.workspace.toggle_special("magic"), { description = "Toggle scratchpad" })
+bind(mod .. " + SHIFT + S", hl.dsp.window.move({ workspace = "special:magic" }), { description = "Send to scratchpad" })
 
 -- ── Monitors ─────────────────────────────────────────────────────────
-hl.bind(mod .. " + comma", hl.dsp.focus({ monitor = "-1" }), { description = "Focus previous monitor" })
-hl.bind(mod .. " + period", hl.dsp.focus({ monitor = "+1" }), { description = "Focus next monitor" })
-hl.bind(
+bind(mod .. " + comma", hl.dsp.focus({ monitor = "-1" }), { description = "Focus previous monitor" })
+bind(mod .. " + period", hl.dsp.focus({ monitor = "+1" }), { description = "Focus next monitor" })
+bind(
 	mod .. " + SHIFT + comma",
 	hl.dsp.window.move({ monitor = "-1", follow = true }),
 	{ description = "Move window to previous monitor" }
 )
-hl.bind(
+bind(
 	mod .. " + SHIFT + period",
 	hl.dsp.window.move({ monitor = "+1", follow = true }),
 	{ description = "Move window to next monitor" }
@@ -163,13 +167,13 @@ local function screenshot(action, mode)
 	return hl.dsp.exec_cmd(("qs ipc call screenshot %s %s || { %s; }"):format(action, mode, fallback))
 end
 
-hl.bind("Print", screenshot("capture", "region"), { description = "Screenshot region to file" })
-hl.bind("SHIFT + Print", screenshot("capture", "screen"), { description = "Screenshot to file" })
-hl.bind(mod .. " + Print", screenshot("copy", "region"), { description = "Screenshot region to clipboard" })
-hl.bind(mod .. " + SHIFT + Print", screenshot("copy", "screen"), { description = "Screenshot to clipboard" })
+bind("Print", screenshot("capture", "region"), { description = "Screenshot region to file" })
+bind("SHIFT + Print", screenshot("capture", "screen"), { description = "Screenshot to file" })
+bind(mod .. " + Print", screenshot("copy", "region"), { description = "Screenshot region to clipboard" })
+bind(mod .. " + SHIFT + Print", screenshot("copy", "screen"), { description = "Screenshot to clipboard" })
 -- Window mode: click the window to capture.
-hl.bind("ALT + Print", screenshot("capture", "window"), { description = "Screenshot a window to file" })
-hl.bind(
+bind("ALT + Print", screenshot("capture", "window"), { description = "Screenshot a window to file" })
+bind(
 	mod .. " + CTRL + Print",
 	hl.dsp.exec_cmd("qs ipc call screenshot capture text"),
 	{ description = "Copy the text in a region" }
@@ -182,8 +186,8 @@ local function record(mode)
 	return hl.dsp.exec_cmd(("qs ipc call recorder toggle %s || systemctl --user stop quickshell-recorder"):format(mode))
 end
 
-hl.bind("CTRL + Print", record("region"), { description = "Record a region, or stop recording" })
-hl.bind("CTRL + SHIFT + Print", record("screen"), { description = "Record the screen, or stop recording" })
+bind("CTRL + Print", record("region"), { description = "Record a region, or stop recording" })
+bind("CTRL + SHIFT + Print", record("screen"), { description = "Record the screen, or stop recording" })
 
 -- ── Shell panels ─────────────────────────────────────────────────────
 -- Global shortcuts the running shell registers (hypr/README.md); SUPER+letter stays with apps.
@@ -209,75 +213,76 @@ local panels = {
 }
 
 for key, panel in pairs(panels) do
-	hl.bind(mod .. " + SHIFT + " .. key, hl.dsp.global("quickshell:" .. panel[1]), { description = panel[2] })
+	bind(mod .. " + SHIFT + " .. key, hl.dsp.global("quickshell:" .. panel[1]), { description = panel[2] })
 end
 
 -- G is the system stats panel, so game mode sits on ALT.
-hl.bind(mod .. " + ALT + G", hl.dsp.global("quickshell:toggleGameMode"), { description = "Toggle game mode" })
+bind(mod .. " + ALT + G", hl.dsp.global("quickshell:toggleGameMode"), { description = "Toggle game mode" })
 
 -- Dismiss whatever is open.
-hl.bind(mod .. " + grave", hl.dsp.global("quickshell:panelClose"), { description = "Close any shell panel" })
+bind(mod .. " + grave", hl.dsp.global("quickshell:panelClose"), { description = "Close any shell panel" })
 
 -- ── System ───────────────────────────────────────────────────────────
 
-hl.bind(mod .. " + Escape", hl.dsp.exec_cmd(apps.lock), { description = "Lock screen" })
+bind(mod .. " + Escape", hl.dsp.exec_cmd(apps.lock), { description = "Lock screen" })
 -- Every keyboard at once; the XKB toggle only switched the one it was pressed on.
-hl.bind(
+bind(
 	mod .. " + space",
 	hl.dsp.exec_cmd("hyprctl switchxkblayout all next"),
 	{ locked = true, description = "Switch keyboard layout" }
 )
--- uwsm stop, not hl.dsp.exit(), so the session shuts down in order. Three modifiers, so it isn't hit by accident.
+-- uwsm stop, not hl.dsp.exit(), so the session shuts down in order. Three modifiers and no palette entry, so it
+-- isn't hit by accident.
 hl.bind(mod .. " + CTRL + SHIFT + Escape", hl.dsp.exec_cmd("uwsm stop"), { description = "Log out" })
 
 -- ── Brightness ───────────────────────────────────────────────────────
 -- Linear (no -e4), to match the shell's slider (hypr/README.md).
-hl.bind(
+bind(
 	"XF86MonBrightnessUp",
 	hl.dsp.exec_cmd("brightnessctl -n2 set 5%+"),
 	{ locked = true, repeating = true, description = "Brightness up" }
 )
-hl.bind(
+bind(
 	"XF86MonBrightnessDown",
 	hl.dsp.exec_cmd("brightnessctl -n2 set 5%-"),
 	{ locked = true, repeating = true, description = "Brightness down" }
 )
 
 -- ── Volume ───────────────────────────────────────────────────────────
-hl.bind(
+bind(
 	"XF86AudioRaiseVolume",
 	hl.dsp.exec_cmd("wpctl set-volume -l 1.5 @DEFAULT_AUDIO_SINK@ 5%+"),
 	{ locked = true, repeating = true, description = "Volume up" }
 )
-hl.bind(
+bind(
 	"XF86AudioLowerVolume",
 	hl.dsp.exec_cmd("wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%-"),
 	{ locked = true, repeating = true, description = "Volume down" }
 )
-hl.bind(
+bind(
 	"XF86AudioMute",
 	hl.dsp.exec_cmd("wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle"),
 	{ locked = true, description = "Mute" }
 )
-hl.bind(
+bind(
 	"XF86AudioMicMute",
 	hl.dsp.exec_cmd("wpctl set-mute @DEFAULT_AUDIO_SOURCE@ toggle"),
 	{ locked = true, description = "Mute microphone" }
 )
 
 -- ── Media ────────────────────────────────────────────────────────────
-hl.bind("XF86AudioPlay", hl.dsp.exec_cmd("playerctl play-pause"), { locked = true, description = "Play/pause" })
-hl.bind("XF86AudioPause", hl.dsp.exec_cmd("playerctl play-pause"), { locked = true, description = "Play/pause" })
-hl.bind("XF86AudioNext", hl.dsp.exec_cmd("playerctl next"), { locked = true, description = "Next track" })
-hl.bind("XF86AudioPrev", hl.dsp.exec_cmd("playerctl previous"), { locked = true, description = "Previous track" })
-hl.bind("XF86AudioStop", hl.dsp.exec_cmd("playerctl stop"), { locked = true, description = "Stop playback" })
+bind("XF86AudioPlay", hl.dsp.exec_cmd("playerctl play-pause"), { locked = true, description = "Play/pause" })
+bind("XF86AudioPause", hl.dsp.exec_cmd("playerctl play-pause"), { locked = true, description = "Play/pause" })
+bind("XF86AudioNext", hl.dsp.exec_cmd("playerctl next"), { locked = true, description = "Next track" })
+bind("XF86AudioPrev", hl.dsp.exec_cmd("playerctl previous"), { locked = true, description = "Previous track" })
+bind("XF86AudioStop", hl.dsp.exec_cmd("playerctl stop"), { locked = true, description = "Stop playback" })
 
-hl.bind(
+bind(
 	mod .. " + XF86AudioNext",
 	hl.dsp.exec_cmd("playerctl position 5+"),
 	{ locked = true, description = "Seek forward 5 s" }
 )
-hl.bind(
+bind(
 	mod .. " + XF86AudioPrev",
 	hl.dsp.exec_cmd("playerctl position 5-"),
 	{ locked = true, description = "Seek back 5 s" }
@@ -285,22 +290,12 @@ hl.bind(
 
 -- ── Utility ──────────────────────────────────────────────────────────
 
-hl.bind(mod .. " + SHIFT + C", hl.dsp.exec_cmd("hyprpicker -a"), { description = "Color picker" })
-
--- Every described bind, searchable; the digit and arrow rows fold into one line each.
-local cheatsheet = [=[hyprctl binds -j | jq -r '
-	def m($bit; $name): if (.modmask / $bit | floor) % 2 == 1 then $name else empty end;
-	[.[] | select(.has_description)
-		| .key |= (if test("^[0-9]$") then "1-0" elif test("^(left|right|up|down)$") then "arrows" else . end)
-		| ([m(64; "SUPER"), m(4; "CTRL"), m(8; "ALT"), m(1; "SHIFT"), .key] | join(" + ")) + "\t" + .description]
-	| unique[]' | column -t -s "$(printf '\t')" | ]=] .. apps.menu .. " -d --placeholder='Keybinds…'"
-
-hl.bind(mod .. " + F1", hl.dsp.exec_cmd(cheatsheet), { description = "Keybind cheat sheet" })
+bind(mod .. " + SHIFT + C", hl.dsp.exec_cmd("hyprpicker -a"), { description = "Color picker" })
 
 -- Cycle the tiling layout.
 local layouts = { "dwindle", "master", "scrolling" }
 
-hl.bind(mod .. " + L", function()
+bind(mod .. " + L", function()
 	local current = hl.get_config("general.layout")
 	local nextIdx = 1
 	for i, name in ipairs(layouts) do
@@ -313,3 +308,47 @@ hl.bind(mod .. " + L", function()
 	hl.config({ general = { layout = nextLayout } })
 	hl.notification.create({ text = "Layout: " .. nextLayout, timeout = 1500, icon = "ok" })
 end, { description = "Cycle layout" })
+
+-- ── Command palette ──────────────────────────────────────────────────
+
+local function keyless(description, call)
+	palette[#palette + 1] = { description, "", hl.dsp.exec_cmd("qs ipc call " .. call) }
+end
+
+keyless("Check for updates", "updates check")
+keyless("Clear notifications", "notifications clear")
+keyless("Shuffle the wallpaper", "wallpaper shuffle")
+-- The names in the shell's core/Themes.qml.
+for _, name in ipairs({
+	"catppuccin-latte",
+	"catppuccin-macchiato",
+	"catppuccin-mocha",
+	"tokyo-night",
+	"tokyo-night-storm",
+}) do
+	keyless("Theme: " .. name, "theme set " .. name)
+end
+
+-- Sorted, so the list keeps its order from one reload to the next; pairs() above does not.
+table.sort(palette, function(a, b)
+	return a[1] .. "\t" .. a[2] < b[1] .. "\t" .. b[2]
+end)
+
+local list = os.getenv("XDG_RUNTIME_DIR") .. "/hypr-palette"
+local file = assert(io.open(list, "w"))
+for _, entry in ipairs(palette) do
+	file:write(entry[1], "\t", entry[2], "\n")
+end
+file:close()
+
+-- The menu answers with the line's number, counted from 0, and run() below takes it.
+local pick = [=[i=$(column -t -s "$(printf '\t')" %s | %s -d --index --only-match -w 66 --placeholder='Run a command…'); ]=]
+	.. [=[[ -n "$i" ] && hyprctl eval "package.loaded['settings.keybinds'].run($i)"]=]
+
+hl.bind(mod .. " + P", hl.dsp.exec_cmd(pick:format(list, apps.menu)), { description = "Command palette" })
+
+return {
+	run = function(index)
+		hl.dispatch(palette[index + 1][3])
+	end,
+}

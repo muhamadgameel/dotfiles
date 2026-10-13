@@ -35,6 +35,10 @@ probed on 0.56.2:
   its release, so a hold-to-act pair belongs on a key without modifiers.
 - `hl.on("input.keyboard.key", fn)` hands `fn` a key code, a time in ms and a state
   (1 down, 0 up) for every keyboard device.
+- `hl.dispatch(x)` runs a dispatcher object or a function, also from `hyprctl eval`. A
+  dispatcher object is a plain value: the one handed to `hl.bind` can be kept in a
+  table and dispatched again and again. `hl.dsp.global` dispatched this way sends a
+  press each time, with no release, and the shell acts on every one.
 
 ## Probe the live compositor
 
@@ -71,8 +75,18 @@ no file.
 
 ## Keybinds and the session
 
-- Every bind has a `description`. SUPER+F1 and the table in `hypr/README.md` are built
-  from them; regenerate the table with the command printed under it.
+- Every bind has a `description`. The command palette (SUPER+P) and the table in
+  `hypr/README.md` are built from them; regenerate the table with the command printed
+  under it. In `settings/keybinds.lua` the local `bind()` makes a bind and lists it in
+  the palette; `hl.bind` makes one that is not listed.
+- Check a change to `settings/keybinds.lua` outside Hyprland first:
+  `XDG_RUNTIME_DIR=<scratch> lua .claude/skills/hyprland-lua/scripts/bindcheck.lua <file>`
+  prints every `hl.bind` call, so a `diff` of the output for two versions shows which
+  binds a change touched, and it fails when a palette line would run another entry's
+  action. Live, compare `hyprctl binds -j` from before and after the save.
+- `fuzzel -d --index` prints the picked line's place in its input, counted from 0, also
+  while the list is filtered. `--search=<text> --auto-select` picks without a key when
+  one line matches, which tests a menu's command without the owner's hands.
 - SUPER+letter starts an app. SUPER+SHIFT+letter opens a shell panel or flips a shell
   toggle through `hl.dsp.global("quickshell:<name>")`, where `<name>` is a key of
   `shortcuts` in `quickshell/.config/quickshell/modules/ipc/Shortcuts.qml`. Find free

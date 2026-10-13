@@ -28,7 +28,8 @@ systemd user units.
 
 - Saving a file reloads Hyprland. `hyprctl reload` forces a reload, and
   `hyprctl configerrors` should print nothing.
-- SUPER+F1 lists every keybind.
+- SUPER+P is the command palette: every keybind, searchable, and Enter runs
+  the one you pick.
 - `./setup.sh lint`, run from the repo root, checks these files with stylua.
 - The Lua API is in `/usr/share/hypr/stubs/hl.meta.lua`, which
   lua-language-server reads through `.luarc.json`, and on the
@@ -110,6 +111,15 @@ SUPER+grave closes whatever panel is open, and so does a click anywhere outside
 it. That left-click bind is non-consuming, so the click still reaches whatever
 it was aimed at.
 
+SUPER+P opens the command palette, a fuzzel list of every bind made with the
+local `bind()` in `settings/keybinds.lua`, and of a few shell actions that
+have no key: the update check, clearing the notifications, a wallpaper
+shuffle and each theme. The list is written to `$XDG_RUNTIME_DIR/hypr-palette`
+when the config loads, and the pick runs through `hyprctl eval`, in the
+config's own Lua state, so it does exactly what the key does. A bind made
+with `hl.bind` stays off the list: the mouse binds, and Log out, which one
+Enter should not reach. Restart and shut down stay behind the Power panel.
+
 The media keys call playerctl rather than the shell, so they keep working while
 the shell restarts. The Print keys go through the shell's screenshot service,
 which names the file and tracks the last shot, and fall back to plain grim when
@@ -153,10 +163,10 @@ under the pointer still zooms along.
 | `SUPER + D` | App launcher |
 | `SUPER + E` | File manager |
 | `SUPER + Escape` | Lock screen |
-| `SUPER + F1` | Keybind cheat sheet |
 | `SUPER + F` | Fullscreen |
 | `SUPER + J` | Toggle split (dwindle) |
 | `SUPER + L` | Cycle layout |
+| `SUPER + P` | Command palette |
 | `SUPER + Print` | Screenshot region to clipboard |
 | `SUPER + Q` | Close window |
 | `SUPER + Return` | Terminal |
