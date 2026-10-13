@@ -138,8 +138,8 @@ Singleton {
     }
 
     if (mode === "text") {
-      // tesseract ends a page with a form feed and reports its guesses on stderr.
-      lines.push(`text=$(grim ${geometry}- | tesseract stdin stdout -l eng+ara 2>/dev/null | tr -d '\\f') || { notify-send -a Screenshot "Text grab failed" "Is tesseract installed?"; exit 1; }`);
+      // On stderr tesseract says how it guessed the resolution, every time.
+      lines.push(`text=$(grim ${geometry}- | tesseract stdin stdout -l eng+ara 2>/dev/null) || { notify-send -a Screenshot "Text grab failed" "Is tesseract installed?"; exit 1; }`);
       lines.push('case $text in *[![:space:]]*) ;; *) notify-send -a Screenshot "No text found"; exit 0 ;; esac');
       lines.push('printf %s "$text" | wl-copy >/dev/null 2>&1');
       lines.push('notify-send -a Screenshot -- "Text copied" "$text"');
