@@ -1,4 +1,5 @@
 import QtQuick
+import QtQuick.Layouts
 
 import "../../../components" as Components
 import "../../../core" as Core
@@ -7,11 +8,24 @@ import "../../../services" as Services
 /**
 * Indicators - what is capturing the screen right now
 *
-* Shown only while something is. A click stops the recording.
+* One icon each, shown only while it is true. A click stops the recording; a
+* share ends in the app that shares.
 */
-Components.Button {
-  icon: "video"
-  iconColor: Core.Theme.error
-  tooltipText: "Recording the screen\n\nClick: Stop and save"
-  onClicked: Services.Recorder.stop()
+RowLayout {
+  spacing: Core.Style.spaceXS
+
+  Components.Button {
+    visible: Services.Recorder.recording
+    icon: "video"
+    iconColor: Core.Theme.error
+    tooltipText: "Recording the screen\n\nClick: Stop and save"
+    onClicked: Services.Recorder.stop()
+  }
+
+  Components.Button {
+    visible: Services.Privacy.screenShared
+    icon: "monitor"
+    iconColor: Core.Theme.warning
+    tooltipText: "An app is sharing the screen or a window"
+  }
 }

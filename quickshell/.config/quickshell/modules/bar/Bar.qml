@@ -92,9 +92,9 @@ Rectangle {
 
     spacing: Core.Style.spaceXS
 
-    // Only while the screen is being recorded.
+    // Only while the screen is being recorded or shared.
     Widgets.Indicators {
-      visible: Services.Recorder.recording
+      visible: Services.Recorder.recording || Services.Privacy.screenShared
     }
 
     // Beside the clock; nothing to show while the system is up to date.

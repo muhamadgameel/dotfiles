@@ -60,6 +60,21 @@ qsrig stop  <scratch>/rig
   session bus that the live shell never sees. Inside it, start the rig, then for
   media players, silent and windowless:
   `mpv --no-config --script=/etc/mpv/scripts/mpris.so --idle=yes --no-video --ao=null --force-window=no --force-media-title=P1 av://lavfi:sine=d=900 &`
+- A real screen share, with no picker on the screen and no frame copied: inside
+  `dbus-run-session`, start a second `/usr/lib/xdg-desktop-portal-hyprland` with a
+  stand-in `hyprland-share-picker` first on PATH that prints
+  `[SELECTION]/screen:<monitor>`, then ask it for a stream:
+
+  ```bash
+  o=/org/freedesktop/portal/desktop
+  call() { busctl --user call org.freedesktop.impl.portal.desktop.hyprland $o org.freedesktop.impl.portal.ScreenCast "$@"; }
+  call CreateSession 'oosa{sv}' $o/request/t/r1 $o/session/t/s1 t 0
+  call SelectSources 'oosa{sv}' $o/request/t/r2 $o/session/t/s1 t 2 types u 1 multiple b false
+  call Start 'oossa{sv}' $o/request/t/r3 $o/session/t/s1 t '' 0
+  ```
+
+  The stream stays suspended while nothing reads it. `Close` on the session's path
+  (`org.freedesktop.impl.portal.Session`) removes it, and so does killing that backend.
 - `qs ipc call` splits an argument at commas, so pass no JSON and no expression with a
   comma. A function named `show` is never called: `qs ipc call <target> show` lists
   the target instead.
@@ -168,6 +183,12 @@ reload says `Configuration Loaded`. The argument is the edited file's directory.
 - **`MprisPlayer.uniqueId` names the current track,** not the player: it counts up with
   each track, and every player starts at the same number. A player is known by its
   `dbusName`.
+- **A PipeWire stream's node is named after its client,** not after the stream. Unless
+  the client sets `node.name`, PipeWire uses the client's application name; the stream's
+  own name lands in `media.name`, which a `PwNode` shows only once a `PwObjectTracker`
+  has bound it. The portal's share is the video source named
+  `xdg-desktop-portal-hyprland`; `xdph-streaming-<id>` is its `media.name`. A made-up
+  node proves nothing about a name: read it off a real one.
 - **Several live files written within one reload** can leave the last one unread. Compare
   the reload's start time in the journal with the files' write times, and nudge the
   directory if a write came later: a reload then means the file had been missed.
