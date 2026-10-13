@@ -191,7 +191,7 @@ Singleton {
     const data = _createData(n);
     _addToHistory(_lasting(n, data));
 
-    if (!doNotDisturb) {
+    if (!doNotDisturb || data.urgency === Core.Enums.Urgency.Critical) {
       _addActive(n, data);
     }
   }

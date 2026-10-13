@@ -130,7 +130,7 @@ qs ipc call updates status              # packages waiting in pacman and the AUR
                                         # `check` asks again
 qs ipc call weather city <name>         # turn the weather on, for that city
 qs ipc call wallpaper shuffle
-qs ipc call notifications toggleDnd
+qs ipc call notifications toggleDnd     # critical ones still pop up
 ```
 
 Hyprland's SUPER+SHIFT keys go through global shortcuts instead

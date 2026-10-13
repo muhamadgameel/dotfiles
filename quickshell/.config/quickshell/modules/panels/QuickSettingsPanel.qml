@@ -162,7 +162,7 @@ Components.SlidingPanel {
       icon: Services.Notification.doNotDisturb ? "bell-off" : "bell"
       label: "Do Not Disturb"
       // Says so when game mode, not the setting, is what is holding popups.
-      subtitle: !Services.Notification.doNotDisturb ? "Off" : Config.Config.doNotDisturb ? "Popups hidden" : "Game mode"
+      subtitle: !Services.Notification.doNotDisturb ? "Off" : Config.Config.doNotDisturb ? "Critical only" : "Game mode"
       active: Services.Notification.doNotDisturb
 
       // No chevron: the label needs the room, and the bar's bell already opens
