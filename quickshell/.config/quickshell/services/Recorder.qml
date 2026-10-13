@@ -3,6 +3,7 @@ pragma Singleton
 import QtQuick
 import Quickshell
 
+import "../config" as Config
 import "../core" as Core
 
 /**
@@ -28,9 +29,8 @@ Singleton {
   /**
   * Start a recording, or stop the one that is running.
   * @param mode - "screen" for the focused monitor, "region" to drag one
-  * @param microphone - record the default input along with the desktop audio
   */
-  function toggle(mode, microphone) {
+  function toggle(mode) {
     if (_toggle.running)
       return;
 
@@ -46,9 +46,11 @@ Singleton {
       lines.push(`set -- -w "$(hyprctl -j activeworkspace | jq -r '.monitor')"`);
     }
 
+    // Desktop audio always; the microphone only when the setting asks for it.
+    const audio = Config.Config.recordMicrophone ? "default_output|default_input" : "default_output";
     lines.push(`mkdir -p ${root.directoryExpr}`);
     lines.push(`f=${root.directoryExpr}/"$(date +%Y-%m-%d_%H-%M-%S)".mp4`);
-    lines.push(`systemd-run --user --quiet --collect --unit=${root.unit} -p KillSignal=SIGINT sh -c '${root._inUnit}' "$f" "$@" -a "${microphone ? "default_output|default_input" : "default_output"}" -o "$f"`);
+    lines.push(`systemd-run --user --quiet --collect --unit=${root.unit} -p KillSignal=SIGINT sh -c '${root._inUnit}' "$f" "$@" -a "${audio}" -o "$f"`);
 
     _toggle.command = ["sh", "-c", lines.join("\n")];
     _toggle.running = true;

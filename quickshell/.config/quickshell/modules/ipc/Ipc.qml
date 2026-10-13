@@ -276,7 +276,7 @@ Scope {
       if (mode !== "screen" && mode !== "region")
         return `unknown mode "${mode}"; known: screen, region`;
       const was = Services.Recorder.recording;
-      Services.Recorder.toggle(mode, false);
+      Services.Recorder.toggle(mode);
       return was ? "stopping" : `recording the ${mode}`;
     }
 

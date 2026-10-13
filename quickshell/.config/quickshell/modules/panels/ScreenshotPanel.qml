@@ -4,11 +4,12 @@ import QtQuick
 import QtQuick.Layouts
 
 import "../../components" as Components
+import "../../config" as Config
 import "../../core" as Core
 import "../../services" as Services
 
 /**
-* ScreenshotPanel - capture chooser
+* ScreenshotPanel - capture chooser, for pictures and recordings
 *
 * The panel closes before the capture runs, so it never ends up in the shot.
 */
@@ -20,7 +21,7 @@ Components.SlidingPanel {
   headerIcon: "camera"
   headerIconColor: Core.Theme.accent
   headerTitle: "Screenshot"
-  headerSubtitle: Services.Screenshot.capturing ? "Capturing…" : "~/Pictures/Screenshots"
+  headerSubtitle: Services.Recorder.recording ? "Recording…" : Services.Screenshot.capturing ? "Capturing…" : "~/Pictures/Screenshots"
 
   // The last capture may have been moved or deleted since it was taken, so its
   // buttons are re-validated each time the panel comes up.
@@ -65,6 +66,52 @@ Components.SlidingPanel {
     Services.Screenshot.capture(mode, root.toClipboard, root.delaySeconds);
   }
 
+  // One row while a recording runs, to stop it.
+  readonly property var recordings: Services.Recorder.recording ? [
+    {
+      id: "stop",
+      label: "Stop recording",
+      icon: "close",
+      hint: "Finish the file in ~/Pictures/Recordings"
+    }
+  ] : [
+    {
+      id: "region",
+      label: "Record a region",
+      icon: "video",
+      hint: "Drag to choose an area"
+    },
+    {
+      id: "screen",
+      label: "Record this display",
+      icon: "video",
+      hint: "The whole current monitor"
+    }
+  ]
+
+  function record(mode) {
+    // At once, with no slide: the recorder starts within a few frames.
+    Services.Panels.closeNow();
+    if (mode === "stop")
+      Services.Recorder.stop();
+    else
+      Services.Recorder.toggle(mode);
+  }
+
+  component ModeRow: Components.ListRow {
+    required property var modelData
+
+    interactive: true
+    hoverColor: Core.Theme.surfaceHover
+
+    icon: modelData.icon
+    iconColor: Core.Theme.accent
+    title: modelData.label
+    subtitle: modelData.hint
+    trailingIcon: hovered ? "chevron-right" : ""
+    trailingColor: Core.Theme.textDim
+  }
+
   // === Options ===
   Components.FormRow {
     label: "Copy to clipboard"
@@ -102,22 +149,31 @@ Components.SlidingPanel {
   Repeater {
     model: root.modes
 
-    delegate: Components.ListRow {
+    delegate: ModeRow {
       id: modeCard
 
-      required property var modelData
-
-      interactive: true
-      hoverColor: Core.Theme.surfaceHover
-
-      icon: modelData.icon
-      iconColor: Core.Theme.accent
-      title: modelData.label
-      subtitle: modelData.hint
-      trailingIcon: hovered ? "chevron-right" : ""
-      trailingColor: Core.Theme.textDim
-
       onClicked: root.capture(modeCard.modelData.id)
+    }
+  }
+
+  // === Recording ===
+  Components.Divider {}
+
+  Components.FormRow {
+    label: "Record the microphone too"
+    hasToggle: true
+    toggleChecked: Config.Config.recordMicrophone
+    onToggled: checked => Config.Config.setFlag("recordMicrophone", checked)
+  }
+
+  Repeater {
+    model: root.recordings
+
+    delegate: ModeRow {
+      id: recordCard
+
+      iconColor: Core.Theme.error
+      onClicked: root.record(recordCard.modelData.id)
     }
   }
 

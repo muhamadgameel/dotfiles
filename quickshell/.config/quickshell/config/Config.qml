@@ -88,6 +88,10 @@ Singleton {
   readonly property string wallpaper: Settings.get("wallpaper", "")
   readonly property string wallpaperDirectory: Settings.get("wallpaperDirectory", `${Quickshell.env("HOME")}/Pictures/Wallpapers`)
 
+  // === Screen recording ===
+  // Desktop audio is always recorded; the microphone only with this on.
+  readonly property bool recordMicrophone: Settings.get("recordMicrophone", false)
+
   // === Weather ===
   // The city services/Weather.qml asks about, and where it is. With no city
   // nothing is asked. `qs ipc call weather city <name>` sets all three.
