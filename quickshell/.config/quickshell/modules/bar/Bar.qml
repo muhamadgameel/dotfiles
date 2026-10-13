@@ -162,9 +162,7 @@ Rectangle {
 
       // Not while it sits on mains with nothing to report.
       Widgets.Battery {
-        id: battery
-
-        visible: Config.Config.barShowBattery && (battery.isOnBattery || battery.isCharging)
+        visible: Config.Config.barShowBattery && (isOnBattery || isCharging)
         onPanelRequested: root.panelRequested("systemstats")
       }
     }

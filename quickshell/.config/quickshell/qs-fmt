@@ -106,6 +106,9 @@ fi
 files=()
 for target in "${targets[@]}"; do
   [[ -e $target ]] || target="$ROOT/$target"
+  # Absolute: handed a relative path, qmllint says of a singleton that imports
+  # its own directory that the qmldir does not declare it one.
+  [[ ! -e $target ]] || target=$(realpath "$target")
   if [[ -f $target ]]; then
     files+=("$target")
   elif [[ -d $target ]]; then
@@ -180,17 +183,31 @@ if ((run_lint != 2)); then
 fi
 
 # --- lint ---------------------------------------------------------------------
-# Quickshell's qmltypes are incomplete, and qmllint reports the gaps as findings:
-# PanelWindow is marked uncreatable, and its `margins` group, QProcess::ExitStatus
-# (every onExited handler), PopupAnchor's edges/gravity/adjustment and
-# PostReloadHook are undescribed. Two categories are switched off; the rest share
-# categories with useful findings, so they are filtered by message.
+# Quickshell's qmltypes are incomplete, and qmllint reports the gaps as findings.
+# PanelWindow is marked uncreatable and PostReloadHook is undescribed. A module's
+# type file also holds an empty stand-in for each type it takes from another
+# module (Margins, PopupAnchor, QuickshellScreenInfo, UntypedObjectModel, the
+# Edges and PopupAdjustment flags), so no member reached through one is found.
+# Two categories are switched off; the rest share categories with useful
+# findings, so they are filtered by message. The wording is qmllint's and changes
+# between Qt releases: this list is for Qt 6.12 with Quickshell 0.3.2.
 
-# Drop whole qmllint records (a Warning/Error/Info line plus its continuation
-# lines) whose header matches the known-noise pattern.
+# Drop whole qmllint records whose header matches the known noise. A record is
+# a Warning or Error line and what follows it: the source excerpt, and an
+# "Info:" hint, which names no file.
 filter_lint_noise() {
-  awk -v noise='unknown grouped property scope margins|Type QProcess::ExitStatus of parameter|No type found for property "(edges|gravity|adjustment)"|PostReloadHook was not found' '
-    /^(Warning|Error|Info): / { keep = ($0 !~ noise) }
+  local IFS='|'
+  local noise=(
+    'unknown grouped property scope margins'
+    'PostReloadHook was not found'
+    'Could not find property "(top|bottom|left|right|edges|gravity|adjustment)"'
+    'not found on type "(UntypedObjectModel|PopupAnchor|QuickshellScreenInfo)"'
+    'not found on type [A-Za-z:]+ with type PopupAnchor'
+    'Redundant optional chaining for lookup on .* type QuickshellScreenInfo'
+    'Cannot assign binding of type (Edges|PopupAdjustment)::Enum to (Edges|PopupAdjustment)::Flags'
+  )
+  awk -v noise="${noise[*]}" '
+    /^(Warning|Error): / || /^Info: \// { keep = ($0 !~ noise) }
     keep { print }
   '
 }

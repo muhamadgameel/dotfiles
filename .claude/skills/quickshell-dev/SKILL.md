@@ -109,6 +109,16 @@ quickshell/.config/quickshell/qs-fmt --strict services/Audio.qml   # must exit 0
 - The formatter joins an array of arrays into one line and expands an object literal
   one key per line. A table that should keep one row per line is a keyed object:
   `({ name: [a, () => b()] })`, as in `modules/ipc/Shortcuts.qml`.
+- A Qt or Quickshell upgrade can change what the lint says about files nobody touched.
+  The gaps in Quickshell's type descriptions are filtered by qmllint's wording, in
+  `filter_lint_noise` in `qs-fmt`. See everything unfiltered with
+  `/usr/lib/qt6/bin/qmllint -I /usr/lib/qt6/qml -I <dir> --uncreatable-type disable --unresolved-type disable <files>`,
+  fix in the code what is real, and add the rest to the list by its narrowest wording.
+- A clean lint does not prove a file was checked. In 17 of the 113 files (October 2026;
+  `services/Privacy.qml`, `Media.qml` and `Notification.qml` among them) qmllint gives up
+  and reports no wrong member name at all; in `Privacy.qml` a binding with a `for…of`
+  loop does it. Before trusting the lint for a rename or a removal, plant a wrong name
+  in the file's copy in a rig and see that it is reported.
 - The lint catches a deleted member of a singleton that something still reads. It
   does not catch a name passed as a string (`icon: "bell"`, a setting key, a panel
   id): grep for the literal before removing one, with `grep -o` so that a long line

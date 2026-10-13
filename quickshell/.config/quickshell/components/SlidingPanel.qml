@@ -332,7 +332,7 @@ Item {
           Component.onCompleted: root.frameHeight = implicitHeight
 
           // === Optional Header ===
-          PanelHeader {
+          Components.PanelHeader {
             Layout.fillWidth: true
             visible: root.hasHeader
             icon: root.headerIcon

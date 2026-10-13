@@ -81,9 +81,13 @@ PATH.
 ```
 
 qmllint reports gaps in Quickshell's own type descriptions as warnings
-(`PanelWindow` margins, `onExited` parameter types and a few more); qs-fmt
-filters those out. It exits 0 when clean, 1 when something needs fixing and 2
-when the Qt 6 tools are missing.
+(`PanelWindow` margins, the members of `PopupAnchor` and of the object models,
+and a few more); qs-fmt filters those out by their wording. The wording
+changes between Qt releases, so after a Qt upgrade the list in
+`filter_lint_noise` may need new entries. A clean run is not proof that a file
+was checked: in 17 of the 113 files qmllint gives up on the bindings and would
+not report a wrong member name. It exits 0 when clean, 1 when something needs
+fixing and 2 when the Qt 6 tools are missing.
 
 ## Settings and state
 
