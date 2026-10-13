@@ -364,16 +364,14 @@ Scope {
     target: "screenshot"
 
     /**
-    * @param mode - region | window | output | screen
+    * @param mode - region | window | output | screen | text
     */
     function capture(mode: string): string {
-      Services.Screenshot.capture(mode, false, 0);
-      return `capturing ${mode}`;
+      return Services.Screenshot.capture(mode, false, 0) || `capturing ${mode}`;
     }
 
     function copy(mode: string): string {
-      Services.Screenshot.capture(mode, true, 0);
-      return `capturing ${mode} to clipboard`;
+      return Services.Screenshot.capture(mode, true, 0) || `capturing ${mode} to clipboard`;
     }
   }
 

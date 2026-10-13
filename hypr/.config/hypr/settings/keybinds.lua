@@ -169,6 +169,11 @@ hl.bind(mod .. " + Print", screenshot("copy", "region"), { description = "Screen
 hl.bind(mod .. " + SHIFT + Print", screenshot("copy", "screen"), { description = "Screenshot to clipboard" })
 -- Window mode: click the window to capture.
 hl.bind("ALT + Print", screenshot("capture", "window"), { description = "Screenshot a window to file" })
+hl.bind(
+	mod .. " + CTRL + Print",
+	hl.dsp.exec_cmd("qs ipc call screenshot capture text"),
+	{ description = "Copy the text in a region" }
+)
 
 -- ── Recording ───────────────────────────────────────────────────────
 

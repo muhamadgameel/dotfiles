@@ -54,6 +54,13 @@ qsrig stop  <scratch>/rig
   singleton with the same properties and functions that only records its calls.
   Never click a real bar widget against its real service: a left click on Brightness
   sets 50%, a middle click on Network turns Wi-Fi off.
+- A service that runs programs gets stand-in programs: scripts named `slurp`, `grim`,
+  `wl-copy` or `notify-send` that log their arguments, in a directory first on the
+  rig's PATH (`PATH=<dir>:$PATH qsrig start <rig>`). A stand-in `sh` that logs `$2` and
+  exits shows the script a service builds without running it: make the same calls on a
+  rig of today's code and `diff` the two logs to prove which modes a change left alone.
+- An `IpcHandler` block copied from `modules/ipc/Ipc.qml` into `Scene.qml` answers
+  `qs -p <rig>/cfg ipc call <target> …`, so a reply is read off the real block.
 - A stand-in proves only what its author assumed about the real object. When a result
   rests on what a real property returns, make the calls once on a real object too.
   `dbus-run-session -- bash <script>` gives the rig and throwaway programs a private
@@ -189,6 +196,8 @@ reload says `Configuration Loaded`. The argument is the edited file's directory.
   has bound it. The portal's share is the video source named
   `xdg-desktop-portal-hyprland`; `xdph-streaming-<id>` is its `media.name`. A made-up
   node proves nothing about a name: read it off a real one.
+- **Text from outside goes after `--`** when it is an argument. `notify-send "Text
+  copied" "$text"` fails with "Missing argument for -r" when the text starts with a dash.
 - **Several live files written within one reload** can leave the last one unread. Compare
   the reload's start time in the journal with the files' write times, and nudge the
   directory if a write came later: a reload then means the file had been missed.

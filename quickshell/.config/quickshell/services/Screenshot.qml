@@ -30,16 +30,21 @@ Singleton {
   }
 
   /**
-  * @param mode - "region" (drag) | "window" (pick one) | "output" | "screen"
+  * @param mode - "region" (drag) | "window" (pick one) | "output" | "screen" |
+  *               "text" (drag; the words in it go to the clipboard)
   * @param toClipboard - copy instead of saving to disk
   * @param delaySeconds - wait before capturing
+  * @return "" once the capture is on its way, or why it is not
   */
   function capture(mode, toClipboard, delaySeconds) {
+    if (!["region", "window", "output", "screen", "text"].includes(mode))
+      return `unknown mode "${mode}"`;
+
     if (capturing) {
       // Used to return in silence, which is how one wedged capture could
       // disable the whole feature without leaving a trace anywhere.
       Core.Logger.w("Screenshot", `ignoring ${mode}: a capture is already in progress`);
-      return false;
+      return "a capture is already in progress";
     }
 
     // Latched here rather than in _start(), so a second request during the wait
@@ -59,7 +64,7 @@ Singleton {
     // shot no matter which entry point was used.
     Services.Panels.close();
     root._settleIfClear();
-    return true;
+    return "";
   }
 
   // === Waiting for the shell to get out of the shot ===
@@ -115,7 +120,7 @@ Singleton {
 
     let geometry = "";
 
-    if (mode === "region") {
+    if (mode === "region" || mode === "text") {
       // Cancelling is a normal outcome, not a failure: slurp exits non-zero and
       // this leaves quietly rather than handing grim an empty -g and letting it
       // complain about invalid geometry.
@@ -132,7 +137,13 @@ Singleton {
       geometry = `-o "$(hyprctl -j activeworkspace | jq -r '.monitor')" `;
     }
 
-    if (toClipboard) {
+    if (mode === "text") {
+      // tesseract ends a page with a form feed and reports its guesses on stderr.
+      lines.push(`text=$(grim ${geometry}- | tesseract stdin stdout -l eng+ara 2>/dev/null | tr -d '\\f') || { notify-send -a Screenshot "Text grab failed" "Is tesseract installed?"; exit 1; }`);
+      lines.push('case $text in *[![:space:]]*) ;; *) notify-send -a Screenshot "No text found"; exit 0 ;; esac');
+      lines.push('printf %s "$text" | wl-copy >/dev/null 2>&1');
+      lines.push('notify-send -a Screenshot -- "Text copied" "$text"');
+    } else if (toClipboard) {
       // wl-copy stays resident to serve the selection, so its stdio is sent to
       // /dev/null; left attached it would hold the collectors' pipes open and
       // the capture would never look finished.

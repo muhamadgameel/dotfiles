@@ -54,6 +54,12 @@ Components.SlidingPanel {
       label: "Everything",
       icon: "layers",
       hint: "All displays"
+    },
+    {
+      id: "text",
+      label: "Copy text",
+      icon: "copy",
+      hint: "Drag over the words you want"
     }
   ]
 

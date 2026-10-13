@@ -33,6 +33,9 @@ grim
 playerctl               # media keys
 slurp
 swappy
+tesseract               # reads the text in a region (SUPER+CTRL+Print)
+tesseract-data-ara
+tesseract-data-eng
 wl-clipboard
 
 # apps the session relies on

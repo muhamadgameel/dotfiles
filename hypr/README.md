@@ -117,8 +117,10 @@ the shell isn't running. CTRL+Print records a region and CTRL+SHIFT+Print the
 screen, with the desktop's sound, into `~/Pictures/Recordings`; the same key
 stops it, also while the shell is down, because the recorder runs in a unit of
 its own. It captures below the compositor, so the `no_screen_share` rule does
-not apply: the Bitwarden window is recorded like any other. Brightness steps
-are linear because
+not apply: the Bitwarden window is recorded like any other. SUPER+CTRL+Print
+reads the text in a region you drag, in English and Arabic, and puts it on the
+clipboard; tesseract does the reading, and the key does nothing while the
+shell is down. Brightness steps are linear because
 [`services/Brightness.qml`](../quickshell/.config/quickshell/services/Brightness.qml)
 writes and reads a linear percentage; an exponential curve here would move the
 shell's slider by uneven amounts.
@@ -144,6 +146,7 @@ under the pointer still zooms along.
 | `SUPER + ALT + 1-0` | Send window to workspace and follow |
 | `SUPER + ALT + G` | Toggle game mode |
 | `SUPER + B` | Browser |
+| `SUPER + CTRL + Print` | Copy the text in a region |
 | `SUPER + CTRL + SHIFT + Escape` | Log out |
 | `SUPER + CTRL + arrows` | Resize window |
 | `SUPER + C` | Center window |
