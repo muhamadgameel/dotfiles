@@ -36,6 +36,7 @@ enables services.
 | `starship` | The prompt | yes |
 | `swappy` | swappy, saving edited screenshots next to the originals | |
 | `thunar` | Thunar's terminal action and its F4 shortcut | |
+| `tmux` | tmux, in the terminal's colours, with the backtick as its prefix | yes |
 | `uwsm` | The session environment | |
 | `zsh` | zsh and its plugins ([README](zsh/README.md)) | yes |
 
@@ -226,8 +227,9 @@ Fullscreen games skip vsync and keep the screen awake; see
 
 On macOS, `./setup.sh install` installs Homebrew if it's missing, runs
 `brew bundle --file setup/macos/Brewfile`, and stows aerospace, bat, btop,
-ghostty, gitconfig, lazygit, mpv, nvim, starship and zsh. AeroSpace uses Alt where
-Hyprland uses SUPER, Ghostty is the terminal, and Raycast is the launcher.
+ghostty, gitconfig, lazygit, mpv, nvim, starship, tmux and zsh. AeroSpace uses
+Alt where Hyprland uses SUPER, Ghostty is the terminal, and Raycast is the
+launcher.
 
 ## Considered and not installed
 

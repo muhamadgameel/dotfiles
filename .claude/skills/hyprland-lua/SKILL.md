@@ -62,6 +62,10 @@ hyprctl eval "local f = io.open('$SCRATCH/out.txt', 'w'); f:write(tostring(hl.ge
   undo. Read it in `hyprctl clients -j` and close it by its address:
   `hl.dispatch(hl.dsp.window.close({ window = "address:0x…" }))`. Do not
   `pkill -f <pattern>`: the pattern matches the shell that runs it.
+- A key for a window that has no focus, such as a hidden one:
+  `hl.dispatch(hl.dsp.send_shortcut({ mods = "SHIFT", key = "Return", window = "address:0x…" }))`,
+  with `mods = ""` for none. The app gets a real key event, so a program in a hidden
+  terminal can log the bytes a key produces.
 - To see whether a rule added through `eval` is still in force, give it
   `tag = "+qsprobe"`: the tag shows in `tags` in `hyprctl clients -j`.
 - A terminal's rows and columns are wrong for the first half second, before the rule's

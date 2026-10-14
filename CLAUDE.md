@@ -89,7 +89,7 @@ prefix marks an AUR package), `services.txt` (units to enable) and `system/`
 (a mirror of `/`). `real_dirs` names the directories that must be real before
 stow runs, so that apps and `systemctl --user enable` never write into the
 repo. `mac()` is the macOS path; bat, btop, gitconfig, lazygit, mpv, nvim,
-starship and zsh are stowed on both systems and have to work on both.
+starship, tmux and zsh are stowed on both systems and have to work on both.
 
 **The session.** uwsm starts Hyprland. Session environment variables go in
 `uwsm/.config/uwsm/env`, not in `hl.env()`. The daemons (hypridle, hyprpaper,

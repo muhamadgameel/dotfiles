@@ -138,6 +138,11 @@ SUPER+equal opens a calculator: a small floating terminal running Python with
 the names of its `math` module loaded, so `sqrt(2)`, `sin(pi / 4)` and `2**10`
 work, and `_` is the last answer. Ctrl+D closes it.
 
+SUPER+SHIFT+Return opens a terminal on the tmux session used last, and starts
+one when there is none; SUPER+Return stays a plain terminal. A session
+outlives its window, but not the desktop session: the tmux server runs in the
+scope of the terminal that started it, and those end with Hyprland.
+
 The media keys call playerctl rather than the shell, so they keep working while
 the shell restarts. The Print keys go through the shell's screenshot service,
 which names the file and tracks the last shot, and fall back to plain grim when
@@ -205,6 +210,7 @@ under the pointer still zooms along.
 | `SUPER + SHIFT + P` | Power panel |
 | `SUPER + SHIFT + Print` | Screenshot to clipboard |
 | `SUPER + SHIFT + Q` | Quick settings panel |
+| `SUPER + SHIFT + Return` | Terminal on the last tmux session |
 | `SUPER + SHIFT + S` | Send to scratchpad |
 | `SUPER + SHIFT + W` | Network panel |
 | `SUPER + SHIFT + X` | Screenshot panel |

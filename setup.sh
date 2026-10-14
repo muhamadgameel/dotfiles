@@ -315,7 +315,7 @@ mac() {
   brew_get() { run bash -c 'bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"'; }
   bundle_ok() { brew bundle check --file setup/macos/Brewfile >/dev/null 2>&1; }
   bundle_run() { run brew bundle --file setup/macos/Brewfile; }
-  local mac_packages=(aerospace bat btop ghostty gitconfig lazygit mpv nvim starship zsh)
+  local mac_packages=(aerospace bat btop ghostty gitconfig lazygit mpv nvim starship tmux zsh)
   mac_stowed() { [[ -z $(stow_pending "${mac_packages[@]}") ]]; }
   mac_stow() { run stow -d "$PWD" -t "$HOME" -S "${mac_packages[@]}"; }
 

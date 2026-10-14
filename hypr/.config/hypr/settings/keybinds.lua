@@ -17,6 +17,11 @@ end
 -- ── Apps ─────────────────────────────────────────────────────────────
 
 bind(mod .. " + Return", hl.dsp.exec_cmd(apps.terminal), { description = "Terminal" })
+bind(
+	mod .. " + SHIFT + Return",
+	hl.dsp.exec_cmd(apps.terminal .. " -e sh -c 'tmux attach || tmux new'"),
+	{ description = "Terminal on the last tmux session" }
+)
 bind(mod .. " + E", hl.dsp.exec_cmd(apps.fileManager), { description = "File manager" })
 bind(mod .. " + B", hl.dsp.exec_cmd(apps.browser), { description = "Browser" })
 
