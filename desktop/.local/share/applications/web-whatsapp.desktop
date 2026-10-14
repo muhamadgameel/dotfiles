@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=WhatsApp
+Comment=WhatsApp Web in a window of its own
+Keywords=chat;messages;
+Exec=chromium --app=https://web.whatsapp.com/
+Icon=whatsapp
+Categories=Network;Chat;InstantMessaging;
+StartupWMClass=chrome-web.whatsapp.com__-Default

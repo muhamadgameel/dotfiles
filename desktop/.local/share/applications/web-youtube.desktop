@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=YouTube
+Comment=YouTube in a window of its own
+Keywords=video;
+Exec=chromium --app=https://www.youtube.com/
+Icon=youtube
+Categories=AudioVideo;Video;
+StartupWMClass=chrome-www.youtube.com__-Default

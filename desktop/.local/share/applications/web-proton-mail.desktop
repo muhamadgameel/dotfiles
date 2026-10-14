@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=Proton Mail
+Comment=Proton Mail in a window of its own
+Keywords=mail;email;
+Exec=chromium --app=https://mail.proton.me/
+Icon=proton-mail
+Categories=Network;Email;
+StartupWMClass=chrome-mail.proton.me__-Default

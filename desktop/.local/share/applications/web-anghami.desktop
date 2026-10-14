@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=Anghami
+Comment=Anghami in a window of its own
+Keywords=music;
+Exec=chromium --app=https://play.anghami.com/
+Icon=audio-player
+Categories=AudioVideo;Audio;
+StartupWMClass=chrome-play.anghami.com__-Default
