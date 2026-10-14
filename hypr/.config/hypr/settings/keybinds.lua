@@ -40,6 +40,14 @@ bind(
 	{ description = "Clipboard history" }
 )
 
+bind(
+	mod .. " + SHIFT + V",
+	hl.dsp.exec_cmd(
+		"voxtype record toggle || notify-send -a Dictation -- 'No dictation' 'The voxtype service is not running.'"
+	),
+	{ description = "Dictation on and off" }
+)
+
 -- ── Windows ──────────────────────────────────────────────────────────
 
 bind(mod .. " + Q", hl.dsp.window.close(), { description = "Close window" })

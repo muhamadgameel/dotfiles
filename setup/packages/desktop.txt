@@ -23,6 +23,7 @@ libnotify
 nm-connection-editor    # network settings the Network panel doesn't cover
 xdg-user-dirs           # screenshot binds resolve ~/Pictures with it
 xdg-utils
+aur/voxtype-bin         # dictation, typed into the focused window
 aur/wayland-pipewire-idle-inhibit  # no dimming while audio plays
 
 # input, clipboard, screenshots
@@ -38,6 +39,7 @@ tesseract               # reads the text in a region (SUPER+CTRL+Print)
 tesseract-data-ara
 tesseract-data-eng
 wl-clipboard
+wtype                   # types what voxtype heard
 
 # apps the session relies on
 alacritty

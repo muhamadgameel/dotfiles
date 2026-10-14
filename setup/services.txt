@@ -22,4 +22,5 @@ user    hyprpaper.service
 user    hyprpolkitagent.service
 user    hyprsunset.service
 user    quickshell.service
+user    voxtype.service
 user    wayland-pipewire-idle-inhibit.service

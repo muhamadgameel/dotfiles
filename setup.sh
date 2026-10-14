@@ -253,6 +253,13 @@ rust_set() {
   rustup default >/dev/null 2>&1 || run rustup default stable
   run rustup component add rust-analyzer rust-src
 }
+# Not `voxtype setup --download`: it also writes a whole config into ~/.config, hiding the packaged one.
+voxtype_model=$HOME/.local/share/voxtype/models/ggml-base.en.bin
+voxtype_ok() { ! command -v voxtype >/dev/null || [[ -s $voxtype_model ]]; }
+voxtype_get() {
+  run curl -fL --create-dirs -o "$voxtype_model.part" https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-base.en.bin &&
+    run mv "$voxtype_model.part" "$voxtype_model"
+}
 ext_missing() { comm -23 <(sort setup/packages/code-extensions.txt) <(code --list-extensions 2>/dev/null | sort); }
 ext_ok() { ! command -v code >/dev/null || [[ -z $(ext_missing) ]]; }
 ext_add() { for e in $(ext_missing); do run code --install-extension "$e"; done; }
@@ -391,6 +398,7 @@ else
     item "a wallpaper in ~/Pictures/Wallpapers" walls_ok walls_seed
     item "the launcher's colour file" fuzzel_ok fuzzel_seed
     item "rust toolchain with rust-analyzer and rust-src" rust_ok rust_set
+    item "voxtype's speech model (148 MB)" voxtype_ok voxtype_get
     item "Code - OSS extensions" ext_ok ext_add
     git_identity
     key=$(git config --get user.signingkey || true)

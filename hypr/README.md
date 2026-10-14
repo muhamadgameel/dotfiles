@@ -143,6 +143,13 @@ one when there is none; SUPER+Return stays a plain terminal. A session
 outlives its window, but not the desktop session: the tmux server runs in the
 scope of the terminal that started it, and those end with Hyprland.
 
+SUPER+SHIFT+V starts dictation and the same key stops it. voxtype turns the
+speech into text on this machine, with Whisper's English base model, and wtype
+types it into the window that has focus; a recording stops by itself after a
+minute. Keys that wtype types never reach Hyprland's binds, measured with a
+modifier held on another keyboard, so voxtype's own submap workaround for
+held modifiers is not needed here.
+
 The media keys call playerctl rather than the shell, so they keep working while
 the shell restarts. The Print keys go through the shell's screenshot service,
 which names the file and tracks the last shot, and fall back to plain grim when
@@ -212,6 +219,7 @@ under the pointer still zooms along.
 | `SUPER + SHIFT + Q` | Quick settings panel |
 | `SUPER + SHIFT + Return` | Terminal on the last tmux session |
 | `SUPER + SHIFT + S` | Send to scratchpad |
+| `SUPER + SHIFT + V` | Dictation on and off |
 | `SUPER + SHIFT + W` | Network panel |
 | `SUPER + SHIFT + X` | Screenshot panel |
 | `SUPER + SHIFT + Y` | Wallpaper panel |
