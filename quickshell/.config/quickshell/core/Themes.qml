@@ -127,6 +127,122 @@ Singleton {
         overlayLight: "#565f89",
         selection: "#2e3c64",
         term: ["#1d202f", "#f7768e", "#9ece6a", "#e0af68", "#7aa2f7", "#bb9af7", "#7dcfff", "#a9b1d6", "#414868", "#ff899d", "#9fe044", "#faba4a", "#8db0ff", "#c7a9ff", "#a4daff", "#c0caf5"]
+      },
+      // Gruvbox dark, from morhetz/gruvbox, yellow as the accent. bgDark is darker
+      // than its palette goes.
+      "gruvbox": {
+        dark: true,
+        bg: "#282828",
+        bgAlt: "#1d2021",
+        bgDark: "#141617",
+        surface: "#3c3836",
+        surfaceHover: "#504945",
+        surfaceActive: "#665c54",
+        text: "#ebdbb2",
+        textDim: "#d5c4a1",
+        textMuted: "#a89984",
+        accent: "#fabd2f",
+        accentAlt: "#83a598",
+        success: "#b8bb26",
+        warning: "#fe8019",
+        error: "#fb4934",
+        overlay: "#665c54",
+        overlayLight: "#928374",
+        selection: "#504945",
+        term: ["#282828", "#cc241d", "#98971a", "#d79921", "#458588", "#b16286", "#689d6a", "#a89984", "#928374", "#fb4934", "#b8bb26", "#fabd2f", "#83a598", "#d3869b", "#8ec07c", "#ebdbb2"]
+      },
+      // Nord, from nordtheme.com. Its darkest is nord0, so bgAlt and bgDark go below
+      // it, and textMuted is its comment grey lifted to 4.5:1.
+      "nord": {
+        dark: true,
+        bg: "#2e3440",
+        bgAlt: "#292e39",
+        bgDark: "#242933",
+        surface: "#3b4252",
+        surfaceHover: "#434c5e",
+        surfaceActive: "#4c566a",
+        text: "#eceff4",
+        textDim: "#d8dee9",
+        textMuted: "#929cb0",
+        accent: "#88c0d0",
+        accentAlt: "#b48ead",
+        success: "#a3be8c",
+        warning: "#ebcb8b",
+        error: "#bf616a",
+        overlay: "#4c566a",
+        overlayLight: "#616e88",
+        selection: "#434c5e",
+        term: ["#3b4252", "#bf616a", "#a3be8c", "#ebcb8b", "#81a1c1", "#b48ead", "#88c0d0", "#e5e9f0", "#4c566a", "#bf616a", "#a3be8c", "#ebcb8b", "#81a1c1", "#b48ead", "#8fbcbb", "#eceff4"]
+      },
+      // Everforest dark medium, from sainnhe/everforest. textDim sits between its
+      // foreground and grey2, which it has nothing in between.
+      "everforest": {
+        dark: true,
+        bg: "#2d353b",
+        bgAlt: "#232a2e",
+        bgDark: "#1e2326",
+        surface: "#343f44",
+        surfaceHover: "#3d484d",
+        surfaceActive: "#475258",
+        text: "#d3c6aa",
+        textDim: "#b8b8a5",
+        textMuted: "#9da9a0",
+        accent: "#a7c080",
+        accentAlt: "#7fbbb3",
+        success: "#83c092",
+        warning: "#dbbc7f",
+        error: "#e67e80",
+        overlay: "#475258",
+        overlayLight: "#7a8478",
+        selection: "#543a48",
+        term: ["#475258", "#e67e80", "#a7c080", "#dbbc7f", "#7fbbb3", "#d699b6", "#83c092", "#d3c6aa", "#859289", "#e67e80", "#a7c080", "#dbbc7f", "#7fbbb3", "#d699b6", "#83c092", "#d3c6aa"]
+      },
+      // Rosé Pine, from rose-pine/neovim. surface is its overlay, since its surface
+      // barely shows on the base; textDim sits between text and subtle, and bgDark
+      // is darker than its palette goes.
+      "rose-pine": {
+        dark: true,
+        bg: "#191724",
+        bgAlt: "#16141f",
+        bgDark: "#12101a",
+        surface: "#26233a",
+        surfaceHover: "#403d52",
+        surfaceActive: "#524f67",
+        text: "#e0def4",
+        textDim: "#b8b5d0",
+        textMuted: "#908caa",
+        accent: "#c4a7e7",
+        accentAlt: "#ebbcba",
+        success: "#9ccfd8",
+        warning: "#f6c177",
+        error: "#eb6f92",
+        overlay: "#403d52",
+        overlayLight: "#6e6a86",
+        selection: "#403d52",
+        term: ["#26233a", "#eb6f92", "#31748f", "#f6c177", "#9ccfd8", "#c4a7e7", "#ebbcba", "#e0def4", "#6e6a86", "#eb6f92", "#31748f", "#f6c177", "#9ccfd8", "#c4a7e7", "#ebbcba", "#e0def4"]
+      },
+      // Kanagawa wave, as in Neovim, from rebelot/kanagawa.nvim and its Alacritty
+      // colours.
+      "kanagawa": {
+        dark: true,
+        bg: "#1f1f28",
+        bgAlt: "#1a1a22",
+        bgDark: "#16161d",
+        surface: "#2a2a37",
+        surfaceHover: "#363646",
+        surfaceActive: "#54546d",
+        text: "#dcd7ba",
+        textDim: "#c8c093",
+        textMuted: "#938aa9",
+        accent: "#7e9cd8",
+        accentAlt: "#957fb8",
+        success: "#98bb6c",
+        warning: "#e6c384",
+        error: "#e46876",
+        overlay: "#54546d",
+        overlayLight: "#727169",
+        selection: "#2d4f67",
+        term: ["#090618", "#c34043", "#76946a", "#c0a36e", "#7e9cd8", "#957fb8", "#6a9589", "#c8c093", "#727169", "#e82424", "#98bb6c", "#e6c384", "#7fb4ca", "#938aa9", "#7aa89f", "#dcd7ba"]
       }
     })
 

@@ -120,7 +120,8 @@ qs ipc call panel toggle audio          # audio, network, bluetooth, systemstats
                                         # wallpaper, settings
 qs ipc call panel closeNow              # no slide; hypridle calls it before locking
 qs ipc call theme set tokyo-night       # catppuccin-mocha, catppuccin-macchiato,
-                                        # catppuccin-latte, tokyo-night, tokyo-night-storm
+                                        # catppuccin-latte, tokyo-night, tokyo-night-storm,
+                                        # gruvbox, nord, everforest, rose-pine, kanagawa
 qs ipc call screenshot capture region   # region, window, output or screen;
                                         # `copy` puts it on the clipboard instead
 qs ipc call screenshot capture text     # the words in a region, onto the clipboard

@@ -381,6 +381,11 @@ for _, name in ipairs({
 	"catppuccin-latte",
 	"catppuccin-macchiato",
 	"catppuccin-mocha",
+	"everforest",
+	"gruvbox",
+	"kanagawa",
+	"nord",
+	"rose-pine",
 	"tokyo-night",
 	"tokyo-night-storm",
 }) do
