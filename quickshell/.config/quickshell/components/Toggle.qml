@@ -45,17 +45,11 @@ Rectangle {
   opacity: enabled ? 1.0 : Core.Style.opacityDisabled
 
   Behavior on opacity {
-    NumberAnimation {
-      duration: Core.Style.duration(Core.Style.animFast)
-      easing.type: Core.Style.easeStandard
-    }
+    AnimFast {}
   }
 
   Behavior on color {
-    ColorAnimation {
-      duration: Core.Style.duration(Core.Style.animFast)
-      easing.type: Core.Style.easeStandard
-    }
+    AnimFast {}
   }
 
   // Knob
@@ -70,10 +64,7 @@ Rectangle {
     color: Core.Theme.text
 
     Behavior on x {
-      NumberAnimation {
-        duration: Core.Style.duration(Core.Style.animFast)
-        easing.type: Core.Style.easeStandard
-      }
+      AnimFast {}
     }
   }
 

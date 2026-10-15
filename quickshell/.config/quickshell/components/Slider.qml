@@ -98,10 +98,7 @@ Item {
   opacity: enabled ? 1.0 : Core.Style.opacityDisabled
 
   Behavior on opacity {
-    NumberAnimation {
-      duration: Core.Style.duration(Core.Style.animFast)
-      easing.type: Core.Style.easeStandard
-    }
+    AnimFast {}
   }
 
   // === Track Background ===
@@ -138,10 +135,7 @@ Item {
 
     Behavior on width {
       enabled: root.animateValue && !root.dragging
-      NumberAnimation {
-        duration: Core.Style.duration(Core.Style.animFast)
-        easing.type: Core.Style.easeStandard
-      }
+      AnimFast {}
     }
   }
 
@@ -153,10 +147,7 @@ Item {
 
     Behavior on x {
       enabled: root.animateValue && !root.dragging
-      NumberAnimation {
-        duration: Core.Style.duration(Core.Style.animFast)
-        easing.type: Core.Style.easeStandard
-      }
+      AnimFast {}
     }
     width: root.handleSize
     height: root.handleSize
@@ -165,17 +156,11 @@ Item {
     scale: root.dragging ? 1.1 : (root.hovered ? 1.05 : 1.0)
 
     Behavior on color {
-      ColorAnimation {
-        duration: Core.Style.duration(Core.Style.animFast)
-        easing.type: Core.Style.easeStandard
-      }
+      AnimFast {}
     }
 
     Behavior on scale {
-      NumberAnimation {
-        duration: Core.Style.duration(Core.Style.animFast)
-        easing.type: Core.Style.easeStandard
-      }
+      AnimFast {}
     }
   }
 

@@ -69,22 +69,18 @@ Column {
   Transition {
     id: fadeInTransition
 
-    NumberAnimation {
+    AnimNormal {
       property: "opacity"
       from: 0
       to: 1
-      duration: Core.Style.duration(Core.Style.animNormal)
-      easing.type: Core.Style.easeStandard
     }
   }
 
   Transition {
     id: moveTransition
 
-    NumberAnimation {
+    AnimNormal {
       property: "y"
-      duration: Core.Style.duration(Core.Style.animNormal)
-      easing.type: Core.Style.easeStandard
     }
   }
 
@@ -95,24 +91,18 @@ Column {
   Transition {
     id: moveAndSettleTransition
 
-    NumberAnimation {
+    AnimNormal {
       property: "y"
-      duration: Core.Style.duration(Core.Style.animNormal)
-      easing.type: Core.Style.easeStandard
     }
 
-    NumberAnimation {
+    AnimNormal {
       property: "x"
       to: 0
-      duration: Core.Style.duration(Core.Style.animNormal)
-      easing.type: Core.Style.easeStandard
     }
 
-    NumberAnimation {
+    AnimNormal {
       property: "opacity"
       to: 1
-      duration: Core.Style.duration(Core.Style.animNormal)
-      easing.type: Core.Style.easeStandard
     }
   }
 }

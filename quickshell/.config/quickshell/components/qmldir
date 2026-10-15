@@ -1,5 +1,7 @@
 module components
 
+AnimFast 1.0 AnimFast.qml
+AnimNormal 1.0 AnimNormal.qml
 AnimatedColumn 1.0 AnimatedColumn.qml
 Badge 1.0 Badge.qml
 Button 1.0 Button.qml

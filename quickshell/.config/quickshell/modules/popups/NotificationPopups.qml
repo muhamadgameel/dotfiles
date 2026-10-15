@@ -75,10 +75,7 @@ Variants {
         }
 
         Behavior on anchors.rightMargin {
-          NumberAnimation {
-            duration: Core.Style.duration(Core.Style.animNormal)
-            easing.type: Core.Style.easeStandard
-          }
+          Components.AnimNormal {}
         }
 
         fadeIn: false
@@ -246,10 +243,7 @@ Variants {
           scale: overflowPill.shown ? 1 : Core.Style.popHiddenScale
 
           Behavior on opacity {
-            NumberAnimation {
-              duration: Core.Style.duration(Core.Style.animNormal)
-              easing.type: Core.Style.easeStandard
-            }
+            Components.AnimNormal {}
           }
 
           Behavior on scale {

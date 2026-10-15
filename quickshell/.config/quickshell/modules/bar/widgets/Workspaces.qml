@@ -95,10 +95,7 @@ Item {
   // The row's width changes when a slot appears or goes; without this every
   // widget to the right of it jumps sideways in one frame.
   Behavior on implicitWidth {
-    NumberAnimation {
-      duration: Core.Style.duration(Core.Style.animFast)
-      easing.type: Core.Style.easeStandard
-    }
+    Components.AnimFast {}
   }
 
   Row {
@@ -110,10 +107,8 @@ Item {
     // Slots that shift because a neighbour arrived or left slide across instead
     // of teleporting to their new position.
     move: Transition {
-      NumberAnimation {
+      Components.AnimFast {
         property: "x"
-        duration: Core.Style.duration(Core.Style.animFast)
-        easing.type: Core.Style.easeStandard
       }
     }
 
@@ -158,10 +153,7 @@ Item {
         }
 
         Behavior on opacity {
-          NumberAnimation {
-            duration: Core.Style.duration(Core.Style.animFast)
-            easing.type: Core.Style.easeStandard
-          }
+          Components.AnimFast {}
         }
 
         Behavior on scale {
@@ -207,10 +199,7 @@ Item {
           scale: slot.isFocused ? 1.08 : 1.0
 
           Behavior on scale {
-            NumberAnimation {
-              duration: Core.Style.duration(Core.Style.animFast)
-              easing.type: Core.Style.easeStandard
-            }
+            Components.AnimFast {}
           }
         }
 

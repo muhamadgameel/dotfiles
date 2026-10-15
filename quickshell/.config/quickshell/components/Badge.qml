@@ -80,17 +80,11 @@ Rectangle {
   color: backgroundColor
 
   Behavior on implicitWidth {
-    NumberAnimation {
-      duration: Core.Style.duration(Core.Style.animFast)
-      easing.type: Core.Style.easeStandard
-    }
+    AnimFast {}
   }
 
   Behavior on implicitHeight {
-    NumberAnimation {
-      duration: Core.Style.duration(Core.Style.animFast)
-      easing.type: Core.Style.easeStandard
-    }
+    AnimFast {}
   }
 
   // === Text Content ===

@@ -63,10 +63,7 @@ ColumnLayout {
         rotation: root.expanded ? 90 : 0
 
         Behavior on rotation {
-          NumberAnimation {
-            duration: Core.Style.duration(Core.Style.animFast)
-            easing.type: Core.Style.easeStandard
-          }
+          Components.AnimFast {}
         }
       }
     }
@@ -86,19 +83,13 @@ ColumnLayout {
     opacity: root.expanded ? 1 : 0
 
     Behavior on opacity {
-      NumberAnimation {
-        duration: Core.Style.duration(Core.Style.animFast)
-        easing.type: Core.Style.easeStandard
-      }
+      Components.AnimFast {}
     }
     // Skipped entirely when collapsed, so it costs nothing and takes no input.
     visible: Layout.preferredHeight > 0
 
     Behavior on Layout.preferredHeight {
-      NumberAnimation {
-        duration: Core.Style.duration(Core.Style.animNormal)
-        easing.type: Core.Style.easeStandard
-      }
+      Components.AnimNormal {}
     }
 
     ColumnLayout {

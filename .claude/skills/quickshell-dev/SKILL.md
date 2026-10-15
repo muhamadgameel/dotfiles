@@ -131,6 +131,8 @@ quickshell/.config/quickshell/qs-fmt --strict services/Audio.qml   # must exit 0
   id): grep for the literal before removing one, with `grep -o` so that a long line
   cannot hide the match. `barKeys` in `modules/panels/SettingsPanel.qml` is one such
   line: a key left there shows as a dead switch.
+- An animation on the standard timing is `AnimFast {}` or `AnimNormal {}` from
+  `components/`, in a `Behavior` or a transition; they animate colours too.
 - Comment only a trap, a quirk or an ordering dependency. The reason for a change
   goes in the commit message.
 

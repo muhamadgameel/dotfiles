@@ -61,10 +61,7 @@ Flickable {
       y: root.contentHeight > root.height ? (parent.height - handleHeight) * (root.contentY / (root.contentHeight - root.height)) : 0
 
       Behavior on color {
-        ColorAnimation {
-          duration: Core.Style.duration(Core.Style.animFast)
-          easing.type: Core.Style.easeStandard
-        }
+        AnimFast {}
       }
     }
   }

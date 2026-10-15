@@ -41,17 +41,11 @@ Rectangle {
     color: root.progressColor
 
     Behavior on color {
-      ColorAnimation {
-        duration: Core.Style.duration(Core.Style.animNormal)
-        easing.type: Core.Style.easeStandard
-      }
+      AnimNormal {}
     }
 
     Behavior on width {
-      NumberAnimation {
-        duration: Core.Style.duration(Core.Style.animFast)
-        easing.type: Core.Style.easeStandard
-      }
+      AnimFast {}
     }
   }
 }

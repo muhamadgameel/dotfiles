@@ -243,10 +243,8 @@ Item {
       x: root.revealed ? 0 : slider.width
 
       Behavior on x {
-        NumberAnimation {
+        Components.AnimNormal {
           id: slideAnim
-          duration: Core.Style.duration(Core.Style.animNormal)
-          easing.type: Core.Style.easeStandard
         }
       }
 
@@ -278,10 +276,7 @@ Item {
         Behavior on height {
           enabled: root.revealed && !slideAnim.running && !root._contentAnimating
 
-          NumberAnimation {
-            duration: Core.Style.duration(Core.Style.animNormal)
-            easing.type: Core.Style.easeStandard
-          }
+          Components.AnimNormal {}
         }
 
         // The content is laid out at the target height, so while the edge is
@@ -367,10 +362,7 @@ Item {
             opacity: scrollArea.contentY > 0 ? 1 : 0
 
             Behavior on opacity {
-              NumberAnimation {
-                duration: Core.Style.duration(Core.Style.animFast)
-                easing.type: Core.Style.easeStandard
-              }
+              Components.AnimFast {}
             }
           }
 

@@ -55,10 +55,7 @@ RowLayout {
         color: mouse.containsMouse ? Core.Theme.surfaceHover : Core.Theme.transparentOf(Core.Theme.surfaceHover)
 
         Behavior on color {
-          ColorAnimation {
-            duration: Core.Style.duration(Core.Style.animFast)
-            easing.type: Core.Style.easeStandard
-          }
+          Components.AnimFast {}
         }
       }
 

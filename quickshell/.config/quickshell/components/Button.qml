@@ -131,10 +131,7 @@ Rectangle {
   opacity: enabled ? 1.0 : Core.Style.opacityDisabled
 
   Behavior on opacity {
-    NumberAnimation {
-      duration: Core.Style.duration(Core.Style.animFast)
-      easing.type: Core.Style.easeStandard
-    }
+    AnimFast {}
   }
 
   // Fades from the hover colour at zero alpha rather than from `transparent`,
@@ -144,10 +141,7 @@ Rectangle {
   color: hovered ? _hoverColor : _effectiveBackground
 
   Behavior on color {
-    ColorAnimation {
-      duration: Core.Style.duration(Core.Style.animFast)
-      easing.type: Core.Style.easeStandard
-    }
+    AnimFast {}
   }
 
   // === Content ===
@@ -185,10 +179,7 @@ Rectangle {
       color: root._textColor
 
       Behavior on color {
-        ColorAnimation {
-          duration: Core.Style.duration(Core.Style.animFast)
-          easing.type: Core.Style.easeStandard
-        }
+        AnimFast {}
       }
     }
   }

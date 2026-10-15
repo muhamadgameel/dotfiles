@@ -26,17 +26,11 @@ Item {
   scale: visible ? 1 : 0.96
 
   Behavior on opacity {
-    NumberAnimation {
-      duration: Core.Style.duration(Core.Style.animNormal)
-      easing.type: Core.Style.easeStandard
-    }
+    Components.AnimNormal {}
   }
 
   Behavior on scale {
-    NumberAnimation {
-      duration: Core.Style.duration(Core.Style.animNormal)
-      easing.type: Core.Style.easeStandard
-    }
+    Components.AnimNormal {}
   }
 
   property string icon: "info"
