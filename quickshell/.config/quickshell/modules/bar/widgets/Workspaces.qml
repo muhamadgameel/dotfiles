@@ -1,6 +1,7 @@
 pragma ComponentBehavior: Bound
 
 import QtQuick
+import Quickshell
 import Quickshell.Hyprland
 
 import "../../../components" as Components
@@ -78,24 +79,6 @@ Item {
     return ids;
   }
 
-  // === Slot model ===
-  // Syncing a ListModel in place keeps the untouched slots alive, so only the
-  // workspace that genuinely appeared animates.
-  ListModel {
-    id: slotModel
-  }
-
-  // Removal is immediate, deliberately. Holding a departed slot back for a
-  // fade-out animation meant it kept its full width - opacity and scale are
-  // transforms, not layout - so switching quickly through empty workspaces piled
-  // up invisible slots and shoved the rest of the bar sideways
-  function _syncSlots() {
-    Core.Utils.syncKeyedModel(slotModel, root.visibleIds, "wsId");
-  }
-
-  onVisibleIdsChanged: root._syncSlots()
-  Component.onCompleted: root._syncSlots()
-
   WheelHandler {
     // Qt's Wayland platform reports every wheel event as a touchpad's.
     acceptedDevices: PointerDevice.AllDevices
@@ -134,15 +117,21 @@ Item {
       }
     }
 
+    // Removal is immediate, deliberately. Holding a departed slot back for a
+    // fade-out animation meant it kept its full width - opacity and scale are
+    // transforms, not layout - so switching quickly through empty workspaces
+    // piled up invisible slots and shoved the rest of the bar sideways.
     Repeater {
-      model: slotModel
+      model: ScriptModel {
+        values: root.visibleIds
+      }
 
       delegate: Components.Card {
         id: slot
 
-        required property int wsId
+        required property int modelData
 
-        readonly property int workspaceId: wsId
+        readonly property int workspaceId: modelData
         readonly property var workspace: root.localWorkspaces[workspaceId] ?? null
         readonly property bool occupied: (workspace?.toplevels?.values?.length ?? 0) > 0
         readonly property bool isFocused: root.focusedId === workspaceId

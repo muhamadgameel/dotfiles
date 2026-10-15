@@ -184,6 +184,8 @@ reload says `Configuration Loaded`. The argument is the edited file's directory.
 - **A Repeater over a JS array rebuilds every row** when the array's contents change
   (an equal array is skipped). `model: ScriptModel { values: … }` keeps the rows whose
   values remain and reports a reorder as a move, which `AnimatedColumn` animates.
+  For fresh JS objects on every update, pass their keys and look the object up in the
+  row: matched with `objectProp`, the data update every row gets stops the slide.
 - **A program that cannot be started** emits no `exited`, so `Command.onDone` never
   fires for it.
 - **A setting is written 400 ms after it changes;** a reload inside that window reads

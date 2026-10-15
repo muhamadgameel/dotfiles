@@ -2,6 +2,7 @@ pragma ComponentBehavior: Bound
 
 import QtQuick
 import QtQuick.Layouts
+import Quickshell
 
 import "../../components" as Components
 import "../../core" as Core
@@ -118,13 +119,17 @@ Components.SlidingPanel {
     spacing: Core.Style.spaceXS
     animated: root.revealed
 
+    // Keyed by SSID: the backends hand over fresh objects on every update, and
+    // matching those with objectProp instead stops a re-sort from sliding.
     Repeater {
-      model: networkRows
+      model: ScriptModel {
+        values: Services.Network.sortedNetworks.map(n => n.ssid)
+      }
       delegate: NetworkItem {
-        required property string netSsid
+        required property string modelData
 
         width: networkList.width
-        network: Services.Network.networks[netSsid] ?? ({})
+        network: Services.Network.networks[modelData] ?? ({})
         onConnectRequested: ssid => Services.Network.connect(ssid)
       }
     }
@@ -147,19 +152,6 @@ Components.SlidingPanel {
     message: "Wi-Fi is disabled"
     hint: "Enable Wi-Fi to see available networks"
   }
-
-  // Rows are keyed by SSID rather than driven straight off sortedNetworks, which
-  // is a fresh array of fresh objects on every nmcli poll. A Repeater on that
-  // rebuilt every delegate each poll; keyed, a row only comes or goes with its
-  // network, and a re-sort moves rows instead of recreating them.
-  readonly property var networkKeys: Services.Network.sortedNetworks.map(n => n?.ssid ?? "").filter(s => s !== "")
-
-  ListModel {
-    id: networkRows
-  }
-
-  onNetworkKeysChanged: Core.Utils.syncKeyedModel(networkRows, root.networkKeys, "netSsid")
-  Component.onCompleted: Core.Utils.syncKeyedModel(networkRows, root.networkKeys, "netSsid")
 
   // ==========================================================================
   // INLINE COMPONENTS

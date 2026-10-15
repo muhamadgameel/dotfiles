@@ -2,6 +2,7 @@ pragma ComponentBehavior: Bound
 
 import QtQuick
 import QtQuick.Layouts
+import Quickshell
 
 import "../../components" as Components
 import "../../core" as Core
@@ -165,19 +166,6 @@ Components.SlidingPanel {
     property string title: ""
     property var devices: []
 
-    // Rows are keyed by address rather than driven straight off `devices`.
-    // The service rebuilds these filtered arrays on every discovery update, and
-    // a Repeater on a plain array rebuilds every delegate when it does - ~32
-    // full rebuilds a second while scanning
-    readonly property var addresses: (section.devices ?? []).map(d => d?.address ?? "").filter(a => a !== "")
-
-    ListModel {
-      id: deviceRows
-    }
-
-    onAddressesChanged: Core.Utils.syncKeyedModel(deviceRows, section.addresses, "devAddress")
-    Component.onCompleted: Core.Utils.syncKeyedModel(deviceRows, section.addresses, "devAddress")
-
     spacing: Core.Style.spaceXS
 
     Components.Text {
@@ -188,12 +176,14 @@ Components.SlidingPanel {
     }
 
     Repeater {
-      model: deviceRows
+      model: ScriptModel {
+        values: section.devices
+      }
       delegate: DeviceItem {
-        required property string devAddress
+        required property var modelData
 
         width: section.width
-        device: Services.Bluetooth.deviceByAddress(devAddress)
+        device: modelData
       }
     }
   }
