@@ -35,7 +35,7 @@ enables services.
 | `quickshell` | The bar, panels, OSD and notifications ([README](quickshell/README.md)) | |
 | `starship` | The prompt | yes |
 | `swappy` | swappy, saving edited screenshots next to the originals | |
-| `thunar` | Thunar's terminal action and its F4 shortcut | |
+| `thunar` | Thunar's terminal action and its F4 shortcut, and Send with LocalSend | |
 | `tmux` | tmux, in the terminal's colours, with the backtick as its prefix | yes |
 | `uwsm` | The session environment | |
 | `zsh` | zsh and its plugins ([README](zsh/README.md)) | yes |
@@ -119,7 +119,7 @@ the repo copy changes nothing until the next `./setup.sh install system`):
 | `/etc/systemd/zram-generator.conf`, `/etc/sysctl.d/99-zram.conf` | Swap in compressed RAM (half its size), with the Arch wiki's sysctl values for it. |
 | `/etc/mkinitcpio.conf.d/10-no-kms.conf` | The stock hooks minus `kms`, which only added about 105 MiB of firmware for nouveau; nouveau is blacklisted, and the NVIDIA driver isn't in the image. |
 | `/etc/xdg/reflector/reflector.conf` | HTTPS mirrors from nearby countries, refreshed weekly by reflector.timer. |
-| `/etc/firewalld/zones/home.xml` | The home zone: stock services, plus Metro for React Native (8081) and Steam Remote Play and LAN transfers. |
+| `/etc/firewalld/zones/home.xml` | The home zone: stock services, plus Metro for React Native (8081), Steam Remote Play and LAN transfers, and LocalSend (53317). |
 | `/etc/firewalld/zones/trusted.xml` | Trusts Waydroid's network bridge. |
 | `/usr/local/share/wayland-sessions/hyprland.desktop` | Hides the plain Hyprland session. uwsm launches this same file, so it must keep its `Exec` line. |
 

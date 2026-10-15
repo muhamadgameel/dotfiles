@@ -12,4 +12,19 @@
 	<startup-notify/>
 	<directories/>
 </action>
+<action>
+	<icon>localsend</icon>
+	<name>Send with LocalSend</name>
+	<submenu></submenu>
+	<unique-id>1792036763103216-2</unique-id>
+	<command>localsend %F</command>
+	<description>Send the selected files to a device nearby</description>
+	<range></range>
+	<patterns>*</patterns>
+	<audio-files/>
+	<image-files/>
+	<other-files/>
+	<text-files/>
+	<video-files/>
+</action>
 </actions>

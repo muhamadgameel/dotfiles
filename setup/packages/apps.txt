@@ -18,4 +18,5 @@ waydroid
 yt-dlp
 aur/waydroid-image
 aur/claude-desktop
+aur/localsend-bin       # files to and from the phone, on the home network
 aur/zen-browser-bin
