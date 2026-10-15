@@ -60,16 +60,30 @@ PopupWindow {
 
   // === Public API (driven by Services.Tooltip) ===
 
+  // Another item's tooltip, waiting for this one to finish hiding.
+  property var _next: null
+
   function showFor(target, tipText, tipDirection) {
     if (!target || !tipText)
       return;
 
-    root.text = tipText;
-    root.direction = tipDirection ?? "auto";
-    root.anchor.item = target;
+    // A popup moved while it shows can leave pieces of its old frame on screen,
+    // so the tooltip only moves once it has hidden.
+    if (root.visible && root.anchor.item !== target) {
+      root._next = {
+        target: target,
+        text: tipText,
+        direction: tipDirection
+      };
+      animator.hide();
+      return;
+    }
+
+    root._next = null;
+    root._place(target, tipText, tipDirection);
 
     if (root.visible) {
-      // Already up for a different target - move without re-waiting.
+      // Back on the item it was hiding from.
       animator.show();
       return;
     }
@@ -77,7 +91,15 @@ PopupWindow {
     showTimer.restart();
   }
 
+  function refresh(target, tipText) {
+    if (root._next?.target === target)
+      root._next.text = tipText;
+    else if (root.anchor.item === target)
+      root.text = tipText;
+  }
+
   function hide() {
+    root._next = null;
     showTimer.stop();
     if (root.visible)
       animator.hide();
@@ -86,6 +108,7 @@ PopupWindow {
   // Drop the anchor immediately, without animating, so a target that is being
   // destroyed is not held alive by it.
   function release() {
+    root._next = null;
     showTimer.stop();
     animator.setHidden();
     root.visible = false;
@@ -98,20 +121,28 @@ PopupWindow {
     interval: Config.Config.tooltipDelay
     repeat: false
     onTriggered: {
-      if (!root.anchor.item)
-        return;
-
-      root.visible = true;
-      // Let the content lay out first, otherwise the opening frame is placed
-      // against a zero-size popup. This is why the old version mispositioned
-      // whenever it was shown with no delay.
-      Qt.callLater(animator.show);
+      if (root.anchor.item)
+        root._reveal();
     }
+  }
+
+  function _place(target, tipText, tipDirection) {
+    root.text = tipText;
+    root.direction = tipDirection ?? "auto";
+    root.anchor.item = target;
+  }
+
+  function _reveal() {
+    root.visible = true;
+    // Let the content lay out first, otherwise the opening frame is placed
+    // against a zero-size popup. This is why the old version mispositioned
+    // whenever it was shown with no delay.
+    Qt.callLater(animator.show);
   }
 
   Core.ShowHideAnimator {
     id: animator
-    target: content
+    target: bubble
     slideFrom: "none"
     showDuration: Core.Style.duration(Core.Style.popShowDuration)
     hideDuration: Core.Style.duration(Core.Style.popHideDuration)
@@ -119,35 +150,54 @@ PopupWindow {
     onHideFinished: {
       root.visible = false;
       root.anchor.item = null;
+
+      // Straight in, without the hover delay: the pointer went from one
+      // tooltip to the next.
+      const next = root._next;
+      root._next = null;
+      if (next) {
+        root._place(next.target, next.text, next.direction);
+        root._reveal();
+      }
     }
   }
 
-  Components.Elevation {
-    surface: content
-    level: 1
-    radius: content.radius
-  }
-
-  Rectangle {
-    id: content
+  // The shadow fades and scales with the bubble, so neither is left on
+  // screen without the other.
+  Item {
+    id: bubble
 
     anchors.centerIn: parent
-    implicitWidth: tooltipText.implicitWidth + Core.Style.spaceM * 2
-    implicitHeight: tooltipText.implicitHeight + Core.Style.spaceS * 2
-    radius: Core.Style.radiusS
-    color: Core.Theme.surface
-    border.color: Core.Theme.surfaceHover
-    border.width: Core.Style.borderThin
+    width: content.implicitWidth
+    height: content.implicitHeight
     visible: root.text !== ""
     transformOrigin: Item.Center
     opacity: 0
 
-    Components.Text {
-      id: tooltipText
+    Components.Elevation {
+      surface: content
+      level: 1
+      radius: content.radius
+    }
 
-      anchors.centerIn: parent
-      text: root.text
-      size: Core.Style.fontS
+    Rectangle {
+      id: content
+
+      anchors.fill: parent
+      implicitWidth: tooltipText.implicitWidth + Core.Style.spaceM * 2
+      implicitHeight: tooltipText.implicitHeight + Core.Style.spaceS * 2
+      radius: Core.Style.radiusS
+      color: Core.Theme.surface
+      border.color: Core.Theme.surfaceHover
+      border.width: Core.Style.borderThin
+
+      Components.Text {
+        id: tooltipText
+
+        anchors.centerIn: parent
+        text: root.text
+        size: Core.Style.fontS
+      }
     }
   }
 }

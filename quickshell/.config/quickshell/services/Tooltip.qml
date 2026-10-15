@@ -37,7 +37,7 @@ Singleton {
   // Change the text of the tooltip `target` is showing. Anyone else's is left alone.
   function refresh(target, text) {
     if (root._target === target)
-      root.window.text = text;
+      root.window.refresh(target, text);
   }
 
   // Hide the tooltip `target` is showing. Moving from one item to the next, Qt
