@@ -34,33 +34,7 @@ Components.SlidingPanel {
     Services.Panels.open(id, root.screen);
   }
 
-  // === Battery charge limit ===
-  // UPower's charge limit, Lenovo's conservation mode on this laptop. Through
-  // busctl, as in setup.sh: Quickshell's UPower module does not expose it.
-  readonly property var _chargeLimitBus: ["org.freedesktop.UPower", "/org/freedesktop/UPower/devices/battery_BAT0", "org.freedesktop.UPower.Device"]
-  property bool _chargeLimitSupported: false
-  property bool _chargeLimit: false
-
-  Core.Command {
-    id: chargeLimitRead
-
-    running: true
-    command: ["busctl", "get-property"].concat(root._chargeLimitBus, ["ChargeThresholdSupported", "ChargeThresholdEnabled"])
-
-    onDone: (code, out) => {
-      const values = out.trim().split("\n");
-      root._chargeLimitSupported = values[0] === "b true";
-      root._chargeLimit = values[1] === "b true";
-    }
-  }
-
-  Core.Command {
-    id: chargeLimitWrite
-    tag: "QuickSettings"
-    label: "charge limit"
-
-    onDone: chargeLimitRead.running = true
-  }
+  onOpened: Services.ChargeLimit.refresh()
 
   // === Panels with no bar widget of their own ===
   RowLayout {
@@ -198,18 +172,15 @@ Components.SlidingPanel {
     Components.QuickToggle {
       Layout.fillWidth: true
       Layout.columnSpan: 2
-      visible: root._chargeLimitSupported
+      visible: Services.ChargeLimit.supported
 
       icon: "shield"
       label: "Battery Protect"
-      subtitle: root._chargeLimit ? "Charging stops before full" : "Off - charges to full"
-      active: root._chargeLimit
-      busy: chargeLimitWrite.running
+      subtitle: Services.ChargeLimit.active ? "Charging stops before full" : "Off - charges to full"
+      active: Services.ChargeLimit.active
+      busy: Services.ChargeLimit.busy
 
-      onToggled: {
-        chargeLimitWrite.command = ["busctl", "call"].concat(root._chargeLimitBus, ["EnableChargeThreshold", "b", String(!root._chargeLimit)]);
-        chargeLimitWrite.running = true;
-      }
+      onToggled: Services.ChargeLimit.toggle()
     }
   }
 
