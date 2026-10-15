@@ -7,4 +7,5 @@ lib32-mangohud
 mangohud
 protontricks
 steam
+aur/heroic-games-launcher-bin  # Epic and GOG games, on GE-Proton through umu
 aur/protonplus          # Proton-GE builds

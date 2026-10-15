@@ -201,6 +201,10 @@ gamemoderun mangohud %command%
   package lists.
 - **ProtonPlus** installs Proton-GE builds; choose one per game under
   Properties → Compatibility.
+- **Heroic** runs Epic and GOG games, on GE-Proton through umu, so no system
+  Wine is needed. Turn on GameMode and MangoHud in each game's settings, the
+  same as the launch options above. Its games get Proton's window class too
+  (`steam_app_0`), so the rules below treat them like Steam's.
 
 Fullscreen games skip vsync and keep the screen awake; see
 [hypr/README.md](hypr/README.md#games).
@@ -243,7 +247,7 @@ launcher.
 | hyprshot | The shell's screenshot service covers it. |
 | network-manager-applet | Its tray icon and Wi-Fi password prompt duplicate the shell's. Saved networks keep their password in the profile, so no agent has to supply it. |
 | nvtop | btop shows the GPU. |
-| Heroic, Lutris | Steam is the only game store in use. |
+| Lutris | Heroic covers Epic and GOG. Lutris would add Battle.net and Ubisoft, but needs a system Wine for them. |
 | Jellyfin, Kodi | mpv and the browser cover playback. |
 | LenovoLegionLinux | It needs an out-of-tree kernel module; UPower and power-profiles-daemon cover the battery and power modes. |
 | qt6ct, Kvantum | Not needed for the few Qt apps here. |
