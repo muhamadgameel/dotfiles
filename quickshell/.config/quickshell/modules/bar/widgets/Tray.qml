@@ -93,7 +93,7 @@ RowLayout {
             Services.Tooltip.show(entry, text, "bottom");
         }
 
-        onExited: Services.Tooltip.hide()
+        onExited: Services.Tooltip.hide(entry)
 
         onClicked: mouseEvent => {
           if (!entry.item)

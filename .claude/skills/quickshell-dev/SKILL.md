@@ -97,6 +97,9 @@ qsrig stop  <scratch>/rig
   `components/SlidingPanel.qml` in the copy with a window-less stand-in that has the
   same properties. `QSRIG_PLATFORM=wayland qsrig start` uses the real platform when
   layer-shell behaviour is the question; the probe's window then stays hidden.
+- To hover or click in a rig, put `import QtTest` and `TestCase { id: probe; when: false }`
+  in `Scene.qml` and call `probe.mouseMove(item, x, y)` or `probe.mouseClick(...)` from
+  a scene function; the events go through Qt's real delivery.
 - Offscreen wheel events come from a mouse device. On the real session every wheel
   event comes from a touchpad-type device, so a `WheelHandler` needs
   `acceptedDevices: PointerDevice.AllDevices`; reuse `components/WheelSteps.qml`.
@@ -183,6 +186,9 @@ reload says `Configuration Loaded`. The argument is the edited file's directory.
   `services/OSD.qml` ignores its first two seconds for this reason.
 - **A `Process` remembers `running = true` set while it runs** and starts once more
   when it exits. For something a user closes, toggle with `running = !running`.
+- **Moving from one item to the next, the new item's `entered` comes before the old
+  one's `exited`.** Anything shared that an exit closes, like the tooltip, must check
+  that the exit belongs to the item it is showing for.
 - **A singleton that gains an inline component fails to hot-reload:** "Reader is not a
   type", and the old config keeps running. A fresh start loads the same file. Keep a
   service's helpers as functions.

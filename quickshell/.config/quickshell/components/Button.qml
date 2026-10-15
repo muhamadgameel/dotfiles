@@ -225,7 +225,7 @@ Rectangle {
       }
     }
 
-    onExited: Services.Tooltip.hide()
+    onExited: Services.Tooltip.hide(root)
   }
 
   // Repeater and Variants delegates get destroyed while still hovered, which

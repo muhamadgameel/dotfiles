@@ -155,6 +155,6 @@ Item {
     hoverEnabled: root.hasContent
 
     onEntered: Services.Tooltip.show(root, root.appName === "" ? root.rawTitle : `${root.appName}\n${root.rawTitle}`, "bottom")
-    onExited: Services.Tooltip.hide()
+    onExited: Services.Tooltip.hide(root)
   }
 }

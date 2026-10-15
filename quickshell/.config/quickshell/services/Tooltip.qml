@@ -40,7 +40,13 @@ Singleton {
       root.window.text = text;
   }
 
-  function hide() {
+  // Hide the tooltip `target` is showing. Moving from one item to the next, Qt
+  // delivers the new item's enter before the old one's exit, which would
+  // otherwise hide the tooltip that had just moved to the new item.
+  function hide(target) {
+    if (root._target !== target)
+      return;
+
     root._target = null;
     if (root.window)
       root.window.hide();
