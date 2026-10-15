@@ -183,6 +183,9 @@ reload says `Configuration Loaded`. The argument is the edited file's directory.
   `services/OSD.qml` ignores its first two seconds for this reason.
 - **A `Process` remembers `running = true` set while it runs** and starts once more
   when it exits. For something a user closes, toggle with `running = !running`.
+- **A singleton that gains an inline component fails to hot-reload:** "Reader is not a
+  type", and the old config keeps running. A fresh start loads the same file. Keep a
+  service's helpers as functions.
 - **A Repeater over a JS array rebuilds every row** when the array's contents change
   (an equal array is skipped). `model: ScriptModel { values: … }` keeps the rows whose
   values remain and reports a reorder as a move, which `AnimatedColumn` animates.
