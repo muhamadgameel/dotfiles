@@ -54,6 +54,10 @@ qsrig stop  <scratch>/rig
   singleton with the same properties and functions that only records its calls.
   Never click a real bar widget against its real service: a left click on Brightness
   sets 50%, a middle click on Network turns Wi-Fi off.
+- A D-Bus service (the tray, notifications) goes on a private bus:
+  `dbus-daemon --session --fork --address=unix:abstract=<name> --print-address=1`,
+  exported as `DBUS_SESSION_BUS_ADDRESS` before `qsrig start`. A socket path under the
+  scratchpad is too long for it, and an empty address puts the rig on the real bus.
 - A service that runs programs gets stand-in programs: scripts named `slurp`, `grim`,
   `wl-copy` or `notify-send` that log their arguments, in a directory first on the
   rig's PATH (`PATH=<dir>:$PATH qsrig start <rig>`). A stand-in `sh` that logs `$2` and
@@ -177,6 +181,9 @@ reload says `Configuration Loaded`. The argument is the edited file's directory.
   `services/OSD.qml` ignores its first two seconds for this reason.
 - **A `Process` remembers `running = true` set while it runs** and starts once more
   when it exits. For something a user closes, toggle with `running = !running`.
+- **A Repeater over a JS array rebuilds every row** when the array's contents change
+  (an equal array is skipped). `model: ScriptModel { values: … }` keeps the rows whose
+  values remain and reports a reorder as a move, which `AnimatedColumn` animates.
 - **A program that cannot be started** emits no `exited`, so `Command.onDone` never
   fires for it.
 - **A setting is written 400 ms after it changes;** a reload inside that window reads

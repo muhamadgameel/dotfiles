@@ -2,6 +2,7 @@ pragma ComponentBehavior: Bound
 
 import QtQuick
 import QtQuick.Layouts
+import Quickshell
 
 import "../../components" as Components
 import "../../core" as Core
@@ -87,7 +88,9 @@ Components.SlidingPanel {
 
     // Playback Streams
     Repeater {
-      model: Services.Audio.sinkStreams
+      model: ScriptModel {
+        values: Services.Audio.sinkStreams
+      }
       delegate: StreamItem {
         Layout.fillWidth: true
         isOutput: true
@@ -96,7 +99,9 @@ Components.SlidingPanel {
 
     // Recording Streams
     Repeater {
-      model: Services.Audio.sourceStreams
+      model: ScriptModel {
+        values: Services.Audio.sourceStreams
+      }
       delegate: StreamItem {
         Layout.fillWidth: true
         isOutput: false
@@ -205,7 +210,9 @@ Components.SlidingPanel {
     signal deviceSelected(var node)
 
     Repeater {
-      model: deviceSelectorRoot.devices
+      model: ScriptModel {
+        values: deviceSelectorRoot.devices
+      }
 
       Components.ListRow {
         id: deviceCard

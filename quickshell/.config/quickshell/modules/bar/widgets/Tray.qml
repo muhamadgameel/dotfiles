@@ -32,7 +32,9 @@ RowLayout {
   property bool expanded: false
 
   Repeater {
-    model: root.shownItems
+    model: ScriptModel {
+      values: root.shownItems
+    }
 
     delegate: Item {
       id: entry
