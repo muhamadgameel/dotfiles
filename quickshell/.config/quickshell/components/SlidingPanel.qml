@@ -40,8 +40,6 @@ Item {
   id: root
 
   // === Required Properties ===
-  property var parentWindow: null
-
   // Panel identity in Services.Panels.
   property string panelId: ""
 
@@ -87,7 +85,7 @@ Item {
   signal closed
 
   // === State ===
-  readonly property var screen: root.parentWindow?.screen ?? null
+  readonly property var screen: Services.Panels.targetScreen
   readonly property bool isOpen: Services.Panels.isOpen(root.panelId, root.screen)
 
   // Drives the slide. Distinct from isOpen because the panel is constructed
