@@ -189,142 +189,68 @@ Components.SlidingPanel {
   }
 
   // --- Device Item ---
-  component DeviceItem: Components.Card {
+  component DeviceItem: Components.ListRow {
     id: devItem
 
     property var device: null
 
-    readonly property string deviceName: Services.Bluetooth.deviceLabel(device)
-    readonly property string deviceIcon: Services.Bluetooth.getDeviceIcon(device)
     readonly property bool isConnected: device?.connected ?? false
     readonly property bool isPaired: device?.paired || device?.trusted || false
     readonly property string statusText: Services.Bluetooth.getDeviceStatus(device)
     readonly property string batteryText: Services.Bluetooth.getDeviceBatteryText(device)
     readonly property bool isBusy: Services.Bluetooth.isDeviceBusy(device)
 
-    // Show actions for connected/paired devices always, or on hover for available
-    readonly property bool showActions: (isConnected || isPaired || hovered) && !isBusy
-
-    implicitHeight: Core.Style.controlHeightL
     interactive: !isBusy
+
+    icon: Services.Bluetooth.getDeviceIcon(device)
+    iconSize: Core.Style.fontL
+    iconColor: isConnected ? Core.Theme.accentAlt : Core.Theme.text
+    title: Services.Bluetooth.deviceLabel(device)
+    titleColor: isConnected ? Core.Theme.accentAlt : Core.Theme.text
+    titleWeight: isConnected ? Core.Style.weightBold : Core.Style.weightNormal
+    subtitle: {
+      const parts = [device?.address ?? ""];
+      if (statusText !== "Connected" && statusText !== "Paired")
+        parts.push(statusText);
+      if (batteryText !== "")
+        parts.push(`Battery ${batteryText}`);
+      else if (isPaired && !isConnected && !isBusy)
+        parts.push("Tap to connect");
+      return parts.filter(part => part !== "").join(" · ");
+    }
 
     // Pairs, connects or disconnects as appropriate. Tapping an unpaired device
     // used to connect and silently trust it.
     onClicked: Services.Bluetooth.activate(devItem.device)
 
-    RowLayout {
-      anchors.left: parent.left
-      anchors.right: parent.right
-      anchors.verticalCenter: parent.verticalCenter
-      anchors.leftMargin: Core.Style.spaceM
-      anchors.rightMargin: Core.Style.spaceS
-      spacing: Core.Style.spaceM
-
-      // Device Icon
-      Components.Icon {
-        icon: devItem.deviceIcon
-        size: Core.Style.fontL
-        color: devItem.isConnected ? Core.Theme.accentAlt : Core.Theme.text
-      }
-
-      // Device Info
-      ColumnLayout {
-        Layout.fillWidth: true
-        spacing: 0
-
-        Components.Text {
-          text: devItem.deviceName
-          color: devItem.isConnected ? Core.Theme.accentAlt : Core.Theme.text
-          weight: devItem.isConnected ? Core.Style.weightBold : Core.Style.weightNormal
-          Layout.fillWidth: true
-        }
-
-        RowLayout {
-          spacing: Core.Style.spaceXS
-
-          Components.Text {
-            text: devItem.device?.address ?? ""
-            size: Core.Style.fontXS
-            color: Core.Theme.textMuted
-            font.family: Core.Style.fontMono
-          }
-
-          // Status text
-          Components.Text {
-            visible: devItem.statusText !== "" && devItem.statusText !== "Connected" && devItem.statusText !== "Paired"
-            text: devItem.statusText
-            size: Core.Style.fontS
-            color: Core.Theme.textDim
-          }
-
-          // Battery info
-          RowLayout {
-            visible: devItem.batteryText !== ""
-            spacing: Core.Style.spaceXS
-
-            Components.Icon {
-              icon: "battery"
-              size: Core.Style.fontS
-              color: Core.Theme.textDim
-            }
-
-            Components.Text {
-              text: devItem.batteryText
-              size: Core.Style.fontS
-              color: Core.Theme.textDim
-            }
-          }
-
-          // Tap to connect hint (for paired but not connected)
-          Components.Text {
-            visible: devItem.isPaired && !devItem.isConnected && !devItem.batteryText && !devItem.isBusy
-            text: "Tap to connect"
-            size: Core.Style.fontS
-            color: Core.Theme.textMuted
-          }
-        }
-      }
-
-      // Loading Spinner
+    trailing: [
       Components.Spinner {
         visible: devItem.isBusy
         size: Core.Style.fontM
         color: Core.Theme.accentAlt
-      }
-
-      // Action Buttons
-      RowLayout {
-        spacing: Core.Style.spaceXS
-        visible: devItem.showActions
-
-        // Disconnect button (for connected devices)
-        Components.Button {
-          visible: devItem.isConnected
-          icon: "close"
-          iconSize: Core.Style.fontM
-          tooltipText: "Disconnect"
-          variant: "danger"
-          onClicked: Services.Bluetooth.disconnectDevice(devItem.device)
-        }
-
-        // Forget button (for paired devices)
-        Components.Button {
-          visible: devItem.isPaired
-          icon: "trash"
-          iconSize: Core.Style.fontM
-          tooltipText: "Forget device"
-          variant: "danger"
-          onClicked: Services.Bluetooth.forgetDevice(devItem.device)
-        }
-      }
-
-      // Arrow indicator (shows on hover for available devices)
+      },
+      Components.Button {
+        visible: devItem.isConnected && !devItem.isBusy
+        icon: "close"
+        iconSize: Core.Style.fontM
+        tooltipText: "Disconnect"
+        variant: "danger"
+        onClicked: Services.Bluetooth.disconnectDevice(devItem.device)
+      },
+      Components.Button {
+        visible: devItem.isPaired && !devItem.isBusy
+        icon: "trash"
+        iconSize: Core.Style.fontM
+        tooltipText: "Forget device"
+        variant: "danger"
+        onClicked: Services.Bluetooth.forgetDevice(devItem.device)
+      },
       Components.Icon {
         visible: !devItem.isConnected && !devItem.isPaired && !devItem.isBusy && devItem.hovered
         icon: "chevron-right"
         size: Core.Style.fontM
         color: Core.Theme.textDim
       }
-    }
+    ]
   }
 }
