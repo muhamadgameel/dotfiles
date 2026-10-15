@@ -31,16 +31,12 @@ Singleton {
     return Quickshell.screens[0] ?? null;
   }
 
-  // Hyprland's Lua config mode evaluates a dispatch as Lua, so the plain
-  // "workspace 3" form is a syntax error there and the classic form is wrong in
-  // the other direction. Hyprland tells us which dialect it wants.
-  readonly property bool usingLua: Hyprland.usingLua
-
+  // The Lua config evaluates a dispatch as Lua.
   function focusWorkspace(id) {
-    Hyprland.dispatch(usingLua ? `hl.dsp.focus({ workspace = ${id} })` : `workspace ${id}`);
+    Hyprland.dispatch(`hl.dsp.focus({ workspace = ${id} })`);
   }
 
   function moveToWorkspace(id) {
-    Hyprland.dispatch(usingLua ? `hl.dsp.window.move({ workspace = ${id}, follow = false })` : `movetoworkspacesilent ${id}`);
+    Hyprland.dispatch(`hl.dsp.window.move({ workspace = ${id}, follow = false })`);
   }
 }

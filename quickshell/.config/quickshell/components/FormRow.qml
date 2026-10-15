@@ -10,13 +10,13 @@ import "." as Components
 * Usage:
 *   FormRow {
 *       label: "Enable notifications"
-*       hasToggle: true
 *       toggleChecked: settings.notifications
 *       onToggled: settings.notifications = checked
 *   }
 *
 *   FormRow {
 *       label: "Version"
+*       hasToggle: false
 *       valueText: "1.0.0"
 *   }
 */
@@ -24,7 +24,7 @@ Components.Card {
   id: root
 
   property string label: "Label"
-  property bool hasToggle: false
+  property bool hasToggle: true
   property bool toggleChecked: false
   property string valueText: ""
 

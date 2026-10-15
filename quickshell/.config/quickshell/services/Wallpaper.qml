@@ -99,8 +99,6 @@ Singleton {
     _set.running = true;
   }
 
-  Component.onCompleted: root.apply()
-
   Core.Command {
     id: _resolve
 

@@ -57,7 +57,6 @@ Variants {
       // Position configuration
       location: Config.Config.osdPosition
       margin: Core.Style.osdMargin
-      topExtra: Core.Style.barHeight
 
       readonly property int shadowRoom: Math.max(Core.Style.spaceXS, Core.Style.elevationRoom(2))
 

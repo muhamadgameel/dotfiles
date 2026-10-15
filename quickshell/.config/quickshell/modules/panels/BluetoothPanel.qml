@@ -35,7 +35,6 @@ Components.SlidingPanel {
     // Bluetooth Toggle
     Components.FormRow {
       label: "Bluetooth"
-      hasToggle: true
       toggleChecked: Services.Bluetooth.enabled
       onToggled: checked => Services.Bluetooth.setEnabled(checked)
     },

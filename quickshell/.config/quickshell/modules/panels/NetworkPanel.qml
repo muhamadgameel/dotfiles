@@ -31,7 +31,6 @@ Components.SlidingPanel {
     // WiFi Toggle
     Components.FormRow {
       label: "Wi-Fi"
-      hasToggle: true
       toggleChecked: Services.Network.wifiEnabled
       onToggled: checked => Services.Network.setWifiEnabled(checked)
     },

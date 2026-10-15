@@ -121,7 +121,6 @@ Components.SlidingPanel {
   // === Options ===
   Components.FormRow {
     label: "Copy to clipboard"
-    hasToggle: true
     toggleChecked: root.toClipboard
     onToggled: checked => root.toClipboard = checked
   }
@@ -167,7 +166,6 @@ Components.SlidingPanel {
 
   Components.FormRow {
     label: "Record the microphone too"
-    hasToggle: true
     toggleChecked: Config.Config.recordMicrophone
     onToggled: checked => Config.Config.setFlag("recordMicrophone", checked)
   }

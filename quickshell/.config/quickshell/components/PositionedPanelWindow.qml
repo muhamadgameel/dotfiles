@@ -14,7 +14,6 @@ import "../core" as Core
 *     screen: myScreen
 *     location: "top_right"   // or Config.Config.osdPosition
 *     margin: 20
-*     topExtra: Style.barHeight * 2
 *
 *     // Your content here
 *   }
@@ -27,7 +26,8 @@ PanelWindow {
   // === Position Configuration ===
   property string location: "top_right"
   property int margin: 0
-  property int topExtra: 0
+  // Below the bar by default.
+  property int topExtra: Core.Style.barHeight
   property int bottomExtra: 0
 
   // === Parsed Position (readonly) ===

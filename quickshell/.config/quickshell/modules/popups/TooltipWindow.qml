@@ -128,12 +128,26 @@ PopupWindow {
     radius: content.radius
   }
 
-  Components.TooltipBubble {
+  Rectangle {
     id: content
 
     anchors.centerIn: parent
-    text: root.text
+    implicitWidth: tooltipText.implicitWidth + Core.Style.spaceM * 2
+    implicitHeight: tooltipText.implicitHeight + Core.Style.spaceS * 2
+    radius: Core.Style.radiusS
+    color: Core.Theme.surface
+    border.color: Core.Theme.surfaceHover
+    border.width: Core.Style.borderThin
+    visible: root.text !== ""
     transformOrigin: Item.Center
     opacity: 0
+
+    Components.Text {
+      id: tooltipText
+
+      anchors.centerIn: parent
+      text: root.text
+      size: Core.Style.fontS
+    }
   }
 }

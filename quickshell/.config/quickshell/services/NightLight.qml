@@ -142,8 +142,6 @@ Singleton {
     }
   }
 
-  Component.onCompleted: root.apply()
-
   // Re-checked when the panel holding the control opens, so enabling the unit
   // is noticed without restarting the shell.
   Connections {

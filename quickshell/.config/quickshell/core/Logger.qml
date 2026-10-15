@@ -27,7 +27,6 @@ Singleton {
   readonly property int levelInfo: 1
   readonly property int levelWarn: 2
   readonly property int levelError: 3
-  readonly property int levelOff: 4
 
   readonly property var levelNames: ["debug", "info", "warn", "error", "off"]
 

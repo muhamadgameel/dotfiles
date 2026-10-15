@@ -85,33 +85,6 @@ Scope {
   }
 
   IpcHandler {
-    target: "workspace"
-
-    /**
-    * Switch to a workspace on the focused monitor.
-    *
-    * Goes through the same path the bar's workspace buttons use, so this also
-    * exercises the Lua/plain dispatch split (Hyprland.usingLua).
-    */
-    function focus(id: int): string {
-      Targets.focusWorkspace(id);
-      return `workspace ${id}`;
-    }
-
-    /**
-    * Move the focused window to a workspace without following it.
-    */
-    function move(id: int): string {
-      Targets.moveToWorkspace(id);
-      return `moved to ${id}`;
-    }
-
-    function usingLua(): bool {
-      return Targets.usingLua;
-    }
-  }
-
-  IpcHandler {
     target: "notifications"
 
     function toggleDnd(): string {

@@ -79,7 +79,6 @@ Singleton {
 
   // === Typography ===
   readonly property string fontFamily: Config.Config.fontFamily
-  readonly property string fontMono: "JetBrainsMono Nerd Font"
 
   // A section heading is set smaller than the rows it labels, so it needs more
   // tracking than a heading set larger would.
@@ -216,9 +215,6 @@ Singleton {
   readonly property int slideHideDuration: animNormal
   readonly property real slideHiddenScale: 0.8
   readonly property int slideDistance: Math.round(300 * uiScale)
-
-  // Gap between consecutive cards in a stack, so they arrive in sequence.
-  readonly property int slideStagger: 80
 
   // One turn of a Spinner.
   readonly property int spinDuration: 1000

@@ -36,6 +36,7 @@ Components.Collapsible {
       readonly property var row: root.rows[index] ?? ({})
 
       label: String(row.label ?? "")
+      hasToggle: false
       valueText: String(row.value ?? "")
     }
   }
