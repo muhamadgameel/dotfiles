@@ -68,20 +68,7 @@ Rectangle {
     }
   }
 
-  // Keyboard focus was invisible everywhere except TextField, which made the
-  // shell effectively unusable without a pointer. Drawn outside the control so
-  // it never eats into the content box.
-  Rectangle {
-    anchors.fill: parent
-    anchors.margins: -Core.Style.focusRingOffset
-    z: -1
-
-    visible: root.activeFocus
-    color: Core.Theme.transparent
-    radius: parent.radius + Core.Style.focusRingOffset
-    border.color: Core.Theme.focusRing
-    border.width: Core.Style.focusRingWidth
-  }
+  FocusRing {}
 
   // Space and Enter on the focused toggle: flip it, once per press.
   Keys.onPressed: event => {

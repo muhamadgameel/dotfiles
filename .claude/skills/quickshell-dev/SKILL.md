@@ -97,9 +97,11 @@ qsrig stop  <scratch>/rig
   `components/SlidingPanel.qml` in the copy with a window-less stand-in that has the
   same properties. `QSRIG_PLATFORM=wayland qsrig start` uses the real platform when
   layer-shell behaviour is the question; the probe's window then stays hidden.
-- A `Timer` started over `qs ipc` in an offscreen rig may never fire, and animations
-  can crawl. For logic, set `animationsEnabled` to false in the rig (every duration is
-  then 0) and do the timer's work from a scene function.
+- A rig with nothing animating can sit idle until the next event: a `Timer` started over
+  `qs ipc` may never fire, animations crawl, and a `grab` is written late. After a grab,
+  wake it with a few `qsrig call <rig> js 1`. For logic, set `animationsEnabled` to
+  false in the rig (every duration is then 0) and do the timer's work from a scene
+  function.
 - Format a candidate inside a rig copy, which carries `.qmlformat.ini`. qmlformat on
   a file in a bare scratch folder uses its own defaults.
 - To hover or click in a rig, put `import QtTest` and `TestCase { id: probe; when: false }`

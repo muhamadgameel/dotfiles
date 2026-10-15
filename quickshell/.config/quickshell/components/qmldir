@@ -10,6 +10,7 @@ Collapsible 1.0 Collapsible.qml
 Divider 1.0 Divider.qml
 Elevation 1.0 Elevation.qml
 EmptyState 1.0 EmptyState.qml
+FocusRing 1.0 FocusRing.qml
 FormRow 1.0 FormRow.qml
 Icon 1.0 Icon.qml
 InfoList 1.0 InfoList.qml
