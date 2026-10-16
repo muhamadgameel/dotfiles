@@ -8,7 +8,6 @@ return {
 
     lualine.setup {
       options = {
-        theme = 'auto',
         refresh = {
           statusline = 200,
           tabline = 500,
@@ -21,7 +20,6 @@ return {
           { 'branch', icon = { '' } },
           {
             'diff',
-            colored = true,
             symbols = { added = ' ', modified = ' ', removed = ' ' },
           },
         },

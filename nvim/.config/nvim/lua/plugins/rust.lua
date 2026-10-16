@@ -25,29 +25,20 @@ return {
           end,
           default_settings = {
             ['rust-analyzer'] = {
-              cargo = {
-                allFeatures = true,
-                loadOutDirsFromCheck = true,
-                buildScripts = { enable = true },
-              },
-              checkOnSave = true,
+              cargo = { features = 'all' },
               check = { command = 'clippy', extraArgs = { '--no-deps' } },
               procMacro = {
-                enable = true,
                 ignored = {
                   ['async-trait'] = { 'async_trait' },
                   ['napi-derive'] = { 'napi' },
                 },
               },
               inlayHints = {
-                bindingModeHints = { enable = false },
                 closureReturnTypeHints = { enable = 'with_block' },
                 lifetimeElisionHints = { enable = 'skip_trivial', useParameterNames = true },
-                parameterHints = { enable = true },
-                typeHints = { enable = true },
               },
               files = {
-                excludeDirs = { '.direnv', '.git', 'node_modules', 'target' },
+                exclude = { '.direnv', '.git', 'node_modules', 'target' },
               },
             },
           },
@@ -63,7 +54,6 @@ return {
     'saecki/crates.nvim',
     event = { 'BufRead Cargo.toml' },
     opts = {
-      completion = { crates = { enabled = true } },
       lsp = {
         enabled = true,
         actions = true,

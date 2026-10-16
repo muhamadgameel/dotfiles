@@ -23,8 +23,6 @@ return {
       ['<C-k>'] = { 'select_prev', 'fallback' },
       ['<C-j>'] = { 'select_next', 'fallback' },
     },
-    appearance = { nerd_font_variant = 'mono' },
-    completion = { documentation = { auto_show = false, auto_show_delay_ms = 500 } },
     signature = { enabled = true },
     sources = {
       default = { 'lsp', 'lazydev', 'path', 'buffer', 'emoji' },
@@ -45,7 +43,5 @@ return {
         },
       },
     },
-    fuzzy = { implementation = 'prefer_rust_with_warning' },
   },
-  opts_extend = { 'sources.default' },
 }

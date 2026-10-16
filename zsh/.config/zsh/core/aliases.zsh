@@ -66,29 +66,11 @@ case $_os in
     alias sys-update="softwareupdate -i -a"
     ;;
   Linux)
-    # Read ID= straight out of /etc/os-release. The previous
-    # `$(. /etc/os-release && echo $ID)` spawned a subshell on every startup and
-    # leaked $OS_ID into the global namespace.
-    if [[ -r /etc/os-release ]]; then
-      typeset -a _osrelease_id
-      _osrelease_id=(${(M)${(f)"$(</etc/os-release)"}:#ID=*})
-      case ${${_osrelease_id[1]#ID=}//\"/} in
-        debian | ubuntu | elementary | pop)
-          alias sys-update="sudo apt update && sudo apt upgrade"
-          ;;
-        arch | manjaro | endeavouros | cachyos)
-          # yay updates the repos and the AUR, and calls sudo itself.
-          if (( $+commands[yay] )); then
-            alias sys-update="yay -Syu"
-          else
-            alias sys-update="sudo pacman -Syu"
-          fi
-          ;;
-        fedora | rhel | centos)
-          alias sys-update="sudo dnf upgrade --refresh"
-          ;;
-      esac
-      unset _osrelease_id
+    # yay updates the repos and the AUR, and calls sudo itself.
+    if (( $+commands[yay] )); then
+      alias sys-update="yay -Syu"
+    else
+      alias sys-update="sudo pacman -Syu"
     fi
     ;;
 esac

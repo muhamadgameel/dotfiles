@@ -1,18 +1,5 @@
 return {
   {
-    'folke/tokyonight.nvim',
-    lazy = true, -- Alternative theme; kanagawa is the active one
-    config = function()
-      require('tokyonight').setup {
-        style = 'night',
-        dim_inactive = true,
-        lualine_bold = true,
-      }
-
-      -- vim.cmd.colorscheme 'tokyonight'
-    end,
-  },
-  {
     'rebelot/kanagawa.nvim',
     lazy = false,
     priority = 1000,
