@@ -47,13 +47,10 @@ if (( $+commands[bat] )); then
   export MANROFFOPT="-c"
 fi
 
-# FNM (Node versions manager)
-if [[ $_os == Linux && -d $HOME/.local/share/fnm ]]; then
-  path=($HOME/.local/share/fnm $path)
-fi
-# Deliberately NOT run through cached-eval: `fnm env` bakes a per-shell
-# FNM_MULTISHELL_PATH under /run/user into its output, so a cached copy would
-# point every later shell at a directory that no longer exists.
+# FNM (Node versions manager). Deliberately NOT run through cached-eval:
+# `fnm env` bakes a per-shell FNM_MULTISHELL_PATH under /run/user into its
+# output, so a cached copy would point every later shell at a directory that no
+# longer exists.
 if (( $+commands[fnm] )); then
   eval "$(fnm env --use-on-cd --shell zsh)"
 fi

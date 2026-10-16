@@ -56,15 +56,12 @@ fi
 # fzf reject the whole string with "invalid command line string".
 FZF_CTRL_R_OPTS="--preview 'echo {2..}'"
 FZF_CTRL_R_OPTS+=" --preview-window='down:3:hidden:wrap'"
-FZF_CTRL_R_OPTS+=" --bind='?:toggle-preview'"
 
 _fzf_clip=''
 if (( $+commands[wl-copy] )); then
   _fzf_clip='wl-copy'
 elif (( $+commands[pbcopy] )); then
   _fzf_clip='pbcopy'
-elif (( $+commands[xclip] )); then
-  _fzf_clip='xclip -selection clipboard'
 fi
 
 if [[ -n $_fzf_clip ]]; then

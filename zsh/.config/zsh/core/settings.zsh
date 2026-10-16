@@ -30,7 +30,6 @@ setopt rc_quotes       # Allow 'Henry''s Garage' instead of 'Henry'\''s Garage'.
 # ===== Jobs
 setopt long_list_jobs # List jobs in the long format by default.
 setopt auto_resume    # Resume existing job from background before creating a new process by typing its name
-setopt notify         # Report status of background jobs immediately
 unsetopt bg_nice      # Do not run all background jobs at a lower priority
 unsetopt hup          # Do not kill jobs on shell exit
 
@@ -51,7 +50,6 @@ SAVEHIST=100000
 HISTFILE=${XDG_STATE_HOME:-$HOME/.local/state}/zsh/history
 [[ -d ${HISTFILE:h} ]] || command mkdir -p ${HISTFILE:h}
 
-setopt bang_hist              # Treat the '!' character specially during expansion
 setopt extended_history       # Write the history file in the ":start:elapsed;command" format
 setopt share_history          # Share history between all sessions (implies inc_append_history_time)
 setopt hist_expire_dups_first # Delete duplicates first when HISTFILE size exceeds HISTSIZE.
