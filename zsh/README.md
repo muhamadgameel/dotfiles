@@ -36,21 +36,14 @@ autoloaded when it exists: one file per function, named after the function.
 
 ## Plugins (zpm)
 
-`zpm.zsh` is a small plugin manager in the style of Zap. Each `Plug` line in
-`init.zsh` clones its repository into `~/.local/share/zpm/plugins` on first use
-and sources it:
-
-```zsh
-Plug "owner/repo"                 # GitHub shorthand
-Plug "owner/repo" "v1.2.0"        # pinned to a tag, branch or commit
-Plug "https://example.com/x.git"  # any git URL
-Plug "~/code/my-plugin"           # local directory, never cloned or updated
-```
+`zpm.zsh` is a small plugin manager in the style of Zap. Each `Plug "owner/repo"`
+line in `init.zsh` clones that GitHub repository into
+`~/.local/share/zpm/plugins` on first use and sources it.
 
 | Command | Does |
 |---|---|
 | `zpm list` | List the declared plugins. |
-| `zpm update` | Update every plugin in parallel, skipping pinned ones. |
+| `zpm update` | Update every plugin in parallel. |
 | `zpm clean` | Remove plugins that are no longer declared. |
 | `zpm compile` | Rebuild the `.zwc` byte-code cache. |
 | `zpm doctor` | Report problems with the setup. |
