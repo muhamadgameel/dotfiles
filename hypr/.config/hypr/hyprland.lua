@@ -7,4 +7,3 @@ require("settings.input") -- keyboard, mouse, touchpad, gestures
 require("settings.rules") -- window / layer / workspace rules
 require("settings.keybinds")
 require("settings.autostart")
-require("settings.keydiag") -- temporary: key timings for the repeat bursts
