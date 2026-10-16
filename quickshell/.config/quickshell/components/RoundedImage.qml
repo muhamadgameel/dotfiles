@@ -25,7 +25,6 @@ Item {
 
   property alias source: image.source
   property alias sourceSize: image.sourceSize
-  property alias fillMode: image.fillMode
   readonly property alias status: image.status
   property real radius: Core.Style.radiusM
 

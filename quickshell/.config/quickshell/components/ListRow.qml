@@ -7,6 +7,10 @@ import "." as Components
 /**
 * ListRow - a card row: an icon, a title over a small grey line, an icon at the end
 *
+* Items in `trailing` go at the end of the row: buttons, a spinner. The row keeps
+* its height at the top of the card, so a row that sets a larger implicitHeight
+* has room under it for content of its own.
+*
 * Usage:
 *   ListRow {
 *       icon: "lock"
@@ -31,18 +35,25 @@ Components.Card {
   property int titleWeight: root.dense ? Core.Style.weightMedium : Core.Style.weightBold
   property string subtitle: ""
 
+  property alias trailing: trailingRow.data
+
   // Shown at the end of the row while set.
   property string trailingIcon: ""
   property real trailingSize: Core.Style.fontM
   property color trailingColor: Core.Theme.accent
 
+  readonly property int rowHeight: root.dense ? Core.Style.controlHeightM : Core.Style.controlHeightL
+
   Layout.fillWidth: true
-  implicitHeight: root.dense ? Core.Style.controlHeightM : Core.Style.controlHeightL
+  implicitHeight: root.rowHeight
 
   RowLayout {
-    anchors.fill: parent
+    anchors.top: parent.top
+    anchors.left: parent.left
+    anchors.right: parent.right
     anchors.leftMargin: root.dense ? Core.Style.spaceM : Core.Style.spaceL
     anchors.rightMargin: root.dense ? Core.Style.spaceM : Core.Style.spaceL
+    height: root.rowHeight
     spacing: root.dense ? Core.Style.spaceS : Core.Style.spaceM
 
     Components.Icon {
@@ -69,6 +80,13 @@ Components.Card {
         size: Core.Style.fontXS
         color: Core.Theme.textMuted
       }
+    }
+
+    RowLayout {
+      id: trailingRow
+
+      visible: children.length > 0
+      spacing: Core.Style.spaceXS
     }
 
     Components.Icon {

@@ -32,7 +32,9 @@ RowLayout {
   property bool expanded: false
 
   Repeater {
-    model: root.shownItems
+    model: ScriptModel {
+      values: root.shownItems
+    }
 
     delegate: Item {
       id: entry
@@ -53,10 +55,7 @@ RowLayout {
         color: mouse.containsMouse ? Core.Theme.surfaceHover : Core.Theme.transparentOf(Core.Theme.surfaceHover)
 
         Behavior on color {
-          ColorAnimation {
-            duration: Core.Style.duration(Core.Style.animFast)
-            easing.type: Core.Style.easeStandard
-          }
+          Components.AnimFast {}
         }
       }
 
@@ -94,7 +93,7 @@ RowLayout {
             Services.Tooltip.show(entry, text, "bottom");
         }
 
-        onExited: Services.Tooltip.hide()
+        onExited: Services.Tooltip.hide(entry)
 
         onClicked: mouseEvent => {
           if (!entry.item)

@@ -74,7 +74,7 @@ Item {
     }
 
     onExited: {
-      Services.Tooltip.hide();
+      Services.Tooltip.hide(root);
     }
 
     acceptedButtons: Qt.LeftButton

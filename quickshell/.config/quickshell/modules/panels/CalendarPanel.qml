@@ -119,17 +119,11 @@ Components.SlidingPanel {
       opacity: root.monthOffset !== 0 ? 1 : 0
 
       Behavior on Layout.preferredHeight {
-        NumberAnimation {
-          duration: Core.Style.duration(Core.Style.animNormal)
-          easing.type: Core.Style.easeStandard
-        }
+        Components.AnimNormal {}
       }
 
       Behavior on opacity {
-        NumberAnimation {
-          duration: Core.Style.duration(Core.Style.animFast)
-          easing.type: Core.Style.easeStandard
-        }
+        Components.AnimFast {}
       }
 
       Components.Button {

@@ -7,7 +7,6 @@ import Quickshell.Wayland
 import "../../config" as Config
 import "../../core" as Core
 import "../../services" as Services
-import "../panels" as Panels
 
 /**
 * BarWindow - the bar window for each screen, plus that screen's panels
@@ -74,99 +73,29 @@ Variants {
 
     // === Panels (built on first open, torn down after the close animation) ===
 
-    LazyLoader {
-      active: Services.Panels.isLoaded("audio", barWindow.modelData)
+    readonly property var panelFiles: ({
+        audio: "AudioPanel",
+        network: "NetworkPanel",
+        bluetooth: "BluetoothPanel",
+        systemstats: "SystemStatsPanel",
+        notifications: "NotificationCenter",
+        media: "MediaPanel",
+        calendar: "CalendarPanel",
+        power: "PowerPanel",
+        screenshot: "ScreenshotPanel",
+        quicksettings: "QuickSettingsPanel",
+        wallpaper: "WallpaperPanel",
+        settings: "SettingsPanel"
+      })
 
-      component: Panels.AudioPanel {
-        parentWindow: barWindow
-      }
-    }
+    Variants {
+      model: Services.Panels.ids
 
-    LazyLoader {
-      active: Services.Panels.isLoaded("network", barWindow.modelData)
+      LazyLoader {
+        required property string modelData
 
-      component: Panels.NetworkPanel {
-        parentWindow: barWindow
-      }
-    }
-
-    LazyLoader {
-      active: Services.Panels.isLoaded("bluetooth", barWindow.modelData)
-
-      component: Panels.BluetoothPanel {
-        parentWindow: barWindow
-      }
-    }
-
-    LazyLoader {
-      active: Services.Panels.isLoaded("systemstats", barWindow.modelData)
-
-      component: Panels.SystemStatsPanel {
-        parentWindow: barWindow
-      }
-    }
-
-    LazyLoader {
-      active: Services.Panels.isLoaded("notifications", barWindow.modelData)
-
-      component: Panels.NotificationCenter {
-        parentWindow: barWindow
-      }
-    }
-
-    LazyLoader {
-      active: Services.Panels.isLoaded("media", barWindow.modelData)
-
-      component: Panels.MediaPanel {
-        parentWindow: barWindow
-      }
-    }
-
-    LazyLoader {
-      active: Services.Panels.isLoaded("calendar", barWindow.modelData)
-
-      component: Panels.CalendarPanel {
-        parentWindow: barWindow
-      }
-    }
-
-    LazyLoader {
-      active: Services.Panels.isLoaded("power", barWindow.modelData)
-
-      component: Panels.PowerPanel {
-        parentWindow: barWindow
-      }
-    }
-
-    LazyLoader {
-      active: Services.Panels.isLoaded("screenshot", barWindow.modelData)
-
-      component: Panels.ScreenshotPanel {
-        parentWindow: barWindow
-      }
-    }
-
-    LazyLoader {
-      active: Services.Panels.isLoaded("quicksettings", barWindow.modelData)
-
-      component: Panels.QuickSettingsPanel {
-        parentWindow: barWindow
-      }
-    }
-
-    LazyLoader {
-      active: Services.Panels.isLoaded("wallpaper", barWindow.modelData)
-
-      component: Panels.WallpaperPanel {
-        parentWindow: barWindow
-      }
-    }
-
-    LazyLoader {
-      active: Services.Panels.isLoaded("settings", barWindow.modelData)
-
-      component: Panels.SettingsPanel {
-        parentWindow: barWindow
+        active: Services.Panels.isLoaded(modelData, barWindow.modelData)
+        source: Qt.resolvedUrl(`../panels/${barWindow.panelFiles[modelData]}.qml`)
       }
     }
   }

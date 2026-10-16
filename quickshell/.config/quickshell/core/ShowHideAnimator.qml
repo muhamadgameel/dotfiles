@@ -51,9 +51,6 @@ Item {
   property int hideEasing: Core.Style.easeExit
   property real showOvershoot: Core.Style.enterOvershoot
 
-  // Entry delay for staggered animations
-  property int entryDelay: 0
-
   // === Signals ===
   signal hideFinished
 
@@ -92,23 +89,14 @@ Item {
       return;
     if (!_initialized)
       setHidden();
-    const reversing = hideAnim.running;
     hideAnim.stop();
-
-    // Stagger hidden entrances only; never pause an in-flight reversal.
-    if (delayTimer.interval > 0 && !reversing && !showAnim.running && target.opacity === hiddenOpacity) {
-      delayTimer.start();
-    } else {
-      delayTimer.stop();
-      showAnim.start();
-    }
+    showAnim.start();
   }
 
   function hide() {
     if (!target)
       return;
     _initialized = true;
-    delayTimer.stop();
     showAnim.stop();
     hideAnim.start();
   }
@@ -117,7 +105,6 @@ Item {
     if (!target)
       return;
     _initialized = true;
-    delayTimer.stop();
     showAnim.stop();
     hideAnim.stop();
     target.opacity = hiddenOpacity;
@@ -129,19 +116,11 @@ Item {
     if (!target)
       return;
     _initialized = true;
-    delayTimer.stop();
     showAnim.stop();
     hideAnim.stop();
     target.opacity = visibleOpacity;
     target.scale = visibleScale;
     root._setOffset(0);
-  }
-
-  Timer {
-    id: delayTimer
-    interval: Core.Style.duration(root.entryDelay)
-    repeat: false
-    onTriggered: showAnim.start()
   }
 
   // === Animations ===

@@ -12,9 +12,9 @@ import "../services" as Services
 * SystemStats - Service for monitoring system hardware metrics
 *
 * Provides real-time monitoring of:
-* - CPU temperature (Intel coretemp package, AMD k10temp/zenpower Tctl)
-* - GPU temperature (AMD via hwmon, NVIDIA via one looping nvidia-smi)
-* - NVIDIA usage, VRAM, power draw and throttling, from the same query
+* - CPU temperature (the coretemp package sensor)
+* - NVIDIA temperature, usage, VRAM, power draw and throttling, from one
+*   looping nvidia-smi
 * - NVIDIA VRAM by process, while the System Monitor is open
 * - CPU usage (overall and per-core)
 * - Memory usage (RAM + Swap)
@@ -27,7 +27,7 @@ import "../services" as Services
 * Sensor discovery is a single shell pass over /sys/class/hwmon at startup that
 * caches the exact sysfs paths. Each poll is then one file read per metric.
 *
-* On Intel this resolves the "Package id 0" sensor specifically. Averaging
+* This resolves the "Package id 0" sensor specifically. Averaging
 * temp1..temp20 (as this previously did) mixes the package reading with the
 * per-core readings and silently ignores any core sensor numbered above 20 -
 * on a 48-sensor part that averaged an arbitrary 6 of them and under-reported
@@ -40,10 +40,6 @@ import "../services" as Services
 */
 Singleton {
   id: root
-
-  // ═══════════════════════════════════════════════════════════════════════════
-  // CONFIGURATION
-  // ═══════════════════════════════════════════════════════════════════════════
 
   readonly property int pollingInterval: 2000
 
@@ -66,10 +62,6 @@ Singleton {
   // window rendering at the display refresh rate almost continuously. The
   // thresholds have since moved, but any reading can sit near any threshold.
   readonly property real hysteresis: 5
-
-  // ═══════════════════════════════════════════════════════════════════════════
-  // PUBLIC METRICS
-  // ═══════════════════════════════════════════════════════════════════════════
 
   // === CPU ===
   property real cpuTemp: 0
@@ -171,10 +163,6 @@ Singleton {
   property var topCpuApps: []
   property var topMemoryApps: []
 
-  // ═══════════════════════════════════════════════════════════════════════════
-  // COMPUTED PROPERTIES
-  // ═══════════════════════════════════════════════════════════════════════════
-
   // Detection flags
   readonly property bool hasCpuTemp: cpuTemp > 0
   readonly property bool hasGpuTemp: gpuTemp > 0
@@ -216,14 +204,9 @@ Singleton {
     return "gauge";
   }
 
-  // ═══════════════════════════════════════════════════════════════════════════
-  // PRIVATE STATE
-  // ═══════════════════════════════════════════════════════════════════════════
-
   // Resolved sensor paths (empty until detection finishes)
   property string _cpuTempPath: ""
-  property string _gpuType: ""         // "amd", "nvidia"
-  property string _gpuTempPath: ""
+  property bool _nvidia: false
   // Only set for a battery reporting energy (Wh). One reporting charge (Ah)
   // instead has no energy_full_design, and the health figures below assume it.
   property string _batteryPath: ""
@@ -242,13 +225,8 @@ Singleton {
   property var _prevCpuStats: null
   property var _prevCpuCoreStats: ({})
 
-  // Network delta tracking: iface -> { rx, tx }
-  property var _prevNetStats: ({})
-  property real _prevNetTime: 0
-
-  // Disk delta tracking: device -> { read, write }, in 512-byte sectors
-  property var _prevDiskStats: ({})
-  property real _prevDiskTime: 0
+  // The last sample of each counter file, for _rates().
+  property var _lastSamples: ({})
 
   readonly property var _whitespace: /\s+/
   readonly property var _meminfoLine: /^(\w+):\s+(\d+)/
@@ -262,10 +240,6 @@ Singleton {
   // the same bytes - including either double-counts throughput.
 
   readonly property var _ignoredIfacePrefixes: ["lo", "veth", "docker", "br-", "virbr", "vnet", "tun", "tap", "wg", "tailscale", "podman", "cni", "flannel", "kube", "ifb", "dummy", "bond", "sit", "gre", "waydroid"]
-
-  // ═══════════════════════════════════════════════════════════════════════════
-  // PUBLIC FUNCTIONS
-  // ═══════════════════════════════════════════════════════════════════════════
 
   /**
   * Status level for a reading, with hysteresis.
@@ -288,12 +262,7 @@ Singleton {
     return "normal";
   }
 
-  // ═══════════════════════════════════════════════════════════════════════════
-  // SENSOR DETECTION
-  // ═══════════════════════════════════════════════════════════════════════════
-
-  // One shell pass resolves both the CPU and the GPU sensor path, replacing two
-  // separate 16-iteration async walks over the same hwmon directories.
+  // One shell pass finds the CPU sensor and the battery.
   Core.Command {
     id: _sensorDetect
     running: true
@@ -312,10 +281,6 @@ Singleton {
         if (kind === "cpu" && root._cpuTempPath === "") {
           root._cpuTempPath = path;
           Core.Logger.i("SystemStats", `CPU sensor: ${type} at ${path}`);
-        } else if (kind === "gpu" && root._gpuTempPath === "") {
-          root._gpuType = type;
-          root._gpuTempPath = path;
-          Core.Logger.i("SystemStats", `GPU sensor: ${type} at ${path}`);
         } else if (kind === "battery" && root._batteryPath === "") {
           root._batteryPath = path;
           Core.Logger.i("SystemStats", `Battery: ${path}`);
@@ -324,18 +289,10 @@ Singleton {
 
       if (root._cpuTempPath === "")
         Core.Logger.w("SystemStats", "No supported CPU temperature sensor found");
-
-      // No hwmon GPU: probe NVIDIA once. If it answers, its slow timer starts.
-      if (root._gpuType === "")
-        _nvidiaProcess.running = true;
     }
   }
 
-  // ═══════════════════════════════════════════════════════════════════════════
-  // POLLING TIMERS
-  // ═══════════════════════════════════════════════════════════════════════════
-
-  // Sysfs metrics: CPU temp, AMD GPU temp, CPU usage, memory, network.
+  // Sysfs metrics: CPU temp, CPU usage, memory, network.
   // Every one of these is a single file read.
   Timer {
     interval: root.pollingInterval
@@ -345,8 +302,6 @@ Singleton {
     onTriggered: {
       if (root._cpuTempPath !== "")
         _cpuTempFile.reload();
-      if (root._gpuType === "amd")
-        _gpuTempFile.reload();
 
       _cpuStatFile.reload();
       _memInfoFile.reload();
@@ -444,10 +399,6 @@ Singleton {
     onLoaded: root.cpuEpp = text().trim()
   }
 
-  // ═══════════════════════════════════════════════════════════════════════════
-  // BATTERY READER
-  // ═══════════════════════════════════════════════════════════════════════════
-
   function _reloadBattery() {
     if (root._batteryPath !== "")
       _batteryFile.reload();
@@ -502,10 +453,6 @@ Singleton {
     onLoaded: root.uptime = parseFloat(text().trim().split(root._whitespace)[0]) || 0
   }
 
-  // ═══════════════════════════════════════════════════════════════════════════
-  // TEMPERATURE READERS
-  // ═══════════════════════════════════════════════════════════════════════════
-
   FileView {
     id: _cpuTempFile
     path: root._cpuTempPath
@@ -518,18 +465,6 @@ Singleton {
     }
   }
 
-  FileView {
-    id: _gpuTempFile
-    path: root._gpuType === "amd" ? root._gpuTempPath : ""
-    printErrors: false
-
-    onLoaded: {
-      const milli = parseInt(text().trim(), 10);
-      if (!isNaN(milli))
-        root.gpuTemp = Math.round(milli / 1000);
-    }
-  }
-
   // One long-running nvidia-smi in loop mode (`-l`), printing a reading every
   // nvidiaPollingInterval, instead of a fresh process every tick.
   //
@@ -539,12 +474,12 @@ Singleton {
   // register. That was essentially all of the shell's child-process CPU. Same
   // shape as Network's long-running `nmcli monitor`.
   //
-  // Started once by sensor detection as a probe. On a machine without an
+  // Started once at load as a probe. On a machine without an
   // NVIDIA GPU it exits straight away and stays down.
   Process {
     id: _nvidiaProcess
     command: root._nvidiaQuery.concat([String(root.nvidiaPollingInterval / 1000)])
-    running: false
+    running: true
 
     stdout: SplitParser {
       splitMarker: "\n"
@@ -552,8 +487,8 @@ Singleton {
         if (!root._readNvidia(data))
           return;
 
-        if (root._gpuType === "") {
-          root._gpuType = "nvidia";
+        if (!root._nvidia) {
+          root._nvidia = true;
           Core.Logger.i("SystemStats", "NVIDIA GPU detected");
         }
       }
@@ -561,7 +496,7 @@ Singleton {
 
     stderr: StdioCollector {
       onStreamFinished: {
-        if (root._gpuType === "")
+        if (!root._nvidia)
           Core.Logger.d("SystemStats", "No NVIDIA GPU detected");
       }
     }
@@ -570,7 +505,7 @@ Singleton {
     // killed). The fixed delay means a persistent failure retries at the old
     // polling rate rather than spinning.
     onExited: {
-      if (root._gpuType === "nvidia")
+      if (root._nvidia)
         _nvidiaRestart.restart();
     }
   }
@@ -586,7 +521,7 @@ Singleton {
   // with the CPU and memory rows. It stops when the panel closes.
   Process {
     command: root._nvidiaQuery.concat([String(root.pollingInterval / 1000)])
-    running: root._gpuType === "nvidia" && root._monitorOpen
+    running: root._nvidia && root._monitorOpen
 
     stdout: SplitParser {
       splitMarker: "\n"
@@ -638,7 +573,7 @@ Singleton {
     interval: root.pollingInterval
     repeat: true
     triggeredOnStart: true
-    running: root._gpuType === "nvidia" && root._monitorOpen
+    running: root._nvidia && root._monitorOpen
     onTriggered: _gpuProcessQuery.running = true
   }
 
@@ -701,10 +636,6 @@ Singleton {
     }
     return root._readProc(owner, "comm").trim();
   }
-
-  // ═══════════════════════════════════════════════════════════════════════════
-  // CPU USAGE READER
-  // ═══════════════════════════════════════════════════════════════════════════
 
   // Percentage of non-idle jiffies between two /proc/stat samples.
   // Returns null when there is no usable previous sample.
@@ -792,10 +723,6 @@ Singleton {
     }
   }
 
-  // ═══════════════════════════════════════════════════════════════════════════
-  // MEMORY READER
-  // ═══════════════════════════════════════════════════════════════════════════
-
   FileView {
     id: _memInfoFile
     path: "/proc/meminfo"
@@ -830,10 +757,6 @@ Singleton {
     }
   }
 
-  // ═══════════════════════════════════════════════════════════════════════════
-  // NETWORK READER
-  // ═══════════════════════════════════════════════════════════════════════════
-
   function _isIgnoredInterface(iface) {
     for (const prefix of root._ignoredIfacePrefixes) {
       if (iface === prefix || iface.startsWith(prefix))
@@ -842,21 +765,61 @@ Singleton {
     return false;
   }
 
+  // Growth per second of each field since the last sample of `name`, summed
+  // over the devices in both and naming the one that grew most, or null for
+  // the first sample. A device seen for the first time has nothing to compare
+  // with, and a counter that went backwards was reset; neither may cancel
+  // growth elsewhere.
+  function _rates(name, current, fields) {
+    const now = Date.now() / 1000;
+    const last = root._lastSamples[name];
+    root._lastSamples[name] = {
+      sample: current,
+      time: now
+    };
+
+    const seconds = last ? now - last.time : 0;
+    if (seconds <= 0)
+      return null;
+
+    const result = {
+      busiest: ""
+    };
+    let busiestGrowth = 0;
+    for (const field of fields)
+      result[field] = 0;
+
+    for (const key in current) {
+      const before = last.sample[key];
+      if (!before)
+        continue;
+
+      let growth = 0;
+      for (const field of fields) {
+        const grown = Math.max(0, current[key][field] - before[field]);
+        result[field] += grown;
+        growth += grown;
+      }
+      if (growth > busiestGrowth) {
+        busiestGrowth = growth;
+        result.busiest = key;
+      }
+    }
+
+    for (const field of fields)
+      result[field] /= seconds;
+    return result;
+  }
+
   FileView {
     id: _netDevFile
     path: "/proc/net/dev"
     printErrors: false
 
     onLoaded: {
-      const now = Date.now() / 1000;
-      const lines = text().split("\n");
       const current = {};
 
-      for (let i = 2; i < lines.length; i++) {
-        const line = lines[i].trim();
-        if (!line)
-          continue;
-
+      for (const line of text().split("\n").slice(2)) {
         const colonIdx = line.indexOf(":");
         if (colonIdx === -1)
           continue;
@@ -866,61 +829,27 @@ Singleton {
           continue;
 
         const stats = line.substring(colonIdx + 1).trim().split(root._whitespace);
-        const rx = parseInt(stats[0], 10) || 0;
-        const tx = parseInt(stats[8], 10) || 0;
-
         current[iface] = {
-          rx: rx,
-          tx: tx
+          rx: parseInt(stats[0], 10) || 0,
+          tx: parseInt(stats[8], 10) || 0
         };
       }
 
-      const dt = now - root._prevNetTime;
-      if (root._prevNetTime > 0 && dt > 0) {
-        let deltaRx = 0;
-        let deltaTx = 0;
-        let busiestIface = "";
-        let busiestDelta = 0;
+      const rate = root._rates("net", current, ["rx", "tx"]);
+      if (!rate)
+        return;
 
-        for (const iface in current) {
-          const prev = root._prevNetStats[iface];
-          if (!prev)
-            continue;  // Appeared this tick - no delta to take yet
+      root.netDownSpeed = Math.round(rate.rx);
+      root.netUpSpeed = Math.round(rate.tx);
 
-          // Sum only matched samples. A new interface's lifetime counters are
-          // not traffic from this interval, and a reset must not cancel traffic
-          // on another interface.
-          const rx = Math.max(0, current[iface].rx - prev.rx);
-          const tx = Math.max(0, current[iface].tx - prev.tx);
-          deltaRx += rx;
-          deltaTx += tx;
-
-          // The active interface is the one moving bytes right now, not merely
-          // the first one with a non-zero lifetime counter.
-          const delta = rx + tx;
-          if (delta > busiestDelta) {
-            busiestDelta = delta;
-            busiestIface = iface;
-          }
-        }
-
-        root.netDownSpeed = Math.round(deltaRx / dt);
-        root.netUpSpeed = Math.round(deltaTx / dt);
-
-        if (busiestIface !== "")
-          root.netInterface = busiestIface;
-        else if (!(root.netInterface in current))
-          root.netInterface = Object.keys(current)[0] ?? "";
-      }
-
-      root._prevNetStats = current;
-      root._prevNetTime = now;
+      // The active interface is the one moving bytes right now, not merely the
+      // first one with a non-zero lifetime counter.
+      if (rate.busiest !== "")
+        root.netInterface = rate.busiest;
+      else if (!(root.netInterface in current))
+        root.netInterface = Object.keys(current)[0] ?? "";
     }
   }
-
-  // ═══════════════════════════════════════════════════════════════════════════
-  // DISK READER
-  // ═══════════════════════════════════════════════════════════════════════════
 
   // Whole disks only. A partition's traffic is already counted on its disk, and
   // zram is compressed RAM rather than a device with a queue.
@@ -933,7 +862,6 @@ Singleton {
     printErrors: false
 
     onLoaded: {
-      const now = Date.now() / 1000;
       const current = {};
 
       for (const line of text().split("\n")) {
@@ -945,33 +873,18 @@ Singleton {
         if (root._virtualDisk.test(name) || root._diskPartition.test(name))
           continue;
 
-        // Sectors are always 512 bytes here, whatever the drive's own size is.
         current[name] = {
           read: parseInt(parts[5], 10) || 0,
           write: parseInt(parts[9], 10) || 0
         };
       }
 
-      const dt = now - root._prevDiskTime;
-      if (root._prevDiskTime > 0 && dt > 0) {
-        let read = 0;
-        let written = 0;
-
-        for (const name in current) {
-          const prev = root._prevDiskStats[name];
-          if (!prev)
-            continue;  // Appeared this tick - no delta to take yet
-
-          read += Math.max(0, current[name].read - prev.read);
-          written += Math.max(0, current[name].write - prev.write);
-        }
-
-        root.diskReadSpeed = Math.round(read * 512 / dt);
-        root.diskWriteSpeed = Math.round(written * 512 / dt);
+      // Sectors are always 512 bytes here, whatever the drive's own size is.
+      const rate = root._rates("disk", current, ["read", "write"]);
+      if (rate) {
+        root.diskReadSpeed = Math.round(rate.read * 512);
+        root.diskWriteSpeed = Math.round(rate.write * 512);
       }
-
-      root._prevDiskStats = current;
-      root._prevDiskTime = now;
     }
   }
 
@@ -999,10 +912,6 @@ Singleton {
       root.diskMount = parts[2] || "/";
     }
   }
-
-  // ═══════════════════════════════════════════════════════════════════════════
-  // TOP APPS
-  // ═══════════════════════════════════════════════════════════════════════════
 
   // Parsing every process takes ~10 ms, so it happens in awk rather than on
   // the UI thread, and only the top rows come back.
@@ -1058,10 +967,6 @@ Singleton {
     tag: "SystemStats"
     label: "kill"
   }
-
-  // ═══════════════════════════════════════════════════════════════════════════
-  // INITIALIZATION
-  // ═══════════════════════════════════════════════════════════════════════════
 
   Component.onCompleted: Core.Logger.i("SystemStats", "Service initializing...")
 }

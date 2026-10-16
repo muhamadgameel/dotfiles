@@ -61,6 +61,19 @@ Rectangle {
   // === Signals ===
   signal clicked(var button)
 
+  // An interactive card is a Tab stop, and Space or Enter clicks it.
+  activeFocusOnTab: root.interactive
+
+  Keys.onPressed: event => {
+    if (event.key !== Qt.Key_Space && event.key !== Qt.Key_Return && event.key !== Qt.Key_Enter)
+      return;
+    event.accepted = true;
+    if (!event.isAutoRepeat)
+      root.clicked(Qt.LeftButton);
+  }
+
+  FocusRing {}
+
   // === Appearance ===
   radius: Core.Style.radiusS
 
@@ -80,10 +93,7 @@ Rectangle {
   border.width: borderWidth
 
   Behavior on color {
-    ColorAnimation {
-      duration: Core.Style.duration(Core.Style.animFast)
-      easing.type: Core.Style.easeStandard
-    }
+    AnimFast {}
   }
 
   // === Mouse Handling ===

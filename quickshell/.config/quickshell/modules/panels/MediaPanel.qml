@@ -122,10 +122,7 @@ Components.SlidingPanel {
           color: Core.Theme.overlay
 
           Behavior on opacity {
-            NumberAnimation {
-              duration: Core.Style.duration(Core.Style.animNormal)
-              easing.type: Core.Style.easeStandard
-            }
+            Components.AnimNormal {}
           }
         }
 
@@ -143,10 +140,7 @@ Components.SlidingPanel {
           opacity: status === Image.Ready ? 1 : 0
 
           Behavior on opacity {
-            NumberAnimation {
-              duration: Core.Style.duration(Core.Style.animNormal)
-              easing.type: Core.Style.easeStandard
-            }
+            Components.AnimNormal {}
           }
         }
       }

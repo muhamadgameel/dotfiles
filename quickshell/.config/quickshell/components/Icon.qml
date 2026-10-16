@@ -72,10 +72,7 @@ Item {
     color: Core.Theme.transparent
     radius: 0
     Behavior on color {
-      ColorAnimation {
-        duration: Core.Style.duration(Core.Style.animFast)
-        easing.type: Core.Style.easeStandard
-      }
+      AnimFast {}
     }
   }
 
@@ -105,10 +102,7 @@ Item {
     anchors.centerIn: parent
 
     Behavior on color {
-      ColorAnimation {
-        duration: Core.Style.duration(Core.Style.animFast)
-        easing.type: Core.Style.easeStandard
-      }
+      AnimFast {}
     }
   }
 }

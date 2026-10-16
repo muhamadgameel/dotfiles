@@ -34,7 +34,6 @@ Variants {
       location: "top_right"
 
       margin: Core.Style.spaceL
-      topExtra: Core.Style.barHeight
 
       // A fixed full-height column rather than one sized to the stack: that
       // resized the layer surface on every arrival and every dismissal, a
@@ -75,10 +74,7 @@ Variants {
         }
 
         Behavior on anchors.rightMargin {
-          NumberAnimation {
-            duration: Core.Style.duration(Core.Style.animNormal)
-            easing.type: Core.Style.easeStandard
-          }
+          Components.AnimNormal {}
         }
 
         fadeIn: false
@@ -132,22 +128,19 @@ Variants {
             }
 
             // Entry is driven by having room, not just by being constructed: a
-            // queued card has to animate in when one above it goes away. The
-            // stagger applies only to a batch built in one go - a promoted card
-            // slides straight in behind the one that just left.
+            // queued card has to animate in when one above it goes away.
             property bool _entered: false
 
-            function _enter(delay) {
+            function _enter() {
               if (!card.onScreen || card._entered)
                 return;
               card._entered = true;
-              slideAnimator.entryDelay = delay;
               slideAnimator.show();
             }
 
             onOnScreenChanged: {
               if (card.onScreen) {
-                card._enter(0);
+                card._enter();
               } else {
                 // Pushed back into the queue by newer arrivals. Park it in the
                 // hidden state so a later promotion has something to animate from.
@@ -156,11 +149,9 @@ Variants {
               }
             }
 
-            Component.onCompleted: card._enter(card.index * Core.Style.slideStagger)
-
             onNotificationIdChanged: {
               card._entered = false;
-              card._enter(0);
+              card._enter();
             }
 
             // === Notification Card ===
@@ -246,10 +237,7 @@ Variants {
           scale: overflowPill.shown ? 1 : Core.Style.popHiddenScale
 
           Behavior on opacity {
-            NumberAnimation {
-              duration: Core.Style.duration(Core.Style.animNormal)
-              easing.type: Core.Style.easeStandard
-            }
+            Components.AnimNormal {}
           }
 
           Behavior on scale {

@@ -1,5 +1,7 @@
 module components
 
+AnimFast 1.0 AnimFast.qml
+AnimNormal 1.0 AnimNormal.qml
 AnimatedColumn 1.0 AnimatedColumn.qml
 Badge 1.0 Badge.qml
 Button 1.0 Button.qml
@@ -8,6 +10,7 @@ Collapsible 1.0 Collapsible.qml
 Divider 1.0 Divider.qml
 Elevation 1.0 Elevation.qml
 EmptyState 1.0 EmptyState.qml
+FocusRing 1.0 FocusRing.qml
 FormRow 1.0 FormRow.qml
 Icon 1.0 Icon.qml
 InfoList 1.0 InfoList.qml
@@ -15,7 +18,6 @@ ListRow 1.0 ListRow.qml
 NotificationCard 1.0 NotificationCard.qml
 PanelHeader 1.0 PanelHeader.qml
 PositionedPanelWindow 1.0 PositionedPanelWindow.qml
-ProgressBar 1.0 ProgressBar.qml
 ProgressRow 1.0 ProgressRow.qml
 QuickToggle 1.0 QuickToggle.qml
 RoundedImage 1.0 RoundedImage.qml
@@ -32,6 +34,5 @@ StatusDot 1.0 StatusDot.qml
 Text 1.0 Text.qml
 TextField 1.0 TextField.qml
 Toggle 1.0 Toggle.qml
-TooltipBubble 1.0 TooltipBubble.qml
 WarningOverlay 1.0 WarningOverlay.qml
 WheelSteps 1.0 WheelSteps.qml

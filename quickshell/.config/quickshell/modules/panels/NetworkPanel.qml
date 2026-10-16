@@ -2,6 +2,7 @@ pragma ComponentBehavior: Bound
 
 import QtQuick
 import QtQuick.Layouts
+import Quickshell
 
 import "../../components" as Components
 import "../../core" as Core
@@ -30,7 +31,6 @@ Components.SlidingPanel {
     // WiFi Toggle
     Components.FormRow {
       label: "Wi-Fi"
-      hasToggle: true
       toggleChecked: Services.Network.wifiEnabled
       onToggled: checked => Services.Network.setWifiEnabled(checked)
     },
@@ -118,13 +118,17 @@ Components.SlidingPanel {
     spacing: Core.Style.spaceXS
     animated: root.revealed
 
+    // Keyed by SSID: the backends hand over fresh objects on every update, and
+    // matching those with objectProp instead stops a re-sort from sliding.
     Repeater {
-      model: networkRows
+      model: ScriptModel {
+        values: Services.Network.sortedNetworks.map(n => n.ssid)
+      }
       delegate: NetworkItem {
-        required property string netSsid
+        required property string modelData
 
         width: networkList.width
-        network: Services.Network.networks[netSsid] ?? ({})
+        network: Services.Network.networks[modelData] ?? ({})
         onConnectRequested: ssid => Services.Network.connect(ssid)
       }
     }
@@ -148,25 +152,12 @@ Components.SlidingPanel {
     hint: "Enable Wi-Fi to see available networks"
   }
 
-  // Rows are keyed by SSID rather than driven straight off sortedNetworks, which
-  // is a fresh array of fresh objects on every nmcli poll. A Repeater on that
-  // rebuilt every delegate each poll; keyed, a row only comes or goes with its
-  // network, and a re-sort moves rows instead of recreating them.
-  readonly property var networkKeys: Services.Network.sortedNetworks.map(n => n?.ssid ?? "").filter(s => s !== "")
-
-  ListModel {
-    id: networkRows
-  }
-
-  onNetworkKeysChanged: Core.Utils.syncKeyedModel(networkRows, root.networkKeys, "netSsid")
-  Component.onCompleted: Core.Utils.syncKeyedModel(networkRows, root.networkKeys, "netSsid")
-
   // ==========================================================================
   // INLINE COMPONENTS
   // ==========================================================================
 
   // --- Network Item ---
-  component NetworkItem: Components.Card {
+  component NetworkItem: Components.ListRow {
     id: netItem
 
     property var network: ({})
@@ -175,7 +166,6 @@ Components.SlidingPanel {
     // Destructure network properties
     readonly property string ssid: network?.ssid ?? ""
     readonly property int signalStrength: network?.signal ?? 0
-    readonly property bool secured: network?.secured ?? false
     readonly property bool connected: network?.connected ?? false
     readonly property string security: network?.security ?? ""
     readonly property bool known: network?.known ?? false
@@ -189,10 +179,16 @@ Components.SlidingPanel {
     // This is the network NetworkManager asked for a key for.
     readonly property bool needsPassword: ssid !== "" && Services.Network.passwordRequiredFor === ssid
 
-    readonly property int rowHeight: Core.Style.widgetSize + Core.Style.spaceL + Core.Style.spaceS
-
-    implicitHeight: itemColumn.implicitHeight
+    implicitHeight: rowHeight + (passwordPrompt.visible ? passwordPrompt.implicitHeight + Core.Style.spaceM : 0)
     interactive: !needsPassword
+
+    icon: Services.Network.getSignalIcon(signalStrength)
+    iconSize: Core.Style.fontL
+    iconColor: connected ? Core.Theme.accent : Core.Theme.text
+    title: ssid
+    titleColor: connected ? Core.Theme.accent : Core.Theme.text
+    titleWeight: connected ? Core.Style.weightBold : Core.Style.weightNormal
+    subtitle: security !== "" && security !== "--" ? `${signalStrength}% · ${security}` : `${signalStrength}%`
 
     onClicked: {
       if (!connected && !isBusy) {
@@ -200,200 +196,122 @@ Components.SlidingPanel {
       }
     }
 
+    trailing: [
+      Components.Badge {
+        visible: netItem.connected
+        text: "Connected"
+      },
+      Components.Spinner {
+        visible: netItem.isBusy
+        size: Core.Style.fontM
+        color: Core.Theme.accent
+      },
+      Components.Button {
+        visible: netItem.connected && !netItem.isBusy
+        icon: "close"
+        iconSize: Core.Style.fontM
+        variant: "danger"
+        tooltipText: "Disconnect"
+        onClicked: Services.Network.disconnect(netItem.ssid)
+      },
+      // Forget button, for saved networks: there is nothing to forget on
+      // the others.
+      Components.Button {
+        visible: netItem.known && !netItem.isBusy && (netItem.connected || netItem.hovered)
+        icon: "trash"
+        iconSize: Core.Style.fontM
+        variant: "danger"
+        tooltipText: "Forget network"
+        onClicked: Services.Network.forget(netItem.ssid)
+      },
+      Components.Icon {
+        visible: netItem.hovered && !netItem.connected && !netItem.isBusy
+        icon: "chevron-right"
+        size: Core.Style.fontM
+        color: Core.Theme.textDim
+      }
+    ]
+
+    // Inline password prompt.
+    //
+    // Only appears once NetworkManager has said it has no key for this
+    // network, so open and already-saved networks still join on one click.
+    // Previously that failure surfaced as a raw "Secrets were required"
+    // string with no way to supply one.
     ColumnLayout {
-      id: itemColumn
+      id: passwordPrompt
 
       anchors.left: parent.left
       anchors.right: parent.right
-      anchors.top: parent.top
-      spacing: 0
+      anchors.bottom: parent.bottom
+      anchors.leftMargin: Core.Style.spaceM
+      anchors.rightMargin: Core.Style.spaceM
+      anchors.bottomMargin: Core.Style.spaceM
+      spacing: Core.Style.spaceXS
+
+      visible: netItem.needsPassword
+
+      function submit() {
+        if (passwordField.text.length === 0)
+          return;
+        Services.Network.connect(netItem.ssid, passwordField.text);
+        passwordField.clear();
+      }
+
+      onVisibleChanged: {
+        passwordField.clear();
+        showPassword.revealed = false;
+        if (visible)
+          passwordField.forceActiveFocus();
+      }
+
+      Components.Text {
+        Layout.fillWidth: true
+        text: Services.Network.lastError !== "" ? Services.Network.lastError : `Password for "${netItem.ssid}"`
+        size: Core.Style.fontS
+        color: Services.Network.lastError !== "" ? Core.Theme.error : Core.Theme.textDim
+      }
 
       RowLayout {
         Layout.fillWidth: true
-        Layout.preferredHeight: netItem.rowHeight
-        Layout.leftMargin: Core.Style.spaceM
-        Layout.rightMargin: Core.Style.spaceS
-        spacing: Core.Style.spaceM
-
-        // Signal icon
-        Components.Icon {
-          icon: Services.Network.getSignalIcon(netItem.signalStrength)
-          size: Core.Style.fontL
-          color: netItem.connected ? Core.Theme.accent : Core.Theme.text
-        }
-
-        // Network info
-        ColumnLayout {
-          Layout.fillWidth: true
-          spacing: 0
-
-          RowLayout {
-            Layout.fillWidth: true
-            spacing: Core.Style.spaceXS
-
-            Components.Text {
-              text: netItem.ssid
-              color: netItem.connected ? Core.Theme.accent : Core.Theme.text
-              weight: netItem.connected ? Core.Style.weightBold : Core.Style.weightNormal
-              Layout.fillWidth: true
-            }
-
-            // Connected badge
-            Components.Badge {
-              visible: netItem.connected
-              text: "Connected"
-            }
-          }
-
-          RowLayout {
-            Layout.fillWidth: true
-            spacing: Core.Style.spaceXS
-
-            Components.Text {
-              text: netItem.signalStrength + "%"
-              size: Core.Style.fontS
-              color: Core.Theme.textDim
-            }
-
-            Components.Icon {
-              visible: netItem.secured
-              icon: "lock"
-              size: Core.Style.fontS
-              color: Core.Theme.textDim
-            }
-
-            Components.Text {
-              Layout.fillWidth: true
-              visible: netItem.security && netItem.security !== "--"
-              text: netItem.security
-              size: Core.Style.fontXS
-              color: Core.Theme.textMuted
-            }
-          }
-        }
-
-        // Loading spinner
-        Components.Spinner {
-          visible: netItem.isBusy
-          size: Core.Style.fontM
-          color: Core.Theme.accent
-        }
-
-        // Action buttons
-        RowLayout {
-          spacing: Core.Style.spaceXS
-          visible: !netItem.isBusy && (netItem.connected || netItem.hovered)
-
-          // Disconnect button
-          Components.Button {
-            visible: netItem.connected
-            icon: "close"
-            iconSize: Core.Style.fontM
-            variant: "danger"
-            tooltipText: "Disconnect"
-            onClicked: Services.Network.disconnect(netItem.ssid)
-          }
-
-          // Forget button, for saved networks: there is nothing to forget on
-          // the others.
-          Components.Button {
-            visible: netItem.known
-            icon: "trash"
-            iconSize: Core.Style.fontM
-            variant: "danger"
-            tooltipText: "Forget network"
-            onClicked: Services.Network.forget(netItem.ssid)
-          }
-        }
-
-        // Arrow indicator (shows on hover for available networks)
-        Components.Icon {
-          visible: netItem.hovered && !netItem.connected && !netItem.isBusy
-          icon: "chevron-right"
-          size: Core.Style.fontM
-          color: Core.Theme.textDim
-        }
-      }
-
-      // Inline password prompt.
-      //
-      // Only appears once NetworkManager has said it has no key for this
-      // network, so open and already-saved networks still join on one click.
-      // Previously that failure surfaced as a raw "Secrets were required"
-      // string with no way to supply one.
-      ColumnLayout {
-        id: passwordPrompt
-
-        Layout.fillWidth: true
-        Layout.leftMargin: Core.Style.spaceM
-        Layout.rightMargin: Core.Style.spaceM
-        Layout.bottomMargin: Core.Style.spaceM
         spacing: Core.Style.spaceXS
 
-        visible: netItem.needsPassword
+        Components.TextField {
+          id: passwordField
 
-        function submit() {
-          if (passwordField.text.length === 0)
-            return;
-          Services.Network.connect(netItem.ssid, passwordField.text);
-          passwordField.clear();
-        }
-
-        onVisibleChanged: {
-          passwordField.clear();
-          showPassword.revealed = false;
-          if (visible)
-            passwordField.forceActiveFocus();
-        }
-
-        Components.Text {
           Layout.fillWidth: true
-          text: Services.Network.lastError !== "" ? Services.Network.lastError : `Password for "${netItem.ssid}"`
-          size: Core.Style.fontS
-          color: Services.Network.lastError !== "" ? Core.Theme.error : Core.Theme.textDim
+          placeholder: "Network password"
+          echoMode: showPassword.revealed ? TextInput.Normal : TextInput.Password
+          onAccepted: passwordPrompt.submit()
+          onCancelled: Services.Network.cancelPasswordPrompt()
         }
 
-        RowLayout {
-          Layout.fillWidth: true
-          spacing: Core.Style.spaceXS
+        Components.Button {
+          id: showPassword
 
-          Components.TextField {
-            id: passwordField
+          property bool revealed: false
 
-            Layout.fillWidth: true
-            placeholder: "Network password"
-            echoMode: showPassword.revealed ? TextInput.Normal : TextInput.Password
-            onAccepted: passwordPrompt.submit()
-            onCancelled: Services.Network.cancelPasswordPrompt()
-          }
+          icon: revealed ? "eye-off" : "eye"
+          iconSize: Core.Style.fontM
+          tooltipText: revealed ? "Hide password" : "Show password"
+          onClicked: revealed = !revealed
+        }
 
-          Components.Button {
-            id: showPassword
+        Components.Button {
+          icon: "check"
+          iconSize: Core.Style.fontM
+          variant: "primary"
+          tooltipText: "Connect"
+          enabled: passwordField.text.length > 0
+          onClicked: passwordPrompt.submit()
+        }
 
-            property bool revealed: false
-
-            icon: revealed ? "eye-off" : "eye"
-            iconSize: Core.Style.fontM
-            tooltipText: revealed ? "Hide password" : "Show password"
-            onClicked: revealed = !revealed
-          }
-
-          Components.Button {
-            icon: "check"
-            iconSize: Core.Style.fontM
-            variant: "primary"
-            tooltipText: "Connect"
-            enabled: passwordField.text.length > 0
-            onClicked: passwordPrompt.submit()
-          }
-
-          Components.Button {
-            icon: "close"
-            iconSize: Core.Style.fontM
-            variant: "danger"
-            tooltipText: "Cancel"
-            onClicked: Services.Network.cancelPasswordPrompt()
-          }
+        Components.Button {
+          icon: "close"
+          iconSize: Core.Style.fontM
+          variant: "danger"
+          tooltipText: "Cancel"
+          onClicked: Services.Network.cancelPasswordPrompt()
         }
       }
     }

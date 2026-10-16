@@ -50,10 +50,7 @@ RowLayout {
     color: Core.Theme.alpha(root.iconColor, Core.Style.opacityTint)
 
     Behavior on color {
-      ColorAnimation {
-        duration: Core.Style.duration(Core.Style.animFast)
-        easing.type: Core.Style.easeStandard
-      }
+      Components.AnimFast {}
     }
 
     Components.Icon {

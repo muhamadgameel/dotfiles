@@ -89,12 +89,29 @@ ColumnLayout {
         }
       }
 
-      Components.ProgressBar {
+      Rectangle {
         Layout.fillWidth: true
         Layout.preferredHeight: root.progressHeight
-        value: root.value
-        maxValue: root.maxValue
-        progressColor: root.progressColor
+        implicitWidth: Core.Style.px(200)
+        radius: Core.Style.radiusFull
+        color: Core.Theme.surface
+
+        Rectangle {
+          anchors.left: parent.left
+          anchors.top: parent.top
+          anchors.bottom: parent.bottom
+          width: parent.width * Math.min(1.0, root.value / root.maxValue)
+          radius: parent.radius
+          color: root.progressColor
+
+          Behavior on color {
+            Components.AnimNormal {}
+          }
+
+          Behavior on width {
+            Components.AnimFast {}
+          }
+        }
       }
     }
 

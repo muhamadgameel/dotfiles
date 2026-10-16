@@ -17,7 +17,7 @@ Paths below are under `quickshell/.config/quickshell/` unless they start with `.
 |---|---|
 | A system concern (state, a program to run) | One singleton `services/<Name>.qml` and a line in `services/qmldir`. Services import `core/` and `config/`, never `components/` or `modules/`. Run programs through `core/Command.qml` (`onDone: (code, out, err) =>`). |
 | A bar widget | `modules/bar/widgets/<Name>.qml`, a line in its `qmldir`, its place in `modules/bar/Bar.qml`. A show/hide flag `barShow<Name>` in `config/Config.qml`, its key in `barKeys` in `modules/panels/SettingsPanel.qml`, and in `barNotes` there if the widget also hides itself. |
-| A panel | `modules/panels/<Name>Panel.qml` on `components/SlidingPanel`, a line in that `qmldir`, its id in `ids` in `services/Panels.qml`, a `LazyLoader` in `modules/bar/BarWindow.qml`. |
+| A panel | `modules/panels/<Name>Panel.qml` on `components/SlidingPanel`, a line in that `qmldir`, its id in `ids` in `services/Panels.qml`, and the id with its file name in `panelFiles` in `modules/bar/BarWindow.qml`. |
 | A way into a panel that has no bar widget | A `PanelButton` in the first row of `modules/panels/QuickSettingsPanel.qml`, beside Settings, Wallpaper, Screenshot and Power, and a `panel<Name>` shortcut. The bar keeps one button for Quick Settings. |
 | A setting | `config/Config.qml`: `readonly property … : Settings.get("key", default)` with the default inline, and a setter if something writes it. `~/.local/state/quickshell/settings.json` holds only the values that differ from their default, so a changed default reaches everyone who never changed that setting. |
 | A key | A name in the `shortcuts` table of `modules/ipc/Shortcuts.qml`. The bind is in Hyprland (`hl.dsp.global("quickshell:<name>")`; see the hyprland-lua skill). |
@@ -54,6 +54,10 @@ qsrig stop  <scratch>/rig
   singleton with the same properties and functions that only records its calls.
   Never click a real bar widget against its real service: a left click on Brightness
   sets 50%, a middle click on Network turns Wi-Fi off.
+- A D-Bus service (the tray, notifications) goes on a private bus:
+  `dbus-daemon --session --fork --address=unix:abstract=<name> --print-address=1`,
+  exported as `DBUS_SESSION_BUS_ADDRESS` before `qsrig start`. A socket path under the
+  scratchpad is too long for it, and an empty address puts the rig on the real bus.
 - A service that runs programs gets stand-in programs: scripts named `slurp`, `grim`,
   `wl-copy` or `notify-send` that log their arguments, in a directory first on the
   rig's PATH (`PATH=<dir>:$PATH qsrig start <rig>`). A stand-in `sh` that logs `$2` and
@@ -93,6 +97,16 @@ qsrig stop  <scratch>/rig
   `components/SlidingPanel.qml` in the copy with a window-less stand-in that has the
   same properties. `QSRIG_PLATFORM=wayland qsrig start` uses the real platform when
   layer-shell behaviour is the question; the probe's window then stays hidden.
+- A rig with nothing animating can sit idle until the next event: a `Timer` started over
+  `qs ipc` may never fire, animations crawl, and a `grab` is written late. After a grab,
+  wake it with a few `qsrig call <rig> js 1`. For logic, set `animationsEnabled` to
+  false in the rig (every duration is then 0) and do the timer's work from a scene
+  function.
+- Format a candidate inside a rig copy, which carries `.qmlformat.ini`. qmlformat on
+  a file in a bare scratch folder uses its own defaults.
+- To hover or click in a rig, put `import QtTest` and `TestCase { id: probe; when: false }`
+  in `Scene.qml` and call `probe.mouseMove(item, x, y)` or `probe.mouseClick(...)` from
+  a scene function; the events go through Qt's real delivery.
 - Offscreen wheel events come from a mouse device. On the real session every wheel
   event comes from a touchpad-type device, so a `WheelHandler` needs
   `acceptedDevices: PointerDevice.AllDevices`; reuse `components/WheelSteps.qml`.
@@ -127,6 +141,8 @@ quickshell/.config/quickshell/qs-fmt --strict services/Audio.qml   # must exit 0
   id): grep for the literal before removing one, with `grep -o` so that a long line
   cannot hide the match. `barKeys` in `modules/panels/SettingsPanel.qml` is one such
   line: a key left there shows as a dead switch.
+- An animation on the standard timing is `AnimFast {}` or `AnimNormal {}` from
+  `components/`, in a `Behavior` or a transition; they animate colours too.
 - Comment only a trap, a quirk or an ordering dependency. The reason for a change
   goes in the commit message.
 
@@ -143,6 +159,11 @@ reload says `Configuration Loaded`. The argument is the edited file's directory.
   missed by the file watcher. The script nudges it by creating and deleting a file in
   that directory. `touch` on the edited file does nothing, and neither does writing
   the same content again.
+- **No reload, by design.** Only files the running shell has loaded are watched. A
+  panel that is closed, a new service file and a `qmldir` are not, and a closed panel
+  loads from disk the next time it opens, against the modules of the running config.
+  After adding a service, force a reload: append a comment to `shell.qml`, wait for
+  `Configuration Loaded`, then restore the file.
 - **`Failed to load configuration`.** The old config keeps running, and the cause is on
   the next line. A popup at the top left of the screen stays while the pointer is on
   it, and `qs ipc` answers "Not ready" until it is gone. Fix the file; do not restart
@@ -177,6 +198,17 @@ reload says `Configuration Loaded`. The argument is the edited file's directory.
   `services/OSD.qml` ignores its first two seconds for this reason.
 - **A `Process` remembers `running = true` set while it runs** and starts once more
   when it exits. For something a user closes, toggle with `running = !running`.
+- **Moving from one item to the next, the new item's `entered` comes before the old
+  one's `exited`.** Anything shared that an exit closes, like the tooltip, must check
+  that the exit belongs to the item it is showing for.
+- **A singleton that gains an inline component fails to hot-reload:** "Reader is not a
+  type", and the old config keeps running. A fresh start loads the same file. Keep a
+  service's helpers as functions.
+- **A Repeater over a JS array rebuilds every row** when the array's contents change
+  (an equal array is skipped). `model: ScriptModel { values: … }` keeps the rows whose
+  values remain and reports a reorder as a move, which `AnimatedColumn` animates.
+  For fresh JS objects on every update, pass their keys and look the object up in the
+  row: matched with `objectProp`, the data update every row gets stops the slide.
 - **A program that cannot be started** emits no `exited`, so `Command.onDone` never
   fires for it.
 - **A setting is written 400 ms after it changes;** a reload inside that window reads

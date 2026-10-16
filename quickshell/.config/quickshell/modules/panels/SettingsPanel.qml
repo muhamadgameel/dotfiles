@@ -129,7 +129,6 @@ Components.SlidingPanel {
   Components.FormRow {
     Layout.fillWidth: true
     label: "Animations"
-    hasToggle: true
     toggleChecked: Config.Config.animationsEnabled
     onToggled: on => Config.Config.setFlag("animationsEnabled", on)
   }
@@ -137,7 +136,6 @@ Components.SlidingPanel {
   Components.FormRow {
     Layout.fillWidth: true
     label: "Shadows"
-    hasToggle: true
     toggleChecked: Config.Config.shadowsEnabled
     onToggled: on => Config.Config.setFlag("shadowsEnabled", on)
   }
@@ -172,7 +170,6 @@ Components.SlidingPanel {
         Layout.fillWidth: true
         label: root.barLabel(widgetRow.modelData)
         valueText: root.barNotes[widgetRow.modelData] ?? ""
-        hasToggle: true
         toggleChecked: Config.Config.flag(widgetRow.modelData)
         onToggled: on => Config.Config.setFlag(widgetRow.modelData, on)
       }
@@ -182,7 +179,6 @@ Components.SlidingPanel {
   Components.FormRow {
     Layout.fillWidth: true
     label: "Clock seconds"
-    hasToggle: true
     toggleChecked: Config.Config.barClockShowSeconds
     onToggled: on => Config.Config.setFlag("barClockShowSeconds", on)
   }
@@ -190,7 +186,6 @@ Components.SlidingPanel {
   Components.FormRow {
     Layout.fillWidth: true
     label: "Empty workspaces"
-    hasToggle: true
     toggleChecked: Config.Config.workspaceShowEmpty
     onToggled: on => Config.Config.setFlag("workspaceShowEmpty", on)
   }
@@ -205,7 +200,6 @@ Components.SlidingPanel {
   Components.FormRow {
     Layout.fillWidth: true
     label: "On-screen display"
-    hasToggle: true
     toggleChecked: Config.Config.osdEnabled
     onToggled: on => Config.Config.setFlag("osdEnabled", on)
   }
@@ -215,7 +209,6 @@ Components.SlidingPanel {
     enabled: Services.NightLight.available
     label: "Night light"
     valueText: Services.NightLight.available ? `${Services.NightLight.temperature}K` : "hyprsunset off"
-    hasToggle: true
     toggleChecked: Config.Config.nightLight
     onToggled: on => Services.NightLight.setEnabled(on)
   }
@@ -225,7 +218,6 @@ Components.SlidingPanel {
     enabled: Services.NightLight.available
     label: "Night light schedule"
     valueText: `${Config.Config.nightLightStart} - ${Config.Config.nightLightEnd}`
-    hasToggle: true
     toggleChecked: Config.Config.nightLightAuto
     onToggled: on => Services.NightLight.setSchedule(on)
   }
@@ -234,7 +226,6 @@ Components.SlidingPanel {
     Layout.fillWidth: true
     label: "Lower refresh on battery"
     valueText: `${Config.Config.batteryRefreshRate} Hz`
-    hasToggle: true
     toggleChecked: Config.Config.lowRefreshOnBattery
     onToggled: on => Config.Config.setFlag("lowRefreshOnBattery", on)
   }

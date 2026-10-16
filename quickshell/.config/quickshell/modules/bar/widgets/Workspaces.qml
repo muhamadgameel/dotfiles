@@ -1,6 +1,7 @@
 pragma ComponentBehavior: Bound
 
 import QtQuick
+import Quickshell
 import Quickshell.Hyprland
 
 import "../../../components" as Components
@@ -78,24 +79,6 @@ Item {
     return ids;
   }
 
-  // === Slot model ===
-  // Syncing a ListModel in place keeps the untouched slots alive, so only the
-  // workspace that genuinely appeared animates.
-  ListModel {
-    id: slotModel
-  }
-
-  // Removal is immediate, deliberately. Holding a departed slot back for a
-  // fade-out animation meant it kept its full width - opacity and scale are
-  // transforms, not layout - so switching quickly through empty workspaces piled
-  // up invisible slots and shoved the rest of the bar sideways
-  function _syncSlots() {
-    Core.Utils.syncKeyedModel(slotModel, root.visibleIds, "wsId");
-  }
-
-  onVisibleIdsChanged: root._syncSlots()
-  Component.onCompleted: root._syncSlots()
-
   WheelHandler {
     // Qt's Wayland platform reports every wheel event as a touchpad's.
     acceptedDevices: PointerDevice.AllDevices
@@ -112,10 +95,7 @@ Item {
   // The row's width changes when a slot appears or goes; without this every
   // widget to the right of it jumps sideways in one frame.
   Behavior on implicitWidth {
-    NumberAnimation {
-      duration: Core.Style.duration(Core.Style.animFast)
-      easing.type: Core.Style.easeStandard
-    }
+    Components.AnimFast {}
   }
 
   Row {
@@ -127,22 +107,26 @@ Item {
     // Slots that shift because a neighbour arrived or left slide across instead
     // of teleporting to their new position.
     move: Transition {
-      NumberAnimation {
+      Components.AnimFast {
         property: "x"
-        duration: Core.Style.duration(Core.Style.animFast)
-        easing.type: Core.Style.easeStandard
       }
     }
 
+    // Removal is immediate, deliberately. Holding a departed slot back for a
+    // fade-out animation meant it kept its full width - opacity and scale are
+    // transforms, not layout - so switching quickly through empty workspaces
+    // piled up invisible slots and shoved the rest of the bar sideways.
     Repeater {
-      model: slotModel
+      model: ScriptModel {
+        values: root.visibleIds
+      }
 
       delegate: Components.Card {
         id: slot
 
-        required property int wsId
+        required property int modelData
 
-        readonly property int workspaceId: wsId
+        readonly property int workspaceId: modelData
         readonly property var workspace: root.localWorkspaces[workspaceId] ?? null
         readonly property bool occupied: (workspace?.toplevels?.values?.length ?? 0) > 0
         readonly property bool isFocused: root.focusedId === workspaceId
@@ -169,10 +153,7 @@ Item {
         }
 
         Behavior on opacity {
-          NumberAnimation {
-            duration: Core.Style.duration(Core.Style.animFast)
-            easing.type: Core.Style.easeStandard
-          }
+          Components.AnimFast {}
         }
 
         Behavior on scale {
@@ -218,10 +199,7 @@ Item {
           scale: slot.isFocused ? 1.08 : 1.0
 
           Behavior on scale {
-            NumberAnimation {
-              duration: Core.Style.duration(Core.Style.animFast)
-              easing.type: Core.Style.easeStandard
-            }
+            Components.AnimFast {}
           }
         }
 
