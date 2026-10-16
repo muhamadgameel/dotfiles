@@ -23,6 +23,20 @@ Hyprland reaches it through global shortcuts, and scripts through `qs ipc`.
 
 The network service has two backends, nmcli and Quickshell.Networking
 ("native"). `qs ipc call network backend nmcli` switches between them.
+Native is the default, and `services/network/NmcliBackend.qml` (692 lines)
+stays as its fallback until native can stand alone:
+
+- It survives a NetworkManager restart. Today its state goes stale until the
+  shell restarts.
+- Quickshell's networking crash, upstream issue #1021, is fixed. It is still
+  open as of Quickshell 0.3.2.
+- It refreshes the connection details (IP, gateway, DNS) when the panel opens.
+  Today they follow link changes and a right click on the bar's network icon.
+  This one is ours to fix, in `NativeBackend.qml`.
+
+Then the file goes, with its loader in `services/Network.qml`, the
+`networkBackend` setting and its chooser in the Settings panel, and
+`qs ipc call network backend`.
 
 ## Running it
 
@@ -36,7 +50,7 @@ The network service has two backends, nmcli and Quickshell.Networking
 - The unit restarts the shell if it exits with an error, and keeps trying every
   two seconds with no limit. A config that fails to load at start comes up by
   itself once the file is fixed; until then the cause is in the journal, and
-  `systemctl --user stop quickshell` ends the retries. Quickshell 0.3.1's
+  `systemctl --user stop quickshell` ends the retries. Quickshell's
   networking module has a use-after-free (upstream issue #1021) that can crash
   it. Most crashes restart in place instead: Quickshell re-runs
   itself and shows a "Quickshell has crashed" dialog, and systemd never notices.
