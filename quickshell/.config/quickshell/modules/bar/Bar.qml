@@ -105,7 +105,7 @@ Rectangle {
 
     BarGroup {
       Widgets.KeyboardLayout {
-        visible: Config.Config.barShowKeyboardLayout && Services.KeyboardLayout.hasChoice
+        visible: Config.Config.barShowKeyboardLayout && Services.KeyboardLayout.hasChoice && !Services.KeyboardLayout.isDefault
       }
 
       Widgets.Indicators {

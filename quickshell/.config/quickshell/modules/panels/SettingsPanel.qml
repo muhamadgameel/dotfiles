@@ -33,7 +33,7 @@ Components.SlidingPanel {
   // Widgets that stay hidden even when on, so a toggle that seems to do nothing
   // says why. Each matches a condition in modules/bar/Bar.qml.
   readonly property var barNotes: ({
-      barShowKeyboardLayout: "with two layouts",
+      barShowKeyboardLayout: "off the first layout",
       barShowUpdates: "when updates wait",
       barShowTray: "when filled",
       barShowIdleInhibitor: "when on",

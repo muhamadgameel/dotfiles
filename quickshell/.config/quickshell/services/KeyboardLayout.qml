@@ -25,6 +25,9 @@ Singleton {
   // Whether more than one layout is configured.
   property bool hasChoice: false
 
+  // Whether that layout is the first one configured.
+  property bool isDefault: true
+
   function next() {
     _next.running = true;
   }
@@ -41,6 +44,7 @@ Singleton {
       for (const keyboard of keyboards)
         count[keyboard.active_keymap] = (count[keyboard.active_keymap] ?? 0) + 1;
       root.name = Object.keys(count).sort((a, b) => count[b] - count[a])[0] ?? "";
+      root.isDefault = keyboards.some(keyboard => keyboard.active_keymap === root.name && keyboard.active_layout_index === 0);
       root.hasChoice = keyboards.some(keyboard => keyboard.layout.includes(","));
     }
   }
