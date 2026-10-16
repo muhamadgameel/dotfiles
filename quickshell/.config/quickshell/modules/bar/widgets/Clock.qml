@@ -7,7 +7,7 @@ import "../../../core" as Core
 import "../../../services" as Services
 
 /**
-* Clock - time, date and the weather, and the way in to the calendar
+* Clock - time and date, and the way in to the calendar
 *
 * Left click opens the calendar panel.
 */
@@ -43,21 +43,6 @@ Item {
       size: Core.Style.fontM
       color: Core.Theme.textDim
       weight: Core.Style.weightNormal
-    }
-
-    // Weather, once a city is set
-    Components.Icon {
-      visible: Services.Weather.ready
-      icon: Services.Weather.icon(Services.Weather.code, Services.Weather.night)
-      size: Core.Style.fontM
-      color: Core.Theme.textDim
-    }
-
-    Components.Text {
-      visible: Services.Weather.ready
-      text: `${Math.round(Services.Weather.temperature)}°`
-      size: Core.Style.fontM
-      color: Core.Theme.textDim
     }
   }
 

@@ -73,11 +73,6 @@ Rectangle {
 
     // Takes up whatever the title does not, keeping the widgets left-packed.
     Components.Spacer {}
-
-    // Beside the clock; nothing to show with a single layout.
-    Widgets.KeyboardLayout {
-      visible: Config.Config.barShowKeyboardLayout && Services.KeyboardLayout.hasChoice
-    }
   }
 
   // ===================================================================
@@ -91,16 +86,6 @@ Rectangle {
     anchors.verticalCenter: parent.verticalCenter
 
     spacing: Core.Style.spaceXS
-
-    // Only while the screen is being recorded or shared.
-    Widgets.Indicators {
-      visible: Services.Recorder.recording || Services.Privacy.screenShared
-    }
-
-    // Beside the clock; nothing to show while the system is up to date.
-    Widgets.Updates {
-      visible: Config.Config.barShowUpdates && Services.Updates.count > 0
-    }
 
     // Pushes everything to the right edge.
     Components.Spacer {}
@@ -118,10 +103,24 @@ Rectangle {
       vertical: true
     }
 
-    // Only while it is on: left on by accident, it keeps the machine awake and
-    // drains the battery. Quick Settings has the switch.
-    Widgets.IdleInhibitor {
-      visible: Config.Config.barShowIdleInhibitor && Services.Idle.inhibited
+    BarGroup {
+      Widgets.KeyboardLayout {
+        visible: Config.Config.barShowKeyboardLayout && Services.KeyboardLayout.hasChoice
+      }
+
+      Widgets.Indicators {
+        visible: Services.Recorder.recording || Services.Privacy.screenShared
+      }
+
+      Widgets.Updates {
+        visible: Config.Config.barShowUpdates && Services.Updates.count > 0
+      }
+
+      // Only while it is on: left on by accident, it keeps the machine awake and
+      // drains the battery. Quick Settings has the switch.
+      Widgets.IdleInhibitor {
+        visible: Config.Config.barShowIdleInhibitor && Services.Idle.inhibited
+      }
     }
 
     BarGroup {
