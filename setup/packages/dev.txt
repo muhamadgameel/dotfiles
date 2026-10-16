@@ -12,12 +12,10 @@ eza
 fd
 fnm
 fzf
-nushell
 ouch                    # compress, decompress and list archives
 ripgrep
 starship
 tmux                    # sessions that outlive the terminal window
-yazi
 zoxide
 
 # git

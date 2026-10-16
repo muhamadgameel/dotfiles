@@ -248,6 +248,8 @@ launcher.
 | network-manager-applet | Its tray icon and Wi-Fi password prompt duplicate the shell's. Saved networks keep their password in the profile, so no agent has to supply it. |
 | nvtop | btop shows the GPU. |
 | Lutris | Heroic covers Epic and GOG. Lutris would add Battle.net and Ubisoft, but needs a system Wine for them. |
+| yazi | Ran once in a year of zsh history; Thunar and the terminal cover it. |
+| nushell | Ran once in a year of zsh history. It comes back only if reading up on it shows it worth switching to. |
 | Jellyfin, Kodi | mpv and the browser cover playback. |
 | LenovoLegionLinux | It needs an out-of-tree kernel module; UPower and power-profiles-daemon cover the battery and power modes. |
 | qt6ct, Kvantum | Not needed for the few Qt apps here. |
