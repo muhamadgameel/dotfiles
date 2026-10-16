@@ -14,8 +14,7 @@ return {
     event = 'VeryLazy',
     opts = {
       modes = {
-        -- Leave `/` and `f`/`t` alone; only the explicit s/S motions are new.
-        search = { enabled = false },
+        -- Leave `f`/`t` alone; only the explicit s/S motions are new.
         char = { enabled = false },
       },
     },
@@ -58,7 +57,7 @@ return {
     -- Project-wide find & replace with live preview. <leader>rw is buffer-only.
     'MagicDuck/grug-far.nvim',
     cmd = 'GrugFar',
-    opts = { headerMaxWidth = 80 },
+    opts = {},
     keys = {
       {
         '<leader>rW',
@@ -81,7 +80,7 @@ return {
     'vuki656/package-info.nvim',
     dependencies = { 'MunifTanjim/nui.nvim' },
     event = { 'BufRead package.json' },
-    opts = { package_manager = 'npm', hide_up_to_date = true },
+    opts = { hide_up_to_date = true },
     keys = {
       {
         '<leader>cps',

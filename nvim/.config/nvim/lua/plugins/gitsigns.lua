@@ -3,15 +3,8 @@ return {
   event = { 'BufReadPre', 'BufNewFile' },
   opts = {
     attach_to_untracked = true,
-    signs_staged_enable = true, -- Distinct signs for staged changes
     current_line_blame_opts = {
       delay = 100,
-    },
-    preview_config = {
-      style = 'minimal',
-      relative = 'cursor',
-      row = 0,
-      col = 1,
     },
     on_attach = function(bufnr)
       local gs = require 'gitsigns'

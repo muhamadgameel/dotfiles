@@ -22,11 +22,7 @@ require('lazy').setup {
   -- Lazy by default; plugins that must be present at startup opt out with lazy = false
   defaults = { lazy = true },
   install = { colorscheme = { 'kanagawa' } },
-  checker = { enabled = false },
-  change_detection = {
-    enabled = true,
-    notify = false,
-  },
+  change_detection = { notify = false },
   performance = {
     rtp = {
       disabled_plugins = {

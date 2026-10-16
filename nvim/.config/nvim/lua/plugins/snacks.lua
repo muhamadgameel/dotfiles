@@ -77,14 +77,11 @@ return {
   opts = {
     bigfile = { enabled = true }, -- Disable heavy features on huge files
     quickfile = { enabled = true }, -- Render the file before loading plugins
-    bufdelete = { enabled = true }, -- Close buffers without wrecking the layout
     input = { enabled = true }, -- Better vim.ui.input (LSP rename)
-    rename = { enabled = true }, -- LSP-aware file rename (wired into oil below)
-    gitbrowse = { enabled = true },
-    notifier = { enabled = true, timeout = 3000 }, -- Needed since cmdheight = 0
+    notifier = { enabled = true }, -- Needed since cmdheight = 0
 
     -- Replaces vim-illuminate, via native LSP document highlight
-    words = { enabled = true, debounce = 200 },
+    words = { enabled = true },
 
     -- Replaces neoscroll. Animates through WinScrolled rather than remapping
     -- keys, so <C-d>/<C-u> stay ordinary mappings.
@@ -93,9 +90,6 @@ return {
     -- Replaces indent-blankline (and its hand-rolled highlight hook)
     indent = {
       enabled = true,
-      indent = { char = '│' },
-      scope = { char = '│', hl = 'SnacksIndentScope' },
-      chunk = { enabled = false },
       animate = { enabled = false },
     },
 
@@ -108,7 +102,6 @@ return {
     },
 
     picker = {
-      ui_select = true, -- Route vim.ui.select through the picker
       formatters = {
         file = { filename_first = true }, -- Matches the old telescope path_display
       },
@@ -126,7 +119,6 @@ return {
         },
         colorschemes = { layout = 'select' },
         registers = { layout = 'select' },
-        filetypes = { layout = 'select' },
         commands = { layout = 'ivy' },
         autocmds = { layout = 'ivy' },
         keymaps = { layout = 'ivy' },
@@ -205,13 +197,6 @@ return {
         Snacks.picker.colorschemes()
       end,
       desc = 'Color Schemes',
-    },
-    {
-      '<leader>of',
-      function()
-        Snacks.picker.filetypes()
-      end,
-      desc = 'File Types',
     },
     {
       '<leader>ok',
