@@ -5,6 +5,7 @@ import Quickshell
 import Quickshell.Hyprland
 
 import "../core" as Core
+import "../services" as Services
 
 /**
 * KeyboardLayout - the layout the keyboards are on
@@ -27,6 +28,15 @@ Singleton {
 
   // Whether that layout is the first one configured.
   property bool isDefault: true
+
+  onNameChanged: {
+    if (root.name !== "")
+      Services.OSD.show({
+        icon: "keyboard",
+        valueText: root.name,
+        maxValue: 0
+      });
+  }
 
   function next() {
     _next.running = true;

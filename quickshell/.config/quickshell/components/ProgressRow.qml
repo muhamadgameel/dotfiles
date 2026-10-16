@@ -20,6 +20,9 @@ import "." as Components
 *
 * 4. Full: Icon + (Label + Progress) + Value
 *    ProgressRow { icon: "thermometer"; label: "CPU"; value: 0.65; valueText: "65°C" }
+*
+* 5. No bar: Icon + Value, with maxValue 0
+*    ProgressRow { icon: "keyboard"; maxValue: 0; valueText: "Arabic" }
 */
 ColumnLayout {
   id: root
@@ -66,6 +69,7 @@ ColumnLayout {
 
     // Optional label row above the bar
     ColumnLayout {
+      visible: root.maxValue > 0
       Layout.fillWidth: true
       spacing: Core.Style.spaceXS
 
