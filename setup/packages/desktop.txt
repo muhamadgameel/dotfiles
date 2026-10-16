@@ -19,6 +19,7 @@ xorg-server             # SDDM's greeter runs on X11
 
 # desktop services
 gnome-keyring           # secret store for git, SSH keys, browsers and Code
+gtk4-layer-shell        # voxtype's on-screen indicator while it listens
 libnotify
 nm-connection-editor    # network settings the Network panel doesn't cover
 xdg-user-dirs           # screenshot binds resolve ~/Pictures with it
