@@ -33,7 +33,7 @@ hl.animation({ leaf = "border", enabled = true, speed = 3, bezier = "easeOutQuin
 hl.animation({ leaf = "borderangle", enabled = false })
 
 -- Workspaces
-hl.animation({ leaf = "workspaces", enabled = true, speed = 4, bezier = "easeOutExpo", style = "slide" })
+hl.animation({ leaf = "workspaces", enabled = true, speed = 2.5, bezier = "easeOutExpo", style = "slide" })
 hl.animation({ leaf = "specialWorkspace", enabled = true, speed = 4, bezier = "easeOutExpo", style = "slidevert" })
 
 -- Layers (bar, launcher, notifications)
