@@ -110,6 +110,20 @@ Item {
 
   Component.onDestruction: Services.Tooltip.forget(root)
 
+  // Another window, or a window again after an empty workspace, fades in. A
+  // title that changes within one window (a tab, a path) does not.
+  readonly property var _shownWindow: root.hasContent ? root.toplevel : null
+
+  on_ShownWindowChanged: fadeIn.restart()
+
+  Components.AnimFast {
+    id: fadeIn
+    target: row
+    property: "opacity"
+    from: 0
+    to: 1
+  }
+
   RowLayout {
     id: row
 
