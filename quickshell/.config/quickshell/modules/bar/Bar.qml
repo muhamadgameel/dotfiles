@@ -32,6 +32,10 @@ Rectangle {
 
   color: Core.Theme.barBg
 
+  Behavior on color {
+    Components.AnimFast {}
+  }
+
   // ===================================================================
   // CENTRE - absolutely centred, never overlapped
   // ===================================================================

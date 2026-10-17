@@ -1,6 +1,7 @@
 import QtQuick
 import QtQuick.Layouts
 
+import "../../components" as Components
 import "../../core" as Core
 
 /**
@@ -31,6 +32,10 @@ Rectangle {
   // Solid surface: cardBg's half alpha vanished against the translucent bar.
   // Hovering a widget still shows, as surfaceHover.
   color: Core.Theme.surface
+
+  Behavior on color {
+    Components.AnimFast {}
+  }
 
   RowLayout {
     id: row
