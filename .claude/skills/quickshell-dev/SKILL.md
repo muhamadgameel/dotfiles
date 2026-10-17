@@ -16,7 +16,7 @@ Paths below are under `quickshell/.config/quickshell/` unless they start with `.
 | Adding | Touch |
 |---|---|
 | A system concern (state, a program to run) | One singleton `services/<Name>.qml` and a line in `services/qmldir`. Services import `core/` and `config/`, never `components/` or `modules/`. Run programs through `core/Command.qml` (`onDone: (code, out, err) =>`). |
-| A bar widget | `modules/bar/widgets/<Name>.qml`, a line in its `qmldir`, its place in `modules/bar/Bar.qml`. A show/hide flag `barShow<Name>` in `config/Config.qml`, its key in `barKeys` in `modules/panels/SettingsPanel.qml`, and in `barNotes` there if the widget also hides itself. |
+| A bar widget | `modules/bar/widgets/<Name>.qml`, on `BarButton` if it is a button (the bar's height and round ends), a line in its `qmldir`, its place in `modules/bar/Bar.qml`. A show/hide flag `barShow<Name>` in `config/Config.qml`, its key in `barKeys` in `modules/panels/SettingsPanel.qml`, and in `barNotes` there if the widget also hides itself. |
 | A panel | `modules/panels/<Name>Panel.qml` on `components/SlidingPanel`, a line in that `qmldir`, its id in `ids` in `services/Panels.qml`, and the id with its file name in `panelFiles` in `modules/bar/BarWindow.qml`. |
 | A way into a panel that has no bar widget | A `PanelButton` in the first row of `modules/panels/QuickSettingsPanel.qml`, beside Settings, Wallpaper, Screenshot and Power, and a `panel<Name>` shortcut. The bar keeps one button for Quick Settings. |
 | A setting | `config/Config.qml`: `readonly property … : Settings.get("key", default)` with the default inline, and a setter if something writes it. `~/.local/state/quickshell/settings.json` holds only the values that differ from their default, so a changed default reaches everyone who never changed that setting. |
@@ -52,8 +52,8 @@ qsrig stop  <scratch>/rig
   `Notification` claims the session's notification name, `Wallpaper` stops hyprpaper's
   rotation, others call `hyprctl`, `brightnessctl` or `systemctl`. A stand-in is a
   singleton with the same properties and functions that only records its calls.
-  Never click a real bar widget against its real service: a left click on Brightness
-  sets 50%, a middle click on Network turns Wi-Fi off.
+  Never click a real bar widget against its real service: a right click on Volume
+  mutes it, a middle click on Network turns Wi-Fi off.
 - A D-Bus service (the tray, notifications) goes on a private bus:
   `dbus-daemon --session --fork --address=unix:abstract=<name> --print-address=1`,
   exported as `DBUS_SESSION_BUS_ADDRESS` before `qsrig start`. A socket path under the

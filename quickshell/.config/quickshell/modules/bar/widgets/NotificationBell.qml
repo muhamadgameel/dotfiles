@@ -8,34 +8,26 @@ import "../../../services" as Services
 /**
 * Notification Bar Widget - Shows notification bell and opens notification center
 */
-Item {
+BarButton {
   id: root
 
-  implicitWidth: notificationButton.implicitWidth
-  implicitHeight: notificationButton.implicitHeight
-
-  // Indicator for unread count (bind directly to service property)
   property int unreadCount: Services.Notification.unreadCount
 
   signal panelRequested
 
-  Components.Button {
-    id: notificationButton
-    icon: Services.Notification.doNotDisturb ? "bell-off" : "bell"
-    iconColor: Services.Notification.doNotDisturb ? Core.Theme.warning : Core.Theme.text
-    tooltipText: Services.Notification.doNotDisturb ? (Services.GameMode.active && !Config.Config.doNotDisturb ? "Do Not Disturb (game mode)" : "Do Not Disturb") : "Notifications" + (root.unreadCount > 0 ? " (" + root.unreadCount + " unread)" : "")
+  icon: Services.Notification.doNotDisturb ? "bell-off" : "bell"
+  iconColor: Services.Notification.doNotDisturb ? Core.Theme.warning : Core.Theme.text
+  tooltipText: Services.Notification.doNotDisturb ? (Services.GameMode.active && !Config.Config.doNotDisturb ? "Do Not Disturb (game mode)" : "Do Not Disturb") : "Notifications" + (root.unreadCount > 0 ? " (" + root.unreadCount + " unread)" : "")
 
-    acceptedButtons: Qt.LeftButton | Qt.RightButton
-    onClicked: function (button) {
-      if (button === Qt.RightButton) {
-        Config.Config.toggleDoNotDisturb();
-      } else if (button === Qt.LeftButton) {
-        root.panelRequested();
-      }
+  acceptedButtons: Qt.LeftButton | Qt.RightButton
+  onClicked: function (button) {
+    if (button === Qt.RightButton) {
+      Config.Config.toggleDoNotDisturb();
+    } else if (button === Qt.LeftButton) {
+      root.panelRequested();
     }
   }
 
-  // Unread indicator using Badge with count variant
   Components.Badge {
     anchors.right: parent.right
     anchors.top: parent.top
@@ -43,6 +35,6 @@ Item {
     anchors.topMargin: 1
     variant: "count"
     count: root.unreadCount
-    backgroundColor: Services.Notification.doNotDisturb ? Core.Theme.warning : Core.Theme.error
+    backgroundColor: Services.Notification.doNotDisturb ? Core.Theme.warning : Core.Theme.accent
   }
 }

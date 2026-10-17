@@ -2,6 +2,7 @@ pragma ComponentBehavior: Bound
 
 import QtQuick
 import Quickshell
+import Quickshell.Wayland
 
 import "../../components" as Components
 import "../../config" as Config
@@ -45,18 +46,22 @@ Variants {
       }
     }
 
-    sourceComponent: Components.PositionedPanelWindow {
+    sourceComponent: PanelWindow {
       id: osdWindow
 
       screen: osdLoader.screen
-      namespace: "quickshell-osd"
+      color: Core.Theme.transparent
+      WlrLayershell.namespace: "quickshell-osd-" + (osdWindow.screen?.name ?? "unknown")
+      WlrLayershell.layer: WlrLayer.Overlay
+      WlrLayershell.exclusionMode: ExclusionMode.Ignore
+      WlrLayershell.keyboardFocus: WlrKeyboardFocus.None
 
       // An empty region: the OSD takes no input, and clicks reach what is under it.
       mask: Region {}
 
-      // Position configuration
-      location: Config.Config.osdPosition
-      margin: Core.Style.osdMargin
+      // Bottom centre, clear of the notification stack and the panels at the top right.
+      anchors.bottom: true
+      margins.bottom: Core.Style.osdMargin
 
       readonly property int shadowRoom: Math.max(Core.Style.spaceXS, Core.Style.elevationRoom(2))
 

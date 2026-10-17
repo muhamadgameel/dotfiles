@@ -34,7 +34,6 @@ Singleton {
   readonly property bool barClockShowSeconds: Settings.get("barClockShowSeconds", false)
   readonly property bool barShowVolume: Settings.get("barShowVolume", true)
   readonly property bool barShowMicrophone: Settings.get("barShowMicrophone", true)
-  readonly property bool barShowBrightness: Settings.get("barShowBrightness", false)
   readonly property bool barShowBattery: Settings.get("barShowBattery", true)
   readonly property bool barShowLauncher: Settings.get("barShowLauncher", true)
   readonly property bool barShowNotification: Settings.get("barShowNotification", true)
@@ -62,8 +61,6 @@ Singleton {
   readonly property real barOpacity: Settings.get("barOpacity", 0.85)
 
   // === OSD Configuration ===
-  // Clear of the notification stack and the panels, which share the top-right.
-  readonly property string osdPosition: Settings.get("osdPosition", "bottom_center")
   readonly property int osdDuration: Settings.get("osdDuration", 2000)
   readonly property bool osdEnabled: Settings.get("osdEnabled", true)
 

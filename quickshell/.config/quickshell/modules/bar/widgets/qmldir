@@ -1,8 +1,8 @@
 module modules.bar.widgets
 
+BarButton 1.0 BarButton.qml
 Battery 1.0 Battery.qml
 Bluetooth 1.0 Bluetooth.qml
-Brightness 1.0 Brightness.qml
 Clock 1.0 Clock.qml
 IdleInhibitor 1.0 IdleInhibitor.qml
 Indicators 1.0 Indicators.qml

@@ -152,7 +152,6 @@ Singleton {
       "cpu": "",
       "gpu": "󰢮",
       "memory": "",
-      "ram": "󰘚",
       "disk": "󰋊",
       "thermometer": "󰔏",
       "thermometer-high": "󰔐",

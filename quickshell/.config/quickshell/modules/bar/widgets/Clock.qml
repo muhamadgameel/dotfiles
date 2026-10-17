@@ -1,5 +1,4 @@
 import QtQuick
-import QtQuick.Layouts
 
 import "../../../components" as Components
 import "../../../config" as Config
@@ -7,7 +6,7 @@ import "../../../core" as Core
 import "../../../services" as Services
 
 /**
-* Clock - time, date and the weather, and the way in to the calendar
+* Clock - the time, and the way in to the calendar
 *
 * Left click opens the calendar panel.
 */
@@ -19,46 +18,12 @@ Item {
   implicitWidth: content.implicitWidth
   implicitHeight: Core.Style.widgetSize
 
-  RowLayout {
+  Components.Text {
     id: content
     anchors.centerIn: parent
-    spacing: Core.Style.spaceS
-
-    // Time
-    Components.Text {
-      text: Config.Config.barClockShowSeconds ? Services.Time.timeLong : Services.Time.timeShort
-      size: Core.Style.fontL
-      weight: Core.Style.weightBold
-    }
-
-    // Separator
-    Components.Divider {
-      vertical: true
-      Layout.preferredHeight: Core.Style.fontL
-    }
-
-    // Date
-    Components.Text {
-      text: Services.Time.dateShort
-      size: Core.Style.fontM
-      color: Core.Theme.textDim
-      weight: Core.Style.weightNormal
-    }
-
-    // Weather, once a city is set
-    Components.Icon {
-      visible: Services.Weather.ready
-      icon: Services.Weather.icon(Services.Weather.code, Services.Weather.night)
-      size: Core.Style.fontM
-      color: Core.Theme.textDim
-    }
-
-    Components.Text {
-      visible: Services.Weather.ready
-      text: `${Math.round(Services.Weather.temperature)}°`
-      size: Core.Style.fontM
-      color: Core.Theme.textDim
-    }
+    text: Config.Config.barClockShowSeconds ? Services.Time.timeLong : Services.Time.timeShort
+    size: Core.Style.fontL
+    weight: Core.Style.weightBold
   }
 
   Component.onDestruction: Services.Tooltip.forget(root)
@@ -70,7 +35,7 @@ Item {
 
     onEntered: {
       const weather = Services.Weather.ready ? `\n${Services.Weather.statusText}` : "";
-      Services.Tooltip.show(root, `${Services.Time.dateLong}${weather}\n\nClick: Calendar`, "bottom");
+      Services.Tooltip.show(root, `${Services.Time.dateLong}${weather}`, "bottom");
     }
 
     onExited: {

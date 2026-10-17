@@ -1,7 +1,7 @@
 # Quickshell
 
 The desktop shell: the bar, the sliding panels, the OSD, notifications and the
-tooltip, written in QML for Quickshell 0.3.1. It runs as a systemd user unit.
+tooltip, written in QML for Quickshell 0.3.2. It runs as a systemd user unit.
 Hyprland reaches it through global shortcuts, and scripts through `qs ipc`.
 
 ## Layout
@@ -152,7 +152,7 @@ Hyprland's SUPER+SHIFT keys go through global shortcuts instead
 (`modules/ipc/Shortcuts.qml`; see [hypr/README.md](../hypr/README.md#keybinds)).
 `hyprctl globalshortcuts` lists the 19 the shell registers.
 
-The weather shows after the date in the bar's clock and as five days at the
+The weather shows in the tooltip of the bar's clock and as five days at the
 bottom of the calendar panel. It is off until a city is set, and asks nothing
 until then. Setting one sends its name to open-meteo.com once, to find its
 coordinates; from then on the shell asks for the forecast by those coordinates

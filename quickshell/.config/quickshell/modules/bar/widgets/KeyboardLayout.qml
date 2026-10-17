@@ -1,13 +1,12 @@
 import QtQuick
 
-import "../../../components" as Components
 import "../../../services" as Services
 
 /**
 * KeyboardLayout - the active layout as two letters; a click moves to the next
 */
-Components.Button {
+BarButton {
   text: Services.KeyboardLayout.label
-  tooltipText: `${Services.KeyboardLayout.name}\n\nClick: Next layout`
+  tooltipText: Services.KeyboardLayout.name
   onClicked: Services.KeyboardLayout.next()
 }

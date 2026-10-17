@@ -291,6 +291,14 @@ Item {
           width: Core.Style.borderThin
         }
 
+        Behavior on color {
+          Components.AnimFast {}
+        }
+
+        Behavior on border.color {
+          Components.AnimFast {}
+        }
+
         focus: root.isOpen
 
         Keys.onEscapePressed: root.close()

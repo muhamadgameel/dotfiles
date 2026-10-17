@@ -1,6 +1,5 @@
 import QtQuick
 
-import "../../../components" as Components
 import "../../../core" as Core
 import "../../../services" as Services
 
@@ -14,13 +13,14 @@ import "../../../services" as Services
 * - Middle click: Toggle Bluetooth
 * - Right click: Toggle discovery
 */
-Components.Button {
+BarButton {
   id: root
 
   signal panelRequested
 
   icon: Services.Bluetooth.statusIcon
   iconColor: root.statusColor
+  dot: Services.Bluetooth.discovering ? Core.Theme.accentAlt : Core.Theme.transparent
 
   tooltipText: _tooltip
 
@@ -38,7 +38,7 @@ Components.Button {
     if (Services.Bluetooth.blocked)
       return "Bluetooth blocked";
     if (!Services.Bluetooth.enabled)
-      return "Bluetooth disabled\nMiddle-click to enable";
+      return "Bluetooth disabled";
 
     let tip = Services.Bluetooth.hasConnectedDevices ? Services.Bluetooth.statusText : "Bluetooth";
 
@@ -51,7 +51,6 @@ Components.Button {
 
     if (Services.Bluetooth.discovering)
       tip += "\n🔍 Scanning...";
-    tip += "\nMiddle-click to toggle";
 
     return tip;
   }
@@ -68,15 +67,5 @@ Components.Button {
       else
         Services.Bluetooth.startDiscovery();
     }
-  }
-
-  // Scanning indicator
-  Components.StatusDot {
-    anchors.bottom: parent.bottom
-    anchors.horizontalCenter: parent.horizontalCenter
-    anchors.bottomMargin: Core.Style.spaceXXS
-    visible: Services.Bluetooth.discovering
-    pulse: true
-    color: Core.Theme.accentAlt
   }
 }

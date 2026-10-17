@@ -1,15 +1,18 @@
 import QtQuick
 
-import "../../../components" as Components
 import "../../../core" as Core
 import "../../../services" as Services
 
 /**
 * Network - Bar widget showing network connection status
 *
-* Displays WiFi/Ethernet connection state with click to open network panel
+* Displays the Wi-Fi or Ethernet connection state.
+*
+* - Left click:   open the network panel
+* - Middle click: Wi-Fi on or off
+* - Right click:  refresh the connection details
 */
-Components.Button {
+BarButton {
   id: root
 
   signal panelRequested
@@ -31,6 +34,8 @@ Components.Button {
     return "";
   }
   textColor: iconColor
+  dot: Services.Network.connecting || Services.Network.searching ? Core.Theme.accent : Core.Theme.transparent
+  dotLoops: Animation.Infinite
 
   tooltipText: {
     if (!Services.Network.isConnected)
@@ -56,16 +61,5 @@ Components.Button {
     } else if (button === Qt.RightButton) {
       Services.Network.refreshAll();
     }
-  }
-
-  // Visual indicator for connecting state
-  Components.StatusDot {
-    anchors.bottom: parent.bottom
-    anchors.horizontalCenter: parent.horizontalCenter
-    anchors.bottomMargin: Core.Style.spaceXXS
-    visible: Services.Network.connecting || Services.Network.searching
-    pulse: true
-    pulseLoops: Animation.Infinite
-    color: Core.Theme.accent
   }
 }

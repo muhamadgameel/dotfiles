@@ -32,6 +32,10 @@ Rectangle {
 
   color: Core.Theme.barBg
 
+  Behavior on color {
+    Components.AnimFast {}
+  }
+
   // ===================================================================
   // CENTRE - absolutely centred, never overlapped
   // ===================================================================
@@ -66,18 +70,14 @@ Rectangle {
     }
 
     Widgets.WindowTitle {
+      // Shrinks to elide when the row is tight, but never grows past its own text.
       Layout.fillWidth: true
-      Layout.maximumWidth: Core.Style.windowTitleMaxWidth
+      Layout.maximumWidth: implicitWidth
       visible: Config.Config.barShowWindowTitle
     }
 
     // Takes up whatever the title does not, keeping the widgets left-packed.
     Components.Spacer {}
-
-    // Beside the clock; nothing to show with a single layout.
-    Widgets.KeyboardLayout {
-      visible: Config.Config.barShowKeyboardLayout && Services.KeyboardLayout.hasChoice
-    }
   }
 
   // ===================================================================
@@ -90,17 +90,7 @@ Rectangle {
     anchors.rightMargin: Core.Style.spaceM
     anchors.verticalCenter: parent.verticalCenter
 
-    spacing: Core.Style.spaceXS
-
-    // Only while the screen is being recorded or shared.
-    Widgets.Indicators {
-      visible: Services.Recorder.recording || Services.Privacy.screenShared
-    }
-
-    // Beside the clock; nothing to show while the system is up to date.
-    Widgets.Updates {
-      visible: Config.Config.barShowUpdates && Services.Updates.count > 0
-    }
+    spacing: Core.Style.spaceS
 
     // Pushes everything to the right edge.
     Components.Spacer {}
@@ -118,10 +108,28 @@ Rectangle {
       vertical: true
     }
 
-    // Only while it is on: left on by accident, it keeps the machine awake and
-    // drains the battery. Quick Settings has the switch.
-    Widgets.IdleInhibitor {
-      visible: Config.Config.barShowIdleInhibitor && Services.Idle.inhibited
+    BarGroup {
+      Widgets.KeyboardLayout {
+        readonly property bool wanted: Config.Config.barShowKeyboardLayout && Services.KeyboardLayout.hasChoice && !Services.KeyboardLayout.isDefault
+        visible: wanted
+      }
+
+      Widgets.Indicators {
+        readonly property bool wanted: Services.Recorder.recording || Services.Privacy.screenShared
+        visible: wanted
+      }
+
+      Widgets.Updates {
+        readonly property bool wanted: Config.Config.barShowUpdates && Services.Updates.count > 0
+        visible: wanted
+      }
+
+      // Only while it is on: left on by accident, it keeps the machine awake and
+      // drains the battery. Quick Settings has the switch.
+      Widgets.IdleInhibitor {
+        readonly property bool wanted: Config.Config.barShowIdleInhibitor && Services.Idle.inhibited
+        visible: wanted
+      }
     }
 
     BarGroup {
@@ -167,26 +175,17 @@ Rectangle {
       }
     }
 
-    // Off by default; Quick Settings has the slider.
-    Widgets.Brightness {
-      visible: Config.Config.barShowBrightness && Services.Brightness.ready
-    }
+    BarGroup {
+      Widgets.NotificationBell {
+        visible: Config.Config.barShowNotification
+        onPanelRequested: root.panelRequested("notifications")
+      }
 
-    Widgets.NotificationBell {
-      visible: Config.Config.barShowNotification
-      onPanelRequested: root.panelRequested("notifications")
-    }
-
-    Components.Divider {
-      Layout.fillHeight: false
-      Layout.preferredHeight: Core.Style.iconSize
-      vertical: true
-    }
-
-    Components.Button {
-      icon: "dashboard"
-      tooltipText: "Quick settings"
-      onClicked: root.panelRequested("quicksettings")
+      Widgets.BarButton {
+        icon: "dashboard"
+        tooltipText: "Quick settings"
+        onClicked: root.panelRequested("quicksettings")
+      }
     }
   }
 }

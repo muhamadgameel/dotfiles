@@ -196,7 +196,7 @@ PopupWindow {
 
         anchors.centerIn: parent
         text: root.text
-        size: Core.Style.fontS
+        size: Core.Style.fontM
       }
     }
   }

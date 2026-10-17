@@ -28,19 +28,18 @@ Components.SlidingPanel {
   readonly property var scales: [0.75, 1.0, 1.25, 1.5]
 
   // In bar order, left to right.
-  readonly property var barKeys: ["barShowLauncher", "barShowWindowTitle", "barShowKeyboardLayout", "barShowClock", "barShowUpdates", "barShowTray", "barShowIdleInhibitor", "barShowVolume", "barShowMicrophone", "barShowMedia", "barShowNetwork", "barShowBluetooth", "barShowSystemStats", "barShowBattery", "barShowBrightness", "barShowNotification"]
+  readonly property var barKeys: ["barShowLauncher", "barShowWindowTitle", "barShowClock", "barShowTray", "barShowKeyboardLayout", "barShowUpdates", "barShowIdleInhibitor", "barShowVolume", "barShowMicrophone", "barShowMedia", "barShowNetwork", "barShowBluetooth", "barShowSystemStats", "barShowBattery", "barShowNotification"]
 
   // Widgets that stay hidden even when on, so a toggle that seems to do nothing
   // says why. Each matches a condition in modules/bar/Bar.qml.
   readonly property var barNotes: ({
-      barShowKeyboardLayout: "with two layouts",
+      barShowKeyboardLayout: "off the first layout",
       barShowUpdates: "when updates wait",
       barShowTray: "when filled",
       barShowIdleInhibitor: "when on",
       barShowMicrophone: "when recording",
       barShowMedia: "when playing",
-      barShowBattery: "on battery or charging",
-      barShowBrightness: "when available"
+      barShowBattery: "on battery or charging"
     })
 
   readonly property int hiddenCount: root.barKeys.filter(k => !Config.Config.flag(k)).length

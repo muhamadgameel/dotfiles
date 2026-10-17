@@ -7,11 +7,15 @@ import "../../../services" as Services
 /**
 * Volume - Bar widget for the default audio output
 *
+* - Left click:  open the sound panel
+* - Right click: mute or unmute
+* - Scroll:      volume
+*
 * Reads Audio.hasSink rather than sinkReady: a device swap (AirPods, docking)
 * tears down the old node before the new one is ready, and the raw flag made
 * the readout blank mid-swap. See services/Audio.qml.
 */
-Components.Button {
+BarButton {
   id: root
 
   signal panelRequested
@@ -36,10 +40,6 @@ Components.Button {
   tooltipText: {
     const name = Services.Audio.deviceName(Services.Audio.sink);
     const lines = [Services.Audio.muted ? `${name} (muted)` : name];
-    lines.push("");
-    lines.push("Scroll: Adjust volume");
-    lines.push("Left click: Open sound panel");
-    lines.push("Right click: Toggle mute");
     return lines.join("\n");
   }
 

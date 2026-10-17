@@ -12,8 +12,9 @@ import "../../../core" as Core
 * - Charging animation with pulsing indicator
 * - Low/critical battery warning with color indication
 * - Tooltip with detailed info (time remaining, health, power rate)
+* - Click: open the system stats panel
 */
-Components.Button {
+BarButton {
   id: root
 
   signal panelRequested
@@ -31,7 +32,6 @@ Components.Button {
   // Battery states
   readonly property bool isOnBattery: UPower.onBattery
   readonly property bool isCharging: isReady && battery.state === UPowerDeviceState.Charging
-  readonly property bool isFullyCharged: isReady && battery.state === UPowerDeviceState.FullyCharged
   readonly property bool isDischarging: isReady && battery.state === UPowerDeviceState.Discharging
   readonly property bool isLow: isReady && !isCharging && percent <= lowThreshold
   readonly property bool isCritical: isReady && !isCharging && percent <= criticalThreshold
@@ -56,8 +56,6 @@ Components.Button {
   iconColor: {
     if (!isReady)
       return Core.Theme.textMuted;
-    if (isFullyCharged)
-      return Core.Theme.text;
     if (isCharging)
       return Core.Theme.success;
     if (isCritical)
@@ -67,8 +65,9 @@ Components.Button {
     return Core.Theme.text;
   }
 
-  text: isFullyCharged ? "" : isReady ? Math.round(percent) + "%" : "--"
+  text: isReady ? Math.round(percent) + "%" : "--"
   textColor: iconColor
+  dot: root.isCharging ? Core.Theme.success : Core.Theme.transparent
 
   // === Tooltip ===
   tooltipText: {
@@ -78,9 +77,7 @@ Components.Button {
     let lines = [];
 
     // Status
-    if (isFullyCharged) {
-      lines.push("Fully charged");
-    } else if (isCharging) {
+    if (isCharging) {
       lines.push("Charging (" + Math.round(percent) + "%)");
     } else {
       lines.push("On battery (" + Math.round(percent) + "%)");
@@ -103,9 +100,6 @@ Components.Button {
       lines.push(Core.Icons.get("heart") + "   " + "Health: " + Math.round(battery.healthPercentage) + "%");
     }
 
-    lines.push("");
-    lines.push("Click for details");
-
     return lines.join("\n");
   }
 
@@ -113,16 +107,6 @@ Components.Button {
   onClicked: root.panelRequested()
 
   // === Visual Indicators ===
-
-  // Charging indicator
-  Components.StatusDot {
-    anchors.bottom: parent.bottom
-    anchors.horizontalCenter: parent.horizontalCenter
-    anchors.bottomMargin: Core.Style.spaceXXS
-    visible: root.isCharging
-    pulse: true
-    color: Core.Theme.success
-  }
 
   // Critical battery warning overlay
   Components.WarningOverlay {
