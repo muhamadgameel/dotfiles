@@ -15,24 +15,9 @@ BarButton {
   id: root
 
   icon: Services.Idle.statusIcon
-  iconColor: Services.Idle.inhibited ? Core.Theme.warning : Core.Theme.textMuted
+  iconColor: Core.Theme.warning
 
-  tooltipText: {
-    const lines = [Services.Idle.inhibited ? "Keeping the screen awake" : "Idle timeout active"];
-    lines.push("");
-    lines.push(Services.Idle.inhibited ? "Click to allow sleeping again" : "Click to prevent locking and blanking");
-    return lines.join("\n");
-  }
+  tooltipText: "Keeping the screen awake\n\nClick to allow sleeping again"
 
   onClicked: Services.Idle.toggle()
-
-  // Unmistakable while it is on.
-  Components.StatusDot {
-    anchors.bottom: parent.bottom
-    anchors.horizontalCenter: parent.horizontalCenter
-    anchors.bottomMargin: Core.Style.spaceXXS
-    visible: Services.Idle.inhibited
-    pulse: true
-    color: Core.Theme.warning
-  }
 }

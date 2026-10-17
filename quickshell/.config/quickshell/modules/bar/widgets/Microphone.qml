@@ -33,8 +33,7 @@ BarButton {
     const name = Services.Audio.deviceName(Services.Audio.source);
     const level = Math.round(Services.Audio.micVolume * 100);
     const lines = [Services.Audio.micMuted ? `${name} (muted)` : `${name}: ${level}%`];
-    if (Services.Privacy.micInUse)
-      lines.push(`In use by ${Services.Privacy.micUsers.join(", ")}`);
+    lines.push(`In use by ${Services.Privacy.micUsers.join(", ")}`);
     lines.push("");
     lines.push("Scroll: Adjust level");
     lines.push("Left click: Open sound panel");
@@ -55,7 +54,6 @@ BarButton {
     anchors.top: parent.top
     anchors.right: parent.right
     anchors.margins: Core.Style.spaceXS
-    visible: Services.Privacy.micInUse
     color: Core.Theme.warning
   }
 

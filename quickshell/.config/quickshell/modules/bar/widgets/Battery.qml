@@ -31,7 +31,6 @@ BarButton {
   // Battery states
   readonly property bool isOnBattery: UPower.onBattery
   readonly property bool isCharging: isReady && battery.state === UPowerDeviceState.Charging
-  readonly property bool isFullyCharged: isReady && battery.state === UPowerDeviceState.FullyCharged
   readonly property bool isDischarging: isReady && battery.state === UPowerDeviceState.Discharging
   readonly property bool isLow: isReady && !isCharging && percent <= lowThreshold
   readonly property bool isCritical: isReady && !isCharging && percent <= criticalThreshold
@@ -56,8 +55,6 @@ BarButton {
   iconColor: {
     if (!isReady)
       return Core.Theme.textMuted;
-    if (isFullyCharged)
-      return Core.Theme.text;
     if (isCharging)
       return Core.Theme.success;
     if (isCritical)
@@ -67,7 +64,7 @@ BarButton {
     return Core.Theme.text;
   }
 
-  text: isFullyCharged ? "" : isReady ? Math.round(percent) + "%" : "--"
+  text: isReady ? Math.round(percent) + "%" : "--"
   textColor: iconColor
 
   // === Tooltip ===
@@ -78,9 +75,7 @@ BarButton {
     let lines = [];
 
     // Status
-    if (isFullyCharged) {
-      lines.push("Fully charged");
-    } else if (isCharging) {
+    if (isCharging) {
       lines.push("Charging (" + Math.round(percent) + "%)");
     } else {
       lines.push("On battery (" + Math.round(percent) + "%)");
