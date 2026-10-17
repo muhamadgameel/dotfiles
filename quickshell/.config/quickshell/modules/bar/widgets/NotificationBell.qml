@@ -19,7 +19,7 @@ Item {
 
   signal panelRequested
 
-  Components.Button {
+  BarButton {
     id: notificationButton
     icon: Services.Notification.doNotDisturb ? "bell-off" : "bell"
     iconColor: Services.Notification.doNotDisturb ? Core.Theme.warning : Core.Theme.text

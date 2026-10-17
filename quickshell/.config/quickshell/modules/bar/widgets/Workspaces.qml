@@ -134,6 +134,7 @@ Item {
 
         width: Core.Style.widgetSize
         height: Core.Style.widgetSize
+        radius: height / 2
 
         interactive: true
 

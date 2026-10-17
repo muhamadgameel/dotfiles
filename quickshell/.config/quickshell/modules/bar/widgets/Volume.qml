@@ -11,7 +11,7 @@ import "../../../services" as Services
 * tears down the old node before the new one is ready, and the raw flag made
 * the readout blank mid-swap. See services/Audio.qml.
 */
-Components.Button {
+BarButton {
   id: root
 
   signal panelRequested

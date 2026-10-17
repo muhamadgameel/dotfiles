@@ -15,7 +15,7 @@ import "../../../services" as Services
 *
 * Design: Compact single-indicator that expands on hover/click
 */
-Components.Button {
+BarButton {
   id: root
 
   signal panelRequested

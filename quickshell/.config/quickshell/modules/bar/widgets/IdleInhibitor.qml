@@ -11,7 +11,7 @@ import "../../../services" as Services
 * battery silently, so it gets an accent colour and a pulsing dot rather than a
 * subtle state change.
 */
-Components.Button {
+BarButton {
   id: root
 
   icon: Services.Idle.statusIcon

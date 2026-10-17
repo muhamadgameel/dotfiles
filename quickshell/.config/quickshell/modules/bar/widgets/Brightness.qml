@@ -14,7 +14,7 @@ import "../../../services" as Services
 * - Middle-click to set to 50%
 * - Tooltip showing percentage and device info
 */
-Components.Button {
+BarButton {
   id: root
 
   icon: Services.Brightness.getIcon()

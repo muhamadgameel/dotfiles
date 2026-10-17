@@ -15,7 +15,7 @@ import "../../../services" as Services
 * - Right click:  next track
 * - Scroll:       volume, where the player supports it
 */
-Components.Button {
+BarButton {
   id: root
 
   signal panelRequested

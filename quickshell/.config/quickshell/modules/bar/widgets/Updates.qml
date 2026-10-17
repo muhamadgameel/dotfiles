@@ -1,6 +1,5 @@
 import QtQuick
 
-import "../../../components" as Components
 import "../../../services" as Services
 
 /**
@@ -9,7 +8,7 @@ import "../../../services" as Services
 * - Left click:  upgrade, in a terminal
 * - Right click: check now
 */
-Components.Button {
+BarButton {
   id: root
 
   // How many packages the tooltip names.

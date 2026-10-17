@@ -9,7 +9,7 @@ import "../../../services" as Services
 *
 * Displays WiFi/Ethernet connection state with click to open network panel
 */
-Components.Button {
+BarButton {
   id: root
 
   signal panelRequested

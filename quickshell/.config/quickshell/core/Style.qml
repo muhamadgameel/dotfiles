@@ -40,7 +40,7 @@ Singleton {
   readonly property int panelPadding: Math.round(16 * uiScale)
 
   // === Widget Dimensions ===
-  readonly property int widgetSize: Math.round(30 * uiScale)
+  readonly property int widgetSize: Math.round(26 * uiScale)
   readonly property int iconSize: Math.round(18 * uiScale)
 
   // Widest the focused-window title may get before it elides.

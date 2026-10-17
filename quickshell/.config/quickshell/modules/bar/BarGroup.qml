@@ -27,7 +27,7 @@ Rectangle {
   visible: row.children.some(widget => widget.wanted ?? true)
   implicitWidth: row.implicitWidth
   implicitHeight: row.implicitHeight
-  radius: Core.Style.radiusS
+  radius: height / 2
   // Solid surface: cardBg's half alpha vanished against the translucent bar.
   // Hovering a widget still shows, as surfaceHover.
   color: Core.Theme.surface

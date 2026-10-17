@@ -1,6 +1,5 @@
 import QtQuick
 
-import "../../../components" as Components
 import "../../../core" as Core
 
 /**
@@ -10,7 +9,7 @@ import "../../../core" as Core
 * execDetached so a launcher that fails to start says so in the log instead of
 * silently doing nothing.
 */
-Components.Button {
+BarButton {
   id: root
 
   icon: "apps"

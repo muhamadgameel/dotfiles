@@ -14,7 +14,7 @@ import "../../../services" as Services
 * - Middle click: Toggle Bluetooth
 * - Right click: Toggle discovery
 */
-Components.Button {
+BarButton {
   id: root
 
   signal panelRequested

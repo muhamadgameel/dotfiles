@@ -13,7 +13,7 @@ import "../../../core" as Core
 * - Low/critical battery warning with color indication
 * - Tooltip with detailed info (time remaining, health, power rate)
 */
-Components.Button {
+BarButton {
   id: root
 
   signal panelRequested

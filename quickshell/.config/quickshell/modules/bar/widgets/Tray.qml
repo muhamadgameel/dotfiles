@@ -49,7 +49,7 @@ RowLayout {
 
       Rectangle {
         anchors.fill: parent
-        radius: Core.Style.radiusS
+        radius: height / 2
         // Fades from surfaceHover at zero alpha, not from transparent black,
         // which darkened mid-fade. See Theme.transparentOf.
         color: mouse.containsMouse ? Core.Theme.surfaceHover : Core.Theme.transparentOf(Core.Theme.surfaceHover)
@@ -140,7 +140,7 @@ RowLayout {
     }
   }
 
-  Components.Button {
+  BarButton {
     icon: root.expanded ? "chevron-right" : "chevron-left"
     tooltipText: root.expanded ? "Hide the tray icons" : `Show the tray icons (${root.shownItems.length})`
     onClicked: root.expanded = !root.expanded

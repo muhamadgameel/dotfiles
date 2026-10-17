@@ -1,7 +1,6 @@
 import QtQuick
 import QtQuick.Layouts
 
-import "../../../components" as Components
 import "../../../core" as Core
 import "../../../services" as Services
 
@@ -14,7 +13,7 @@ import "../../../services" as Services
 RowLayout {
   spacing: Core.Style.spaceXS
 
-  Components.Button {
+  BarButton {
     visible: Services.Recorder.recording
     icon: "video"
     iconColor: Core.Theme.error
@@ -22,7 +21,7 @@ RowLayout {
     onClicked: Services.Recorder.stop()
   }
 
-  Components.Button {
+  BarButton {
     visible: Services.Privacy.screenShared
     icon: "monitor"
     iconColor: Core.Theme.warning

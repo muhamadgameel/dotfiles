@@ -181,7 +181,7 @@ Rectangle {
         onPanelRequested: root.panelRequested("notifications")
       }
 
-      Components.Button {
+      Widgets.BarButton {
         icon: "dashboard"
         tooltipText: "Quick settings"
         onClicked: root.panelRequested("quicksettings")

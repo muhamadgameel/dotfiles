@@ -14,7 +14,7 @@ import "../../../services" as Services
 * swaps the default source, and binding to the raw flag made the widget flash
 * "off / --" for the duration of the swap.
 */
-Components.Button {
+BarButton {
   id: root
 
   signal panelRequested
