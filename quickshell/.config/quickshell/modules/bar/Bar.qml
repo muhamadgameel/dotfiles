@@ -70,8 +70,9 @@ Rectangle {
     }
 
     Widgets.WindowTitle {
+      // Shrinks to elide when the row is tight, but never grows past its own text.
       Layout.fillWidth: true
-      Layout.maximumWidth: Core.Style.windowTitleMaxWidth
+      Layout.maximumWidth: implicitWidth
       visible: Config.Config.barShowWindowTitle
     }
 

@@ -26,9 +26,6 @@ import "../core" as Core
 * analytic quad: no source item, no texture, no layer, and its properties only
 * change when geometry or the theme does.
 *
-* This Qt build's RectangularShadow has no `spread` or `cached` property - only
-* offset, colour, blur and the corner radii - so there is no spread token.
-*
 * Two things to know:
 *
 * - The surface's window must leave Style.elevationRoom(level) px of transparent

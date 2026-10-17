@@ -1,7 +1,7 @@
 # Quickshell
 
 The desktop shell: the bar, the sliding panels, the OSD, notifications and the
-tooltip, written in QML for Quickshell 0.3.1. It runs as a systemd user unit.
+tooltip, written in QML for Quickshell 0.3.2. It runs as a systemd user unit.
 Hyprland reaches it through global shortcuts, and scripts through `qs ipc`.
 
 ## Layout

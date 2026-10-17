@@ -90,7 +90,6 @@ Singleton {
   readonly property real fontM: 12 * uiScale
   readonly property real fontL: 14 * uiScale
   readonly property real fontXL: 18 * uiScale
-  readonly property real fontXXL: 24 * uiScale
   readonly property real fontXXXL: 32 * uiScale
 
   // === Font Weights ===
@@ -137,10 +136,6 @@ Singleton {
   // How far a surface floats above the desktop: 1 a tooltip, 2 the bar and the
   // notification popups, 3 the panels and the OSD. Indexed by level so a caller
   // passes one number instead of picking three tokens apart.
-  //
-  // Note there is no `spread` token: this Qt build's RectangularShadow exposes
-  // only offset/color/blur/radius (checked against plugins.qmltypes), so a
-  // spread token would be a value nothing could consume.
   readonly property bool shadowsEnabled: Config.Config.shadowsEnabled
 
   readonly property var _shadowBlur: [0, 10, 18, 28]
