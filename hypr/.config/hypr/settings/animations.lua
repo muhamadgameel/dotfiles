@@ -5,6 +5,7 @@ hl.curve("easeOutQuint", { type = "bezier", points = { { 0.23, 1 }, { 0.32, 1 } 
 hl.curve("easeOutExpo", { type = "bezier", points = { { 0.16, 1 }, { 0.30, 1 } } })
 hl.curve("linear", { type = "bezier", points = { { 0, 0 }, { 1, 1 } } })
 hl.curve("smooth", { type = "bezier", points = { { 0.05, 0.9 }, { 0.10, 1.05 } } })
+hl.curve("easeOutCubic", { type = "bezier", points = { { 0.33, 1 }, { 0.68, 1 } } })
 
 -- Spring: physical model, no fixed duration. Feels better than a bezier for
 -- things that get interrupted mid-flight (opening/moving windows).
@@ -21,7 +22,7 @@ hl.animation({ leaf = "windowsOut", enabled = true, speed = 3, bezier = "easeOut
 hl.animation({ leaf = "windowsMove", enabled = true, speed = 3, spring = "easy" })
 
 -- Fades
-hl.animation({ leaf = "fade", enabled = true, speed = 3, bezier = "smooth" })
+hl.animation({ leaf = "fade", enabled = true, speed = 2, bezier = "easeOutCubic" })
 hl.animation({ leaf = "fadeIn", enabled = true, speed = 3, bezier = "easeOutExpo" })
 hl.animation({ leaf = "fadeOut", enabled = true, speed = 2, bezier = "linear" })
 
