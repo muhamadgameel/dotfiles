@@ -28,13 +28,8 @@ BarButton {
     const lines = [m.trackTitle, m.trackArtist, m.trackAlbum].filter(line => line !== "");
     if (m.identity !== "")
       lines.push(`— ${m.identity}`);
-
-    lines.push("");
-    lines.push("Left click: Open media panel");
-    lines.push("Middle click: Play/pause");
-    lines.push("Right click: Next track");
     if (m.volumeSupported)
-      lines.push(`Scroll: Volume (${Math.round(m.volume * 100)}%)`);
+      lines.push(`Volume ${Math.round(m.volume * 100)}%`);
     return lines.join("\n");
   }
 

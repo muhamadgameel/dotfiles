@@ -35,7 +35,7 @@ Item {
 
     onEntered: {
       const weather = Services.Weather.ready ? `\n${Services.Weather.statusText}` : "";
-      Services.Tooltip.show(root, `${Services.Time.dateLong}${weather}\n\nClick: Calendar`, "bottom");
+      Services.Tooltip.show(root, `${Services.Time.dateLong}${weather}`, "bottom");
     }
 
     onExited: {

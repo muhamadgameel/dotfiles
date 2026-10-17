@@ -1,6 +1,5 @@
 import QtQuick
 
-import "../../../components" as Components
 import "../../../core" as Core
 import "../../../services" as Services
 
@@ -8,8 +7,9 @@ import "../../../services" as Services
 * IdleInhibitor - keep-awake toggle
 *
 * Deliberately loud when active: an inhibitor left on by accident drains the
-* battery silently, so it gets an accent colour and a pulsing dot rather than a
-* subtle state change.
+* battery silently, so it gets an accent colour rather than a subtle state change.
+*
+* - Click: allow sleeping again
 */
 BarButton {
   id: root
@@ -17,7 +17,7 @@ BarButton {
   icon: Services.Idle.statusIcon
   iconColor: Core.Theme.warning
 
-  tooltipText: "Keeping the screen awake\n\nClick to allow sleeping again"
+  tooltipText: "Keeping the screen awake"
 
   onClicked: Services.Idle.toggle()
 }

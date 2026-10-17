@@ -7,6 +7,6 @@ import "../../../services" as Services
 */
 BarButton {
   text: Services.KeyboardLayout.label
-  tooltipText: `${Services.KeyboardLayout.name}\n\nClick: Next layout`
+  tooltipText: Services.KeyboardLayout.name
   onClicked: Services.KeyboardLayout.next()
 }

@@ -7,6 +7,10 @@ import "../../../services" as Services
 /**
 * Microphone - Bar widget for the default audio input
 *
+* - Left click:   open the sound panel
+* - Middle click: mute or unmute
+* - Scroll:       level
+*
 * Just the icon, red while muted, as in the mic OSD; the level is in the
 * tooltip. A dot shows while an app records.
 *
@@ -34,10 +38,6 @@ BarButton {
     const level = Math.round(Services.Audio.micVolume * 100);
     const lines = [Services.Audio.micMuted ? `${name} (muted)` : `${name}: ${level}%`];
     lines.push(`In use by ${Services.Privacy.micUsers.join(", ")}`);
-    lines.push("");
-    lines.push("Scroll: Adjust level");
-    lines.push("Left click: Open sound panel");
-    lines.push("Middle click: Toggle mute");
     return lines.join("\n");
   }
 

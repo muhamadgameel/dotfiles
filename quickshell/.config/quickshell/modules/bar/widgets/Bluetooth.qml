@@ -38,7 +38,7 @@ BarButton {
     if (Services.Bluetooth.blocked)
       return "Bluetooth blocked";
     if (!Services.Bluetooth.enabled)
-      return "Bluetooth disabled\nMiddle-click to enable";
+      return "Bluetooth disabled";
 
     let tip = Services.Bluetooth.hasConnectedDevices ? Services.Bluetooth.statusText : "Bluetooth";
 
@@ -51,7 +51,6 @@ BarButton {
 
     if (Services.Bluetooth.discovering)
       tip += "\n🔍 Scanning...";
-    tip += "\nMiddle-click to toggle";
 
     return tip;
   }

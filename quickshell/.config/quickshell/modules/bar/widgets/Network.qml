@@ -7,7 +7,11 @@ import "../../../services" as Services
 /**
 * Network - Bar widget showing network connection status
 *
-* Displays WiFi/Ethernet connection state with click to open network panel
+* Displays the Wi-Fi or Ethernet connection state.
+*
+* - Left click:   open the network panel
+* - Middle click: Wi-Fi on or off
+* - Right click:  refresh the connection details
 */
 BarButton {
   id: root

@@ -12,6 +12,7 @@ import "../../../core" as Core
 * - Charging animation with pulsing indicator
 * - Low/critical battery warning with color indication
 * - Tooltip with detailed info (time remaining, health, power rate)
+* - Click: open the system stats panel
 */
 BarButton {
   id: root
@@ -97,9 +98,6 @@ BarButton {
     if (battery.healthPercentage > 0) {
       lines.push(Core.Icons.get("heart") + "   " + "Health: " + Math.round(battery.healthPercentage) + "%");
     }
-
-    lines.push("");
-    lines.push("Click for details");
 
     return lines.join("\n");
   }
