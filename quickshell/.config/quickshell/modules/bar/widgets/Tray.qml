@@ -29,7 +29,14 @@ RowLayout {
   // Passive items are ones the app has explicitly said need no attention.
   readonly property var shownItems: SystemTray.items.values.filter(i => i && i.status !== Status.Passive)
 
-  property bool expanded: false
+  property alias expanded: _state.expanded
+
+  PersistentProperties {
+    id: _state
+    reloadableId: "tray"
+
+    property bool expanded: false
+  }
 
   Repeater {
     model: ScriptModel {
