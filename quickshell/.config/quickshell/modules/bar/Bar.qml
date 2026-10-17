@@ -85,7 +85,7 @@ Rectangle {
     anchors.rightMargin: Core.Style.spaceM
     anchors.verticalCenter: parent.verticalCenter
 
-    spacing: Core.Style.spaceXS
+    spacing: Core.Style.spaceS
 
     // Pushes everything to the right edge.
     Components.Spacer {}
@@ -105,21 +105,25 @@ Rectangle {
 
     BarGroup {
       Widgets.KeyboardLayout {
-        visible: Config.Config.barShowKeyboardLayout && Services.KeyboardLayout.hasChoice && !Services.KeyboardLayout.isDefault
+        readonly property bool wanted: Config.Config.barShowKeyboardLayout && Services.KeyboardLayout.hasChoice && !Services.KeyboardLayout.isDefault
+        visible: wanted
       }
 
       Widgets.Indicators {
-        visible: Services.Recorder.recording || Services.Privacy.screenShared
+        readonly property bool wanted: Services.Recorder.recording || Services.Privacy.screenShared
+        visible: wanted
       }
 
       Widgets.Updates {
-        visible: Config.Config.barShowUpdates && Services.Updates.count > 0
+        readonly property bool wanted: Config.Config.barShowUpdates && Services.Updates.count > 0
+        visible: wanted
       }
 
       // Only while it is on: left on by accident, it keeps the machine awake and
       // drains the battery. Quick Settings has the switch.
       Widgets.IdleInhibitor {
-        visible: Config.Config.barShowIdleInhibitor && Services.Idle.inhibited
+        readonly property bool wanted: Config.Config.barShowIdleInhibitor && Services.Idle.inhibited
+        visible: wanted
       }
     }
 
@@ -171,21 +175,17 @@ Rectangle {
       visible: Config.Config.barShowBrightness && Services.Brightness.ready
     }
 
-    Widgets.NotificationBell {
-      visible: Config.Config.barShowNotification
-      onPanelRequested: root.panelRequested("notifications")
-    }
+    BarGroup {
+      Widgets.NotificationBell {
+        visible: Config.Config.barShowNotification
+        onPanelRequested: root.panelRequested("notifications")
+      }
 
-    Components.Divider {
-      Layout.fillHeight: false
-      Layout.preferredHeight: Core.Style.iconSize
-      vertical: true
-    }
-
-    Components.Button {
-      icon: "dashboard"
-      tooltipText: "Quick settings"
-      onClicked: root.panelRequested("quicksettings")
+      Components.Button {
+        icon: "dashboard"
+        tooltipText: "Quick settings"
+        onClicked: root.panelRequested("quicksettings")
+      }
     }
   }
 }

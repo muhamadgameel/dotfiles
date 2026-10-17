@@ -36,7 +36,7 @@ Rectangle {
 
   // === Layout Properties ===
   Layout.fillWidth: true
-  Layout.preferredHeight: Core.Style.widgetSize + Core.Style.spaceS
+  Layout.preferredHeight: Core.Style.px(36)
 
   // === Signals ===
   signal accepted  // Emitted when Enter/Return is pressed

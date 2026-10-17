@@ -9,9 +9,9 @@ import "../../core" as Core
 * The group only draws the pill behind them; each widget keeps its own clicks,
 * scroll and tooltip.
 *
-* It does not hide itself when every widget inside is hidden: hiding it hides
-* the widgets too, so it could never tell when one came back. It shrinks to
-* nothing instead.
+* It hides while none of its widgets is `wanted`; a widget that does not say
+* counts as wanted. It cannot go by their `visible`: hiding the group hides the
+* widgets too, so it could never tell when one came back.
 *
 * Usage:
 *   BarGroup {
@@ -24,12 +24,9 @@ Rectangle {
 
   default property alias content: row.data
 
+  visible: row.children.some(widget => widget.wanted ?? true)
   implicitWidth: row.implicitWidth
   implicitHeight: row.implicitHeight
-
-  // A little more room between groups than between the widgets inside one.
-  Layout.leftMargin: Core.Style.spaceXXS
-  Layout.rightMargin: Core.Style.spaceXXS
   radius: Core.Style.radiusS
   // Solid surface: cardBg's half alpha vanished against the translucent bar.
   // Hovering a widget still shows, as surfaceHover.
