@@ -40,6 +40,10 @@ hl.config({
 			offset = { 0, 4 },
 		},
 
+		motion_blur = {
+			enabled = true,
+		},
+
 		dim_inactive = true,
 		dim_strength = 0.15,
 		dim_special = 0.3,
