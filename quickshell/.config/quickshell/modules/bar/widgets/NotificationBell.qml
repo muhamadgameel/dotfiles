@@ -43,6 +43,6 @@ Item {
     anchors.topMargin: 1
     variant: "count"
     count: root.unreadCount
-    backgroundColor: Services.Notification.doNotDisturb ? Core.Theme.warning : Core.Theme.error
+    backgroundColor: Services.Notification.doNotDisturb ? Core.Theme.warning : Core.Theme.accent
   }
 }
