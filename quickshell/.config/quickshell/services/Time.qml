@@ -12,7 +12,7 @@ import "../services" as Services
 * Two SystemClocks, split by how often what they drive actually changes:
 *
 * - `minuteClock` drives everything shown to the minute: the bar clock by
-*   default, both dates, and relative notification timestamps. One wakeup a
+*   default, the date, and relative notification timestamps. One wakeup a
 *   minute.
 * - `secondClock` drives `timeLong` alone, and only runs while something is
 *   showing seconds - the bar with barClockShowSeconds on, or the calendar.
@@ -35,7 +35,6 @@ Singleton {
   // timeShort is 12-hour to match timeLong. It used to be 24-hour, so the
   // calendar showed "18:05" in its header over "06:05:12 PM" in its body.
   readonly property string timeShort: Qt.formatTime(minuteClock.date, "hh:mm AP")
-  readonly property string dateShort: Qt.formatDate(minuteClock.date, "ddd, MMM d")
   readonly property string dateLong: Qt.formatDate(minuteClock.date, "dddd, MMMM d, yyyy")
 
   // Current only while secondsWanted. Read it only from something that is
