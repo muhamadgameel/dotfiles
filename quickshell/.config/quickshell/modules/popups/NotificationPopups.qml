@@ -3,6 +3,7 @@ pragma ComponentBehavior: Bound
 import QtQuick
 import QtQuick.Layouts
 import Quickshell
+import Quickshell.Wayland
 
 import "../../components" as Components
 import "../../core" as Core
@@ -19,7 +20,7 @@ Variants {
 
     required property ShellScreen modelData
 
-    sourceComponent: Components.PositionedPanelWindow {
+    sourceComponent: PanelWindow {
       id: notifWindow
 
       // Hidden when there is nothing to show, so the window never blocks input
@@ -30,16 +31,27 @@ Variants {
       visible: Services.Notification.activeList.count > 0 && Services.Panels.openPanel !== "notifications"
 
       screen: root.modelData
-      namespace: "quickshell-notifications"
-      location: "top_right"
+      color: Core.Theme.transparent
+      WlrLayershell.namespace: "quickshell-notifications-" + (notifWindow.screen?.name ?? "unknown")
+      WlrLayershell.layer: WlrLayer.Overlay
+      WlrLayershell.exclusionMode: ExclusionMode.Ignore
+      WlrLayershell.keyboardFocus: WlrKeyboardFocus.None
 
-      margin: Core.Style.spaceL
+      // Below the bar at the right edge, as a fixed full-height column rather than
+      // one sized to the stack: that resized the layer surface on every arrival and
+      // every dismissal, a compositor round trip each time. Same approach as
+      // SlidingPanel.
+      anchors {
+        top: true
+        right: true
+        bottom: true
+      }
 
-      // A fixed full-height column rather than one sized to the stack: that
-      // resized the layer surface on every arrival and every dismissal, a
-      // compositor round trip each time. Same approach as SlidingPanel.
-      anchors.bottom: true
-      margins.bottom: Core.Style.spaceL
+      margins {
+        top: Core.Style.barHeight + Core.Style.spaceL
+        right: Core.Style.spaceL
+        bottom: Core.Style.spaceL
+      }
 
       // Input only lands on the stack; the empty column below it passes clicks
       // through to whatever is underneath.
@@ -59,7 +71,7 @@ Variants {
       readonly property int panelShift: shiftFor(Services.Panels.openPanelWidth)
 
       function shiftFor(panelWidth) {
-        return panelWidth + Math.max(Core.Style.spaceS, Core.Style.elevationRoom(2)) - 2 * Core.Style.spaceS + Core.Style.spaceM - margin - shadowRoom;
+        return panelWidth + Math.max(Core.Style.spaceS, Core.Style.elevationRoom(2)) - 2 * Core.Style.spaceS + Core.Style.spaceM - Core.Style.spaceL - shadowRoom;
       }
 
       implicitWidth: notifWidth + (shadowRoom - Core.Style.spaceXS) * 2 + shiftFor(Core.Style.panelWidthWide)

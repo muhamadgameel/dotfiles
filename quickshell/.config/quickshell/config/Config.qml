@@ -62,8 +62,6 @@ Singleton {
   readonly property real barOpacity: Settings.get("barOpacity", 0.85)
 
   // === OSD Configuration ===
-  // Clear of the notification stack and the panels, which share the top-right.
-  readonly property string osdPosition: Settings.get("osdPosition", "bottom_center")
   readonly property int osdDuration: Settings.get("osdDuration", 2000)
   readonly property bool osdEnabled: Settings.get("osdEnabled", true)
 
