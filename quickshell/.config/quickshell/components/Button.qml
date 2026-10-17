@@ -138,7 +138,7 @@ Rectangle {
   // which would run the channels through black mid-fade. See Theme.transparentOf.
   readonly property color _effectiveBackground: Qt.colorEqual(_backgroundColor, Core.Theme.transparent) ? Core.Theme.transparentOf(_hoverColor) : _backgroundColor
 
-  color: hovered ? _hoverColor : _effectiveBackground
+  color: mouseArea.pressed ? Core.Theme.stateLayer(_hoverColor, Core.Style.opacityPressed) : hovered ? _hoverColor : _effectiveBackground
 
   Behavior on color {
     AnimFast {}
