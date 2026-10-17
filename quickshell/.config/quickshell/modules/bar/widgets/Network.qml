@@ -1,6 +1,5 @@
 import QtQuick
 
-import "../../../components" as Components
 import "../../../core" as Core
 import "../../../services" as Services
 
@@ -35,6 +34,8 @@ BarButton {
     return "";
   }
   textColor: iconColor
+  dot: Services.Network.connecting || Services.Network.searching ? Core.Theme.accent : Core.Theme.transparent
+  dotLoops: Animation.Infinite
 
   tooltipText: {
     if (!Services.Network.isConnected)
@@ -60,16 +61,5 @@ BarButton {
     } else if (button === Qt.RightButton) {
       Services.Network.refreshAll();
     }
-  }
-
-  // Visual indicator for connecting state
-  Components.StatusDot {
-    anchors.bottom: parent.bottom
-    anchors.horizontalCenter: parent.horizontalCenter
-    anchors.bottomMargin: Core.Style.spaceXXS
-    visible: Services.Network.connecting || Services.Network.searching
-    pulse: true
-    pulseLoops: Animation.Infinite
-    color: Core.Theme.accent
   }
 }

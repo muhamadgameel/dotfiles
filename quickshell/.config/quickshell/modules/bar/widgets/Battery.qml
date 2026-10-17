@@ -67,6 +67,7 @@ BarButton {
 
   text: isReady ? Math.round(percent) + "%" : "--"
   textColor: iconColor
+  dot: root.isCharging ? Core.Theme.success : Core.Theme.transparent
 
   // === Tooltip ===
   tooltipText: {
@@ -106,16 +107,6 @@ BarButton {
   onClicked: root.panelRequested()
 
   // === Visual Indicators ===
-
-  // Charging indicator
-  Components.StatusDot {
-    anchors.bottom: parent.bottom
-    anchors.horizontalCenter: parent.horizontalCenter
-    anchors.bottomMargin: Core.Style.spaceXXS
-    visible: root.isCharging
-    pulse: true
-    color: Core.Theme.success
-  }
 
   // Critical battery warning overlay
   Components.WarningOverlay {

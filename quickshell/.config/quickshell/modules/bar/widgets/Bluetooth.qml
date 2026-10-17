@@ -1,6 +1,5 @@
 import QtQuick
 
-import "../../../components" as Components
 import "../../../core" as Core
 import "../../../services" as Services
 
@@ -21,6 +20,7 @@ BarButton {
 
   icon: Services.Bluetooth.statusIcon
   iconColor: root.statusColor
+  dot: Services.Bluetooth.discovering ? Core.Theme.accentAlt : Core.Theme.transparent
 
   tooltipText: _tooltip
 
@@ -67,15 +67,5 @@ BarButton {
       else
         Services.Bluetooth.startDiscovery();
     }
-  }
-
-  // Scanning indicator
-  Components.StatusDot {
-    anchors.bottom: parent.bottom
-    anchors.horizontalCenter: parent.horizontalCenter
-    anchors.bottomMargin: Core.Style.spaceXXS
-    visible: Services.Bluetooth.discovering
-    pulse: true
-    color: Core.Theme.accentAlt
   }
 }
