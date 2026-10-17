@@ -129,7 +129,6 @@ Item {
         readonly property int workspaceId: modelData
         readonly property var workspace: root.localWorkspaces[workspaceId] ?? null
         readonly property bool occupied: (workspace?.toplevels?.values?.length ?? 0) > 0
-        readonly property bool isFocused: root.focusedId === workspaceId
         readonly property bool isUrgent: workspace?.urgent ?? false
 
         width: Core.Style.widgetSize
@@ -166,15 +165,13 @@ Item {
         }
 
         backgroundColor: {
-          if (isFocused)
-            return Core.Theme.accent;
           if (isUrgent)
             return Core.Theme.error;
           // Occupied but unfocused reads as "there is something here".
           return occupied ? Core.Theme.surface : Core.Theme.transparent;
         }
 
-        hoverColor: isFocused ? Core.Theme.accent : (isUrgent ? Core.Theme.error : Core.Theme.surfaceHover)
+        hoverColor: isUrgent ? Core.Theme.error : Core.Theme.surfaceHover
 
         acceptedButtons: Qt.LeftButton | Qt.MiddleButton
         onClicked: button => {
@@ -187,21 +184,8 @@ Item {
         Components.Text {
           anchors.centerIn: parent
           text: slot.workspaceId
-          color: {
-            if (slot.isFocused)
-              return Core.Theme.bg;
-            // Empty slots are dimmed so the occupied ones stand out.
-            return slot.occupied ? Core.Theme.text : Core.Theme.textMuted;
-          }
-          weight: slot.isFocused ? Core.Style.weightBold : Core.Style.weightMedium
-
-          // The colour cross-fades via Text's own Behavior; the size shift is
-          // what sells the focus change on a slot this small.
-          scale: slot.isFocused ? 1.08 : 1.0
-
-          Behavior on scale {
-            Components.AnimFast {}
-          }
+          // Empty slots are dimmed so the occupied ones stand out.
+          color: slot.occupied ? Core.Theme.text : Core.Theme.textMuted
         }
 
         // Window-count dot: one per window, capped so it stays legible.
@@ -210,7 +194,7 @@ Item {
           anchors.bottom: parent.bottom
           anchors.bottomMargin: Core.Style.spaceXXS
           spacing: Core.Style.spaceXXS
-          visible: slot.occupied && !slot.isFocused
+          visible: slot.occupied
 
           Repeater {
             model: Math.min(3, slot.workspace?.toplevels?.values?.length ?? 0)
@@ -224,6 +208,32 @@ Item {
           }
         }
       }
+    }
+  }
+
+  // The focused workspace: one disc over its slot, which slides to the next one
+  // instead of one slot fading out while another fades in. Above the slots, or
+  // the filled slots it passes would hide it.
+  Rectangle {
+    readonly property int index: root.visibleIds.indexOf(root.focusedId)
+
+    visible: index >= 0
+    x: Math.max(0, index) * (Core.Style.widgetSize + slots.spacing)
+    anchors.verticalCenter: slots.verticalCenter
+    width: Core.Style.widgetSize
+    height: width
+    radius: width / 2
+    color: Core.Theme.accent
+
+    Behavior on x {
+      Components.AnimFast {}
+    }
+
+    Components.Text {
+      anchors.centerIn: parent
+      text: root.focusedId
+      color: Core.Theme.bg
+      weight: Core.Style.weightBold
     }
   }
 }
