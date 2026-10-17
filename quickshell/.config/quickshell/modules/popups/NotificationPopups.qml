@@ -59,7 +59,7 @@ Variants {
         item: notificationStack
       }
 
-      readonly property int notifWidth: Math.round(400 * Core.Style.uiScale)
+      readonly property int notifWidth: Core.Style.panelWidthWide
 
       readonly property int shadowRoom: Math.max(Core.Style.spaceXS, Core.Style.elevationRoom(2))
 
