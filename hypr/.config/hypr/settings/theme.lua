@@ -2,6 +2,7 @@
 -- The shell's hyprland-colors.lua overrides these key by key; a bad file keeps them.
 local colors = {
 	accent = "rgb(7aa2f7)",
+	accentAlt = "rgb(bb9af7)",
 	inactive = "rgb(565f89)",
 }
 

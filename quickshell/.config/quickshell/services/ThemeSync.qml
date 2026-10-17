@@ -56,12 +56,14 @@ $warning = rgba(${_hex(Core.Theme.warning, 0.9)})
 
   readonly property var _borders: ({
       accent: `rgb(${_hex(Core.Theme.accent)})`,
+      accentAlt: `rgb(${_hex(Core.Theme.accentAlt)})`,
       inactive: `rgb(${_hex(Core.Theme.overlayLight)})`
     })
 
   readonly property string _hyprlandText: `-- Written by quickshell (services/ThemeSync.qml) from the active theme.
 return {
 	accent = "${_borders.accent}",
+	accentAlt = "${_borders.accentAlt}",
 	accentAlpha = "rgba(${_hex(Core.Theme.accent, 0.933)})",
 	inactive = "${_borders.inactive}",
 	surface = "rgb(${_hex(Core.Theme.bg)})",
@@ -147,7 +149,7 @@ border=${_hex(Core.Theme.overlayLight, 1)}
       return;
 
     hyprlandFile.setText(root._hyprlandText);
-    _applyBorders.command = ["hyprctl", "eval", `hl.config({ general = { col = { active_border = "${root._borders.accent}", inactive_border = "${root._borders.inactive}" } } })`];
+    _applyBorders.command = ["hyprctl", "eval", `hl.config({ general = { col = { active_border = { colors = { "${root._borders.accent}", "${root._borders.accentAlt}" }, angle = 45 }, inactive_border = "${root._borders.inactive}" } } })`];
     _applyBorders.running = true;
     Core.Logger.i("ThemeSync", `theme colours written for ${Config.Config.theme}`);
   }

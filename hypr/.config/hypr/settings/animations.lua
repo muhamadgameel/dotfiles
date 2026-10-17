@@ -28,9 +28,6 @@ hl.animation({ leaf = "fadeOut", enabled = true, speed = 1.5, bezier = "linear" 
 
 -- Borders
 hl.animation({ leaf = "border", enabled = true, speed = 3, bezier = "easeOutQuint" })
--- `borderangle` only does anything for *gradient* borders, and with `loop` it
--- redraws forever. Borders here are solid colors, so it is pure battery cost.
-hl.animation({ leaf = "borderangle", enabled = false })
 
 -- Workspaces
 hl.animation({ leaf = "workspaces", enabled = true, speed = 2.5, bezier = "easeOutExpo", style = "slide" })

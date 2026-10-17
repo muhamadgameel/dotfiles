@@ -8,7 +8,7 @@ hl.config({
 		gaps_out = 8,
 
 		col = {
-			active_border = colors.accent,
+			active_border = { colors = { colors.accent, colors.accentAlt }, angle = 45 },
 			inactive_border = colors.inactive,
 		},
 
