@@ -144,7 +144,7 @@ Item {
     Components.Text {
       Layout.fillWidth: true
       text: root.displayTitle
-      size: Core.Style.fontS
+      size: Core.Style.fontM
       color: Core.Theme.textDim
     }
   }

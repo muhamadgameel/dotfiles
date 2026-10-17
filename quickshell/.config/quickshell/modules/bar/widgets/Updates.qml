@@ -14,7 +14,7 @@ BarButton {
   // How many packages the tooltip names.
   readonly property int listed: 8
 
-  icon: "arrow-up"
+  icon: "refresh"
   iconSpinning: Services.Updates.checking
   text: Services.Updates.count
 
