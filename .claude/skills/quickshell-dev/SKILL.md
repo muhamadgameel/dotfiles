@@ -52,8 +52,8 @@ qsrig stop  <scratch>/rig
   `Notification` claims the session's notification name, `Wallpaper` stops hyprpaper's
   rotation, others call `hyprctl`, `brightnessctl` or `systemctl`. A stand-in is a
   singleton with the same properties and functions that only records its calls.
-  Never click a real bar widget against its real service: a left click on Brightness
-  sets 50%, a middle click on Network turns Wi-Fi off.
+  Never click a real bar widget against its real service: a right click on Volume
+  mutes it, a middle click on Network turns Wi-Fi off.
 - A D-Bus service (the tray, notifications) goes on a private bus:
   `dbus-daemon --session --fork --address=unix:abstract=<name> --print-address=1`,
   exported as `DBUS_SESSION_BUS_ADDRESS` before `qsrig start`. A socket path under the

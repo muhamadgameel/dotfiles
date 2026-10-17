@@ -174,11 +174,6 @@ Rectangle {
       }
     }
 
-    // Off by default; Quick Settings has the slider.
-    Widgets.Brightness {
-      visible: Config.Config.barShowBrightness && Services.Brightness.ready
-    }
-
     BarGroup {
       Widgets.NotificationBell {
         visible: Config.Config.barShowNotification
