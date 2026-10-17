@@ -32,7 +32,6 @@ hl.config({
 			passes = 2,
 			noise = 0.02,
 			vibrancy = 0.2,
-			popups = true,
 		},
 
 		shadow = {

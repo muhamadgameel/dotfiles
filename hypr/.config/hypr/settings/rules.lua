@@ -128,12 +128,8 @@ hl.layer_rule({ match = { namespace = "launcher" }, blur = true, animation = "sl
 -- slurp and hyprpicker: grim captures the moment they exit, and a fading overlay would be in the shot.
 hl.layer_rule({ match = { namespace = "^(selection|hyprpicker)$" }, no_anim = true })
 
--- quickshell surfaces are larger than their bodies; the transparent margin holds the shadow.
-hl.layer_rule({
-	match = { namespace = "^quickshell-" },
-	blur = true,
-	ignore_alpha = 0.4,
-})
+-- quickshell's bar
+hl.layer_rule({ match = { namespace = "^quickshell-bar$" }, blur = true })
 
 -- The panels and the OSD run their own animation; a compositor one on top of it
 -- animates them twice.
