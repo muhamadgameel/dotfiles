@@ -135,9 +135,9 @@ hl.layer_rule({
 	ignore_alpha = 0.4,
 })
 
--- The panels run their own slide animation; a compositor animation on top of it
--- animates the open twice.
-hl.layer_rule({ match = { namespace = "^quickshell-.*panel$" }, no_anim = true })
+-- The panels and the OSD run their own animation; a compositor one on top of it
+-- animates them twice.
+hl.layer_rule({ match = { namespace = "^quickshell-(.*panel|osd-.*)$" }, no_anim = true })
 
 -- ── Workspace rules: smart gaps ──────────────────────────────────────
 -- One tiled window (w[tv1]) or one fullscreen window (f[1]) gets no gaps,
