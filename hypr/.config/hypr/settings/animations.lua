@@ -18,16 +18,16 @@ hl.animation({ leaf = "global", enabled = true, speed = 4, bezier = "smooth" })
 
 -- Windows
 hl.animation({ leaf = "windows", enabled = true, speed = 4, spring = "easy", style = "popin 80%" })
-hl.animation({ leaf = "windowsOut", enabled = true, speed = 3, bezier = "easeOutQuint", style = "popin 80%" })
+hl.animation({ leaf = "windowsOut", enabled = true, speed = 1.5, bezier = "easeOutQuint", style = "popin 80%" })
 hl.animation({ leaf = "windowsMove", enabled = true, speed = 3, spring = "easy" })
 
 -- Fades
 hl.animation({ leaf = "fade", enabled = true, speed = 2, bezier = "easeOutCubic" })
 hl.animation({ leaf = "fadeIn", enabled = true, speed = 3, bezier = "easeOutExpo" })
-hl.animation({ leaf = "fadeOut", enabled = true, speed = 2, bezier = "linear" })
+hl.animation({ leaf = "fadeOut", enabled = true, speed = 1.5, bezier = "linear" })
 
 -- Borders
-hl.animation({ leaf = "border", enabled = true, speed = 5, bezier = "easeOutQuint" })
+hl.animation({ leaf = "border", enabled = true, speed = 3, bezier = "easeOutQuint" })
 -- `borderangle` only does anything for *gradient* borders, and with `loop` it
 -- redraws forever. Borders here are solid colors, so it is pure battery cost.
 hl.animation({ leaf = "borderangle", enabled = false })
