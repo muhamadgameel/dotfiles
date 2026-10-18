@@ -126,7 +126,9 @@ the repo copy changes nothing until the next `./setup.sh install system`):
 | `/usr/local/share/wayland-sessions/hyprland.desktop` | Hides the plain Hyprland session. uwsm launches this same file, so it must keep its `Exec` line. |
 
 It also adds a boot entry for the LTS kernel, as a fallback when an update
-breaks the main one, and enables the locale in `/etc/locale.gen`.
+breaks the main one, enables the locale in `/etc/locale.gen`, and sets
+`/etc/security/faillock.conf` to lock the account for two minutes after ten
+failed passwords, instead of ten minutes after three.
 
 **Firewall.** Networks use the public zone unless you trust them. List the
 name of each trusted Wi-Fi network in `setup/home-networks.txt`, one per

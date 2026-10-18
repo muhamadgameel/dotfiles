@@ -184,6 +184,11 @@ locale_fix() {
   run sudo locale-gen
 }
 
+# An unanswered polkit prompt and a password typed in the wrong layout count as
+# failures, and the default locks sudo, polkit and the lock screen after three.
+faillock_ok() { grep -qx 'deny = 10' /etc/security/faillock.conf && grep -qx 'unlock_time = 120' /etc/security/faillock.conf; }
+faillock_fix() { run sudo sed -i -e 's/^#\? *deny *=.*/deny = 10/' -e 's/^#\? *unlock_time *=.*/unlock_time = 120/' /etc/security/faillock.conf; }
+
 # systemd-boot has no entry for linux-lts until one is written; copy the
 # linux entry's options, which carry this machine's root partition.
 lts_ok() { [[ ! -e /boot/vmlinuz-linux-lts ]] || grep -qs 'vmlinuz-linux-lts' /boot/loader/entries/*.conf; }
@@ -411,6 +416,7 @@ else
     item "setup/system files in place" sys_ok sys_install
     item "home networks in the firewall's home zone" home_zone_ok home_zone_fix
     item "locale.gen enables $(lang)" locale_ok locale_fix
+    item "faillock allows ten tries" faillock_ok faillock_fix
     item "boot entry for linux-lts" lts_ok lts_add
   fi
   if want user; then
