@@ -139,7 +139,6 @@ Singleton {
     path: root.path
     blockLoading: true   // so the first get() already has real values
     printErrors: false   // absent on first run, which is normal
-    atomicWrites: true   // never leave a half-written settings file behind
     watchChanges: true
 
     // Picked up when the file is edited by hand or by another instance.

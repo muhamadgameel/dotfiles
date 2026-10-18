@@ -162,7 +162,7 @@ sys_ok() { [[ -z $(sys_stale) ]]; }
 sys_install() {
   local f initramfs=0 sysctl=0 firewall=0 logind=0
   for f in $(sys_stale); do
-    run sudo install -b -Dm644 "$f" "/${f#setup/system/}"
+    run sudo install -Dm644 "$f" "/${f#setup/system/}"
     case $f in
       */mkinitcpio.conf.d/*) initramfs=1 ;;
       */sysctl.d/*) sysctl=1 ;;
@@ -189,14 +189,17 @@ locale_fix() {
 faillock_ok() { grep -qx 'deny = 10' /etc/security/faillock.conf && grep -qx 'unlock_time = 120' /etc/security/faillock.conf; }
 faillock_fix() { run sudo sed -i -e 's/^#\? *deny *=.*/deny = 10/' -e 's/^#\? *unlock_time *=.*/unlock_time = 120/' /etc/security/faillock.conf; }
 
+# /boot is root's alone; the entries systemd-boot found at the last boot are not,
+# so an entry written now shows up here after a reboot.
+loader_entries() { tail -c +5 /sys/firmware/efi/efivars/LoaderEntries-* 2>/dev/null | iconv -f UTF-16LE -t UTF-8 | tr '\0' '\n'; }
+
 # systemd-boot has no entry for linux-lts until one is written; copy the
 # linux entry's options, which carry this machine's root partition.
-lts_ok() { [[ ! -e /boot/vmlinuz-linux-lts ]] || grep -qs 'vmlinuz-linux-lts' /boot/loader/entries/*.conf; }
+lts_ok() { ! pacman -Q linux-lts >/dev/null 2>&1 || loader_entries | grep -q lts; }
+# shellcheck disable=SC2016 # expanded by the root shell
 lts_add() {
-  local src
-  src=$(grep -ls 'vmlinuz-linux$' /boot/loader/entries/*.conf | head -1) || true
-  [[ -n $src ]] || die "no systemd-boot entry for vmlinuz-linux to copy"
-  run sudo sh -c "sed -e 's/^title .*/title Arch Linux (LTS)/' -e 's/vmlinuz-linux\$/vmlinuz-linux-lts/' -e 's/initramfs-linux\.img/initramfs-linux-lts.img/' '$src' > /boot/loader/entries/arch-lts.conf"
+  run sudo sh -c 'src=$(grep -ls "vmlinuz-linux\$" /boot/loader/entries/*.conf | head -1) && [ -n "$src" ] &&
+    sed -e "s/^title .*/title Arch Linux (LTS)/" -e "s/vmlinuz-linux\$/vmlinuz-linux-lts/" -e "s/initramfs-linux\.img/initramfs-linux-lts.img/" "$src" > /boot/loader/entries/arch-lts.conf'
 }
 
 # --- user ---------------------------------------------------------------------
@@ -262,9 +265,11 @@ rust_set() {
 }
 # Not `voxtype setup --download`: it also writes a whole config into ~/.config, hiding the packaged one.
 voxtype_model=$HOME/.local/share/voxtype/models/ggml-base.en.bin
+voxtype_sha=a03779c86df3323075f5e796cb2ce5029f00ec8869eee3fdfb897afe36c6d002 # Hugging Face's LFS oid
 voxtype_ok() { ! command -v voxtype >/dev/null || [[ -s $voxtype_model ]]; }
 voxtype_get() {
   run curl -fL --create-dirs -o "$voxtype_model.part" https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-base.en.bin &&
+    run sha256sum -c --quiet <<<"$voxtype_sha  $voxtype_model.part" &&
     run mv "$voxtype_model.part" "$voxtype_model"
 }
 ext_missing() { comm -23 <(sort setup/packages/code-extensions.txt) <(code --list-extensions 2>/dev/null | sort); }
@@ -460,6 +465,11 @@ else
   fi
   pacnew=$(find /etc -name '*.pacnew' 2>/dev/null | wc -l || true)
   ((pacnew == 0)) || notes+=("$pacnew .pacnew file(s) in /etc; review each with sudo DIFFPROG='nvim -d' pacdiff, and keep your edits in pacman.conf, mirrorlist and locale.gen")
+  failed=$({
+    systemctl --failed --no-legend --plain
+    systemctl --user --failed --no-legend --plain
+  } | awk '{print $1}' | tr '\n' ' ')
+  [[ -z $failed ]] || notes+=("failed units: $failed; systemctl --failed and systemctl --user --failed say why")
   if command -v firewall-cmd >/dev/null && ! home_zone_set; then
     notes+=("no saved network is in the firewall's home zone, so Metro and Steam LAN are blocked everywhere; add a trusted network's name to $home_networks, then ./setup.sh install system")
   fi

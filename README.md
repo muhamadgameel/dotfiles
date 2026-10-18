@@ -71,7 +71,7 @@ files (`system/`), GTK settings (`dconf/`) and the Brewfile (`macos/`).
 ## Day to day
 
 - `./setup.sh` checks packages, configs, system files and services. It also
-  notes installed packages that aren't in any list, pending `.pacnew` files,
+  notes installed packages that aren't in any list, failed units, pending `.pacnew` files,
   and Wi-Fi networks missing from the firewall's home zone.
 - `./setup.sh install [step]` fixes what the check reports; `-y` skips the
   prompts. `SETUP_GROUPS="base dev" ./setup.sh install` limits it to some
