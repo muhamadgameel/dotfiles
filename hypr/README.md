@@ -158,8 +158,9 @@ which names the file and tracks the last shot, and fall back to plain grim when
 the shell isn't running. CTRL+Print records a region and CTRL+SHIFT+Print the
 screen, with the desktop's sound, into `~/Pictures/Recordings`; the same key
 stops it, also while the shell is down, because the recorder runs in a unit of
-its own. It captures below the compositor, so the `no_screen_share` rule does
-not apply: the Bitwarden window is recorded like any other. SUPER+CTRL+Print
+its own. It captures below the compositor, so the `no_screen_share` rules do
+not apply: Bitwarden and the password prompts are recorded like any other
+window, though a screen share shows them black. SUPER+CTRL+Print
 reads the text in a region you drag, in English and Arabic, and puts it on the
 clipboard; tesseract does the reading, and the key does nothing while the
 shell is down. Brightness steps are linear because
@@ -301,9 +302,10 @@ Proton, and `gamescope` for anything running inside it. Native games need
 their class added, and the list has to match `_gameClass` in
 [`services/GameMode.qml`](../quickshell/.config/quickshell/services/GameMode.qml).
 
-- **Idle:** games, mpv, Chromium and Loupe keep the screen awake while
-  fullscreen. mpv and Chromium only ask for that themselves while a video is
-  playing, so the rule is what keeps a paused one from dimming and locking.
+- **Idle:** games, mpv, Chromium, its web apps and Loupe keep the screen awake
+  while fullscreen. mpv and Chromium only ask for that themselves while a
+  video is playing, so the rule is what keeps a paused one from dimming and
+  locking.
 - **Tearing:** `general.allow_tearing` is only a master switch. Games also get
   the `immediate` rule, so a fullscreen game shows each frame as soon as it's
   ready instead of waiting for vsync: lower input latency, possible tear lines.
