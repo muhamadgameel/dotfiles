@@ -127,11 +127,13 @@ the repo copy changes nothing until the next `./setup.sh install system`):
 It also adds a boot entry for the LTS kernel, as a fallback when an update
 breaks the main one, and enables the locale in `/etc/locale.gen`.
 
-**Firewall.** Networks use the public zone unless you trust them. Put a home
-network in the home zone with
-`nmcli connection modify "<name>" connection.zone home`; the zone follows the
-network, not the Wi-Fi card. Neither zone lets ssh in, so turning sshd on
-exposes nothing until a zone allows it.
+**Firewall.** Networks use the public zone unless you trust them. List the
+name of each trusted Wi-Fi network in `setup/home-networks.txt`, one per
+line, and `./setup.sh install system` puts it in the home zone once it is
+saved; the zone follows the network, not the Wi-Fi card. The file stays out
+of git: the repo is public, and a network's name can be looked up on a map.
+Neither zone lets ssh in, so turning sshd on exposes nothing until a zone
+allows it.
 
 **Battery.** `setup.sh` turns on UPower's charge limit, which on this laptop is
 Lenovo's conservation mode: the battery stops charging before full, which

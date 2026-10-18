@@ -10,5 +10,8 @@
 **/pulse/cookie
 *.stale*.bak
 
+# Trusted Wi-Fi names for setup.sh: in a public repo they would point to a place
+setup/home-networks.txt
+
 # Python's cache, when a script under .claude/skills is imported
 __pycache__/

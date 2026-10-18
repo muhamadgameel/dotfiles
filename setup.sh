@@ -266,6 +266,29 @@ ext_add() { for e in $(ext_missing); do run code --install-extension "$e"; done;
 
 # --- services -----------------------------------------------------------------
 
+# Names (SSIDs) of trusted Wi-Fi networks, one per line. Not in git: the repo is
+# public, and a network's name can be looked up on a map.
+home_networks=setup/home-networks.txt
+
+# Saved Wi-Fi profiles listed there whose zone isn't home yet.
+home_zone_missing() {
+  [[ -r $home_networks ]] || return 0
+  local uuid type ssid
+  while IFS=: read -r uuid type; do
+    [[ $type == 802-11-wireless ]] || continue
+    ssid=$(nmcli -e no -g 802-11-wireless.ssid connection show "$uuid")
+    [[ -n $ssid ]] || continue
+    grep -qxF -- "$ssid" "$home_networks" || continue
+    [[ $(nmcli -g connection.zone connection show "$uuid") == home ]] || echo "$uuid"
+  done < <(nmcli -t -f UUID,TYPE connection show 2>/dev/null)
+}
+home_zone_ok() { [[ -z $(home_zone_missing) ]]; }
+# NetworkManager lets the wheel group change saved networks without a password.
+home_zone_fix() {
+  local c
+  for c in $(home_zone_missing); do run nmcli connection modify "$c" connection.zone home; done
+}
+
 # Per network, not the current one: a café's Wi-Fi rightly stays public.
 home_zone_set() {
   local c
@@ -384,6 +407,7 @@ else
   if want system; then
     step $'\uf013' system
     item "setup/system files in place" sys_ok sys_install
+    item "home networks in the firewall's home zone" home_zone_ok home_zone_fix
     item "locale.gen enables $(lang)" locale_ok locale_fix
     item "boot entry for linux-lts" lts_ok lts_add
   fi
@@ -429,7 +453,7 @@ else
   pacnew=$(find /etc -name '*.pacnew' 2>/dev/null | wc -l || true)
   ((pacnew == 0)) || notes+=("$pacnew .pacnew file(s) in /etc; review each with sudo DIFFPROG='nvim -d' pacdiff, and keep your edits in pacman.conf, mirrorlist and locale.gen")
   if command -v firewall-cmd >/dev/null && ! home_zone_set; then
-    notes+=("no saved network is in the firewall's home zone, so Metro and Steam LAN are blocked everywhere; on a network you trust: nmcli connection modify NAME connection.zone home")
+    notes+=("no saved network is in the firewall's home zone, so Metro and Steam LAN are blocked everywhere; add a trusted network's name to $home_networks, then ./setup.sh install system")
   fi
   if ((${#notes[@]})); then
     step $'\uf05a' notes

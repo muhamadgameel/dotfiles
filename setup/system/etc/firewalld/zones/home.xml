@@ -5,10 +5,14 @@
   <service name="mdns"/>
   <service name="samba-client"/>
   <service name="dhcpv6-client"/>
+  <!-- React Native: Metro, the bundler a phone loads the app from -->
   <port port="8081" protocol="tcp"/>
+  <!-- Steam Remote Play: streaming and discovery -->
   <port port="27031-27036" protocol="udp"/>
   <port port="27036-27037" protocol="tcp"/>
+  <!-- Steam: game transfers from another PC on the network -->
   <port port="27040" protocol="tcp"/>
+  <!-- LocalSend: transfers, and discovery of other devices -->
   <port port="53317" protocol="tcp"/>
   <port port="53317" protocol="udp"/>
   <forward/>
