@@ -290,6 +290,10 @@ bind("XF86AudioNext", hl.dsp.exec_cmd("playerctl next"), { locked = true, descri
 bind("XF86AudioPrev", hl.dsp.exec_cmd("playerctl previous"), { locked = true, description = "Previous track" })
 bind("XF86AudioStop", hl.dsp.exec_cmd("playerctl stop"), { locked = true, description = "Stop playback" })
 
+-- ── Power ────────────────────────────────────────────────────────────
+-- logind ignores a short press (setup/system/etc/systemd/logind.conf.d). Off the palette, which has SUPER+SHIFT+P.
+hl.bind("XF86PowerOff", hl.dsp.global("quickshell:panelPower"), { description = "Power panel" })
+
 bind(
 	mod .. " + XF86AudioNext",
 	hl.dsp.exec_cmd("playerctl position 5+"),

@@ -122,6 +122,7 @@ the repo copy changes nothing until the next `./setup.sh install system`):
 | `/etc/firewalld/zones/home.xml` | The home zone: the stock services except ssh, plus Metro for React Native (8081), Steam Remote Play and LAN transfers, and LocalSend (53317). |
 | `/etc/firewalld/zones/public.xml` | The public zone, for every other network: the stock one without ssh. |
 | `/etc/firewalld/zones/trusted.xml` | Trusts Waydroid's network bridge. |
+| `/etc/systemd/logind.conf.d/10-power-key.conf` | A short press of the power button opens the Power panel instead of shutting down; holding it for five seconds still powers off. |
 | `/usr/local/share/wayland-sessions/hyprland.desktop` | Hides the plain Hyprland session. uwsm launches this same file, so it must keep its `Exec` line. |
 
 It also adds a boot entry for the LTS kernel, as a fallback when an update

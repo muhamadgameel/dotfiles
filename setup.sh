@@ -160,19 +160,21 @@ git_identity() {
 sys_stale() { for f in $(find setup/system -type f | sort); do cmp -s "$f" "/${f#setup/system/}" || echo "$f"; done; }
 sys_ok() { [[ -z $(sys_stale) ]]; }
 sys_install() {
-  local f initramfs=0 sysctl=0 firewall=0
+  local f initramfs=0 sysctl=0 firewall=0 logind=0
   for f in $(sys_stale); do
     run sudo install -b -Dm644 "$f" "/${f#setup/system/}"
     case $f in
       */mkinitcpio.conf.d/*) initramfs=1 ;;
       */sysctl.d/*) sysctl=1 ;;
       */firewalld/*) firewall=1 ;;
+      */logind.conf.d/*) logind=1 ;;
       */modprobe.d/* | */zram-generator.conf) reboot=1 ;;
     esac
   done
   if ((initramfs)); then run sudo mkinitcpio -P; fi
   if ((sysctl)); then run sudo sysctl --system; fi
   if ((firewall)) && systemctl is-active -q firewalld; then run sudo firewall-cmd --reload; fi
+  if ((logind)); then run sudo systemctl reload systemd-logind; fi
 }
 
 lang() { sed -n 's/^LANG=//p' /etc/locale.conf 2>/dev/null | tr -d '"'; }

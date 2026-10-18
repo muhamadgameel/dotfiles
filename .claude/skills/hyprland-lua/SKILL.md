@@ -129,6 +129,8 @@ python3 .claude/skills/hyprland-lua/scripts/vkbd.py SUPER+F2
 python3 .claude/skills/hyprland-lua/scripts/vkbd.py 240 400    # hold an inert key for 400 ms
 ```
 
+- Never press the power key (116). logind treats every keyboard as a power switch, the
+  virtual one included, and a five-second hold powers the laptop off.
 - A key that no bind takes goes to whichever window has focus. Press only what is
   bound, or key 240, which types nothing. Read `hyprctl activewindow` before a key an
   app could act on.
