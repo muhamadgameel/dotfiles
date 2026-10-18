@@ -283,12 +283,14 @@ broken file leaves the defaults in place.
 ## Wallpapers
 
 awww draws the wallpaper and the shell chooses it from `~/Pictures/Wallpapers`:
-a new one every hour, until you pick one in the Wallpaper panel, which then
-stays until "Resume cycling". Every change fades over a second, and at login
-awww shows the last image again before the shell is up.
+a new one every hour, until you pick one in the Wallpaper panel. "Resume
+cycling" keeps that one and starts the hourly changes again from it. Each
+change uses the transition set under Appearance in the Settings panel, a
+one-second fade by default, and at login awww shows the last image again
+before the shell is up.
 
 `awww query` says what is on the screen. `qs ipc call wallpaper set <path>`
-and `qs ipc call wallpaper shuffle` do what the panel does.
+pins one, and `qs ipc call wallpaper shuffle` does what "Resume cycling" does.
 
 ## Games
 

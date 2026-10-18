@@ -220,7 +220,7 @@ Scope {
     }
 
     /**
-    * Unpin the wallpaper and show another; a new one follows every hour.
+    * Unpin the wallpaper; the hourly changes start from the one on screen.
     */
     function shuffle(): string {
       Services.Wallpaper.shuffle();

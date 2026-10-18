@@ -161,8 +161,10 @@ reload says `Configuration Loaded`. The argument is the edited file's directory.
   that directory. `touch` on the edited file does nothing, and neither does writing
   the same content again.
 - **No reload, by design.** Only files the running shell has loaded are watched. A
-  panel that is closed, a new service file and a `qmldir` are not, and a closed panel
-  loads from disk the next time it opens, against the modules of the running config.
+  panel that is closed, a new service file and a `qmldir` are not. A closed panel opens
+  with the copy the shell read at its last reload, not the file on disk: an edit to one
+  shows only after a later reload, so write panels before a watched file, or nudge one
+  after, and check the open panel with a capture.
   After adding a service, force a reload: append a comment to `shell.qml`, wait for
   `Configuration Loaded`, then restore the file.
 - **`Failed to load configuration`.** The old config keeps running, and the cause is on

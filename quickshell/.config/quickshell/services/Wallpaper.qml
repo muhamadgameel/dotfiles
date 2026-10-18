@@ -54,10 +54,10 @@ Singleton {
     return true;
   }
 
+  // Back to the hourly changes, starting from the one on screen.
   function shuffle() {
     Config.Config.setWallpaper("");
     Core.Logger.i("Wallpaper", "rotating every hour");
-    root._next();
   }
 
   // awww shows the last image again by itself, so only a pin it never saw is sent.
@@ -75,7 +75,7 @@ Singleton {
   function _send(path) {
     root.busy = true;
     root._retried = false;
-    _set.command = ["awww", "img", "--transition-type", "fade", "--transition-duration", "1", path];
+    _set.command = ["awww", "img", "--transition-type", Config.Config.wallpaperTransition, "--transition-duration", "1", path];
     _set.running = true;
   }
 

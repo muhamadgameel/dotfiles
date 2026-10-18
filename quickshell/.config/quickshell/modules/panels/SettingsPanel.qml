@@ -139,6 +139,16 @@ Components.SlidingPanel {
     onToggled: on => Config.Config.setFlag("shadowsEnabled", on)
   }
 
+  ChoiceRow {
+    label: "Wallpaper"
+    choices: ["none", "fade", "wipe", "wave", "grow", "random"].map(type => ({
+          value: type,
+          text: type.charAt(0).toUpperCase() + type.slice(1)
+        }))
+    current: Config.Config.wallpaperTransition
+    onChosen: value => Config.Config.setWallpaperTransition(value)
+  }
+
   // === Bar ===
   Components.SectionHeader {
     Layout.fillWidth: true

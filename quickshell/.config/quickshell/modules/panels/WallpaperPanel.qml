@@ -90,7 +90,7 @@ Components.SlidingPanel {
     variant: "secondary"
     icon: "refresh"
     text: "Resume cycling"
-    tooltipText: "Pick another now, then a new one every hour"
+    tooltipText: "Keep this one, then a new one every hour"
     onClicked: Services.Wallpaper.shuffle()
   }
 }
