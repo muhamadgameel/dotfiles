@@ -381,6 +381,12 @@ end
 keyless("Check for updates", "updates check")
 keyless("Clear notifications", "notifications clear")
 keyless("Shuffle the wallpaper", "wallpaper shuffle")
+-- Bitwarden doesn't mark a copied password as secret, so cliphist keeps it like any copy.
+palette[#palette + 1] = {
+	"Forget the last clipboard entry",
+	"",
+	hl.dsp.exec_cmd("cliphist list | head -n1 | cliphist delete; wl-copy --clear"),
+}
 -- The names in the shell's core/Themes.qml.
 for _, name in ipairs({
 	"catppuccin-latte",

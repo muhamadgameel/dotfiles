@@ -73,6 +73,11 @@ instance per type, and SUPER+V reads what they store. The packaged
 both text and an image, as a browser's "Copy image" does, that watcher keeps
 only the text.
 
+Bitwarden doesn't mark a copied password as secret, so the history keeps it
+like any other copy, even after Bitwarden clears the clipboard. After pasting
+one, "Forget the last clipboard entry" in the palette deletes the newest entry
+and empties the clipboard.
+
 `autostart.lua` starts only the Thunar daemon, which is what mounts drives as
 they're plugged in. Thunar's own unit can't be enabled, only started over
 D-Bus. The daemon goes through `uwsm app --`, so it runs in its own systemd
