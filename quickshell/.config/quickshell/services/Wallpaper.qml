@@ -9,36 +9,21 @@ import "../core" as Core
 /**
 * Wallpaper - which image is on the screen, and what else is available
 *
-* hyprpaper holds the image; this chooses it. Its entire control surface is
-* `hyprctl hyprpaper wallpaper <monitor>,<path>`, which brings three constraints:
-*
-* - A path containing a comma cannot be expressed, because hyprpaper splits on
-*   the first one. Those files are left out rather than offered and then failing.
-* - hyprctl exits 0 even when hyprpaper rejects a path, so a change is confirmed
-*   by reading listactive back rather than by the exit code.
-* - Setting one stops hyprpaper cycling the directory for good. Only a restart
-*   resumes it, which is what shuffle() does.
-*
-* A chosen wallpaper is re-applied at startup: hyprpaper picks from the clock,
-* so it comes back on its own rotation and would otherwise drop the choice.
+* awww-daemon draws the image and shows the last one again at login; this
+* chooses it. While nothing is pinned, the timer here picks another every hour.
 */
 Singleton {
   id: root
 
   readonly property string directory: Config.Config.wallpaperDirectory
 
-  // hyprpaper reports paths with symlinks resolved, and ~/.config/hypr is a
-  // symlink into the repo. Listing from the resolved directory keeps `current`
-  // comparable with `wallpapers`.
-  property string _resolved: ""
-
-  // Paths in `directory`, sorted by name, minus any the IPC cannot express.
+  // Paths in `directory`, sorted by name.
   property var wallpapers: []
 
-  // What hyprpaper says is on screen.
+  // What awww says is on screen.
   property string current: ""
 
-  // The chosen one, or "" while hyprpaper cycles the directory itself.
+  // The chosen one, or "" while the hourly timer picks.
   readonly property string pinned: Config.Config.wallpaper
   readonly property bool shuffling: root.pinned === ""
 
@@ -56,126 +41,121 @@ Singleton {
   }
 
   function refresh() {
-    // hyprpaper changes the image by itself while it cycles the folder.
     if (!root.busy)
       _active.running = true;
-
-    if (root._resolved === "")
-      _resolve.running = true;
-    else
-      _list.running = true;
+    _list.running = true;
   }
 
   function set(path) {
-    if (!path || path.indexOf(",") >= 0) {
-      Core.Logger.w("Wallpaper", `cannot set ${path}: hyprpaper splits its argument on the first comma`);
+    if (!path)
       return false;
-    }
     root._requested = path;
     root._send(path);
     return true;
   }
 
+  // Back to the hourly changes, starting from the one on screen.
   function shuffle() {
     Config.Config.setWallpaper("");
-    Core.Logger.i("Wallpaper", "handed back to hyprpaper's rotation");
-    _restart.running = true;
+    Core.Logger.i("Wallpaper", "rotating every hour");
   }
 
+  // awww shows the last image again by itself, so only a pin it never saw is sent.
   function apply() {
-    if (root.pinned !== "")
-      root._send(root.pinned);
+    root._checkPin = true;
     root.refresh();
   }
 
-  // Set only once hyprpaper confirms it took the path, so a file that has since
-  // been moved or deleted is not saved and retried at every startup.
+  // Set only once awww shows it, so a file that has since been moved or
+  // deleted is not saved and retried at every startup.
   property string _requested: ""
+  property bool _checkPin: false
+  property bool _retried: false
 
   function _send(path) {
     root.busy = true;
-    // Empty monitor: every output.
-    _set.command = ["hyprctl", "hyprpaper", "wallpaper", `,${path}`];
+    root._retried = false;
+    _set.command = ["awww", "img", "--transition-type", Config.Config.wallpaperTransition, "--transition-duration", "1", path];
     _set.running = true;
   }
 
-  Core.Command {
-    id: _resolve
-
-    command: ["readlink", "-f", root.directory]
-    onDone: (code, out) => {
-      root._resolved = out.trim() || root.directory;
-      _list.running = true;
-    }
+  function _next() {
+    const others = root.wallpapers.filter(p => p !== root.current);
+    if (others.length > 0)
+      root._send(others[Math.floor(Math.random() * others.length)]);
   }
 
   Core.Command {
     id: _list
     tag: "Wallpaper"
 
-    command: ["find", root._resolved || root.directory, "-maxdepth", "1", "-type", "f"]
+    command: ["find", root.directory, "-maxdepth", "1", "-type", "f"]
 
     onDone: (code, out) => {
       const found = out.split("\n").filter(p => /\.(jpe?g|png|webp|bmp)$/i.test(p));
-      const usable = found.filter(p => p.indexOf(",") < 0);
-      if (usable.length < found.length)
-        Core.Logger.w("Wallpaper", `${found.length - usable.length} file(s) skipped: a comma in the name cannot be passed to hyprpaper`);
-      usable.sort((a, b) => a.localeCompare(b));
+      found.sort((a, b) => a.localeCompare(b));
 
       // Assigning an equal array still rebuilds every delegate in the grid,
       // which re-decodes all 42 thumbnails on each panel open.
-      const same = usable.length === root.wallpapers.length && usable.every((p, i) => p === root.wallpapers[i]);
+      const same = found.length === root.wallpapers.length && found.every((p, i) => p === root.wallpapers[i]);
       if (!same)
-        root.wallpapers = usable;
+        root.wallpapers = found;
     }
   }
 
   Core.Command {
     id: _set
 
-    onDone: (code, out) => {
-      // hyprctl reports hyprpaper's refusal here and still exits 0.
-      if (out.indexOf("error") >= 0)
-        Core.Logger.w("Wallpaper", out.trim());
+    onDone: (code, out, err) => {
+      // At login the shell can ask before the daemon has its socket.
+      if (code !== 0 && !root._retried) {
+        root._retried = true;
+        _retry.restart();
+        return;
+      }
+      if (code !== 0)
+        Core.Logger.w("Wallpaper", err.trim());
       _active.running = true;
     }
+  }
+
+  Timer {
+    id: _retry
+
+    interval: 1500
+    onTriggered: _set.running = true
   }
 
   Core.Command {
     id: _active
 
-    command: ["hyprctl", "hyprpaper", "listactive"]
+    command: ["awww", "query", "--json"]
 
     onDone: (code, out) => {
       root.busy = false;
-      const line = out.split("\n").find(l => l.indexOf(": /") > 0);
-      root.current = line ? line.slice(line.indexOf(": /") + 2) : "";
+      const outputs = [].concat(...Object.values(Core.Utils.parseJson(out, {})));
+      root.current = outputs.map(o => o.displaying?.image).find(Boolean) ?? "";
 
-      if (root._requested === "")
-        return;
-      // hyprpaper answers with symlinks resolved, so a path given by name
-      // still counts as taken.
-      const asked = root._requested.split("/").pop();
-      if (root.current.endsWith(`/${asked}`))
-        Config.Config.setWallpaper(root.current);
-      else
-        Core.Logger.w("Wallpaper", `hyprpaper did not take ${root._requested}`);
-      root._requested = "";
+      if (root._requested !== "") {
+        if (root.current === root._requested)
+          Config.Config.setWallpaper(root.current);
+        else
+          Core.Logger.w("Wallpaper", `awww did not take ${root._requested}`);
+        root._requested = "";
+      }
+
+      if (root._checkPin) {
+        root._checkPin = false;
+        if (root.pinned !== "" && root.current !== root.pinned)
+          root._send(root.pinned);
+      }
     }
   }
 
-  Core.Command {
-    id: _restart
-
-    command: ["systemctl", "--user", "restart", "hyprpaper"]
-    onDone: _settle.restart()
-  }
-
-  // hyprpaper binds its socket a moment after the unit reports started.
   Timer {
-    id: _settle
-
-    interval: 1500
-    onTriggered: _active.running = true
+    interval: 3600 * 1000
+    repeat: true
+    running: root.shuffling
+    onTriggered: root._next()
   }
 }

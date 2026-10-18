@@ -567,7 +567,7 @@ Singleton {
     return true;
   }
 
-  // `pmon` also lists graphics-only clients such as hyprpaper and Hyprland,
+  // `pmon` also lists graphics-only clients such as Hyprland and Xwayland,
   // which --query-compute-apps leaves out.
   Timer {
     interval: root.pollingInterval

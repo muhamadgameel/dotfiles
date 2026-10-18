@@ -213,15 +213,14 @@ Scope {
 
     /**
     * Set the wallpaper on every output and keep it across restarts.
-    * @param path - a file in the wallpaper directory; a comma in the name
-    *               cannot be passed to hyprpaper and is refused
+    * @param path - an image file
     */
     function set(path: string): string {
       return Services.Wallpaper.set(path) ? `set ${path}` : `refused ${path}`;
     }
 
     /**
-    * Hand the wallpaper back to hyprpaper's own directory rotation.
+    * Unpin the wallpaper; the hourly changes start from the one on screen.
     */
     function shuffle(): string {
       Services.Wallpaper.shuffle();

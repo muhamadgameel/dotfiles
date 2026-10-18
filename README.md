@@ -25,7 +25,7 @@ enables services.
 | `gamemode` | GameMode | |
 | `ghostty` | Ghostty, the terminal on macOS | only |
 | `gitconfig` | git settings and aliases ([README](gitconfig/README.md)) | yes |
-| `hypr` | Hyprland, hypridle, hyprlock, hyprpaper, hyprsunset, the clipboard watchers ([README](hypr/README.md)) | |
+| `hypr` | Hyprland, hypridle, hyprlock, hyprsunset, awww, the clipboard watchers ([README](hypr/README.md)) | |
 | `lazygit` | lazygit, with diffs rendered through delta | yes |
 | `mangohud` | The MangoHud overlay | |
 | `mpv` | mpv | yes |
@@ -83,7 +83,7 @@ files (`system/`), GTK settings (`dconf/`) and the Brewfile (`macos/`).
 - Hyprland and Quickshell reload when a file changes. Quickshell can miss an
   edit: [quickshell/README.md](quickshell/README.md#editing-and-hot-reload) has
   the checks.
-- Logs: `journalctl --user -u <unit>` for hypridle, hyprpaper, hyprsunset and
+- Logs: `journalctl --user -u <unit>` for awww-daemon, hypridle, hyprsunset and
   quickshell.
 
 ## Keys

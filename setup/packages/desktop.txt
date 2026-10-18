@@ -1,10 +1,10 @@
 # Hyprland under uwsm, with Quickshell as bar, panels and notification daemon.
 
 # session
+awww
 hypridle
 hyprland
 hyprlock
-hyprpaper
 hyprpicker
 hyprpolkitagent
 hyprsunset

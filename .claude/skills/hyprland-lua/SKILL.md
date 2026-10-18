@@ -13,8 +13,8 @@ aborts only that module.
 
 `/usr/share/hypr/stubs/hl.meta.lua` lists every function, config option, event name and
 bind option of the installed version. Read it before writing: `hyprland.conf` syntax
-from memory is wrong here. (`hypridle.conf`, `hyprlock.conf` and `hyprpaper.conf` do
-use the older syntax.)
+from memory is wrong here. (`hypridle.conf` and `hyprlock.conf` do use the older
+syntax.)
 
 The stub types every dispatcher as `fun(...)`, so argument names are not in it. Take
 them from the wiki, from the error strings in the binary
@@ -31,6 +31,9 @@ probed on 0.56.2:
   compares the class exactly.
 - A rule's `move` is a string of expressions (`"monitor_w-642 monitor_h-362"`). In a
   rule that also sets `size`, `window_w` and `window_h` are the window's original size.
+- A rule's pattern must match the whole name, class, title or namespace (RE2's full
+  match): `^quickshell-` matches only `quickshell-` itself, so write
+  `^quickshell-.*`. A pattern that matches nothing raises no error.
 - `release = true` is a bind option. A modifier's state can change between a press and
   its release, so a hold-to-act pair belongs on a key without modifiers.
 - `hl.on("input.keyboard.key", fn)` hands `fn` a key code, a time in ms and a state

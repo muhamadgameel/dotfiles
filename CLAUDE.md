@@ -92,7 +92,7 @@ repo. `mac()` is the macOS path; bat, btop, gitconfig, lazygit, mpv, nvim,
 starship, tmux and zsh are stowed on both systems and have to work on both.
 
 **The session.** uwsm starts Hyprland. Session environment variables go in
-`uwsm/.config/uwsm/env`, not in `hl.env()`. The daemons (hypridle, hyprpaper,
+`uwsm/.config/uwsm/env`, not in `hl.env()`. The daemons (awww-daemon, hypridle,
 hyprsunset, quickshell and the rest of `setup/services.txt`) are systemd user
 units, not Hyprland autostart entries. The units this repo ships are symlinks:
 `enable` them, and never `disable` or `reenable` one, which deletes the link.
@@ -100,8 +100,8 @@ units, not Hyprland autostart entries. The units this repo ships are symlinks:
 **Hyprland** (`hypr/`) uses the Lua config. `hyprland.lua` requires
 `settings/*.lua`, and the API is `hl.*`: read
 `/usr/share/hypr/stubs/hl.meta.lua` instead of writing `hyprland.conf` syntax
-from memory. `hypridle.conf`, `hyprlock.conf` and `hyprpaper.conf` do use that
-older syntax. Every bind has a `description`, and the keybind table in
+from memory. `hypridle.conf` and `hyprlock.conf` do use that older syntax.
+Every bind has a `description`, and the keybind table in
 [hypr/README.md](hypr/README.md#keybinds) is generated from them; the command
 is under the table. A bind made with the local `bind()` in
 `settings/keybinds.lua` is also an entry in the command palette on SUPER+P;

@@ -8,7 +8,7 @@ hl.config({
 		gaps_out = 8,
 
 		col = {
-			active_border = colors.accent,
+			active_border = { colors = { colors.accent, colors.accentAlt }, angle = 45 },
 			inactive_border = colors.inactive,
 		},
 
@@ -32,12 +32,15 @@ hl.config({
 			passes = 2,
 			noise = 0.02,
 			vibrancy = 0.2,
-			popups = true,
 		},
 
 		shadow = {
 			range = 20,
 			offset = { 0, 4 },
+		},
+
+		motion_blur = {
+			enabled = true,
 		},
 
 		dim_inactive = true,

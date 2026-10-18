@@ -80,10 +80,12 @@ Singleton {
   readonly property string nightLightEnd: Settings.get("nightLightEnd", "06:30")
 
   // === Wallpaper ===
-  // The chosen wallpaper, or "" to leave hyprpaper cycling the directory.
+  // The chosen wallpaper, or "" for a new one every hour.
   // See services/Wallpaper.qml.
   readonly property string wallpaper: Settings.get("wallpaper", "")
   readonly property string wallpaperDirectory: Settings.get("wallpaperDirectory", `${Quickshell.env("HOME")}/Pictures/Wallpapers`)
+  // An awww transition type; `awww img --help` lists them.
+  readonly property string wallpaperTransition: Settings.get("wallpaperTransition", "fade")
 
   // === Screen recording ===
   // Desktop audio is always recorded; the microphone only with this on.
@@ -196,6 +198,10 @@ Singleton {
 
   function setWallpaper(path) {
     Settings.set("wallpaper", path);
+  }
+
+  function setWallpaperTransition(type) {
+    Settings.set("wallpaperTransition", type);
   }
 
   // The city last, so nothing sees the new name with the old place.
