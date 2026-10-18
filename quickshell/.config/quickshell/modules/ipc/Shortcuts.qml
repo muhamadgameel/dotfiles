@@ -34,6 +34,7 @@ Scope {
       panelMedia: ["Toggle the media panel", () => root.togglePanel("media")],
       panelCalendar: ["Toggle the calendar", () => root.togglePanel("calendar")],
       panelPower: ["Toggle the power menu", () => root.togglePanel("power")],
+      panelPowerOpen: ["Open the power menu", () => Services.Panels.open("power", Targets.focusedScreen)],
       panelScreenshot: ["Toggle the screenshot menu", () => root.togglePanel("screenshot")],
       panelWallpaper: ["Toggle the wallpaper picker", () => root.togglePanel("wallpaper")],
       panelSettings: ["Toggle the settings panel", () => root.togglePanel("settings")],

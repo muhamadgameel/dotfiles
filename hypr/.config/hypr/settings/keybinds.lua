@@ -292,7 +292,8 @@ bind("XF86AudioStop", hl.dsp.exec_cmd("playerctl stop"), { locked = true, descri
 
 -- ── Power ────────────────────────────────────────────────────────────
 -- logind ignores a short press (setup/system/etc/systemd/logind.conf.d). Off the palette, which has SUPER+SHIFT+P.
-hl.bind("XF86PowerOff", hl.dsp.global("quickshell:panelPower"), { description = "Power panel" })
+-- Two input devices report the button, so it opens the panel: a toggle would open and close it at once.
+hl.bind("XF86PowerOff", hl.dsp.global("quickshell:panelPowerOpen"), { description = "Power panel" })
 
 bind(
 	mod .. " + XF86AudioNext",
