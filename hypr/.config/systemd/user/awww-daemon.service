@@ -1,4 +1,4 @@
-# awww ships no unit; this one follows hyprpaper's packaged unit.
+# awww ships no unit of its own.
 [Unit]
 Description=awww wallpaper daemon
 Documentation=man:awww-daemon(1)

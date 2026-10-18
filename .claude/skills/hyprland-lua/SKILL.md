@@ -13,8 +13,8 @@ aborts only that module.
 
 `/usr/share/hypr/stubs/hl.meta.lua` lists every function, config option, event name and
 bind option of the installed version. Read it before writing: `hyprland.conf` syntax
-from memory is wrong here. (`hypridle.conf`, `hyprlock.conf` and `hyprpaper.conf` do
-use the older syntax.)
+from memory is wrong here. (`hypridle.conf` and `hyprlock.conf` do use the older
+syntax.)
 
 The stub types every dispatcher as `fun(...)`, so argument names are not in it. Take
 them from the wiki, from the error strings in the binary

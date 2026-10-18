@@ -1,7 +1,7 @@
 # Hyprland
 
 Hyprland 0.56 with its Lua config, started by uwsm. Quickshell draws the bar
-and panels. hypridle, hyprlock, hyprpaper and hyprsunset run alongside it as
+and panels. hypridle, hyprlock, hyprsunset and awww run alongside it as
 systemd user units.
 
 ## Files
@@ -20,9 +20,8 @@ systemd user units.
 | `settings/autostart.lua` | The Thunar daemon, the only program started with the compositor. |
 | `hypridle.conf` | Dim after 5 minutes, lock after 20, screen off a minute into any lock. |
 | `hyprlock.conf` | The lock screen. |
-| `hyprpaper.conf` | Wallpaper rotation. |
 | `.luarc.json` | Points lua-language-server at Hyprland's API stubs. |
-| `../systemd/user/hyprsunset.service`, `cliphist@.service` | See [Services](#services). |
+| `../systemd/user/hyprsunset.service`, `awww-daemon.service`, `cliphist@.service` | See [Services](#services). |
 
 ## Day to day
 
@@ -35,7 +34,7 @@ systemd user units.
   lua-language-server reads through `.luarc.json`, and on the
   [wiki](https://wiki.hypr.land/Configuring/Start/).
 - Logs: `journalctl --user -u wayland-wm@hyprland.desktop` for the compositor,
-  and `journalctl --user -u hypridle -u hyprpaper -u hyprsunset` for the
+  and `journalctl --user -u hypridle -u awww-daemon -u hyprsunset` for the
   daemons.
 
 ## Environment
@@ -50,10 +49,10 @@ processes Hyprland starts itself, so the config doesn't use it.
 ## Services
 
 These systemd user units start with the graphical session, not from
-`autostart.lua`: hypridle, hyprpaper, hyprpolkitagent, hyprsunset, quickshell,
+`autostart.lua`: awww-daemon, hypridle, hyprpolkitagent, hyprsunset, quickshell,
 wayland-pipewire-idle-inhibit and the clipboard watchers `cliphist@text` and
 `cliphist@image`. systemd restarts any of them that crashes.
-`systemctl --user status hypridle hyprpaper hyprsunset quickshell` shows them,
+`systemctl --user status awww-daemon hypridle hyprsunset quickshell` shows them,
 and `systemctl --user restart quickshell` restarts the shell together with its
 child processes.
 
@@ -65,6 +64,8 @@ in the shell decides when the filter applies and how warm it is, so a session
 without the shell stays neutral. The unit is a replacement rather than a
 drop-in because a drop-in directory would be a stow symlink, and systemd
 doesn't follow those.
+
+awww-daemon runs from this package's unit too, because awww ships none.
 
 The clipboard watchers come from this package's `cliphist@.service`, one
 instance per type, and SUPER+V reads what they store. The packaged
@@ -281,19 +282,13 @@ broken file leaves the defaults in place.
 
 ## Wallpapers
 
-hyprpaper rotates through `~/Pictures/Wallpapers` every hour. Keep the images
-at 3840x2160 or smaller: hyprpaper uploads each one as a GPU texture at its full
-size, whatever the screen resolution or `fit_mode`, and 0.8.4 has no setting to
-limit that ([hyprwm/hyprpaper#345](https://github.com/hyprwm/hyprpaper/issues/345)).
+awww draws the wallpaper and the shell chooses it from `~/Pictures/Wallpapers`:
+a new one every hour, until you pick one in the Wallpaper panel, which then
+stays until "Resume cycling". Every change fades over a second, and at login
+awww shows the last image again before the shell is up.
 
-Its IPC has two commands, `listactive` and `wallpaper <monitor>,<path>`, and
-three traps:
-
-- A comma in a file name breaks the path.
-- `hyprctl` exits 0 even when hyprpaper refuses, so check the result with
-  `hyprctl hyprpaper listactive`.
-- Setting a wallpaper over IPC stops that monitor's rotation until hyprpaper
-  restarts.
+`awww query` says what is on the screen. `qs ipc call wallpaper set <path>`
+and `qs ipc call wallpaper shuffle` do what the panel does.
 
 ## Games
 

@@ -49,9 +49,10 @@ qsrig stop  <scratch>/rig
 - A service starts on first use, and its first answer is often empty: call once, wait
   two seconds, call again.
 - Replace a service that acts on the session before anything in the rig reads it:
-  `Notification` claims the session's notification name, `Wallpaper` stops hyprpaper's
-  rotation, others call `hyprctl`, `brightnessctl` or `systemctl`. A stand-in is a
-  singleton with the same properties and functions that only records its calls.
+  `Notification` claims the session's notification name, `Wallpaper` changes the
+  live wallpaper through awww, others call `hyprctl`, `brightnessctl` or `systemctl`.
+  A stand-in is a singleton with the same properties and functions that only
+  records its calls.
   Never click a real bar widget against its real service: a right click on Volume
   mutes it, a middle click on Network turns Wi-Fi off.
 - A D-Bus service (the tray, notifications) goes on a private bus:

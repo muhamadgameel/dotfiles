@@ -80,7 +80,7 @@ Singleton {
   readonly property string nightLightEnd: Settings.get("nightLightEnd", "06:30")
 
   // === Wallpaper ===
-  // The chosen wallpaper, or "" to leave hyprpaper cycling the directory.
+  // The chosen wallpaper, or "" for a new one every hour.
   // See services/Wallpaper.qml.
   readonly property string wallpaper: Settings.get("wallpaper", "")
   readonly property string wallpaperDirectory: Settings.get("wallpaperDirectory", `${Quickshell.env("HOME")}/Pictures/Wallpapers`)

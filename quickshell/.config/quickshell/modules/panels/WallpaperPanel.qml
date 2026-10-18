@@ -84,15 +84,13 @@ Components.SlidingPanel {
     }
   }
 
-  // Only while a choice is standing: hyprpaper stops cycling the folder the
-  // moment one is set, and only a restart puts it back.
   Components.Button {
     Layout.fillWidth: true
     visible: !Services.Wallpaper.shuffling
     variant: "secondary"
     icon: "refresh"
     text: "Resume cycling"
-    tooltipText: "Restart hyprpaper so it cycles the folder again"
+    tooltipText: "Pick another now, then a new one every hour"
     onClicked: Services.Wallpaper.shuffle()
   }
 }
