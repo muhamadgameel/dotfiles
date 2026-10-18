@@ -48,6 +48,9 @@ qsrig stop  <scratch>/rig
   on both.
 - A service starts on first use, and its first answer is often empty: call once, wait
   two seconds, call again.
+- A service a `js` call creates after a reload starts fresh: `PersistentProperties`
+  restore only into objects built with the shell. To test what survives a reload, have
+  the probe shell create the service in `Component.onCompleted`, as `shell.qml` does.
 - Replace a service that acts on the session before anything in the rig reads it:
   `Notification` claims the session's notification name, `Wallpaper` changes the
   live wallpaper through awww, others call `hyprctl`, `brightnessctl` or `systemctl`.

@@ -50,7 +50,7 @@ Singleton {
 
   // Switched on by hand. Only adds to the other two: while gamemode reports a
   // game, turning this off does not end game mode.
-  property bool manual: false
+  property alias manual: _kept.manual
 
   // A focused, fullscreen window whose class is a game.
   readonly property bool fullscreenGame: {
@@ -120,7 +120,7 @@ Singleton {
   // === Power Profile ===
 
   // The profile to return to on exit, or -1 when there is nothing to restore.
-  property int _profileBefore: -1
+  property alias _profileBefore: _kept.profileBefore
 
   onActiveChanged: {
     Core.Logger.i("GameMode", active ? `on (${_game || "manual"})` : "off");
@@ -128,7 +128,9 @@ Singleton {
     if (active) {
       if (!PowerProfiles.hasPerformanceProfile)
         return;
-      _profileBefore = PowerProfiles.profile;
+      // Kept when a reload finds game mode on: the profile now is the one it set.
+      if (_profileBefore < 0)
+        _profileBefore = PowerProfiles.profile;
       PowerProfiles.profile = PowerProfile.Performance;
     } else {
       // Only undo what we did. A profile picked by hand mid-game stays.
@@ -136,6 +138,15 @@ Singleton {
         PowerProfiles.profile = _profileBefore;
       _profileBefore = -1;
     }
+  }
+
+  // A reload keeps both; a restart starts with game mode off.
+  PersistentProperties {
+    id: _kept
+    reloadableId: "gameMode"
+
+    property bool manual: false
+    property int profileBefore: -1
   }
 
   // === Startup ===
