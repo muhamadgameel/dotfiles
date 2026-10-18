@@ -37,3 +37,6 @@ hl.animation({ leaf = "specialWorkspace", enabled = true, speed = 4, bezier = "e
 hl.animation({ leaf = "layers", enabled = true, speed = 3, bezier = "easeOutQuint", style = "fade" })
 hl.animation({ leaf = "layersIn", enabled = true, speed = 3, bezier = "easeOutExpo", style = "fade" })
 hl.animation({ leaf = "layersOut", enabled = true, speed = 2, bezier = "linear", style = "fade" })
+
+-- Night light: the colour change when hyprsunset sets a temperature
+hl.animation({ leaf = "__internal_fadeCTM", enabled = true, speed = 10, bezier = "linear" })
