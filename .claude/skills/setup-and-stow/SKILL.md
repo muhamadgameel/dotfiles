@@ -13,6 +13,10 @@ packages, most of them as whole directories, so the repo is the running system.
 
 - **The owner runs** everything that installs or needs root:
   `./setup.sh install [step]`, `pacman`, `yay`, `sudo`. List the command and wait.
+- **Never raise a password prompt.** A polkit prompt nobody answers counts as a failed
+  login, and three lock sudo, polkit and the lock screen for ten minutes.
+  `firewall-cmd --list-all` as a plain user does it: read `/etc/firewalld/zones/`
+  instead, or ask the owner to run `sudo firewall-cmd`.
 - **The owner commits.** End a step with a suggested message:
   `<package>: <lowercase imperative summary>`, several packages comma-separated, and
   the reason in the body, with the measurements if there were any.

@@ -1,8 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <zone>
   <short>Home</short>
-  <description>Stock home zone plus React Native Metro, Steam Remote Play and LAN transfers, and LocalSend.</description>
-  <service name="ssh"/>
+  <description>Stock home zone without ssh, plus React Native Metro, Steam Remote Play and LAN transfers, and LocalSend.</description>
   <service name="mdns"/>
   <service name="samba-client"/>
   <service name="dhcpv6-client"/>
