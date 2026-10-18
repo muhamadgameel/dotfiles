@@ -18,7 +18,7 @@ systemd user units.
 | `settings/rules.lua` | Window, layer and workspace rules. |
 | `settings/keybinds.lua` | Every keybind, each with a description. |
 | `settings/autostart.lua` | The Thunar daemon, the only program started with the compositor. |
-| `hypridle.conf` | Dim after 5 minutes, lock after 20, screen off a minute into any lock. |
+| `hypridle.conf` | Dim after 5 minutes, lock after 10, screen off a minute into any lock. |
 | `hyprlock.conf` | The lock screen. |
 | `.luarc.json` | Points lua-language-server at Hyprland's API stubs. |
 | `../systemd/user/hyprsunset.service`, `awww-daemon.service`, `cliphist@.service` | See [Services](#services). |
@@ -86,7 +86,7 @@ the same through its `launch-prefix`, and so does the terminal keybind, with
 the faster `uwsm-app` client.
 
 SUPER+Escape locks through logind (`loginctl lock-session`). hypridle answers
-the lock request by starting hyprlock, the same way it does after 20 idle
+the lock request by starting hyprlock, the same way it does after 10 idle
 minutes and before sleep, so hyprlock is only ever started from one place.
 Just before, it closes the shell's open panel, which would keep sampling behind
 the lock, and puts every keyboard on the first layout, so the password is typed
