@@ -96,9 +96,12 @@ Singleton {
     root.refresh();
   }
 
+  property real _triedAt: 0
+
   function refresh() {
     if (root.city === "" || _find.running || _fetch.running)
       return;
+    root._triedAt = Date.now();
 
     if (!root.located) {
       // A name nobody knew is not sent again.
@@ -165,6 +168,9 @@ Singleton {
     repeat: true
     running: true
     onTriggered: {
+      // After a failure, offline say, the next try waits five minutes, not one.
+      if (root.problem !== "" && Date.now() - root._triedAt < 5 * 60000)
+        return;
       if (_kept.city !== root.city || Date.now() - _kept.fetchedAt >= root.refreshEveryMs)
         root.refresh();
     }

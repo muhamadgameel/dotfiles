@@ -196,12 +196,10 @@ border=${_hex(Core.Theme.overlayLight, 1)}
     printErrors: false
   }
 
-  // Runs at every start too: setting a key to the value it has changes nothing.
   Core.Command {
     id: _applyGtk
     tag: "ThemeSync"
     label: "gsettings"
-    running: true
     command: ["sh", "-c", "s=org.gnome.desktop.interface; gsettings set $s color-scheme \"$1\" && gsettings set $s gtk-theme \"$2\" && gsettings set $s icon-theme \"$3\"", "sh"].concat(root._gtk)
   }
 

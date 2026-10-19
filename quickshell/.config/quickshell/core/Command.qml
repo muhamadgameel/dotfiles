@@ -23,6 +23,10 @@ Process {
 
   signal done(int code, string out, string err)
 
+  // Quickshell sends no exited for a program that cannot start, so a caller waiting
+  // on done would wait forever: that is reported as a failed run, code -1.
+  property bool _exited: false
+
   stdout: StdioCollector {
     id: out
   }
@@ -32,9 +36,18 @@ Process {
   }
 
   onExited: code => {
+    root._exited = true;
     const msg = err.text.trim();
     if (msg !== "" && root.tag !== "")
       Core.Logger.w(root.tag, root.label === "" ? msg : `${root.label}: ${msg}`);
     root.done(code, out.text, err.text);
+  }
+
+  onRunningChanged: {
+    if (root.running)
+      return;
+    if (!root._exited)
+      root.done(-1, "", "");
+    root._exited = false;
   }
 }
