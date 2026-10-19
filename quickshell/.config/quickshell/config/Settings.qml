@@ -71,6 +71,7 @@ Singleton {
     const next = Object.assign({}, values);
     next[key] = value;
     values = next;
+    _pending.json = JSON.stringify(next);
 
     saveTimer.restart();
     return value;
@@ -114,6 +115,7 @@ Singleton {
   }
 
   function _save() {
+    _pending.json = "";
     root._lastSelfWrite = Date.now();
     // A value back at its default is not a change, and would outlive a new default.
     const changed = {};
@@ -152,6 +154,22 @@ Singleton {
   // blockLoading means the file is read during construction, which can be before
   // the handler above is connected; take the contents once more on completion.
   Component.onCompleted: root.values = _parse(file.text())
+
+  // A reload drops a save still waiting on the timer, and destruction handlers do
+  // not run: the values ride over and the new instance writes them.
+  PersistentProperties {
+    id: _pending
+    reloadableId: "settingsPending"
+
+    property string json: ""
+
+    onReloaded: {
+      if (_pending.json === "")
+        return;
+      root.values = root._parse(_pending.json);
+      root._save();
+    }
+  }
 
   // FileView will not create the directory, and it does not exist on first run.
   Core.Command {

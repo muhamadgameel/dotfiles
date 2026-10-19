@@ -199,6 +199,9 @@ reload says `Configuration Loaded`. The argument is the edited file's directory.
 - **What survives a reload** is what sits in a `PersistentProperties` block, and only
   strings, numbers and booleans do; carry a list as JSON. A restart keeps nothing but
   `settings.json`.
+- **`Component.onDestruction` does not run when a reload replaces a singleton,** so
+  work left for it, like a pending save, is lost. Carry it in `PersistentProperties` and
+  finish it in `onReloaded`, as `config/Settings.qml` does.
 - **A change handler also fires for the first value,** at start and at every reload.
   Do not log or act from `onFooChanged` as if the user did something;
   `services/OSD.qml` ignores its first two seconds for this reason.
