@@ -82,7 +82,7 @@ Singleton {
     command: ["hyprctl", "-j", "monitors"]
 
     onDone: (code, out) => {
-      const monitors = JSON.parse(out);
+      const monitors = Core.Utils.parseJson(out, []);
       // The internal panel, or the only screen on a desktop.
       const panel = monitors.find(m => m.name.startsWith("eDP")) ?? monitors[0];
       if (!panel)

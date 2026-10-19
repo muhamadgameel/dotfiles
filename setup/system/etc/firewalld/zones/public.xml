@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<zone>
+  <short>Public</short>
+  <description>Stock public zone without ssh, for every network not put in the home zone.</description>
+  <service name="dhcpv6-client"/>
+  <forward/>
+</zone>

@@ -160,19 +160,21 @@ git_identity() {
 sys_stale() { for f in $(find setup/system -type f | sort); do cmp -s "$f" "/${f#setup/system/}" || echo "$f"; done; }
 sys_ok() { [[ -z $(sys_stale) ]]; }
 sys_install() {
-  local f initramfs=0 sysctl=0 firewall=0
+  local f initramfs=0 sysctl=0 firewall=0 logind=0
   for f in $(sys_stale); do
-    run sudo install -b -Dm644 "$f" "/${f#setup/system/}"
+    run sudo install -Dm644 "$f" "/${f#setup/system/}"
     case $f in
       */mkinitcpio.conf.d/*) initramfs=1 ;;
       */sysctl.d/*) sysctl=1 ;;
       */firewalld/*) firewall=1 ;;
+      */logind.conf.d/*) logind=1 ;;
       */modprobe.d/* | */zram-generator.conf) reboot=1 ;;
     esac
   done
   if ((initramfs)); then run sudo mkinitcpio -P; fi
   if ((sysctl)); then run sudo sysctl --system; fi
   if ((firewall)) && systemctl is-active -q firewalld; then run sudo firewall-cmd --reload; fi
+  if ((logind)); then run sudo systemctl reload systemd-logind; fi
 }
 
 lang() { sed -n 's/^LANG=//p' /etc/locale.conf 2>/dev/null | tr -d '"'; }
@@ -182,14 +184,22 @@ locale_fix() {
   run sudo locale-gen
 }
 
+# An unanswered polkit prompt and a password typed in the wrong layout count as
+# failures, and the default locks sudo, polkit and the lock screen after three.
+faillock_ok() { grep -qx 'deny = 10' /etc/security/faillock.conf && grep -qx 'unlock_time = 120' /etc/security/faillock.conf; }
+faillock_fix() { run sudo sed -i -e 's/^#\? *deny *=.*/deny = 10/' -e 's/^#\? *unlock_time *=.*/unlock_time = 120/' /etc/security/faillock.conf; }
+
+# /boot is root's alone; the entries systemd-boot found at the last boot are not,
+# so an entry written now shows up here after a reboot.
+loader_entries() { tail -c +5 /sys/firmware/efi/efivars/LoaderEntries-* 2>/dev/null | iconv -f UTF-16LE -t UTF-8 | tr '\0' '\n'; }
+
 # systemd-boot has no entry for linux-lts until one is written; copy the
 # linux entry's options, which carry this machine's root partition.
-lts_ok() { [[ ! -e /boot/vmlinuz-linux-lts ]] || grep -qs 'vmlinuz-linux-lts' /boot/loader/entries/*.conf; }
+lts_ok() { ! pacman -Q linux-lts >/dev/null 2>&1 || loader_entries | grep -q lts; }
+# shellcheck disable=SC2016 # expanded by the root shell
 lts_add() {
-  local src
-  src=$(grep -ls 'vmlinuz-linux$' /boot/loader/entries/*.conf | head -1) || true
-  [[ -n $src ]] || die "no systemd-boot entry for vmlinuz-linux to copy"
-  run sudo sh -c "sed -e 's/^title .*/title Arch Linux (LTS)/' -e 's/vmlinuz-linux\$/vmlinuz-linux-lts/' -e 's/initramfs-linux\.img/initramfs-linux-lts.img/' '$src' > /boot/loader/entries/arch-lts.conf"
+  run sudo sh -c 'src=$(grep -ls "vmlinuz-linux\$" /boot/loader/entries/*.conf | head -1) && [ -n "$src" ] &&
+    sed -e "s/^title .*/title Arch Linux (LTS)/" -e "s/vmlinuz-linux\$/vmlinuz-linux-lts/" -e "s/initramfs-linux\.img/initramfs-linux-lts.img/" "$src" > /boot/loader/entries/arch-lts.conf'
 }
 
 # --- user ---------------------------------------------------------------------
@@ -255,9 +265,11 @@ rust_set() {
 }
 # Not `voxtype setup --download`: it also writes a whole config into ~/.config, hiding the packaged one.
 voxtype_model=$HOME/.local/share/voxtype/models/ggml-base.en.bin
+voxtype_sha=a03779c86df3323075f5e796cb2ce5029f00ec8869eee3fdfb897afe36c6d002 # Hugging Face's LFS oid
 voxtype_ok() { ! command -v voxtype >/dev/null || [[ -s $voxtype_model ]]; }
 voxtype_get() {
   run curl -fL --create-dirs -o "$voxtype_model.part" https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-base.en.bin &&
+    run sha256sum -c --quiet <<<"$voxtype_sha  $voxtype_model.part" &&
     run mv "$voxtype_model.part" "$voxtype_model"
 }
 ext_missing() { comm -23 <(sort setup/packages/code-extensions.txt) <(code --list-extensions 2>/dev/null | sort); }
@@ -265,6 +277,29 @@ ext_ok() { ! command -v code >/dev/null || [[ -z $(ext_missing) ]]; }
 ext_add() { for e in $(ext_missing); do run code --install-extension "$e"; done; }
 
 # --- services -----------------------------------------------------------------
+
+# Names (SSIDs) of trusted Wi-Fi networks, one per line. Not in git: the repo is
+# public, and a network's name can be looked up on a map.
+home_networks=setup/home-networks.txt
+
+# Saved Wi-Fi profiles listed there whose zone isn't home yet.
+home_zone_missing() {
+  [[ -r $home_networks ]] || return 0
+  local uuid type ssid
+  while IFS=: read -r uuid type; do
+    [[ $type == 802-11-wireless ]] || continue
+    ssid=$(nmcli -e no -g 802-11-wireless.ssid connection show "$uuid")
+    [[ -n $ssid ]] || continue
+    grep -qxF -- "$ssid" "$home_networks" || continue
+    [[ $(nmcli -g connection.zone connection show "$uuid") == home ]] || echo "$uuid"
+  done < <(nmcli -t -f UUID,TYPE connection show 2>/dev/null)
+}
+home_zone_ok() { [[ -z $(home_zone_missing) ]]; }
+# NetworkManager lets the wheel group change saved networks without a password.
+home_zone_fix() {
+  local c
+  for c in $(home_zone_missing); do run nmcli connection modify "$c" connection.zone home; done
+}
 
 # Per network, not the current one: a café's Wi-Fi rightly stays public.
 home_zone_set() {
@@ -384,7 +419,9 @@ else
   if want system; then
     step $'\uf013' system
     item "setup/system files in place" sys_ok sys_install
+    item "home networks in the firewall's home zone" home_zone_ok home_zone_fix
     item "locale.gen enables $(lang)" locale_ok locale_fix
+    item "faillock allows ten tries" faillock_ok faillock_fix
     item "boot entry for linux-lts" lts_ok lts_add
   fi
   if want user; then
@@ -428,8 +465,13 @@ else
   fi
   pacnew=$(find /etc -name '*.pacnew' 2>/dev/null | wc -l || true)
   ((pacnew == 0)) || notes+=("$pacnew .pacnew file(s) in /etc; review each with sudo DIFFPROG='nvim -d' pacdiff, and keep your edits in pacman.conf, mirrorlist and locale.gen")
+  failed=$({
+    systemctl --failed --no-legend --plain
+    systemctl --user --failed --no-legend --plain
+  } | awk '{print $1}' | tr '\n' ' ')
+  [[ -z $failed ]] || notes+=("failed units: $failed; systemctl --failed and systemctl --user --failed say why")
   if command -v firewall-cmd >/dev/null && ! home_zone_set; then
-    notes+=("no saved network is in the firewall's home zone, so Metro and Steam LAN are blocked everywhere; on a network you trust: nmcli connection modify NAME connection.zone home")
+    notes+=("no saved network is in the firewall's home zone, so Metro and Steam LAN are blocked everywhere; add a trusted network's name to $home_networks, then ./setup.sh install system")
   fi
   if ((${#notes[@]})); then
     step $'\uf05a' notes

@@ -119,6 +119,9 @@ Singleton {
   // === Value Utilities ===
 
   function clamp(value, min, max) {
+    // NaN would pass through Math.min and Math.max untouched.
+    if (isNaN(value))
+      return min;
     return Math.max(min, Math.min(max, value));
   }
 

@@ -75,7 +75,6 @@ Singleton {
 
   // Put the daemon into the state this service says it should be in.
   function apply() {
-    root._follow();
     commit.restart();
   }
 
@@ -101,8 +100,27 @@ Singleton {
       root.setEnabled(root._inWindow);
   }
 
-  on_InWindowChanged: root._follow()
-  onScheduledChanged: root._follow()
+  // Both also fire for their first value, at a start and at every reload.
+  on_InWindowChanged: if (_run.started)
+    root._follow()
+  onScheduledChanged: if (_run.started)
+    root._follow()
+
+  // A fresh start catches up with the schedule; a reload keeps what was set, so a
+  // night light switched off in the evening stays off.
+  PersistentProperties {
+    id: _run
+    reloadableId: "nightLight"
+
+    property bool started: false
+
+    onLoaded: {
+      if (_run.started)
+        return;
+      _run.started = true;
+      root._follow();
+    }
+  }
 
   // === Applying ===
   readonly property var _request: root.active ? ["temperature", String(root.temperature)] : ["identity"]

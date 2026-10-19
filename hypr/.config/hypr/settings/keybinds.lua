@@ -290,6 +290,11 @@ bind("XF86AudioNext", hl.dsp.exec_cmd("playerctl next"), { locked = true, descri
 bind("XF86AudioPrev", hl.dsp.exec_cmd("playerctl previous"), { locked = true, description = "Previous track" })
 bind("XF86AudioStop", hl.dsp.exec_cmd("playerctl stop"), { locked = true, description = "Stop playback" })
 
+-- ── Power ────────────────────────────────────────────────────────────
+-- logind ignores a short press (setup/system/etc/systemd/logind.conf.d). Off the palette, which has SUPER+SHIFT+P.
+-- Two input devices report the button, so it opens the panel: a toggle would open and close it at once.
+hl.bind("XF86PowerOff", hl.dsp.global("quickshell:panelPowerOpen"), { description = "Power panel" })
+
 bind(
 	mod .. " + XF86AudioNext",
 	hl.dsp.exec_cmd("playerctl position 5+"),
@@ -376,6 +381,12 @@ end
 keyless("Check for updates", "updates check")
 keyless("Clear notifications", "notifications clear")
 keyless("Shuffle the wallpaper", "wallpaper shuffle")
+-- Bitwarden doesn't mark a copied password as secret, so cliphist keeps it like any copy.
+palette[#palette + 1] = {
+	"Forget the last clipboard entry",
+	"",
+	hl.dsp.exec_cmd("cliphist list | head -n1 | cliphist delete; wl-copy --clear"),
+}
 -- The names in the shell's core/Themes.qml.
 for _, name in ipairs({
 	"catppuccin-latte",

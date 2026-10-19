@@ -18,7 +18,7 @@ systemd user units.
 | `settings/rules.lua` | Window, layer and workspace rules. |
 | `settings/keybinds.lua` | Every keybind, each with a description. |
 | `settings/autostart.lua` | The Thunar daemon, the only program started with the compositor. |
-| `hypridle.conf` | Dim after 5 minutes, lock after 20, screen off a minute into any lock. |
+| `hypridle.conf` | Dim after 5 minutes, lock after 10, screen off a minute into any lock. |
 | `hyprlock.conf` | The lock screen. |
 | `.luarc.json` | Points lua-language-server at Hyprland's API stubs. |
 | `../systemd/user/hyprsunset.service`, `awww-daemon.service`, `cliphist@.service` | See [Services](#services). |
@@ -73,6 +73,11 @@ instance per type, and SUPER+V reads what they store. The packaged
 both text and an image, as a browser's "Copy image" does, that watcher keeps
 only the text.
 
+Bitwarden doesn't mark a copied password as secret, so the history keeps it
+like any other copy, even after Bitwarden clears the clipboard. After pasting
+one, "Forget the last clipboard entry" in the palette deletes the newest entry
+and empties the clipboard.
+
 `autostart.lua` starts only the Thunar daemon, which is what mounts drives as
 they're plugged in. Thunar's own unit can't be enabled, only started over
 D-Bus. The daemon goes through `uwsm app --`, so it runs in its own systemd
@@ -81,7 +86,7 @@ the same through its `launch-prefix`, and so does the terminal keybind, with
 the faster `uwsm-app` client.
 
 SUPER+Escape locks through logind (`loginctl lock-session`). hypridle answers
-the lock request by starting hyprlock, the same way it does after 20 idle
+the lock request by starting hyprlock, the same way it does after 10 idle
 minutes and before sleep, so hyprlock is only ever started from one place.
 Just before, it closes the shell's open panel, which would keep sampling behind
 the lock, and puts every keyboard on the first layout, so the password is typed
@@ -119,7 +124,8 @@ shuffle and each theme. The list is written to `$XDG_RUNTIME_DIR/hypr-palette`
 when the config loads, and the pick runs through `hyprctl eval`, in the
 config's own Lua state, so it does exactly what the key does. A bind made
 with `hl.bind` stays off the list: the mouse binds, and Log out, which one
-Enter should not reach. Restart and shut down stay behind the Power panel.
+Enter should not reach. Restart and shut down stay behind the Power panel,
+which the power button opens too: logind only acts on a five-second hold.
 
 SUPER+R asks for a reminder: a time, then the text, as in `10 call Ahmed`. A
 bare number is minutes; `90s`, `2h` and `1h30m` work too, and the text may be
@@ -157,8 +163,9 @@ which names the file and tracks the last shot, and fall back to plain grim when
 the shell isn't running. CTRL+Print records a region and CTRL+SHIFT+Print the
 screen, with the desktop's sound, into `~/Pictures/Recordings`; the same key
 stops it, also while the shell is down, because the recorder runs in a unit of
-its own. It captures below the compositor, so the `no_screen_share` rule does
-not apply: the Bitwarden window is recorded like any other. SUPER+CTRL+Print
+its own. It captures below the compositor, so the `no_screen_share` rules do
+not apply: Bitwarden and the password prompts are recorded like any other
+window, though a screen share shows them black. SUPER+CTRL+Print
 reads the text in a region you drag, in English and Arabic, and puts it on the
 clipboard; tesseract does the reading, and the key does nothing while the
 shell is down. Brightness steps are linear because
@@ -258,6 +265,7 @@ under the pointer still zooms along.
 | `XF86AudioStop` | Stop playback |
 | `XF86MonBrightnessDown` | Brightness down |
 | `XF86MonBrightnessUp` | Brightness up |
+| `XF86PowerOff` | Power panel |
 | `mouse:272` | Dismiss an open shell panel |
 
 Regenerate the table after changing binds:
@@ -299,9 +307,10 @@ Proton, and `gamescope` for anything running inside it. Native games need
 their class added, and the list has to match `_gameClass` in
 [`services/GameMode.qml`](../quickshell/.config/quickshell/services/GameMode.qml).
 
-- **Idle:** games, mpv, Chromium and Loupe keep the screen awake while
-  fullscreen. mpv and Chromium only ask for that themselves while a video is
-  playing, so the rule is what keeps a paused one from dimming and locking.
+- **Idle:** games, mpv, Chromium, its web apps and Loupe keep the screen awake
+  while fullscreen. mpv and Chromium only ask for that themselves while a
+  video is playing, so the rule is what keeps a paused one from dimming and
+  locking.
 - **Tearing:** `general.allow_tearing` is only a master switch. Games also get
   the `immediate` rule, so a fullscreen game shows each frame as soon as it's
   ready instead of waiting for vsync: lower input latency, possible tear lines.

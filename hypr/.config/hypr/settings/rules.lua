@@ -52,6 +52,7 @@ hl.window_rule({
 	float = true,
 	center = true,
 	stay_focused = true,
+	no_screen_share = true,
 })
 hl.window_rule({ match = { class = "^zenity$" }, float = true, center = true })
 
@@ -72,7 +73,12 @@ hl.window_rule({
 
 -- ── Privacy ──────────────────────────────────────────────────────────
 
-hl.window_rule({ match = { class = "^(?i)bitwarden$" }, no_screen_share = true })
+-- The app, and the browser extension popped out into a window of its own. The extension's
+-- popup inside the browser is part of the browser's window: no rule can hide it.
+hl.window_rule({
+	match = { class = "^(?i)(bitwarden|chrome-nngceckbapebfimnlniiiahkandclblb-Default)$" },
+	no_screen_share = true,
+})
 
 -- ── Picture-in-picture ───────────────────────────────────────────────
 
@@ -112,7 +118,8 @@ hl.window_rule({ match = { class = "Alacritty" }, opacity = "1.0 0.92" })
 local games = "^(steam_app_[0-9]+|gamescope)$"
 
 -- Fullscreen video and games keep the screen awake even when paused; the apps only ask while playing.
-for _, class in ipairs({ "mpv", "chromium", "org.gnome.Loupe", games }) do
+-- chrome-*-Default are the web apps (desktop/.local/share/applications/web-*.desktop).
+for _, class in ipairs({ "mpv", "^(chromium|chrome-.*-Default)$", "org.gnome.Loupe", games }) do
 	hl.window_rule({ match = { class = class }, idle_inhibit = "fullscreen" })
 end
 

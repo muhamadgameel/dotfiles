@@ -386,6 +386,8 @@ Scope {
     }
 
     function scale(factor: real): string {
+      if (!isFinite(factor))
+        return "refused: not a number";
       Config.Config.setUiScale(factor);
       return `scale: ${Config.Config.uiScale}`;
     }

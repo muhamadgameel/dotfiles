@@ -71,7 +71,7 @@ files (`system/`), GTK settings (`dconf/`) and the Brewfile (`macos/`).
 ## Day to day
 
 - `./setup.sh` checks packages, configs, system files and services. It also
-  notes installed packages that aren't in any list, pending `.pacnew` files,
+  notes installed packages that aren't in any list, failed units, pending `.pacnew` files,
   and Wi-Fi networks missing from the firewall's home zone.
 - `./setup.sh install [step]` fixes what the check reports; `-y` skips the
   prompts. `SETUP_GROUPS="base dev" ./setup.sh install` limits it to some
@@ -119,17 +119,24 @@ the repo copy changes nothing until the next `./setup.sh install system`):
 | `/etc/systemd/zram-generator.conf`, `/etc/sysctl.d/99-zram.conf` | Swap in compressed RAM (half its size), with the Arch wiki's sysctl values for it. |
 | `/etc/mkinitcpio.conf.d/10-no-kms.conf` | The stock hooks minus `kms`, which only added about 105 MiB of firmware for nouveau; nouveau is blacklisted, and the NVIDIA driver isn't in the image. |
 | `/etc/xdg/reflector/reflector.conf` | HTTPS mirrors from nearby countries, refreshed weekly by reflector.timer. |
-| `/etc/firewalld/zones/home.xml` | The home zone: stock services, plus Metro for React Native (8081), Steam Remote Play and LAN transfers, and LocalSend (53317). |
+| `/etc/firewalld/zones/home.xml` | The home zone: the stock services except ssh, plus Metro for React Native (8081), Steam Remote Play and LAN transfers, and LocalSend (53317). |
+| `/etc/firewalld/zones/public.xml` | The public zone, for every other network: the stock one without ssh. |
 | `/etc/firewalld/zones/trusted.xml` | Trusts Waydroid's network bridge. |
+| `/etc/systemd/logind.conf.d/10-power-key.conf` | A short press of the power button opens the Power panel instead of shutting down; holding it for five seconds still powers off. |
 | `/usr/local/share/wayland-sessions/hyprland.desktop` | Hides the plain Hyprland session. uwsm launches this same file, so it must keep its `Exec` line. |
 
 It also adds a boot entry for the LTS kernel, as a fallback when an update
-breaks the main one, and enables the locale in `/etc/locale.gen`.
+breaks the main one, enables the locale in `/etc/locale.gen`, and sets
+`/etc/security/faillock.conf` to lock the account for two minutes after ten
+failed passwords, instead of ten minutes after three.
 
-**Firewall.** Networks use the public zone unless you trust them. Put a home
-network in the home zone with
-`nmcli connection modify "<name>" connection.zone home`; the zone follows the
-network, not the Wi-Fi card.
+**Firewall.** Networks use the public zone unless you trust them. List the
+name of each trusted Wi-Fi network in `setup/home-networks.txt`, one per
+line, and `./setup.sh install system` puts it in the home zone once it is
+saved; the zone follows the network, not the Wi-Fi card. The file stays out
+of git: the repo is public, and a network's name can be looked up on a map.
+Neither zone lets ssh in, so turning sshd on exposes nothing until a zone
+allows it.
 
 **Battery.** `setup.sh` turns on UPower's charge limit, which on this laptop is
 Lenovo's conservation mode: the battery stops charging before full, which

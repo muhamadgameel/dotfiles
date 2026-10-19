@@ -23,7 +23,10 @@ Singleton {
 
   readonly property int checkEveryMs: 6 * 3600 * 1000
 
+  // A second start while one runs would queue another checkupdates.
   function check() {
+    if (root.checking)
+      return;
     _repo.running = true;
   }
 
