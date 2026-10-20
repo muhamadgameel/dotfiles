@@ -25,6 +25,9 @@ Singleton {
   readonly property BluetoothAdapter adapter: Bluetooth.defaultAdapter
   readonly property bool available: adapter !== null
   readonly property bool enabled: adapter?.enabled ?? false
+  // `enabled` turns true as soon as the shell sets it, before BlueZ has powered the
+  // adapter; a scan asked for in between fails with "Resource Not Ready".
+  readonly property bool _poweredOn: adapter?.state === BluetoothAdapterState.Enabled
   readonly property bool blocked: adapter?.state === BluetoothAdapterState.Blocked
   readonly property bool discovering: adapter?.discovering ?? false
 
@@ -69,12 +72,6 @@ Singleton {
     });
 
     return keyed.map(entry => entry.device);
-  }
-
-  readonly property var devicesWithBattery: {
-    if (!devices)
-      return [];
-    return devices.values.filter(d => d?.batteryAvailable && d.battery > 0);
   }
 
   // === Computed Properties ===
@@ -298,15 +295,10 @@ Singleton {
     return "";
   }
 
-  function getDeviceBattery(device) {
-    if (!device?.batteryAvailable || device.battery <= 0)
-      return -1;
-    return Math.round(device.battery * 100);
-  }
-
   function getDeviceBatteryText(device) {
-    const battery = getDeviceBattery(device);
-    return battery < 0 ? "" : battery + "%";
+    if (!device?.batteryAvailable || device.battery <= 0)
+      return "";
+    return Math.round(device.battery * 100) + "%";
   }
 
   // === Timers ===
@@ -318,19 +310,6 @@ Singleton {
     onTriggered: root.stopDiscovery()
   }
 
-  // Auto-start discovery shortly after the adapter comes up, but only if the
-  // panel is open. Enabling Bluetooth used to kick off a 30s scan whether or
-  // not anything was going to show the results.
-  Timer {
-    id: _autoDiscoveryTimer
-    interval: 1000
-    running: false
-    onTriggered: {
-      if (root.panelOpen)
-        root.startDiscovery();
-    }
-  }
-
   onPanelOpenChanged: {
     if (panelOpen)
       startDiscovery();
@@ -338,17 +317,8 @@ Singleton {
       stopDiscovery();
   }
 
-  // === State Changes ===
-  Connections {
-    target: root.adapter
-    function onStateChanged() {
-      if (!root.adapter)
-        return;
-      Core.Logger.d("Bluetooth", `State: ${root.adapter.state}`);
-
-      if (root.adapter.state === BluetoothAdapterState.Enabled) {
-        _autoDiscoveryTimer.restart();
-      }
-    }
+  on_PoweredOnChanged: {
+    if (_poweredOn && panelOpen)
+      startDiscovery();
   }
 }

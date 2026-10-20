@@ -42,12 +42,9 @@ BarButton {
 
     let tip = Services.Bluetooth.hasConnectedDevices ? Services.Bluetooth.statusText : "Bluetooth";
 
-    // Battery info
-    if (Services.Bluetooth.devicesWithBattery.length > 0) {
-      const battery = Services.Bluetooth.getDeviceBatteryText(Services.Bluetooth.devicesWithBattery[0]);
-      if (battery)
-        tip += "\n🔋 " + battery;
-    }
+    const battery = Services.Bluetooth.connectedDevices.map(d => Services.Bluetooth.getDeviceBatteryText(d)).find(text => text);
+    if (battery)
+      tip += "\n🔋 " + battery;
 
     if (Services.Bluetooth.discovering)
       tip += "\n🔍 Scanning...";
