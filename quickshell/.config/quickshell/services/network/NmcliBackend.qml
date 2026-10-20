@@ -55,9 +55,8 @@ Scope {
   }
 
   function setWifiEnabled(enabled) {
-    // The desired state goes to the process explicitly. Binding the command to
-    // `wifiEnabled` and mutating it in the same call relied on the binding
-    // re-evaluating before `running` was set.
+    // The desired state goes to the process explicitly: a command bound to
+    // `wifiEnabled` may not re-evaluate before `running` is set.
     _wifiToggleProcess.command = ["nmcli", "radio", "wifi", enabled ? "on" : "off"];
     _wifiToggleProcess.running = true;
 
@@ -90,9 +89,8 @@ Scope {
       return;
     }
 
-    // lastError is deliberately left alone. Clearing it here meant the 20s
-    // timer wiped a connect error - "Incorrect password" included - while the
-    // user was still reading it.
+    // lastError is left alone: clearing it here would let the 20s timer wipe a
+    // connect error, "Incorrect password" included, while the user reads it.
     // Which networks are saved only matters on the panel's rows. nmcli monitor
     // says nothing when a profile is added or deleted, so it is re-read here.
     if (panelOpen)
@@ -196,10 +194,9 @@ Scope {
   property bool _scanQueued: false
   property bool _scanQueuedActive: false
 
-  // Deletes every saved Wi-Fi profile whose SSID is $1. Profiles are matched on
-  // the SSID they hold and deleted by UUID. Deleting by *name*, as before,
-  // missed a profile named differently from its SSID, and would have deleted a
-  // wired or VPN profile that happened to share the name.
+  // Deletes every saved Wi-Fi profile whose SSID is $1, matched on the SSID it
+  // holds and deleted by UUID: a profile's name can differ from its SSID, and a
+  // wired or VPN profile can share it.
   readonly property string _forgetScript: `
     nmcli -t -f UUID,TYPE connection show | while IFS=: read -r uuid type; do
       [ "$type" = 802-11-wireless ] || continue
@@ -267,7 +264,7 @@ Scope {
 
   // The first line of nmcli's stderr worth showing. After a NetworkManager
   // upgrade, and until the daemon restarts, every command's stderr starts with
-  // a "Warning: ... versions don't match" line, which used to become the error.
+  // a "Warning: ... versions don't match" line, which is skipped.
   function _firstError(text) {
     return text.split("\n").map(line => line.trim()).find(line => line && !line.startsWith("Warning:")) ?? "";
   }
@@ -321,8 +318,7 @@ Scope {
   // === Timers ===
   // Collapses a burst of monitor events into one refresh. A single connection
   // change prints several lines ("using connection", "connecting", "connected"),
-  // and the connectivity check used to fire on every one of them outside this
-  // debounce - each a real HTTP request to NetworkManager's check endpoint.
+  // and each refresh runs a connectivity check, a real HTTP request.
   Timer {
     id: _refreshDebounce
     interval: 100
@@ -337,7 +333,7 @@ Scope {
   }
 
   // Brisk active scans while the panel is open, slow passive cache reads
-  // otherwise. This used to force an active rescan every 60s indefinitely.
+  // otherwise.
   Timer {
     id: _scanTimer
     interval: root.panelOpen ? 20000 : 120000
@@ -422,8 +418,8 @@ Scope {
     command: ["nmcli", "radio", "wifi"]
 
     onDone: (exitCode, out) => {
-      // A failed read is not an answer. Taking it as "disabled" turned Wi-Fi
-      // off in the shell for the whole session if NetworkManager was not up yet.
+      // A failed read is not an answer: taken as "disabled", it would show Wi-Fi
+      // off for the whole session when NetworkManager starts after the shell.
       const state = out.trim();
       if (exitCode !== 0 || (state !== "enabled" && state !== "disabled"))
         return;
@@ -463,8 +459,8 @@ Scope {
 
         const [name, type, device, state] = parts;
 
-        // `--active` also lists connections still activating or deactivating.
-        // Counting those showed a network as connected while it was still
+        // `--active` also lists connections still activating or deactivating,
+        // which would show a network as connected while it is still
         // authenticating, including ones about to fail.
         if (state !== "activated")
           continue;
@@ -507,7 +503,7 @@ Scope {
   //
   // The processes below act on exitCode, not on what nmcli printed. `exited`
   // arrives after both streams have been read, so the collected text is
-  // complete by then. Matching stdout text reported every failure as success.
+  // complete by then. Matching stdout text would report every failure as success.
   Core.Command {
     id: _scanProcess
     tag: "Network"
@@ -518,8 +514,7 @@ Scope {
 
       // A failed run (NetworkManager restarting, the device not ready) keeps
       // the last list rather than blanking the panel. An empty list from a
-      // run that succeeded is real - nothing in range, or the radio went off -
-      // and used to be mistaken for a failure, so the old list never cleared.
+      // run that succeeded is real: nothing in range, or the radio went off.
       if (exitCode !== 0) {
         Core.Logger.d("Network", `Scan failed (exit ${exitCode}); keeping the previous list`);
       } else if (root.wifiEnabled) {
@@ -597,8 +592,8 @@ Scope {
 
       // NetworkManager wants a key. When one was supplied, this is a wrong
       // password: nmcli reports a rejected key as "Secrets were required", not
-      // as anything about the password. Checking this before _badPassword used
-      // to re-prompt silently, with no sign the key had been wrong.
+      // as anything about the password. Checked before _badPassword, it would
+      // re-prompt silently, with no sign the key was wrong.
       if (root._secretsRequired.test(stderr)) {
         root.passwordRequiredFor = ssid;
         if (_connectProcess.withPassword) {

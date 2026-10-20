@@ -11,12 +11,10 @@ import "../core" as Core
 * Exactly one panel is open at a time, on one screen. Centralising that here
 * means:
 *
-* - Panels can be instantiated lazily. Previously every bar instantiated all of
-*   them at startup, on every screen, and each created two PanelWindows whether
-*   or not it was ever opened.
+* - A panel is instantiated only while it is open, and through its close
+*   animation.
 * - Opening one closes any other, without panels having to know about each other.
-* - IPC and global shortcuts have a single entry point, instead of the bar's
-*   per-panel `signal xClicked` plumbing.
+* - IPC and global shortcuts have a single entry point.
 *
 * Panel ids are the plain names in modules/panels (see Panels.ids below).
 */
@@ -102,7 +100,7 @@ Singleton {
   *
   * Hyprland reports every click through a non-consuming mouse binding, so the
   * click still reaches whatever it was aimed at - unlike a focus grab, which
-  * swallowed it. Clicks on the shell's own surfaces are its own business: the
+  * swallows it. Clicks on the shell's own surfaces are its own business: the
   * panel handles its rows, and a bar widget toggles its panel, which a dismiss
   * would undo by closing the panel the click was about to reopen.
   */
