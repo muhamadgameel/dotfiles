@@ -151,3 +151,15 @@ for _, ws in ipairs({ "w[tv1]s[false]", "f[1]s[false]" }) do
 		rounding = 0,
 	})
 end
+
+-- ── Scratchpad ───────────────────────────────────────────────────────
+hl.workspace_rule({ workspace = "special:magic", on_created_empty = theme.apps.terminal .. " --title scratchpad" })
+
+hl.window_rule({
+	name = "scratchpad-terminal",
+	match = { class = "^Alacritty$", initial_title = "^scratchpad$" },
+	float = true,
+	size = "monitor_w*0.85 monitor_h*0.8",
+	move = "monitor_w*0.075 36",
+	border_size = 0,
+})

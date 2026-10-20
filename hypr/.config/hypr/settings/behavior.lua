@@ -36,5 +36,6 @@ hl.config({
 		workspace_back_and_forth = true,
 		allow_workspace_cycles = true,
 		scroll_event_delay = 100,
+		hide_special_on_workspace_change = true,
 	},
 })

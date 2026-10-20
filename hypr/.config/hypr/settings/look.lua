@@ -45,7 +45,7 @@ hl.config({
 
 		dim_inactive = true,
 		dim_strength = 0.15,
-		dim_special = 0.3,
+		dim_special = 0.6,
 	},
 })
 

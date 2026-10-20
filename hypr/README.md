@@ -117,6 +117,10 @@ SUPER+grave closes whatever panel is open, and so does a click anywhere outside
 it. That left-click bind is non-consuming, so the click still reaches whatever
 it was aimed at.
 
+SUPER+S shows the scratchpad. When it is empty, a terminal drops down over the
+top of the screen; other windows there tile as on any workspace, and switching
+workspace hides the scratchpad again.
+
 SUPER+P opens the command palette, a fuzzel list of every bind made with the
 local `bind()` in `settings/keybinds.lua`, and of a few shell actions that
 have no key: the update check, clearing the notifications, a wallpaper
