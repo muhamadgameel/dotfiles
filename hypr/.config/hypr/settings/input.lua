@@ -24,6 +24,9 @@ hl.config({
 -- Three fingers left/right: switch workspaces.
 hl.gesture({ fingers = 3, direction = "horizontal", action = "workspace" })
 
+-- Three fingers up: show or hide the scratchpad, as SUPER+S does.
+hl.gesture({ fingers = 3, direction = "up", action = "special", workspace_name = "magic" })
+
 -- SUPER + two-finger pinch, either way, toggles a 3x zoom at the cursor.
 -- Hyprland acts on a gesture without taking it from the app, so the plain pinch stays theirs.
 hl.gesture({ fingers = 2, mods = "SUPER", direction = "pinch", action = "cursor_zoom", zoom_level = 3 })
