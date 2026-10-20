@@ -386,15 +386,17 @@ local function keyless(description, call)
 	palette[#palette + 1] = { description, "", hl.dsp.exec_cmd("qs ipc call " .. call) }
 end
 
+local function command(description, cmd)
+	palette[#palette + 1] = { description, "", hl.dsp.exec_cmd(cmd) }
+end
+
 keyless("Check for updates", "updates check")
 keyless("Clear notifications", "notifications clear")
 keyless("Shuffle the wallpaper", "wallpaper shuffle")
+command("Restart the shell", "systemctl --user restart quickshell")
+command("Restart audio", "systemctl --user restart pipewire pipewire-pulse wireplumber")
 -- Bitwarden doesn't mark a copied password as secret, so cliphist keeps it like any copy.
-palette[#palette + 1] = {
-	"Forget the last clipboard entry",
-	"",
-	hl.dsp.exec_cmd("cliphist list | head -n1 | cliphist delete; wl-copy --clear"),
-}
+command("Forget the last clipboard entry", "cliphist list | head -n1 | cliphist delete; wl-copy --clear")
 -- The names in the shell's core/Themes.qml.
 for _, name in ipairs({
 	"catppuccin-latte",

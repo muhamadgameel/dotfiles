@@ -122,14 +122,15 @@ top of the screen; other windows there tile as on any workspace, and switching
 workspace hides the scratchpad again.
 
 SUPER+P opens the command palette, a fuzzel list of every bind made with the
-local `bind()` in `settings/keybinds.lua`, and of a few shell actions that
-have no key: the update check, clearing the notifications, a wallpaper
-shuffle and each theme. The list is written to `$XDG_RUNTIME_DIR/hypr-palette`
-when the config loads, and the pick runs through `hyprctl eval`, in the
-config's own Lua state, so it does exactly what the key does. A bind made
-with `hl.bind` stays off the list: the mouse binds, and Log out, which one
-Enter should not reach. Restart and shut down stay behind the Power panel,
-which the power button opens too: logind only acts on a five-second hold.
+local `bind()` in `settings/keybinds.lua`, and of a few actions that have no
+key: the update check, clearing the notifications, a wallpaper shuffle, each
+theme, and restarting the shell or the audio. The list is written to
+`$XDG_RUNTIME_DIR/hypr-palette` when the config loads, and the pick runs
+through `hyprctl eval`, in the config's own Lua state, so it does exactly what
+the key does. A bind made with `hl.bind` stays off the list: the mouse binds,
+and Log out, which one Enter should not reach. Restart and shut down stay
+behind the Power panel, which the power button opens too: logind only acts on a
+five-second hold.
 
 SUPER+R asks for a reminder: a time, then the text, as in `10 call Ahmed`. A
 bare number is minutes; `90s`, `2h` and `1h30m` work too, and the text may be
