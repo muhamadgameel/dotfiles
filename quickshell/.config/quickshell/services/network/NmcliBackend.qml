@@ -170,7 +170,6 @@ Scope {
 
   // === Initialization ===
   Component.onCompleted: {
-    Core.Logger.i("Network", "Service started");
     _wifiStateProcess.running = true;
     _connectionStatusProcess.running = true;
     _connectivityCheckProcess.running = true;

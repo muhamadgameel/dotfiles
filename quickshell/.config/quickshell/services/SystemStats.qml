@@ -280,10 +280,8 @@ Singleton {
 
         if (kind === "cpu" && root._cpuTempPath === "") {
           root._cpuTempPath = path;
-          Core.Logger.i("SystemStats", `CPU sensor: ${type} at ${path}`);
         } else if (kind === "battery" && root._batteryPath === "") {
           root._batteryPath = path;
-          Core.Logger.i("SystemStats", `Battery: ${path}`);
         }
       }
 
@@ -487,17 +485,7 @@ Singleton {
         if (!root._readNvidia(data))
           return;
 
-        if (!root._nvidia) {
-          root._nvidia = true;
-          Core.Logger.i("SystemStats", "NVIDIA GPU detected");
-        }
-      }
-    }
-
-    stderr: StdioCollector {
-      onStreamFinished: {
-        if (!root._nvidia)
-          Core.Logger.d("SystemStats", "No NVIDIA GPU detected");
+        root._nvidia = true;
       }
     }
 
@@ -967,6 +955,4 @@ Singleton {
     tag: "SystemStats"
     label: "kill"
   }
-
-  Component.onCompleted: Core.Logger.i("SystemStats", "Service initializing...")
 }

@@ -309,14 +309,6 @@ Singleton {
     return battery < 0 ? "" : battery + "%";
   }
 
-  // === Initialization ===
-  Component.onCompleted: {
-    Core.Logger.i("Bluetooth", "Service started");
-    if (available) {
-      Core.Logger.d("Bluetooth", `Adapter: ${adapter.name || "default"}, enabled: ${enabled}`);
-    }
-  }
-
   // === Timers ===
 
   // Auto-stop discovery after 30 seconds

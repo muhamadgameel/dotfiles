@@ -239,7 +239,6 @@ Singleton {
       root.maxBrightness = max;
       root.brightness = current / max;
       root.ready = true;
-      Core.Logger.i("Brightness", `Device '${root.device}' at ${Math.round(root.brightness * 100)}%`);
     }
   }
 
