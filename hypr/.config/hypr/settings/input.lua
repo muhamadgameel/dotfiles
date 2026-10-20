@@ -9,7 +9,6 @@ hl.config({
 
 		-- ── Mouse ────────────────────────────────────────────────────
 		sensitivity = 0.4,
-		accel_profile = "adaptive",
 		scroll_factor = 1.4,
 
 		-- ── Touchpad ─────────────────────────────────────────────────

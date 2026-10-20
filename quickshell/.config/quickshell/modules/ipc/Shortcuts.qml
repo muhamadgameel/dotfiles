@@ -40,7 +40,6 @@ Scope {
       panelSettings: ["Toggle the settings panel", () => root.togglePanel("settings")],
       panelClose: ["Close any open panel", () => Services.Panels.close()],
       panelDismiss: ["Close an open panel when clicking away from it", () => Services.Panels.dismiss()],
-      mediaPlayPause: ["Play/pause the active media player", () => Services.Media.playPause()],
       toggleGameMode: ["Toggle game mode by hand", () => Services.GameMode.toggle()],
       toggleIdleInhibit: ["Toggle the idle inhibitor", () => Services.Idle.toggle()],
       toggleDnd: ["Toggle do not disturb", () => Config.Config.toggleDoNotDisturb()],
