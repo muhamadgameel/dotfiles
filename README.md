@@ -118,7 +118,7 @@ the repo copy changes nothing until the next `./setup.sh install system`):
 | `/etc/modprobe.d/audio-powersave.conf` | Keeps the sound card powered, so audio doesn't crackle or pop when it starts. |
 | `/etc/systemd/zram-generator.conf`, `/etc/sysctl.d/99-zram.conf` | Swap in compressed RAM (half its size), with the Arch wiki's sysctl values for it. |
 | `/etc/mkinitcpio.conf.d/10-no-kms.conf` | The stock hooks minus `kms`, which only added about 105 MiB of firmware for nouveau; nouveau is blacklisted, and the NVIDIA driver isn't in the image. |
-| `/etc/xdg/reflector/reflector.conf` | HTTPS mirrors from nearby countries, refreshed weekly by reflector.timer. |
+| `/etc/xdg/reflector/reflector.conf` | HTTPS mirrors from three countries, ordered by measured download speed and refreshed weekly by reflector.timer. |
 | `/etc/firewalld/zones/home.xml` | The home zone: the stock services except ssh, plus Metro for React Native (8081), Steam Remote Play and LAN transfers, and LocalSend (53317). |
 | `/etc/firewalld/zones/public.xml` | The public zone, for every other network: the stock one without ssh. |
 | `/etc/firewalld/zones/trusted.xml` | Trusts Waydroid's network bridge. |
