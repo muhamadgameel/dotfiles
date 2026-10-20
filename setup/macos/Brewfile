@@ -43,7 +43,6 @@ brew 'yaml-language-server'         # YAML LSP
 brew 'vscode-langservers-extracted' # CSS, HTML, JSON and ESLint LSPs
 brew 'taplo'                        # TOML LSP and formatter
 brew 'stylua'                       # Lua formatter
-brew 'prettier'                     # JS/TS/JSON/Markdown formatter
 brew 'pyright'                      # Python LSP
 brew 'ruff'                         # Python linter and formatter
 brew 'shellcheck'                   # Shell script linting tool
