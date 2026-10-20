@@ -41,8 +41,6 @@ Singleton {
       return `unknown mode "${mode}"`;
 
     if (capturing) {
-      // Used to return in silence, which is how one wedged capture could
-      // disable the whole feature without leaving a trace anywhere.
       Core.Logger.w("Screenshot", `ignoring ${mode}: a capture is already in progress`);
       return "a capture is already in progress";
     }
@@ -162,8 +160,7 @@ Singleton {
   }
 
   // A capture that never finishes must not disable the feature until the next
-  // restart, which is exactly what the slurp hang did. Generous enough that a
-  // slow deliberate selection is never cut short.
+  // restart. Generous enough that a slow deliberate selection is never cut short.
   readonly property int watchdogMs: 180000
 
   Timer {
@@ -195,8 +192,8 @@ Singleton {
         Core.Logger.i("Screenshot", `Saved ${path}`);
       }
 
-      // A cancelled selection now exits 0 from the script itself, so anything
-      // reaching here is a real problem. The explicit check stays for the
+      // A cancelled selection exits 0 from the script itself, so anything
+      // reaching here is a real problem. The explicit check is for the
       // cancellation paths that still write to stderr.
       const problem = err.trim();
       if (problem !== "" && !problem.includes("selection cancelled"))

@@ -145,11 +145,8 @@ stow_all() {
 
 # A real ~/.gitconfig holds your identity, and `git config --global` writes there
 # instead of through the stowed ~/.config/git into the repo.
-gitlocal_ok() { [[ -f $HOME/.gitconfig && ! -L $HOME/.gitconfig ]]; }
-gitlocal_fix() {
-  [[ ! -L $HOME/.gitconfig ]] || run rm "$HOME/.gitconfig"
-  if [[ -e $HOME/.gitconfig.local ]]; then run mv "$HOME/.gitconfig.local" "$HOME/.gitconfig"; else run touch "$HOME/.gitconfig"; fi
-}
+gitlocal_ok() { [[ -f $HOME/.gitconfig ]]; }
+gitlocal_fix() { run touch "$HOME/.gitconfig"; }
 git_identity() {
   [[ -n $(git config --get user.name || true) && -n $(git config --get user.email || true) ]] ||
     warn "git has no identity: git config --global user.name 'Your Name' && git config --global user.email you@example.com"

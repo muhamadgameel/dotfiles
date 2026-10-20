@@ -9,43 +9,22 @@ import "../core" as Core
 import "../services" as Services
 
 /**
-* SystemStats - Service for monitoring system hardware metrics
-*
-* Provides real-time monitoring of:
-* - CPU temperature (the coretemp package sensor)
-* - NVIDIA temperature, usage, VRAM, power draw and throttling, from one
-*   looping nvidia-smi
-* - NVIDIA VRAM by process, while the System Monitor is open
-* - CPU usage (overall and per-core)
-* - Memory usage (RAM + Swap)
-* - Network speeds (download/upload)
-* - Disk usage (root filesystem) and read/write throughput
-* - Battery health, cycles and draw (laptops reporting energy)
-* - Top apps by CPU and memory, while the System Monitor is open
-* - Recent history of CPU, memory, GPU and network, for the panel's sparklines
+* SystemStats - CPU, GPU, memory, network, disk and battery figures for the bar
+* and the System Monitor
 *
 * Sensor discovery is a single shell pass over /sys/class/hwmon at startup that
 * caches the exact sysfs paths. Each poll is then one file read per metric.
 *
-* This resolves the "Package id 0" sensor specifically. Averaging
-* temp1..temp20 (as this previously did) mixes the package reading with the
-* per-core readings and silently ignores any core sensor numbered above 20 -
-* on a 48-sensor part that averaged an arbitrary 6 of them and under-reported
-* the package by several degrees.
-*
-* Usage:
-*   import "../services" as Services
-*   Text { text: Core.Utils.formatTemp(Services.SystemStats.cpuTemp) }
-*   Text { text: Services.SystemStats.cpuTempStatus }  // normal/warning/critical
+* The CPU temperature is coretemp's "Package id 0" sensor: an average over the
+* per-core sensors reads several degrees low.
 */
 Singleton {
   id: root
 
   readonly property int pollingInterval: 2000
 
-  // How often the NVIDIA temperature is sampled. One long-running nvidia-smi
-  // prints at this interval (see _nvidiaProcess), so it costs no spawn per
-  // sample - the interval only bounds how fresh the reading is.
+  // How often the looping nvidia-smi prints while the System Monitor is closed;
+  // while it is open, pollingInterval.
   readonly property int nvidiaPollingInterval: 10000
   readonly property int diskPollingInterval: 60000
 
@@ -53,14 +32,9 @@ Singleton {
   // for the temperature values.
 
   // How far a reading must fall back below a threshold before its status may
-  // drop, in the reading's own units (degrees, or percentage points).
-  //
-  // Without it a sensor sitting near a threshold flipped the status on nearly
-  // every poll. It was found with the CPU idling at 70-72 C against an old 70 C
-  // warning: the bar icon flickered orange-white every few seconds, and each flip
-  // back into "warning" restarted the widget's pulse animation, keeping the
-  // window rendering at the display refresh rate almost continuously. The
-  // thresholds have since moved, but any reading can sit near any threshold.
+  // drop, in the reading's own units (degrees, or percentage points). Without it
+  // a reading near a threshold flips the status every poll, and each flip into
+  // "warning" restarts the bar widget's pulse, which keeps the window redrawing.
   readonly property real hysteresis: 5
 
   // === CPU ===
@@ -275,15 +249,12 @@ Singleton {
           continue;
 
         const kind = parts[0];
-        const type = parts[1];
         const path = parts[2];
 
         if (kind === "cpu" && root._cpuTempPath === "") {
           root._cpuTempPath = path;
-          Core.Logger.i("SystemStats", `CPU sensor: ${type} at ${path}`);
         } else if (kind === "battery" && root._batteryPath === "") {
           root._batteryPath = path;
-          Core.Logger.i("SystemStats", `Battery: ${path}`);
         }
       }
 
@@ -465,20 +436,12 @@ Singleton {
     }
   }
 
-  // One long-running nvidia-smi in loop mode (`-l`), printing a reading every
-  // nvidiaPollingInterval, instead of a fresh process every tick.
-  //
-  // Nearly all of nvidia-smi's cost is start-up - loading NVML and opening the
-  // driver - not the query. Measured over a minute at a 10 s cadence: six
-  // respawns took ~100 ms of CPU, the single looping process too little to
-  // register. That was essentially all of the shell's child-process CPU. Same
-  // shape as Network's long-running `nmcli monitor`.
-  //
-  // Started once at load as a probe. On a machine without an
-  // NVIDIA GPU it exits straight away and stays down.
+  // One long-running nvidia-smi in loop mode (`-l`): nearly all of its cost is
+  // start-up, loading NVML, not the query. Without an NVIDIA GPU it exits at once
+  // and stays down.
   Process {
     id: _nvidiaProcess
-    command: root._nvidiaQuery.concat([String(root.nvidiaPollingInterval / 1000)])
+    command: root._nvidiaQuery.concat([String((root._monitorOpen ? root.pollingInterval : root.nvidiaPollingInterval) / 1000)])
     running: true
 
     stdout: SplitParser {
@@ -487,17 +450,7 @@ Singleton {
         if (!root._readNvidia(data))
           return;
 
-        if (!root._nvidia) {
-          root._nvidia = true;
-          Core.Logger.i("SystemStats", "NVIDIA GPU detected");
-        }
-      }
-    }
-
-    stderr: StdioCollector {
-      onStreamFinished: {
-        if (!root._nvidia)
-          Core.Logger.d("SystemStats", "No NVIDIA GPU detected");
+        root._nvidia = true;
       }
     }
 
@@ -517,16 +470,13 @@ Singleton {
     onTriggered: _nvidiaProcess.running = true
   }
 
-  // A faster second loop while the System Monitor is open, so its GPU rows move
-  // with the CPU and memory rows. It stops when the panel closes.
-  Process {
-    command: root._nvidiaQuery.concat([String(root.pollingInterval / 1000)])
-    running: root._nvidia && root._monitorOpen
-
-    stdout: SplitParser {
-      splitMarker: "\n"
-      onRead: data => root._readNvidia(data)
-    }
+  // A new rate needs a new process: the old one exits and the same object starts
+  // again with the current command.
+  on_MonitorOpenChanged: {
+    if (!root._nvidia)
+      return;
+    _nvidiaProcess.running = false;
+    _nvidiaProcess.running = true;
   }
 
   readonly property var _nvidiaQuery: ["nvidia-smi", "--query-gpu=temperature.gpu,utilization.gpu,memory.used,memory.total,power.draw,enforced.power.limit,clocks_event_reasons.active,name", "--format=csv,noheader,nounits", "-l"]
@@ -689,9 +639,8 @@ Singleton {
           continue;
         }
 
-        // Per-core. Indexed by the real core id so panel labels stay correct -
-        // compacting the array with filter() used to shift "Core N" labels off
-        // the cores they described.
+        // Per-core, indexed by the real core id, so a gap in the numbering cannot
+        // shift the panel's "Core N" labels.
         const coreIndex = parseInt(name.substring(3), 10);
         if (isNaN(coreIndex))
           continue;
@@ -967,6 +916,4 @@ Singleton {
     tag: "SystemStats"
     label: "kill"
   }
-
-  Component.onCompleted: Core.Logger.i("SystemStats", "Service initializing...")
 }

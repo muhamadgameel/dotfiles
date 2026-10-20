@@ -1,6 +1,3 @@
--- Use `hyprctl monitors all` to list available outputs and modes.
-
--- Fallback for any monitor not matched below.
 hl.monitor({
 	output = "",
 	mode = "preferred",

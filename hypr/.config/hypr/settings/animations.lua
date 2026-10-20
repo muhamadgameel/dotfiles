@@ -1,19 +1,13 @@
 -- ── Curves ───────────────────────────────────────────────────────────
--- Bezier: points are the two control points, {x1,y1} and {x2,y2}.
--- Visualize at https://cubic-bezier.com
 hl.curve("easeOutQuint", { type = "bezier", points = { { 0.23, 1 }, { 0.32, 1 } } })
 hl.curve("easeOutExpo", { type = "bezier", points = { { 0.16, 1 }, { 0.30, 1 } } })
 hl.curve("linear", { type = "bezier", points = { { 0, 0 }, { 1, 1 } } })
 hl.curve("smooth", { type = "bezier", points = { { 0.05, 0.9 }, { 0.10, 1.05 } } })
 hl.curve("easeOutCubic", { type = "bezier", points = { { 0.33, 1 }, { 0.68, 1 } } })
 
--- Spring: physical model, no fixed duration. Feels better than a bezier for
--- things that get interrupted mid-flight (opening/moving windows).
 hl.curve("easy", { type = "spring", mass = 1, stiffness = 238.1191, dampening = 24.21279333 })
 
 -- ── Animation leaves ─────────────────────────────────────────────────
--- speed is in 100ms units; lower = faster.
-
 hl.animation({ leaf = "global", enabled = true, speed = 4, bezier = "smooth" })
 
 -- Windows

@@ -368,7 +368,6 @@ Scope {
   }
 
   Component.onCompleted: {
-    Core.Logger.i("Network", "Native backend started");
     _syncScanner();
     _refreshDetails();
   }

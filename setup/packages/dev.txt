@@ -26,7 +26,6 @@ lazygit
 
 # toolchains
 go
-go-tools                # goimports
 jdk17-openjdk           # Gradle JDK for React Native
 nodejs
 npm
@@ -40,7 +39,6 @@ eslint-language-server
 gopls
 lua-language-server
 marksman
-prettier
 pyright
 ruff                    # Python lint and format
 shellcheck

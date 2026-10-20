@@ -13,7 +13,6 @@ import "." as Core
 *   ShowHideAnimator {
 *     id: animator
 *     target: card
-*     slideDistance: 300
 *     onHideFinished: card.destroy()
 *   }
 *
@@ -26,9 +25,6 @@ Item {
   // === Configuration ===
   required property Item target
 
-  // Slide
-  property real slideDistance: Core.Style.slideDistance
-
   // Which edge the item travels in from on show, and back out towards on hide:
   // "top" | "bottom" | "left" | "right", or "none" to pop in place. Hide is always
   // the reverse of show, so a card that enters from the right leaves to the right.
@@ -40,16 +36,10 @@ Item {
 
   // Scale
   property real hiddenScale: Core.Style.slideHiddenScale
-  property real visibleScale: 1.0
-
-  // Opacity
-  property real hiddenOpacity: 0.0
-  property real visibleOpacity: 1.0
 
   // Easing
   property int showEasing: Core.Style.easeEnter
   property int hideEasing: Core.Style.easeExit
-  property real showOvershoot: Core.Style.enterOvershoot
 
   // === Signals ===
   signal hideFinished
@@ -60,7 +50,7 @@ Item {
   readonly property bool _horizontal: root.slideFrom === "left" || root.slideFrom === "right"
 
   // Negative for the edges the item comes from above/before, positive otherwise.
-  readonly property real _hiddenOffset: root.slideFrom === "none" ? 0 : (root.slideFrom === "top" || root.slideFrom === "left") ? -root.slideDistance : root.slideDistance
+  readonly property real _hiddenOffset: root.slideFrom === "none" ? 0 : (root.slideFrom === "top" || root.slideFrom === "left") ? -Core.Style.slideDistance : Core.Style.slideDistance
 
   // The unused axis keeps its binding at 0 forever; the active one has its
   // binding broken by the first _setOffset() write, which is what the animations
@@ -107,7 +97,7 @@ Item {
     _initialized = true;
     showAnim.stop();
     hideAnim.stop();
-    target.opacity = hiddenOpacity;
+    target.opacity = 0;
     target.scale = hiddenScale;
     root._setOffset(root._hiddenOffset);
   }
@@ -118,8 +108,8 @@ Item {
     _initialized = true;
     showAnim.stop();
     hideAnim.stop();
-    target.opacity = visibleOpacity;
-    target.scale = visibleScale;
+    target.opacity = 1;
+    target.scale = 1;
     root._setOffset(0);
   }
 
@@ -130,7 +120,7 @@ Item {
     PropertyAnimation {
       target: root.target
       property: "opacity"
-      to: root.visibleOpacity
+      to: 1
       duration: root.showDuration
       easing.type: Core.Style.easeStandard
     }
@@ -138,10 +128,10 @@ Item {
     PropertyAnimation {
       target: root.target
       property: "scale"
-      to: root.visibleScale
+      to: 1
       duration: root.showDuration
       easing.type: root.showEasing
-      easing.overshoot: root.showOvershoot
+      easing.overshoot: Core.Style.enterOvershoot
     }
 
     PropertyAnimation {
@@ -150,7 +140,7 @@ Item {
       to: 0
       duration: root.showDuration
       easing.type: root.showEasing
-      easing.overshoot: root.showOvershoot
+      easing.overshoot: Core.Style.enterOvershoot
     }
   }
 
@@ -161,7 +151,7 @@ Item {
     PropertyAnimation {
       target: root.target
       property: "opacity"
-      to: root.hiddenOpacity
+      to: 0
       duration: root.hideDuration
       easing.type: root.hideEasing
     }

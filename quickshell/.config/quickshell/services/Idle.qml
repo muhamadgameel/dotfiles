@@ -21,7 +21,6 @@ Singleton {
   id: root
 
   readonly property bool inhibited: _state.inhibited
-  readonly property bool busy: false
   readonly property string statusIcon: inhibited ? "eye" : "eye-off"
 
   // === Public API ===

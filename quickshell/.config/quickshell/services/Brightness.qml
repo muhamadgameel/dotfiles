@@ -14,13 +14,6 @@ import "../services" as Services
 * brightnessctl writes the value; reads come straight from
 * /sys/class/backlight/<device>/brightness via the FileView that is already
 * watching it.
-*
-* Usage:
-*   Services.Brightness.brightness    // Current value (0.0 - 1.0)
-*   Services.Brightness.ready         // Whether brightness control is available
-*   Services.Brightness.increase()    // Increase by step
-*   Services.Brightness.decrease()    // Decrease by step
-*   Services.Brightness.set(0.5)      // Set to 50%
 */
 Singleton {
   id: root
@@ -48,8 +41,8 @@ Singleton {
 
   // hypridle dims the backlight with brightnessctl after five idle minutes and
   // restores it when you come back. To the watcher that is the same as a key
-  // press, so an unattended machine flashed a brightness OSD, and coming back
-  // to it flashed another. Changes while idle, or in the moment of returning,
+  // press, so it would flash an OSD while you are away and another as you
+  // return. Changes while idle, or in the moment of returning,
   // are applied without one. The monitor goes idle well before hypridle's
   // first listener, and respects inhibitors the way hypridle does.
   readonly property int idleReturnGraceMs: 1000
@@ -239,7 +232,6 @@ Singleton {
       root.maxBrightness = max;
       root.brightness = current / max;
       root.ready = true;
-      Core.Logger.i("Brightness", `Device '${root.device}' at ${Math.round(root.brightness * 100)}%`);
     }
   }
 

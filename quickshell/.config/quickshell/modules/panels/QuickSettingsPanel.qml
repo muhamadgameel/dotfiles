@@ -151,7 +151,6 @@ Components.SlidingPanel {
       label: "Stay Awake"
       subtitle: Services.Idle.inhibited ? "Idle lock paused" : "Off"
       active: Services.Idle.inhibited
-      busy: Services.Idle.busy
 
       onToggled: Services.Idle.toggle()
     }

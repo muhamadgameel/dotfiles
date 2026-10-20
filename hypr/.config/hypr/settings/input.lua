@@ -8,8 +8,7 @@ hl.config({
 		repeat_delay = 300,
 
 		-- ── Mouse ────────────────────────────────────────────────────
-		sensitivity = 0.4, -- -1.0 to 1.0, 0 = unmodified
-		accel_profile = "adaptive", -- "flat" or "adaptive"
+		sensitivity = 0.4,
 		scroll_factor = 1.4,
 
 		-- ── Touchpad ─────────────────────────────────────────────────
