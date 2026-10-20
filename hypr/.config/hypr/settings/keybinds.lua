@@ -372,6 +372,14 @@ bind(mod .. " + L", function()
 	hl.notification.create({ text = "Layout: " .. nextLayout, timeout = 1500, icon = "ok" })
 end, { description = "Cycle layout" })
 
+-- Zoom around the cursor, one step per press.
+bind(mod .. " + CTRL + Z", function()
+	hl.config({ cursor = { zoom_factor = hl.get_config("cursor.zoom_factor") + 1 } })
+end, { description = "Zoom in" })
+bind(mod .. " + CTRL + ALT + Z", function()
+	hl.config({ cursor = { zoom_factor = 1 } })
+end, { description = "Reset zoom" })
+
 -- ── Command palette ──────────────────────────────────────────────────
 
 local function keyless(description, call)

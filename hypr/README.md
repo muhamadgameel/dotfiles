@@ -199,8 +199,10 @@ under the pointer still zooms along.
 | `SUPER + ALT + 1-0` | Send window to workspace and follow |
 | `SUPER + ALT + G` | Toggle game mode |
 | `SUPER + B` | Browser |
+| `SUPER + CTRL + ALT + Z` | Reset zoom |
 | `SUPER + CTRL + Print` | Copy the text in a region |
 | `SUPER + CTRL + SHIFT + Escape` | Log out |
+| `SUPER + CTRL + Z` | Zoom in |
 | `SUPER + CTRL + arrows` | Resize window |
 | `SUPER + C` | Center window |
 | `SUPER + D` | App launcher |
