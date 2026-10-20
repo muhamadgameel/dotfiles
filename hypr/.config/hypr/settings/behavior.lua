@@ -3,9 +3,8 @@ hl.config({
 		disable_hyprland_logo = true,
 		disable_splash_rendering = true,
 
-		vrr = 2, -- adaptive sync: 0 off, 1 on, 2 fullscreen only, 3 fullscreen video
+		vrr = 2,
 
-		-- Wake the display on input.
 		mouse_move_enables_dpms = true,
 		key_press_enables_dpms = true,
 
@@ -24,7 +23,7 @@ hl.config({
 	},
 
 	render = {
-		direct_scanout = 2, -- reduces latency for fullscreen apps
+		direct_scanout = 2,
 	},
 
 	xwayland = {

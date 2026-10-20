@@ -1,6 +1,3 @@
--- Rules are evaluated top to bottom; for overlapping matches the LAST one wins.
--- Regexes use RE2. Prefix with "negative:" to invert a match.
-
 local theme = require("settings.theme")
 
 -- ── Global ───────────────────────────────────────────────────────────
