@@ -18,7 +18,7 @@ enables services.
 | `alacritty` | Alacritty, in the shell's theme, plus `xdg-terminal-exec` so apps opened from Thunar find it | |
 | `bat` | bat, in the terminal's colours | yes |
 | `btop` | btop, in the terminal's colours, with the GPU | yes |
-| `desktop` | Default apps, Chromium's video decoding flags, hidden launcher entries, and WhatsApp, YouTube, Proton Mail and Anghami as Chromium app windows | |
+| `desktop` | Default apps, Chromium's flags (video decoding, two-finger swipe back and forward, overlay scrollbars), hidden launcher entries, and WhatsApp, YouTube, Proton Mail and Anghami as Chromium app windows | |
 | `editors` | Code - OSS settings | |
 | `fontconfig` | Noto fonts for Arabic, Japanese and Chinese | |
 | `fuzzel` | The app launcher, in the shell's theme | |
