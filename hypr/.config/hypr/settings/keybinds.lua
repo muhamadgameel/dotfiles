@@ -16,7 +16,18 @@ end
 
 -- ── Apps ─────────────────────────────────────────────────────────────
 
-bind(mod .. " + Return", hl.dsp.exec_cmd(apps.terminal), { description = "Terminal" })
+-- In the focused terminal's directory: the terminal's newest child is its shell.
+bind(mod .. " + Return", function()
+	local window = hl.get_active_window()
+	local terminal = apps.terminal
+	if window and window.class == "Alacritty" then
+		terminal = ([[d=$(readlink /proc/$(pgrep -nP %d)/cwd 2>/dev/null); %s ${d:+--working-directory "$d"}]]):format(
+			window.pid,
+			apps.terminal
+		)
+	end
+	hl.dispatch(hl.dsp.exec_cmd(terminal))
+end, { description = "Terminal" })
 bind(
 	mod .. " + SHIFT + Return",
 	hl.dsp.exec_cmd(apps.terminal .. " -e sh -c 'tmux attach || tmux new'"),

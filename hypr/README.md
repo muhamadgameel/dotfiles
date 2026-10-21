@@ -117,6 +117,9 @@ SUPER+grave closes whatever panel is open, and so does a click anywhere outside
 it. That left-click bind is non-consuming, so the click still reaches whatever
 it was aimed at.
 
+SUPER+Return opens a terminal in the focused terminal's directory, or in your
+home directory from any other window.
+
 SUPER+S shows the scratchpad. When it is empty, a terminal drops down over the
 top of the screen; other windows there tile as on any workspace, and switching
 workspace hides the scratchpad again.
