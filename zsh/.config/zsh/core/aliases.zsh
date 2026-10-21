@@ -68,9 +68,9 @@ case $_os in
   Linux)
     # yay updates the repos and the AUR, and calls sudo itself.
     if (( $+commands[yay] )); then
-      alias sys-update="yay -Syu"
+      alias sys-update="systemd-inhibit --what=idle --who=sys-update --why='System upgrade' yay -Syu"
     else
-      alias sys-update="sudo pacman -Syu"
+      alias sys-update="systemd-inhibit --what=idle --who=sys-update --why='System upgrade' sudo pacman -Syu"
     fi
     ;;
 esac

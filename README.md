@@ -220,7 +220,9 @@ Fullscreen games skip vsync and keep the screen awake; see
 
 - **Updates:** `sys-update` runs `yay -Syu`, which updates the repo packages
   and the AUR ones together. The bar counts what is waiting, asking every six
-  hours; a click on the count runs the same command in a terminal.
+  hours; a click on the count runs the same command in a terminal, and then
+  warns when a new kernel or Hyprland needs a restart. Both hold off the idle
+  dim and lock until the upgrade ends.
 - **`.pacnew` files:** review them with `sudo DIFFPROG='nvim -d' pacdiff`, and
   merge rather than overwrite `pacman.conf`, `mirrorlist` and `locale.gen`.
   Overwriting them drops multilib, pacman's output options, the mirrors and

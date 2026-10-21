@@ -30,8 +30,11 @@ Singleton {
     _repo.running = true;
   }
 
+  // A replaced kernel takes the running kernel's modules with it, and a replaced
+  // compositor binary reads as deleted: either needs a restart to finish.
   function upgrade() {
-    Quickshell.execDetached(["uwsm-app", "--", "alacritty", "-e", "bash", "-c", "yay -Syu; qs ipc call updates check >/dev/null; read -rsn1 -p 'Press a key to close.'"]);
+    const script = ["systemd-inhibit --what=idle --who=Updates --why='System upgrade' yay -Syu", "qs ipc call updates check >/dev/null", "[ -d \"/usr/lib/modules/$(uname -r)\" ] && ! readlink \"/proc/$(pgrep -xo Hyprland)/exe\" | grep -q deleted || notify-send -u critical -a Updates -- 'Restart needed' 'The kernel or Hyprland was upgraded; restart to use the new one.'", "read -rsn1 -p 'Press a key to close.'"];
+    Quickshell.execDetached(["uwsm-app", "--", "alacritty", "-e", "bash", "-c", script.join("; ")]);
   }
 
   // What the last check found survives a reload. A restart asks again.
