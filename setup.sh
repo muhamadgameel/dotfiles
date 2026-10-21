@@ -157,7 +157,7 @@ git_identity() {
 sys_stale() { for f in $(find setup/system -type f | sort); do cmp -s "$f" "/${f#setup/system/}" || echo "$f"; done; }
 sys_ok() { [[ -z $(sys_stale) ]]; }
 sys_install() {
-  local f initramfs=0 sysctl=0 firewall=0 logind=0
+  local f initramfs=0 sysctl=0 firewall=0 logind=0 resolved=0
   for f in $(sys_stale); do
     run sudo install -Dm644 "$f" "/${f#setup/system/}"
     case $f in
@@ -165,6 +165,7 @@ sys_install() {
       */sysctl.d/*) sysctl=1 ;;
       */firewalld/*) firewall=1 ;;
       */logind.conf.d/*) logind=1 ;;
+      */resolved.conf.d/*) resolved=1 ;;
       */modprobe.d/* | */zram-generator.conf) reboot=1 ;;
     esac
   done
@@ -172,6 +173,7 @@ sys_install() {
   if ((sysctl)); then run sudo sysctl --system; fi
   if ((firewall)) && systemctl is-active -q firewalld; then run sudo firewall-cmd --reload; fi
   if ((logind)); then run sudo systemctl reload systemd-logind; fi
+  if ((resolved)) && systemctl is-active -q systemd-resolved; then run sudo systemctl restart systemd-resolved; fi
 }
 
 lang() { sed -n 's/^LANG=//p' /etc/locale.conf 2>/dev/null | tr -d '"'; }
@@ -310,6 +312,15 @@ home_zone_set() {
 sc() { if [[ $1 == user ]]; then systemctl --user "${@:2}"; else systemctl "${@:2}"; fi; }
 unit_ok() { sc "$1" is-enabled -q "$2"; }
 unit_on() { if [[ $1 == user ]]; then run systemctl --user enable "$2"; else run sudo systemctl enable "$2"; fi; }
+
+# NetworkManager hands its DNS to systemd-resolved once /etc/resolv.conf points at
+# the stub, and the stub exists only while resolved runs: start it first.
+resolv_ok() { [[ $(readlink /etc/resolv.conf) == /run/systemd/resolve/stub-resolv.conf ]]; }
+resolv_fix() {
+  run sudo systemctl enable --now systemd-resolved
+  run sudo ln -sf /run/systemd/resolve/stub-resolv.conf /etc/resolv.conf
+  run sudo systemctl reload NetworkManager
+}
 
 # --- commands -----------------------------------------------------------------
 
@@ -453,6 +464,7 @@ else
         warn "$unit is not installed"
       fi
     done
+    item "/etc/resolv.conf through systemd-resolved" resolv_ok resolv_fix
   fi
 
   notes=()

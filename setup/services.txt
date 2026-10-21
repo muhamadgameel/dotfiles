@@ -12,6 +12,7 @@ system  reflector.timer
 system  sddm.service
 system  smartd.service
 system  systemd-boot-update.service
+system  systemd-resolved.service
 system  systemd-timesyncd.service
 
 user    awww-daemon.service
