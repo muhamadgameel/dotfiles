@@ -111,13 +111,16 @@ Singleton {
   Timer {
     interval: 100
     repeat: true
-    running: root.activeList.count > 0
+    running: root.activeList.count > 0 && !root._waiting
     onTriggered: root._expireDue()
     // A fresh start, so the first tick does not count the time spent idle.
     onRunningChanged: root._lastTick = Date.now()
   }
 
   property real _lastTick: 0
+  // Nothing on screen can expire (persistent or hovered), so the timer rests until
+  // a popup arrives, resumes or changes.
+  property bool _waiting: false
 
   // === Signals ===
   signal animateAndRemove(string notificationId)
@@ -165,6 +168,7 @@ Singleton {
     if (entry && entry.meta.paused) {
       entry.meta.startTime += Date.now() - entry.meta.pausedAt;
       entry.meta.paused = false;
+      root._waiting = false;
     }
   }
 
@@ -292,6 +296,7 @@ Singleton {
     notification.closed.connect(onClosed);
 
     activeList.insert(0, data);
+    root._waiting = false;
 
     // Only the backstop is enforced here. Everything between maxVisible and
     // maxActive stays in the model and is counted by hiddenCount.
@@ -334,6 +339,7 @@ Singleton {
       urgency: content.urgency,
       expireTimeout: n.expireTimeout
     });
+    root._waiting = false;
   }
 
   function _remove(id) {
@@ -367,6 +373,7 @@ Singleton {
     const tick = now - root._lastTick;
     root._lastTick = now;
     const expired = [];
+    let running = false;
 
     for (var i = 0; i < activeList.count; i++) {
       const item = activeList.get(i);
@@ -383,11 +390,13 @@ Singleton {
       // One pushed down mid-countdown keeps the time it had left.
       if (i >= maxVisible) {
         meta.startTime += tick;
+        running = true;
         continue;
       }
 
       if (meta.duration < 0 || meta.paused || meta.expired)
         continue;
+      running = true;
 
       if (now - meta.startTime >= meta.duration) {
         // Collected rather than dispatched here: emitting mutates activeList
@@ -403,6 +412,7 @@ Singleton {
     for (const id of expired) {
       animateAndRemove(id);
     }
+    root._waiting = !running;
   }
 
   // === History ===
