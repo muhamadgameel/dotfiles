@@ -11,7 +11,7 @@ systemd user units.
 | `hyprland.lua` | The entry point. It requires each module below; an error in one module aborts only that module. |
 | `settings/theme.lua` | Shared values: colours, border size, default apps. |
 | `settings/monitors.lua` | Outputs. `hyprctl monitors all` lists them. |
-| `settings/look.lua` | Borders, gaps, decoration, and the dwindle and master layouts. |
+| `settings/look.lua` | Borders, gaps, decoration, the groupbar, and the dwindle and master layouts. |
 | `settings/behavior.lua` | misc, cursor, render, XWayland and bind options. |
 | `settings/animations.lua` | Curves and animations. |
 | `settings/input.lua` | Keyboard, mouse, touchpad and gestures. |
@@ -185,6 +185,15 @@ A browser's picture-in-picture window floats in the bottom-right corner at
 640x360, stays on every workspace and isn't dimmed. SUPER+X does the same to
 any window, and a second press puts it back where it was.
 
+SUPER+G turns the focused window into a group, one tile that holds windows as
+tabs, and a second press splits the group up again. While a group has focus, a
+window you open joins it as a new tab, unless it floats: dialogs and the
+calculator open on their own. SUPER+Tab and SUPER+SHIFT+Tab step through the
+tabs, and SUPER+ALT+arrows moves a window into the group on that side, or out
+of its own group that way. With the mouse, a window dragged onto a group joins
+it, a tab dragged off the bar leaves it, the wheel over the bar switches tabs,
+and a middle click closes one.
+
 On the touchpad, a three-finger horizontal swipe switches workspace, a
 three-finger swipe up shows or hides the scratchpad, and SUPER + two-finger
 pinch toggles a 3x zoom at the cursor. Hyprland acts on a
@@ -202,6 +211,7 @@ under the pointer still zooms along.
 | `SUPER + 1-0` | Go to workspace |
 | `SUPER + ALT + 1-0` | Send window to workspace and follow |
 | `SUPER + ALT + G` | Toggle game mode |
+| `SUPER + ALT + arrows` | Move window into or out of group |
 | `SUPER + B` | Browser |
 | `SUPER + CTRL + ALT + Z` | Reset zoom |
 | `SUPER + CTRL + Print` | Copy the text in a region |
@@ -213,6 +223,7 @@ under the pointer still zooms along.
 | `SUPER + E` | File manager |
 | `SUPER + Escape` | Lock screen |
 | `SUPER + F` | Fullscreen |
+| `SUPER + G` | Toggle group |
 | `SUPER + J` | Toggle split (dwindle) |
 | `SUPER + L` | Cycle layout |
 | `SUPER + P` | Command palette |
@@ -238,6 +249,7 @@ under the pointer still zooms along.
 | `SUPER + SHIFT + Q` | Quick settings panel |
 | `SUPER + SHIFT + Return` | Terminal on the last tmux session |
 | `SUPER + SHIFT + S` | Send to scratchpad |
+| `SUPER + SHIFT + Tab` | Previous window in group |
 | `SUPER + SHIFT + V` | Dictation on and off |
 | `SUPER + SHIFT + W` | Network panel |
 | `SUPER + SHIFT + X` | Screenshot panel |
@@ -247,6 +259,7 @@ under the pointer still zooms along.
 | `SUPER + SHIFT + period` | Move window to next monitor |
 | `SUPER + S` | Toggle scratchpad |
 | `SUPER + T` | Toggle floating |
+| `SUPER + Tab` | Next window in group |
 | `SUPER + U` | Focus urgent or last |
 | `SUPER + V` | Clipboard history |
 | `SUPER + XF86AudioNext` | Seek forward 5 s |
@@ -297,7 +310,9 @@ you switch theme in the shell,
 [`services/ThemeSync.qml`](../quickshell/.config/quickshell/services/ThemeSync.qml)
 writes the active colours to `~/.local/state/quickshell/hyprland-colors.lua` and
 `hyprlock-colors.conf`, which override the defaults key by key. A missing or
-broken file leaves the defaults in place.
+broken file leaves the defaults in place. The running compositor changes at
+once: ThemeSync hands the same colours to `paint()` in `settings/look.lua`,
+which sets the borders and the groupbar together.
 
 ## Wallpapers
 

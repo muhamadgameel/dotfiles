@@ -4,6 +4,8 @@ local colors = {
 	accent = "rgb(7aa2f7)",
 	accentAlt = "rgb(bb9af7)",
 	inactive = "rgb(565f89)",
+	surface = "rgb(1a1b26)",
+	text = "rgb(c0caf5)",
 }
 
 local ok, generated = pcall(function()

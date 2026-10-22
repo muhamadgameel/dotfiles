@@ -22,8 +22,9 @@ import "../core" as Core
 *
 * All only override: each config defines its own colours first, so a missing
 * file - a fresh install, the shell not running - changes nothing. A switch
-* also recolours Hyprland's borders straight away rather than waiting for its
-* next start, through a partial hl.config that leaves every other option alone.
+* also recolours Hyprland's borders and groupbar straight away rather than
+* waiting for its next start, through paint() in settings/look.lua, which sets
+* only the colour options.
 *
 * GTK apps, browsers and other toolkits only need to know dark or light. That
 * goes into GTK's own settings, which they read live.
@@ -54,21 +55,18 @@ $success = rgb(${_hex(Core.Theme.success)})
 $warning = rgba(${_hex(Core.Theme.warning, 0.9)})
 `
 
-  readonly property var _borders: ({
-      accent: `rgb(${_hex(Core.Theme.accent)})`,
-      accentAlt: `rgb(${_hex(Core.Theme.accentAlt)})`,
-      inactive: `rgb(${_hex(Core.Theme.overlayLight)})`
-    })
-
-  readonly property string _hyprlandText: `-- Written by quickshell (services/ThemeSync.qml) from the active theme.
-return {
-	accent = "${_borders.accent}",
-	accentAlt = "${_borders.accentAlt}",
+  // A Lua table: the file returns it, and a switch hands it to paint() in settings/look.lua.
+  readonly property string _hyprlandColors: `{
+	accent = "rgb(${_hex(Core.Theme.accent)})",
+	accentAlt = "rgb(${_hex(Core.Theme.accentAlt)})",
 	accentAlpha = "rgba(${_hex(Core.Theme.accent, 0.933)})",
-	inactive = "${_borders.inactive}",
+	inactive = "rgb(${_hex(Core.Theme.overlayLight)})",
 	surface = "rgb(${_hex(Core.Theme.bg)})",
 	text = "rgb(${_hex(Core.Theme.text)})",
-}
+}`
+
+  readonly property string _hyprlandText: `-- Written by quickshell (services/ThemeSync.qml) from the active theme.
+return ${_hyprlandColors}
 `
 
   // Eight "name = colour" lines of the terminal palette, from index `from`.
@@ -149,7 +147,7 @@ border=${_hex(Core.Theme.overlayLight, 1)}
       return;
 
     hyprlandFile.setText(root._hyprlandText);
-    _applyBorders.command = ["hyprctl", "eval", `hl.config({ general = { col = { active_border = { colors = { "${root._borders.accent}", "${root._borders.accentAlt}" }, angle = 45 }, inactive_border = "${root._borders.inactive}" } } })`];
+    _applyBorders.command = ["hyprctl", "eval", `package.loaded["settings.look"].paint(${root._hyprlandColors})`];
     _applyBorders.running = true;
     Core.Logger.i("ThemeSync", `theme colours written for ${Config.Config.theme}`);
   }

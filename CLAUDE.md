@@ -125,7 +125,9 @@ loads a panel only while it is open.
   `hyprlock-colors.conf`, `alacritty-colors.toml` and `fuzzel-colors.ini` into
   `~/.local/state/quickshell/`, and `settings/theme.lua`, `hyprlock.conf`,
   `alacritty.toml` and `fuzzel.ini` read them. fuzzel won't start while its
-  file is missing, so `setup.sh` seeds an empty one.
+  file is missing, so `setup.sh` seeds an empty one. A theme switch recolours
+  Hyprland live through `paint()` in `settings/look.lua`, so a new colour
+  option goes in that function.
 - Theme names: the command palette's list in `settings/keybinds.lua` repeats
   the themes of `core/Themes.qml`.
 - Shell keys: a bind calls `hl.dsp.global("quickshell:<name>")` in

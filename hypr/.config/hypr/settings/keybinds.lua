@@ -68,6 +68,11 @@ bind(mod .. " + T", hl.dsp.window.float({ action = "toggle" }), { description = 
 bind(mod .. " + C", hl.dsp.window.center(), { description = "Center window" })
 bind(mod .. " + J", hl.dsp.layout("togglesplit"), { description = "Toggle split (dwindle)" })
 
+-- Window groups: one tile, a tab per window.
+bind(mod .. " + G", hl.dsp.group.toggle(), { description = "Toggle group" })
+bind(mod .. " + Tab", hl.dsp.group.next(), { description = "Next window in group" })
+bind(mod .. " + SHIFT + Tab", hl.dsp.group.prev(), { description = "Previous window in group" })
+
 -- Picture-in-picture the active window; a second press puts it back.
 local pip_saved = {} -- window address -> where a floating window was
 
@@ -120,6 +125,11 @@ local resize_step =
 for _, dir in ipairs({ "left", "right", "up", "down" }) do
 	bind(mod .. " + " .. dir, hl.dsp.focus({ direction = dir }), { description = "Move focus" })
 	bind(mod .. " + SHIFT + " .. dir, hl.dsp.window.move({ direction = dir }), { description = "Move window" })
+	bind(
+		mod .. " + ALT + " .. dir,
+		hl.dsp.window.move({ direction = dir, group_aware = true }),
+		{ description = "Move window into or out of group" }
+	)
 	bind(
 		mod .. " + CTRL + " .. dir,
 		hl.dsp.window.resize({ x = resize_step[dir].x, y = resize_step[dir].y, relative = true }),
