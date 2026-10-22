@@ -63,7 +63,7 @@ hl.config({
 })
 
 -- ── Window groups ────────────────────────────────────────────────────
--- Tabs filled with the colours from paint(); the indicator under each can't go below 1 px.
+-- Tabs filled with the colours from paint().
 hl.config({
 	group = {
 		groupbar = {

@@ -72,6 +72,12 @@ bind(mod .. " + J", hl.dsp.layout("togglesplit"), { description = "Toggle split 
 bind(mod .. " + G", hl.dsp.group.toggle(), { description = "Toggle group" })
 bind(mod .. " + Tab", hl.dsp.group.next(), { description = "Next window in group" })
 bind(mod .. " + SHIFT + Tab", hl.dsp.group.prev(), { description = "Previous window in group" })
+bind(mod .. " + ALT + Tab", hl.dsp.group.move_window({ forward = true }), { description = "Move tab forward in group" })
+bind(
+	mod .. " + ALT + SHIFT + Tab",
+	hl.dsp.group.move_window({ forward = false }),
+	{ description = "Move tab back in group" }
+)
 
 -- Picture-in-picture the active window; a second press puts it back.
 local pip_saved = {} -- window address -> where a floating window was

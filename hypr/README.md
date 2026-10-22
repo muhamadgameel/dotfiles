@@ -189,8 +189,10 @@ SUPER+G turns the focused window into a group, one tile that holds windows as
 tabs, and a second press splits the group up again. While a group has focus, a
 window you open joins it as a new tab, unless it floats: dialogs and the
 calculator open on their own. SUPER+Tab and SUPER+SHIFT+Tab step through the
-tabs, and SUPER+ALT+arrows moves a window into the group on that side, or out
-of its own group that way. With the mouse, a window dragged onto a group joins
+tabs, and SUPER+ALT+Tab and SUPER+ALT+SHIFT+Tab move the focused tab one place
+right or left; at the end of the bar it swaps with the tab at the other end.
+SUPER+ALT+arrows moves a window into the group on that side, or out of its own
+group that way. With the mouse, a window dragged onto a group joins
 it, a tab dragged off the bar leaves it, the wheel over the bar switches tabs,
 and a middle click closes one.
 
@@ -211,6 +213,8 @@ under the pointer still zooms along.
 | `SUPER + 1-0` | Go to workspace |
 | `SUPER + ALT + 1-0` | Send window to workspace and follow |
 | `SUPER + ALT + G` | Toggle game mode |
+| `SUPER + ALT + SHIFT + Tab` | Move tab back in group |
+| `SUPER + ALT + Tab` | Move tab forward in group |
 | `SUPER + ALT + arrows` | Move window into or out of group |
 | `SUPER + B` | Browser |
 | `SUPER + CTRL + ALT + Z` | Reset zoom |
