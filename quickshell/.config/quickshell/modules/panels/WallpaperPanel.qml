@@ -64,9 +64,12 @@ Components.SlidingPanel {
 
         onClicked: Services.Wallpaper.set(cell.modelData)
 
-        Components.RoundedImage {
+        // Not RoundedImage: its mask layer per thumbnail kept memory on every panel open.
+        Image {
           anchors.fill: parent
-          radius: Core.Style.radiusS
+          anchors.margins: Math.ceil(Core.Style.radiusS / 2)
+          fillMode: Image.PreserveAspectCrop
+          asynchronous: true
           source: Services.Wallpaper.url(cell.modelData)
           sourceSize: Qt.size(root._cellWidth, root._cellHeight)
         }
