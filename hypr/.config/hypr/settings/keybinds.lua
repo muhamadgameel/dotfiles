@@ -311,27 +311,24 @@ bind(
 )
 
 -- ── Media ────────────────────────────────────────────────────────────
-bind("XF86AudioPlay", hl.dsp.exec_cmd("playerctl play-pause"), { locked = true, description = "Play/pause" })
-bind("XF86AudioPause", hl.dsp.exec_cmd("playerctl play-pause"), { locked = true, description = "Play/pause" })
-bind("XF86AudioNext", hl.dsp.exec_cmd("playerctl next"), { locked = true, description = "Next track" })
-bind("XF86AudioPrev", hl.dsp.exec_cmd("playerctl previous"), { locked = true, description = "Previous track" })
-bind("XF86AudioStop", hl.dsp.exec_cmd("playerctl stop"), { locked = true, description = "Stop playback" })
+-- The player the shell's bar shows; playerctl's own pick only while the shell is down.
+local function media(call, fallback)
+	return hl.dsp.exec_cmd(("qs ipc call media %s || playerctl %s"):format(call, fallback))
+end
+
+bind("XF86AudioPlay", media("playPause", "play-pause"), { locked = true, description = "Play/pause" })
+bind("XF86AudioPause", media("playPause", "play-pause"), { locked = true, description = "Play/pause" })
+bind("XF86AudioNext", media("next", "next"), { locked = true, description = "Next track" })
+bind("XF86AudioPrev", media("previous", "previous"), { locked = true, description = "Previous track" })
+bind("XF86AudioStop", media("stop", "stop"), { locked = true, description = "Stop playback" })
 
 -- ── Power ────────────────────────────────────────────────────────────
 -- logind ignores a short press (setup/system/etc/systemd/logind.conf.d). Off the palette, which has SUPER+SHIFT+P.
 -- Two input devices report the button, so it opens the panel: a toggle would open and close it at once.
 hl.bind("XF86PowerOff", hl.dsp.global("quickshell:panelPowerOpen"), { description = "Power panel" })
 
-bind(
-	mod .. " + XF86AudioNext",
-	hl.dsp.exec_cmd("playerctl position 5+"),
-	{ locked = true, description = "Seek forward 5 s" }
-)
-bind(
-	mod .. " + XF86AudioPrev",
-	hl.dsp.exec_cmd("playerctl position 5-"),
-	{ locked = true, description = "Seek back 5 s" }
-)
+bind(mod .. " + XF86AudioNext", media("seekBy 5", "position 5+"), { locked = true, description = "Seek forward 5 s" })
+bind(mod .. " + XF86AudioPrev", media("seekBy -5", "position 5-"), { locked = true, description = "Seek back 5 s" })
 
 -- ── Utility ──────────────────────────────────────────────────────────
 

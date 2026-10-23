@@ -163,6 +163,16 @@ Singleton {
       seek(fraction * root.length);
   }
 
+  function seekBy(seconds) {
+    if (active?.canSeek)
+      active.seek(seconds);
+  }
+
+  function stop() {
+    if (active)
+      active.stop();
+  }
+
   /**
   * Set the active player's volume, and show the same OSD the system volume
   * uses so a scroll on the widget has visible feedback.

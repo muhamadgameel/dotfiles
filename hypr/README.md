@@ -165,8 +165,9 @@ minute. Keys that wtype types never reach Hyprland's binds, measured with a
 modifier held on another keyboard, so voxtype's own submap workaround for
 held modifiers is not needed here.
 
-The media keys call playerctl rather than the shell, so they keep working while
-the shell restarts. The Print keys go through the shell's screenshot service,
+The media keys go through the shell's media service, so they act on the player
+the bar shows; while the shell restarts they fall back to playerctl, which picks
+a player of its own. The Print keys go through the shell's screenshot service,
 which names the file and tracks the last shot, and fall back to plain grim when
 the shell isn't running. CTRL+Print records a region and CTRL+SHIFT+Print the
 screen, with the desktop's sound, into `~/Pictures/Recordings`; the same key

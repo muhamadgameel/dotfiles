@@ -144,6 +144,16 @@ Scope {
       return Services.Media.summary;
     }
 
+    function seekBy(seconds: real): string {
+      Services.Media.seekBy(seconds);
+      return Services.Media.summary;
+    }
+
+    function stop(): string {
+      Services.Media.stop();
+      return Services.Media.summary;
+    }
+
     function status(): string {
       return Services.Media.hasPlayer ? `${Services.Media.isPlaying ? "playing" : "paused"}: ${Services.Media.summary}` : "no player";
     }
