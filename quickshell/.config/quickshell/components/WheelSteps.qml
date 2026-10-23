@@ -5,7 +5,8 @@ import QtQuick
 *
 * A wheel notch is one step. A swipe arrives as dozens of small events, so its
 * travel is added up and counts one step per swipePerStep. Both count along
-* `orientation`; with `swipes: false` only notches do.
+* `orientation`; with `swipes: false` only notches do. A swipe steps the way the
+* fingers move.
 *
 * Usage:
 *   Button {
@@ -38,7 +39,9 @@ WheelHandler {
     if (event.phase !== Qt.NoScrollPhase) {
       if (!root.swipes)
         return;
-      root._travel += delta;
+      // Natural scrolling (hypr settings/input.lua) runs angleDelta against the
+      // fingers, and Qt does not flag it: event.inverted stays false.
+      root._travel -= delta;
       steps = Math.trunc(root._travel / root.swipePerStep);
       root._travel = event.phase === Qt.ScrollEnd ? 0 : root._travel - steps * root.swipePerStep;
     }
