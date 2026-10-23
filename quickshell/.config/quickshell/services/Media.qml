@@ -14,10 +14,10 @@ import "../services" as Services
 * anything was playing even though the media keys were already bound to
 * playerctl.
 *
-* Picking "the" player: whichever one the user last interacted with wins, and
-* it stays selected while it exists - so pausing Spotify does not silently hand
-* control to a background browser tab. Failing that, prefer a playing player,
-* then any controllable one.
+* Picking "the" player: one that starts playing takes over, and when the shown
+* one stops, the latest to start of those still playing does. A pick in the
+* panel holds until then. Chromium is one player for all its tabs, showing the
+* tab that started last, even once it pauses while another tab plays.
 */
 Singleton {
   id: root
@@ -25,21 +25,23 @@ Singleton {
   readonly property var players: Mpris.players.values.filter(p => p && p.canControl)
   readonly property bool hasPlayer: active !== null
 
-  // dbusName of the explicitly chosen player, "" when following the heuristic.
-  property string preferredId: ""
+  // dbusName of the player on show, and of the playing ones in the order they started.
+  property string shownId: ""
+  property var startOrder: []
+  readonly property var playingIds: players.filter(p => p.isPlaying).map(p => p.dbusName)
 
   readonly property var active: {
-    if (players.length === 0)
-      return null;
+    const byId = id => players.find(p => p.dbusName === id);
+    return byId(shownId) ?? byId(startOrder[startOrder.length - 1]) ?? players[0] ?? null;
+  }
 
-    // An explicit pick wins for as long as that player is around.
-    if (preferredId !== "") {
-      const pinned = players.find(p => p.dbusName === preferredId);
-      if (pinned)
-        return pinned;
-    }
-
-    return players.find(p => p.isPlaying) ?? players[0];
+  onPlayingIdsChanged: {
+    const shown = active?.dbusName ?? "";
+    const started = playingIds.filter(id => !startOrder.includes(id));
+    const order = startOrder.filter(id => playingIds.includes(id)).concat(started);
+    if (started.length > 0 || (startOrder.includes(shown) && !order.includes(shown)))
+      shownId = order[order.length - 1] ?? shown;
+    startOrder = order;
   }
 
   // === Track info ===
@@ -138,23 +140,17 @@ Singleton {
   function playPause() {
     if (!active)
       return;
-    // Remember whoever the user acted on, so the selection stops drifting.
-    preferredId = active.dbusName;
     active.togglePlaying();
   }
 
   function next() {
-    if (active?.canGoNext) {
-      preferredId = active.dbusName;
+    if (active?.canGoNext)
       active.next();
-    }
   }
 
   function previous() {
-    if (active?.canGoPrevious) {
-      preferredId = active.dbusName;
+    if (active?.canGoPrevious)
       active.previous();
-    }
   }
 
   function seek(seconds) {
@@ -227,16 +223,16 @@ Singleton {
   }
 
   /**
-  * Pin a specific player, or pass "" to go back to the heuristic.
+  * Show a specific player, or pass "" to go back to the heuristic.
   */
   function selectPlayer(id) {
-    preferredId = id ?? "";
+    shownId = id ?? "";
   }
 
-  // Drop a pin whose player has gone away, so the heuristic takes over again.
+  // Forget a shown player that has gone away: a new one can reuse its bus name.
   onPlayersChanged: {
-    if (preferredId !== "" && !players.some(p => p.dbusName === preferredId))
-      preferredId = "";
+    if (shownId !== "" && !players.some(p => p.dbusName === shownId))
+      shownId = "";
   }
 
   // MprisPlayer only refreshes `position` when asked, so poll while something
