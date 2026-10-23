@@ -16,7 +16,7 @@ Item {
 
   readonly property var toplevel: Hyprland.activeToplevel
 
-  readonly property string windowClass: toplevel?.lastIpcObject?.class ?? ""
+  readonly property string windowClass: toplevel?.wayland?.appId ?? ""
 
   /**
   * Whether a window is really focused *here*.
