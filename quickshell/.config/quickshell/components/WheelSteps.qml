@@ -4,7 +4,8 @@ import QtQuick
 * WheelSteps - whole steps from a mouse wheel or a two-finger swipe
 *
 * A wheel notch is one step. A swipe arrives as dozens of small events, so its
-* travel is added up and counts one step per swipePerStep.
+* travel is added up and counts one step per swipePerStep. Both count along
+* `orientation`; with `swipes: false` only notches do.
 *
 * Usage:
 *   Button {
@@ -19,7 +20,9 @@ WheelHandler {
   // angleDelta a swipe covers per step: about half a centimetre of finger travel.
   property real swipePerStep: 450
 
-  // Up is positive.
+  property bool swipes: true
+
+  // Up or left is positive.
   signal scrolled(int steps)
 
   property real _travel: 0
@@ -28,11 +31,14 @@ WheelHandler {
   acceptedDevices: PointerDevice.AllDevices
 
   onWheel: event => {
-    let steps = Math.sign(event.angleDelta.y);
+    const delta = root.orientation === Qt.Horizontal ? event.angleDelta.x : event.angleDelta.y;
+    let steps = Math.sign(delta);
 
     // Only a swipe has a scroll phase, and it ends on an event of its own.
     if (event.phase !== Qt.NoScrollPhase) {
-      root._travel += event.angleDelta.y;
+      if (!root.swipes)
+        return;
+      root._travel += delta;
       steps = Math.trunc(root._travel / root.swipePerStep);
       root._travel = event.phase === Qt.ScrollEnd ? 0 : root._travel - steps * root.swipePerStep;
     }

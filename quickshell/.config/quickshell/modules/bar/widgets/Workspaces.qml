@@ -26,7 +26,8 @@ import "../../ipc" as Ipc
 *
 * - Click:        switch to the workspace
 * - Middle click: move the focused window there
-* - Wheel, swipe: the next workspace in the row, or the previous
+* - Wheel:        the next workspace in the row, or the previous
+* - Swipe:        the same, with two fingers sideways
 */
 Item {
   id: root
@@ -79,12 +80,20 @@ Item {
     return ids;
   }
 
+  function _step(steps) {
+    const next = root.visibleIds[root.visibleIds.indexOf(root.focusedId) - steps];
+    if (next !== undefined)
+      Ipc.Targets.focusWorkspace(next);
+  }
+
   Components.WheelSteps {
-    onScrolled: steps => {
-      const next = root.visibleIds[root.visibleIds.indexOf(root.focusedId) - steps];
-      if (next !== undefined)
-        Ipc.Targets.focusWorkspace(next);
-    }
+    swipes: false
+    onScrolled: steps => root._step(steps)
+  }
+
+  Components.WheelSteps {
+    orientation: Qt.Horizontal
+    onScrolled: steps => root._step(steps)
   }
 
   // The row's width changes when a slot appears or goes; without this every

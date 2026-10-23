@@ -68,6 +68,12 @@ Components.SlidingPanel {
 
   // === Month navigation ===
   Components.WheelSteps {
+    swipes: false
+    onScrolled: steps => root.monthOffset -= steps
+  }
+
+  Components.WheelSteps {
+    orientation: Qt.Horizontal
     onScrolled: steps => root.monthOffset -= steps
   }
 
