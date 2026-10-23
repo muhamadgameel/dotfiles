@@ -110,7 +110,11 @@ Singleton {
     if (!adapter)
       return;
     Core.Logger.i("Bluetooth", `${state ? "Enabling" : "Disabling"} Bluetooth`);
-    adapter.enabled = state;
+    // BlueZ will not power a radio that rfkill blocks; _unblock powers it on once lifted.
+    if (state && blocked)
+      _unblock.running = true;
+    else
+      adapter.enabled = state;
   }
 
   function toggle() {
@@ -308,6 +312,17 @@ Singleton {
     id: _discoveryTimer
     interval: 30000
     onTriggered: root.stopDiscovery()
+  }
+
+  Core.Command {
+    id: _unblock
+    tag: "Bluetooth"
+    label: "rfkill"
+    command: ["rfkill", "unblock", "bluetooth"]
+    onDone: code => {
+      if (code === 0 && root.adapter)
+        root.adapter.enabled = true;
+    }
   }
 
   onPanelOpenChanged: {
