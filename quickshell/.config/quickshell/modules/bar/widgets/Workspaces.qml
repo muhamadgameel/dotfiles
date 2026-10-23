@@ -26,7 +26,7 @@ import "../../ipc" as Ipc
 *
 * - Click:        switch to the workspace
 * - Middle click: move the focused window there
-* - Wheel:        the next workspace in the row, or the previous
+* - Wheel, swipe: the next workspace in the row, or the previous
 */
 Item {
   id: root
@@ -79,14 +79,9 @@ Item {
     return ids;
   }
 
-  WheelHandler {
-    // Qt's Wayland platform reports every wheel event as a touchpad's.
-    acceptedDevices: PointerDevice.AllDevices
-    onWheel: event => {
-      // Wheel notches only: a swipe is dozens of events, each with a scroll phase.
-      if (event.phase !== Qt.NoScrollPhase || event.angleDelta.y === 0)
-        return;
-      const next = root.visibleIds[root.visibleIds.indexOf(root.focusedId) - Math.sign(event.angleDelta.y)];
+  Components.WheelSteps {
+    onScrolled: steps => {
+      const next = root.visibleIds[root.visibleIds.indexOf(root.focusedId) - steps];
       if (next !== undefined)
         Ipc.Targets.focusWorkspace(next);
     }
