@@ -116,7 +116,8 @@ the repo copy changes nothing until the next `./setup.sh install system`):
 | File | Does |
 |---|---|
 | `/etc/modprobe.d/audio-powersave.conf` | Keeps the sound card powered, so audio doesn't crackle or pop when it starts. |
-| `/etc/systemd/zram-generator.conf`, `/etc/sysctl.d/99-zram.conf` | Swap in compressed RAM (half its size), with the Arch wiki's sysctl values for it. |
+| `/etc/systemd/zram-generator.conf`, `/etc/sysctl.d/99-zram.conf` | Swap in compressed RAM (twice the size of RAM), with the Arch wiki's sysctl values for it. |
+| `/etc/systemd/user/app-.scope.d/10-oom-policy.conf` | When the kernel kills an app's process for memory, the rest of the app keeps running. systemd's default stopped the whole app, so a script Claude ran took Claude down with it. |
 | `/etc/mkinitcpio.conf.d/10-no-kms.conf` | The stock hooks minus `kms`, which only added about 105 MiB of firmware for nouveau; nouveau is blacklisted, and the NVIDIA driver isn't in the image. |
 | `/etc/xdg/reflector/reflector.conf` | HTTPS mirrors from three countries, ordered by measured download speed and refreshed weekly by reflector.timer. |
 | `/etc/systemd/resolved.conf.d/10-dns-over-tls.conf` | DNS to Cloudflare over TLS through systemd-resolved, plain only where a network blocks TLS. `setup.sh` points `/etc/resolv.conf` at resolved's stub, and NetworkManager then hands it each network's DNS. |

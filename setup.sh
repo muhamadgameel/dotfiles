@@ -157,7 +157,7 @@ git_identity() {
 sys_stale() { for f in $(find setup/system -type f | sort); do cmp -s "$f" "/${f#setup/system/}" || echo "$f"; done; }
 sys_ok() { [[ -z $(sys_stale) ]]; }
 sys_install() {
-  local f initramfs=0 sysctl=0 firewall=0 logind=0 resolved=0
+  local f initramfs=0 sysctl=0 firewall=0 logind=0 resolved=0 user=0
   for f in $(sys_stale); do
     run sudo install -Dm644 "$f" "/${f#setup/system/}"
     case $f in
@@ -166,6 +166,7 @@ sys_install() {
       */firewalld/*) firewall=1 ;;
       */logind.conf.d/*) logind=1 ;;
       */resolved.conf.d/*) resolved=1 ;;
+      */systemd/user/*) user=1 ;;
       */modprobe.d/* | */zram-generator.conf) reboot=1 ;;
     esac
   done
@@ -174,6 +175,7 @@ sys_install() {
   if ((firewall)) && systemctl is-active -q firewalld; then run sudo firewall-cmd --reload; fi
   if ((logind)); then run sudo systemctl reload systemd-logind; fi
   if ((resolved)) && systemctl is-active -q systemd-resolved; then run sudo systemctl restart systemd-resolved; fi
+  if ((user)); then run systemctl --user daemon-reload; fi
 }
 
 lang() { sed -n 's/^LANG=//p' /etc/locale.conf 2>/dev/null | tr -d '"'; }
