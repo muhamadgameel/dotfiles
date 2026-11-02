@@ -230,6 +230,7 @@ under the pointer still zooms along.
 | `SUPER + F` | Fullscreen |
 | `SUPER + G` | Toggle group |
 | `SUPER + J` | Toggle split (dwindle) |
+| `SUPER + KP_Enter` | Terminal |
 | `SUPER + L` | Cycle layout |
 | `SUPER + P` | Command palette |
 | `SUPER + Print` | Screenshot region to clipboard |
@@ -245,6 +246,7 @@ under the pointer still zooms along.
 | `SUPER + SHIFT + F` | Maximize |
 | `SUPER + SHIFT + G` | System stats panel |
 | `SUPER + SHIFT + I` | Toggle stay awake |
+| `SUPER + SHIFT + KP_Enter` | Terminal on the last tmux session |
 | `SUPER + SHIFT + K` | Calendar panel |
 | `SUPER + SHIFT + L` | Toggle night light |
 | `SUPER + SHIFT + M` | Media panel |

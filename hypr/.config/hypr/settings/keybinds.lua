@@ -17,7 +17,7 @@ end
 -- ── Apps ─────────────────────────────────────────────────────────────
 
 -- In the focused terminal's directory: the terminal's newest child is its shell.
-bind(mod .. " + Return", function()
+local function openTerminal()
 	local window = hl.get_active_window()
 	local terminal = apps.terminal
 	if window and window.class == "Alacritty" then
@@ -27,12 +27,14 @@ bind(mod .. " + Return", function()
 		)
 	end
 	hl.dispatch(hl.dsp.exec_cmd(terminal))
-end, { description = "Terminal" })
-bind(
-	mod .. " + SHIFT + Return",
-	hl.dsp.exec_cmd(apps.terminal .. " -e sh -c 'tmux attach || tmux new'"),
-	{ description = "Terminal on the last tmux session" }
-)
+end
+bind(mod .. " + Return", openTerminal, { description = "Terminal" })
+hl.bind(mod .. " + KP_Enter", openTerminal, { description = "Terminal" })
+
+local tmuxTerminal = hl.dsp.exec_cmd(apps.terminal .. " -e sh -c 'tmux attach || tmux new'")
+bind(mod .. " + SHIFT + Return", tmuxTerminal, { description = "Terminal on the last tmux session" })
+hl.bind(mod .. " + SHIFT + KP_Enter", tmuxTerminal, { description = "Terminal on the last tmux session" })
+
 bind(mod .. " + E", hl.dsp.exec_cmd(apps.fileManager), { description = "File manager" })
 bind(mod .. " + B", hl.dsp.exec_cmd(apps.browser), { description = "Browser" })
 
