@@ -37,11 +37,17 @@ hl.window_rule({
 
 -- The portal's file dialogs have no parent window, so Hyprland doesn't float them itself.
 hl.window_rule({ match = { class = "^xdg-desktop-portal-gtk$" }, float = true })
+-- "Open With…" is the portal's app chooser, not a file dialog.
 hl.window_rule({
-	match = { class = "^xdg-desktop-portal-gtk$", title = "^(Open|Save|Select)" },
+	match = {
+		class = "^xdg-desktop-portal-gtk$",
+		title = "^(Open|Save|Select).*",
+		initial_title = "negative:Open With.*",
+	},
 	size = { 900, 600 },
 })
-hl.window_rule({ match = { class = "^[Tt]hunar$", title = "^Rename" }, float = true })
+-- Thunar's rename and copy dialogs have no parent either. Only main windows end in " - Thunar".
+hl.window_rule({ match = { class = "^[Tt]hunar$", title = "negative:.* - Thunar" }, float = true })
 
 hl.window_rule({
 	name = "password-prompts",
