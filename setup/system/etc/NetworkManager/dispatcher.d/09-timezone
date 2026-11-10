@@ -1,0 +1,4 @@
+#!/bin/sh
+# Physical links only: through a VPN tunnel the lookup gives the server's country.
+[ "$2" = up ] && [ -e "/sys/class/net/$1/device" ] || exit 0
+tz=$(curl -sf --max-time 10 https://ipapi.co/timezone) && timedatectl set-timezone "$tz"

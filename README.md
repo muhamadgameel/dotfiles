@@ -121,6 +121,7 @@ the repo copy changes nothing until the next `./setup.sh install system`):
 | `/etc/mkinitcpio.conf.d/10-no-kms.conf` | The stock hooks minus `kms`, which only added about 105 MiB of firmware for nouveau; nouveau is blacklisted, and the NVIDIA driver isn't in the image. |
 | `/etc/xdg/reflector/reflector.conf` | HTTPS mirrors from three countries, ordered by measured download speed and refreshed weekly by reflector.timer. |
 | `/etc/systemd/resolved.conf.d/10-dns-over-tls.conf` | DNS to Cloudflare over TLS through systemd-resolved, plain only where a network blocks TLS. `setup.sh` points `/etc/resolv.conf` at resolved's stub, and NetworkManager then hands it each network's DNS. |
+| `/etc/NetworkManager/dispatcher.d/09-timezone` | Sets the time zone to wherever the network is, looked up from the public IP at ipapi.co, each time Wi-Fi or Ethernet connects. It skips VPN tunnels, which would give the server's country; a lookup that fails leaves the zone as it was. |
 | `/etc/firewalld/zones/home.xml` | The home zone: the stock services except ssh, plus Metro for React Native (8081), Steam Remote Play and LAN transfers, and LocalSend (53317). |
 | `/etc/firewalld/zones/public.xml` | The public zone, for every other network: the stock one without ssh. |
 | `/etc/firewalld/zones/trusted.xml` | Trusts Waydroid's network bridge. |

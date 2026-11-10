@@ -157,9 +157,10 @@ git_identity() {
 sys_stale() { for f in $(find setup/system -type f | sort); do cmp -s "$f" "/${f#setup/system/}" || echo "$f"; done; }
 sys_ok() { [[ -z $(sys_stale) ]]; }
 sys_install() {
-  local f initramfs=0 sysctl=0 firewall=0 logind=0 resolved=0 user=0
+  local f perm initramfs=0 sysctl=0 firewall=0 logind=0 resolved=0 user=0
   for f in $(sys_stale); do
-    run sudo install -Dm644 "$f" "/${f#setup/system/}"
+    if [[ -x $f ]]; then perm=755; else perm=644; fi
+    run sudo install -Dm$perm "$f" "/${f#setup/system/}"
     case $f in
       */mkinitcpio.conf.d/*) initramfs=1 ;;
       */sysctl.d/*) sysctl=1 ;;
@@ -344,7 +345,7 @@ lint_one() { # lint_one <label> <command...>
   fi
 }
 lint() {
-  local f sh=(setup.sh quickshell/.config/quickshell/qs-fmt quickshell/.config/quickshell/services/scripts/*.sh .claude/skills/*/scripts/qs*)
+  local f sh=(setup.sh quickshell/.config/quickshell/qs-fmt quickshell/.config/quickshell/services/scripts/*.sh setup/system/etc/NetworkManager/dispatcher.d/* .claude/skills/*/scripts/qs*)
   for f in shellcheck shfmt stylua zsh; do
     command -v $f >/dev/null || {
       printf '%s%s setup: lint needs %s%s\n' "$red" "$i_miss" "$f" "$reset" >&2
